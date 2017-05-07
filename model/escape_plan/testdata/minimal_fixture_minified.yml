@@ -1,0 +1,25 @@
+# The build name.  Together with the release type makes up the build
+# identifier. Format: /[a-zA-Z]+[a-zA-Z0-9-]*/
+#
+build: test
+
+# The release type. One of: ansible, archive, docker, kubespec, terraform
+#
+type: archive
+
+# The version. Either specify the full version or use the '@' symbol to 
+# let Escape pick the next version at build time. Format: /[0-9]+(\.[0-9]+)*(\.@)?/
+# 
+# Examples:
+#
+# Build version 1.5:
+#   version: 1.5
+#
+# Build the next minor release in the 1.* series:
+#   version: 1.@
+#
+# Build the next path release in the 1.1.* series:
+#   version: 1.1.@
+#
+version: 0.1.@
+

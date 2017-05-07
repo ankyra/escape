@@ -1,0 +1,51 @@
+build: test
+type: archive
+version: 0.1.@
+description: Test description
+logo: logo.png
+depends:
+- depends1
+- depends2
+consumes:
+- provider1
+- provider2
+provides:
+- consumer1
+- consumer2
+inputs:
+- input1
+- default: $test.outputs.test
+  id: input2
+  type: string
+outputs:
+- output1
+- default: $test.outputs.test
+  id: output2
+  type: string
+metadata:
+  key1: value1
+  key2: value2
+includes:
+- file1.txt
+- '*.txt'
+errands:
+  errand1:
+    description: Errand 1 description
+    inputs:
+    - input1
+    - input2
+    script: path/to/script1.sh
+  errand2:
+    description: Errand 2 description
+    inputs:
+    - input1
+    - input2
+    script: path/to/script2.sh
+path: path.txt
+pre_build: pre_build.sh
+post_build: post_build.sh
+test: test.sh
+pre_deploy: pre_deploy.sh
+post_deploy: post_deploy.sh
+pre_destroy: pre_destroy.sh
+post_destroy: post_destroy.sh

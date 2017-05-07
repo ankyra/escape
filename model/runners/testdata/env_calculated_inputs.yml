@@ -1,0 +1,13 @@
+build: name
+type: archive
+version: 0.0.1
+inputs:
+- id: input_variable
+  default: $this.version
+- version
+- id: override
+  default: not overridden
+outputs:
+- output_variable
+metadata:
+  key: value

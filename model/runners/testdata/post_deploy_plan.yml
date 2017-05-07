@@ -1,0 +1,8 @@
+build: name
+type: archive
+version: 0.0.1
+post_deploy: testdata/post_deploy.sh
+inputs:
+- variable 
+outputs:
+- output_variable 

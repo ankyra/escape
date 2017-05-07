@@ -1,0 +1,4529 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Test Report</title>
+    <meta name="author" content="Oleksii Skliarov, Ivan Lysenko"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style type="text/css" media="screen">
+        body        { font-family: verdana, arial, helvetica, sans-serif; font-size: 80%; }
+        table       { font-size: 100%; }
+        pre         { }
+
+        /* -- heading ---------------------------------------------------------------------- */
+        h1 {
+            font-size: 16pt;
+            color: gray;
+        }
+        .heading {
+            margin-top: 0ex;
+            margin-bottom: 1ex;
+        }
+
+        .heading .attribute {
+            margin-top: 1ex;
+            margin-bottom: 0;
+        }
+
+        .heading .description {
+            margin-top: 4ex;
+            margin-bottom: 6ex;
+        }
+
+        /* -- css div popup ------------------------------------------------------------------------ */
+        a.popup_link {
+        }
+
+        a.popup_link:hover {
+            color: red;
+        }
+
+        .popup_window {
+            display: none;
+            position: relative;
+            left: 0px;
+            top: 0px;
+            /*border: solid #627173 1px; */
+            padding: 8px;
+            background-color: #E6E6D6;
+            font-family: "Lucida Console", "Courier New", Courier, monospace;
+            text-align: left;
+            font-size: 8pt;
+            width: 570px;
+        }
+
+        }
+        /* -- report ------------------------------------------------------------------------ */
+        #show_detail_line {
+            margin-top: 3ex;
+            margin-bottom: 1ex;
+        }
+        .result_table {
+            width: 80%;
+            border-collapse: collapse;
+            border: 1px solid #777;
+        }
+        #header_row {
+            font-weight: bold;
+            color: white;
+            background-color: #777;
+        }
+        .result_table td {
+            border: 1px solid #777;
+            padding: 2px;
+        }
+        .shortDescription {
+            font-style: italic;
+            font-weight: normal;
+        }
+        #total_row  { font-weight: bold; }
+        .passClass  { background-color: #6c6; }
+        .failClass  { background-color: #c60; }
+        .errorClass { background-color: #c00; }
+        .passCase   { color: #6c6; }
+        .failCase   { color: #c60; font-weight: bold; }
+        .errorCase  { color: #c00; font-weight: bold; }
+        .hiddenRow  { display: none; }
+        
+        .testcase   { display: none; }
+		.testclass.active ~ .testcase { display: table-row; }
+
+        /* -- ending ---------------------------------------------------------------------- */
+        #ending {
+        }
+
+    </style>
+</head>
+<body>
+<script language="javascript" type="text/javascript">
+output_list = Array();
+
+/* level - 0:Summary; 1:Failed; 2:All */
+function showCase(level) {
+    trs = document.getElementsByClassName("testclass");
+    for (var i = 0; i < trs.length; i++) {
+        tr = trs[i];
+        if(0==level && tr.className.indexOf("active") != -1){
+			tr.className = tr.className.replace("active", "").replace("  ", " ").trim();
+		}else if (2 == level && tr.className.indexOf("active") == -1){
+			tr.className+=" active";
+		}else if (1 == level){
+			if(tr.className.indexOf("passClass") != -1){
+				if(tr.className.indexOf("active") != -1){
+					tr.className = tr.className.replace("active", "").replace("  ", " ").trim();
+				}
+			}else if (tr.className.indexOf("active") == -1){
+				tr.className+=" active";
+			}
+        }
+    }
+}
+
+function showClassDetail(element) {
+    var currentClassValue = element.className || "";
+      
+    if (currentClassValue.indexOf("active") == -1) {
+		currentClassValue += " active";
+    } else {
+		currentClassValue = currentClassValue.replace("active", "").replace("  ", " ");
+	}
+	element.className = currentClassValue.trim();
+}
+
+
+function showTestDetail(div_id){
+    var details_div = document.getElementById(div_id)
+    var displayState = details_div.style.display
+    // alert(displayState)
+    if (displayState != 'block' ) {
+        displayState = 'block'
+        details_div.style.display = 'block'
+    }
+    else {
+        details_div.style.display = 'none'
+    }
+}
+
+function togleClass(element, clas){
+        var currentClassValue = element.className || "";
+
+        if (currentClassValue.indexOf(clas) == -1) {
+            currentClassValue += " "+clas;
+        } else {
+            currentClassValue = currentClassValue.replace(clas, "").replace("  ", " ");
+        }
+        element.className = currentClassValue.trim()
+    }
+
+function showRawLog(element){
+        togleClass(element, "popup_window")
+    }
+
+function html_escape(s) {
+    s = s.replace(/&/g,'&amp;');
+    s = s.replace(/</g,'&lt;');
+    s = s.replace(/>/g,'&gt;');
+    return s;
+}
+
+</script>
+
+<table>
+    <tr id="header_row">
+        <th>Class</th>
+        <th>Fail</th>
+        <th>Error</th>
+        <th>Skip</th>
+        <th>Success</th>
+        <th>Total</th>
+    </tr>
+        <tr>
+            <td>tests.test_errand.ErrandTest</td>
+            <td>1</td>
+            <td>0</td>
+            <td>0</td>
+            <td>8</td>
+            <td>9</td>
+        </tr>
+        <tr>
+            <td>tests.test_init.InitEscapePlanTest</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>8</td>
+            <td>8</td>
+        </tr>
+        <tr>
+            <td>tests.test_release.TestTest</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>3</td>
+            <td>3</td>
+        </tr>
+        <tr>
+            <td>tests.test_build_dependency.BuildDependencyTest</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>11</td>
+            <td>11</td>
+        </tr>
+        <tr>
+            <td>tests.test_package.PackageTest</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>2</td>
+            <td>2</td>
+        </tr>
+        <tr>
+            <td>tests.test_plan.EscapePlanTest</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>21</td>
+            <td>21</td>
+        </tr>
+        <tr>
+            <td>tests.test_build.BuildTest</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>19</td>
+            <td>19</td>
+        </tr>
+        <tr>
+            <td>tests.test_test.TestTest</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>3</td>
+            <td>3</td>
+        </tr>
+        <tr>
+            <td>tests.test_escape_config.EscapeConfigTest</td>
+            <td>0</td>
+            <td>0</td>
+            <td>0</td>
+            <td>2</td>
+            <td>2</td>
+        </tr>
+    <tr>
+        <td><strong>Total</strong></td>
+        <td>1</td>
+        <td>0</td>
+        <td>0</td>
+        <td>77</td>
+        <td>78</td>
+    </tr>
+</table>
+
+<!-- test list -->
+<!-- header -->
+<p id='show_detail_line'>Show
+<a href='javascript:showCase(0)'>Summary</a>
+<a href='javascript:showCase(1)'>Failed</a>
+<a href='javascript:showCase(2)'>All</a>
+</p>
+<table class='result_table'>
+    <colgroup>
+        <col align='left' width="50%" />
+        <col align='right' width="10%"/>
+        <col align='right' width="10%"/>
+        <col align='right' width="10%"/>
+        <col align='right' width="10%"/>
+        <col align='right' width="10%"/>
+    </colgroup>
+    <tr id='header_row'>
+        <td>Test Group/Test case</td>
+        <td>Count</td>
+        <td>Pass</td>
+        <td>Fail</td>
+        <td>Error</td>
+        <td>View</td>
+    </tr>
+</table>    
+<!-- for every test suite -->
+    <table class='result_table'>
+	    <colgroup>
+            <col align='left' width="50%" />
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+        </colgroup>
+        <tr class='testclass failClass'>
+            <td>tests.test_errand.ErrandTest</td>
+            <td>9</td>
+            <td>8</td>
+            <td>1</td>
+            <td>0</td>
+            <td><a href="javascript:void(0)" onclick="showClassDetail(this.parentNode.parentNode)">Detail</a></td>
+        </tr>    
+        <!-- for every test -->
+
+<tr id='tests.test_errand.ErrandTesttest_list_errands' class='testcase'>
+            <td class="passCase">
+                test_list_errands
+            </td>
+            <td>0:00:00.010279</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_errand.ErrandTesttest_list_errands')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_errand.ErrandTesttest_list_errands' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_errand.ErrandTesttest_list_errands').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {}}}}
+escape: - test-errand: Test description
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_errand.ErrandTesttest_list_errands_fails_if_script_doesnt_exist' class='testcase'>
+            <td class="passCase">
+                test_list_errands_fails_if_script_doesnt_exist
+            </td>
+            <td>0:00:00.009222</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_errand.ErrandTesttest_list_errands_fails_if_script_doesnt_exist')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_errand.ErrandTesttest_list_errands_fails_if_script_doesnt_exist' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_errand.ErrandTesttest_list_errands_fails_if_script_doesnt_exist').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_errand.ErrandTesttest_plan_errand_happy_path' class='testcase'>
+            <td class="passCase">
+                test_plan_errand_happy_path
+            </td>
+            <td>0:00:00.008970</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_errand.ErrandTesttest_plan_errand_happy_path')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_errand.ErrandTesttest_plan_errand_happy_path' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_errand.ErrandTesttest_plan_errand_happy_path').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {}}}}
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {
+escape:       "test-errand": {
+escape:          "name": "test-errand",
+escape:          "description": "Test description",
+escape:          "script": "test.sh",
+escape:          "inputs": []
+escape:       }
+escape:    },
+escape:    "files": {
+escape:       "test.sh": "b3defcfa2137bb15c01c268ddcf208dc"
+escape:    },
+escape:    "git_revision": "",
+escape:    "inputs": [],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_errand.ErrandTesttest_plan_errand_input_variables' class='testcase'>
+            <td class="passCase">
+                test_plan_errand_input_variables
+            </td>
+            <td>0:00:00.010519</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_errand.ErrandTesttest_plan_errand_input_variables')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_errand.ErrandTesttest_plan_errand_input_variables' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_errand.ErrandTesttest_plan_errand_input_variables').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {}}}}
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {
+escape:       "test-errand": {
+escape:          "name": "test-errand",
+escape:          "description": "",
+escape:          "script": "test.sh",
+escape:          "inputs": [
+escape:             {
+escape:                "id": "input_variable",
+escape:                "type": "string",
+escape:                "visible": true,
+escape:                "items": null
+escape:             },
+escape:             {
+escape:                "id": "variable2",
+escape:                "type": "client",
+escape:                "description": "Test",
+escape:                "visible": true,
+escape:                "items": null
+escape:             }
+escape:          ]
+escape:       }
+escape:    },
+escape:    "files": {
+escape:       "test.sh": "b3defcfa2137bb15c01c268ddcf208dc"
+escape:    },
+escape:    "git_revision": "",
+escape:    "inputs": [],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_errand.ErrandTesttest_plan_errand_inputs_block_need_to_be_of_correct_type' class='testcase'>
+            <td class="passCase">
+                test_plan_errand_inputs_block_need_to_be_of_correct_type
+            </td>
+            <td>0:00:00.028566</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_errand.ErrandTesttest_plan_errand_inputs_block_need_to_be_of_correct_type')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_errand.ErrandTesttest_plan_errand_inputs_block_need_to_be_of_correct_type' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_errand.ErrandTesttest_plan_errand_inputs_block_need_to_be_of_correct_type').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_errand.ErrandTesttest_plan_errand_needs_script_field' class='testcase'>
+            <td class="passCase">
+                test_plan_errand_needs_script_field
+            </td>
+            <td>0:00:00.008469</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_errand.ErrandTesttest_plan_errand_needs_script_field')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_errand.ErrandTesttest_plan_errand_needs_script_field' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_errand.ErrandTesttest_plan_errand_needs_script_field').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_errand.ErrandTesttest_plan_errand_script_needs_to_exist' class='testcase'>
+            <td class="passCase">
+                test_plan_errand_script_needs_to_exist
+            </td>
+            <td>0:00:00.009216</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_errand.ErrandTesttest_plan_errand_script_needs_to_exist')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_errand.ErrandTesttest_plan_errand_script_needs_to_exist' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_errand.ErrandTesttest_plan_errand_script_needs_to_exist').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_errand.ErrandTesttest_run_errand_fails_if_script_doesnt_exist' class='testcase'>
+            <td class="passCase">
+                test_run_errand_fails_if_script_doesnt_exist
+            </td>
+            <td>0:00:00.009827</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_errand.ErrandTesttest_run_errand_fails_if_script_doesnt_exist')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_errand.ErrandTesttest_run_errand_fails_if_script_doesnt_exist' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_errand.ErrandTesttest_run_errand_fails_if_script_doesnt_exist').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_errand.ErrandTesttest_run_errand_with_input_variables' class='testcase'>
+            <td class="failCase">
+                test_run_errand_with_input_variables
+            </td>
+            <td>0:00:00.010265</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_errand.ErrandTesttest_run_errand_with_input_variables')" >
+                Fail
+            </a>
+
+            <div id='div_tests.test_errand.ErrandTesttest_run_errand_with_input_variables' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_errand.ErrandTesttest_run_errand_with_input_variables').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+
+
+Expected: a string containing 'test-errand: test'
+     but: was ''
+
+Traceback (most recent call last):
+  File "/usr/lib/python2.7/unittest/case.py", line 329, in run
+    testMethod()
+  File "/home/bspaans/src/3rdparty/gopath/src/github.com/ankyra/escape-client/tests/test_errand.py", line 191, in test_run_errand_with_input_variables
+    assert_that("".join(stdout), contains_string("test-errand: test"))
+  File "/usr/local/lib/python2.7/dist-packages/hamcrest/core/assert_that.py", line 43, in assert_that
+    _assert_match(actual=arg1, matcher=arg2, reason=arg3)
+  File "/usr/local/lib/python2.7/dist-packages/hamcrest/core/assert_that.py", line 57, in _assert_match
+    raise AssertionError(description)
+AssertionError: 
+Expected: a string containing 'test-errand: test'
+     but: was ''
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>    <table class='result_table'>
+	    <colgroup>
+            <col align='left' width="50%" />
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+        </colgroup>
+        <tr class='testclass passClass'>
+            <td>tests.test_init.InitEscapePlanTest</td>
+            <td>8</td>
+            <td>8</td>
+            <td>0</td>
+            <td>0</td>
+            <td><a href="javascript:void(0)" onclick="showClassDetail(this.parentNode.parentNode)">Detail</a></td>
+        </tr>    
+        <!-- for every test -->
+
+<tr id='tests.test_init.InitEscapePlanTesttest_init_archive_adds_files_as_includes' class='testcase'>
+            <td class="passCase">
+                test_init_archive_adds_files_as_includes
+            </td>
+            <td>0:00:00.005554</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_init.InitEscapePlanTesttest_init_archive_adds_files_as_includes')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_init.InitEscapePlanTesttest_init_archive_adds_files_as_includes' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_init.InitEscapePlanTesttest_init_archive_adds_files_as_includes').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_init.InitEscapePlanTesttest_init_archive_plan' class='testcase'>
+            <td class="passCase">
+                test_init_archive_plan
+            </td>
+            <td>0:00:00.006245</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_init.InitEscapePlanTesttest_init_archive_plan')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_init.InitEscapePlanTesttest_init_archive_plan' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_init.InitEscapePlanTesttest_init_archive_plan').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_init.InitEscapePlanTesttest_init_archive_recursively_adds_files_as_includes' class='testcase'>
+            <td class="passCase">
+                test_init_archive_recursively_adds_files_as_includes
+            </td>
+            <td>0:00:00.005676</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_init.InitEscapePlanTesttest_init_archive_recursively_adds_files_as_includes')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_init.InitEscapePlanTesttest_init_archive_recursively_adds_files_as_includes' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_init.InitEscapePlanTesttest_init_archive_recursively_adds_files_as_includes').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_init.InitEscapePlanTesttest_init_fails_if_escape_plan_already_exists' class='testcase'>
+            <td class="passCase">
+                test_init_fails_if_escape_plan_already_exists
+            </td>
+            <td>0:00:00.005596</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_init.InitEscapePlanTesttest_init_fails_if_escape_plan_already_exists')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_init.InitEscapePlanTesttest_init_fails_if_escape_plan_already_exists' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_init.InitEscapePlanTesttest_init_fails_if_escape_plan_already_exists').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_init.InitEscapePlanTesttest_init_kubespec_plan' class='testcase'>
+            <td class="passCase">
+                test_init_kubespec_plan
+            </td>
+            <td>0:00:00.006237</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_init.InitEscapePlanTesttest_init_kubespec_plan')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_init.InitEscapePlanTesttest_init_kubespec_plan' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_init.InitEscapePlanTesttest_init_kubespec_plan').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_init.InitEscapePlanTesttest_init_succeeds_if_escape_plan_already_exists_but_force_is_used' class='testcase'>
+            <td class="passCase">
+                test_init_succeeds_if_escape_plan_already_exists_but_force_is_used
+            </td>
+            <td>0:00:00.006076</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_init.InitEscapePlanTesttest_init_succeeds_if_escape_plan_already_exists_but_force_is_used')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_init.InitEscapePlanTesttest_init_succeeds_if_escape_plan_already_exists_but_force_is_used' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_init.InitEscapePlanTesttest_init_succeeds_if_escape_plan_already_exists_but_force_is_used').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_init.InitEscapePlanTesttest_init_terraform_parses_tf_files' class='testcase'>
+            <td class="passCase">
+                test_init_terraform_parses_tf_files
+            </td>
+            <td>0:00:00.000029</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_init.InitEscapePlanTesttest_init_terraform_parses_tf_files')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_init.InitEscapePlanTesttest_init_terraform_parses_tf_files' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_init.InitEscapePlanTesttest_init_terraform_parses_tf_files').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_init.InitEscapePlanTesttest_init_terraform_plan' class='testcase'>
+            <td class="passCase">
+                test_init_terraform_plan
+            </td>
+            <td>0:00:00.004737</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_init.InitEscapePlanTesttest_init_terraform_plan')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_init.InitEscapePlanTesttest_init_terraform_plan' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_init.InitEscapePlanTesttest_init_terraform_plan').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>    <table class='result_table'>
+	    <colgroup>
+            <col align='left' width="50%" />
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+        </colgroup>
+        <tr class='testclass passClass'>
+            <td>tests.test_release.TestTest</td>
+            <td>3</td>
+            <td>3</td>
+            <td>0</td>
+            <td>0</td>
+            <td><a href="javascript:void(0)" onclick="showClassDetail(this.parentNode.parentNode)">Detail</a></td>
+        </tr>    
+        <!-- for every test -->
+
+<tr id='tests.test_release.TestTesttest_release_can_skip_tests' class='testcase'>
+            <td class="passCase">
+                test_release_can_skip_tests
+            </td>
+            <td>0:00:00.009691</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_release.TestTesttest_release_can_skip_tests')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_release.TestTesttest_release_can_skip_tests' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_release.TestTesttest_release_can_skip_tests').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_release.TestTesttest_release_fails_if_test_fails' class='testcase'>
+            <td class="passCase">
+                test_release_fails_if_test_fails
+            </td>
+            <td>0:00:00.010170</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_release.TestTesttest_release_fails_if_test_fails')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_release.TestTesttest_release_fails_if_test_fails' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_release.TestTesttest_release_fails_if_test_fails').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_release.TestTesttest_release_test_happy_path' class='testcase'>
+            <td class="passCase">
+                test_release_test_happy_path
+            </td>
+            <td>0:00:00.011103</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_release.TestTesttest_release_test_happy_path')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_release.TestTesttest_release_test_happy_path' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_release.TestTesttest_release_test_happy_path').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>    <table class='result_table'>
+	    <colgroup>
+            <col align='left' width="50%" />
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+        </colgroup>
+        <tr class='testclass passClass'>
+            <td>tests.test_build_dependency.BuildDependencyTest</td>
+            <td>11</td>
+            <td>11</td>
+            <td>0</td>
+            <td>0</td>
+            <td><a href="javascript:void(0)" onclick="showClassDetail(this.parentNode.parentNode)">Detail</a></td>
+        </tr>    
+        <!-- for every test -->
+
+<tr id='tests.test_build_dependency.BuildDependencyTesttest_build_archive_builds_all_dependencies' class='testcase'>
+            <td class="passCase">
+                test_build_archive_builds_all_dependencies
+            </td>
+            <td>0:00:00.079466</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_builds_all_dependencies')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_builds_all_dependencies' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_builds_all_dependencies').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency' class='testcase'>
+            <td class="passCase">
+                test_build_archive_dependency
+            </td>
+            <td>0:00:00.040889</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+[]
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_reference_variables' class='testcase'>
+            <td class="passCase">
+                test_build_archive_dependency_reference_variables
+            </td>
+            <td>0:00:00.037585</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_reference_variables')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_reference_variables' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_reference_variables').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_reference_variables_file_action' class='testcase'>
+            <td class="passCase">
+                test_build_archive_dependency_reference_variables_file_action
+            </td>
+            <td>0:00:00.038314</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_reference_variables_file_action')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_reference_variables_file_action' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_reference_variables_file_action').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_reference_variables_with_renamed_dependencies' class='testcase'>
+            <td class="passCase">
+                test_build_archive_dependency_reference_variables_with_renamed_dependencies
+            </td>
+            <td>0:00:00.038033</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_reference_variables_with_renamed_dependencies')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_reference_variables_with_renamed_dependencies' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_reference_variables_with_renamed_dependencies').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_updates_project_state' class='testcase'>
+            <td class="passCase">
+                test_build_archive_dependency_updates_project_state
+            </td>
+            <td>0:00:00.037076</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_updates_project_state')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_updates_project_state' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_updates_project_state').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_with_default_value_metadata_referencing_renamed_dependencies' class='testcase'>
+            <td class="passCase">
+                test_build_archive_dependency_with_default_value_metadata_referencing_renamed_dependencies
+            </td>
+            <td>0:00:00.043461</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_with_default_value_metadata_referencing_renamed_dependencies')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_with_default_value_metadata_referencing_renamed_dependencies' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_with_default_value_metadata_referencing_renamed_dependencies').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_with_default_value_outputs_referencing_renamed_dependencies' class='testcase'>
+            <td class="passCase">
+                test_build_archive_dependency_with_default_value_outputs_referencing_renamed_dependencies
+            </td>
+            <td>0:00:00.036252</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_with_default_value_outputs_referencing_renamed_dependencies')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_with_default_value_outputs_referencing_renamed_dependencies' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_with_default_value_outputs_referencing_renamed_dependencies').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_with_default_value_outputs_referencing_renamed_dependencies_and_file_action' class='testcase'>
+            <td class="passCase">
+                test_build_archive_dependency_with_default_value_outputs_referencing_renamed_dependencies_and_file_action
+            </td>
+            <td>0:00:00.037192</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_with_default_value_outputs_referencing_renamed_dependencies_and_file_action')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_with_default_value_outputs_referencing_renamed_dependencies_and_file_action' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_dependency_with_default_value_outputs_referencing_renamed_dependencies_and_file_action').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build_dependency.BuildDependencyTesttest_build_archive_that_consumes_a_provider' class='testcase'>
+            <td class="passCase">
+                test_build_archive_that_consumes_a_provider
+            </td>
+            <td>0:00:00.011264</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_that_consumes_a_provider')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_that_consumes_a_provider' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_that_consumes_a_provider').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build_dependency.BuildDependencyTesttest_build_archive_whose_dependency_consumes_a_provider' class='testcase'>
+            <td class="passCase">
+                test_build_archive_whose_dependency_consumes_a_provider
+            </td>
+            <td>0:00:00.036762</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_whose_dependency_consumes_a_provider')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_whose_dependency_consumes_a_provider' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build_dependency.BuildDependencyTesttest_build_archive_whose_dependency_consumes_a_provider').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>    <table class='result_table'>
+	    <colgroup>
+            <col align='left' width="50%" />
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+        </colgroup>
+        <tr class='testclass passClass'>
+            <td>tests.test_package.PackageTest</td>
+            <td>2</td>
+            <td>2</td>
+            <td>0</td>
+            <td>0</td>
+            <td><a href="javascript:void(0)" onclick="showClassDetail(this.parentNode.parentNode)">Detail</a></td>
+        </tr>    
+        <!-- for every test -->
+
+<tr id='tests.test_package.PackageTesttest_package_contains_release_metadata' class='testcase'>
+            <td class="passCase">
+                test_package_contains_release_metadata
+            </td>
+            <td>0:00:00.015947</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_package.PackageTesttest_package_contains_release_metadata')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_package.PackageTesttest_package_contains_release_metadata' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_package.PackageTesttest_package_contains_release_metadata').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_package.PackageTesttest_package_includes_all_files' class='testcase'>
+            <td class="passCase">
+                test_package_includes_all_files
+            </td>
+            <td>0:00:00.014855</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_package.PackageTesttest_package_includes_all_files')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_package.PackageTesttest_package_includes_all_files' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_package.PackageTesttest_package_includes_all_files').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>    <table class='result_table'>
+	    <colgroup>
+            <col align='left' width="50%" />
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+        </colgroup>
+        <tr class='testclass passClass'>
+            <td>tests.test_plan.EscapePlanTest</td>
+            <td>21</td>
+            <td>21</td>
+            <td>0</td>
+            <td>0</td>
+            <td><a href="javascript:void(0)" onclick="showClassDetail(this.parentNode.parentNode)">Detail</a></td>
+        </tr>    
+        <!-- for every test -->
+
+<tr id='tests.test_plan.EscapePlanTesttest_plan_compile' class='testcase'>
+            <td class="passCase">
+                test_plan_compile
+            </td>
+            <td>0:00:00.008045</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_plan.EscapePlanTesttest_plan_compile')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_plan.EscapePlanTesttest_plan_compile' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_plan.EscapePlanTesttest_plan_compile').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {},
+escape:    "git_revision": "",
+escape:    "inputs": [],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_plan.EscapePlanTesttest_plan_dependency_consumes_is_added' class='testcase'>
+            <td class="passCase">
+                test_plan_dependency_consumes_is_added
+            </td>
+            <td>0:00:00.037365</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_plan.EscapePlanTesttest_plan_dependency_consumes_is_added')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_plan.EscapePlanTesttest_plan_dependency_consumes_is_added' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_plan.EscapePlanTesttest_plan_dependency_consumes_is_added').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [
+escape:       "test",
+escape:       "dependency-provider"
+escape:    ],
+escape:    "depends": [
+escape:       "archive-dependency-v1"
+escape:    ],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {
+escape:       "archive-dependency-v1.tgz": "6094630560c0a1cf6b850c14b2105fe9"
+escape:    },
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "input_variable",
+escape:          "type": "string",
+escape:          "visible": true,
+escape:          "items": null
+escape:       },
+escape:       {
+escape:          "id": "default_variable",
+escape:          "type": "string",
+escape:          "default": "test2",
+escape:          "visible": true,
+escape:          "items": null
+escape:       },
+escape:       {
+escape:          "id": "provider_variable",
+escape:          "type": "string",
+escape:          "default": "$dependency-provider.outputs.provider_variable",
+escape:          "visible": true,
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {
+escape:       "archive-dependency": "archive-dependency-v1",
+escape:       "base": "archive-dependency-v1"
+escape:    },
+escape:    "version": "1"
+escape: }
+{
+   "api_version": "1",
+   "branch": "",
+   "consumes": [
+      "test",
+      "dependency-provider"
+   ],
+   "depends": [
+      "archive-dependency-v1"
+   ],
+   "description": "",
+   "errands": {},
+   "files": {
+      "archive-dependency-v1.tgz": "6094630560c0a1cf6b850c14b2105fe9"
+   },
+   "git_revision": "",
+   "inputs": [
+      {
+         "id": "input_variable",
+         "type": "string",
+         "visible": true,
+         "items": null
+      },
+      {
+         "id": "default_variable",
+         "type": "string",
+         "default": "test2",
+         "visible": true,
+         "items": null
+      },
+      {
+         "id": "provider_variable",
+         "type": "string",
+         "default": "$dependency-provider.outputs.provider_variable",
+         "visible": true,
+         "items": null
+      }
+   ],
+   "logo": "",
+   "metadata": {},
+   "name": "test",
+   "outputs": [],
+   "path": "",
+   "post_build": "",
+   "post_destroy": "",
+   "pre_build": "",
+   "pre_destroy": "",
+   "provides": [],
+   "test": "",
+   "type": "archive",
+   "variable_context": {
+      "archive-dependency": "archive-dependency-v1",
+      "base": "archive-dependency-v1"
+   },
+   "version": "1"
+}
+
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_plan.EscapePlanTesttest_plan_dependency_input_variables_are_added_if_not_defined' class='testcase'>
+            <td class="passCase">
+                test_plan_dependency_input_variables_are_added_if_not_defined
+            </td>
+            <td>0:00:00.027121</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_plan.EscapePlanTesttest_plan_dependency_input_variables_are_added_if_not_defined')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_plan.EscapePlanTesttest_plan_dependency_input_variables_are_added_if_not_defined' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_plan.EscapePlanTesttest_plan_dependency_input_variables_are_added_if_not_defined').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [
+escape:       "archive-dependency-v1"
+escape:    ],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {
+escape:       "archive-dependency-v1.tgz": "5788860cebced5a1cd8c05753bfc690e"
+escape:    },
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "input_variable",
+escape:          "type": "string",
+escape:          "visible": true,
+escape:          "items": null
+escape:       },
+escape:       {
+escape:          "id": "default_variable",
+escape:          "type": "string",
+escape:          "default": "test2",
+escape:          "visible": true,
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {
+escape:       "archive-dependency": "archive-dependency-v1",
+escape:       "base": "archive-dependency-v1"
+escape:    },
+escape:    "version": "1"
+escape: }
+{
+   "api_version": "1",
+   "branch": "",
+   "consumes": [],
+   "depends": [
+      "archive-dependency-v1"
+   ],
+   "description": "",
+   "errands": {},
+   "files": {
+      "archive-dependency-v1.tgz": "5788860cebced5a1cd8c05753bfc690e"
+   },
+   "git_revision": "",
+   "inputs": [
+      {
+         "id": "input_variable",
+         "type": "string",
+         "visible": true,
+         "items": null
+      },
+      {
+         "id": "default_variable",
+         "type": "string",
+         "default": "test2",
+         "visible": true,
+         "items": null
+      }
+   ],
+   "logo": "",
+   "metadata": {},
+   "name": "test",
+   "outputs": [],
+   "path": "",
+   "post_build": "",
+   "post_destroy": "",
+   "pre_build": "",
+   "pre_destroy": "",
+   "provides": [],
+   "test": "",
+   "type": "archive",
+   "variable_context": {
+      "archive-dependency": "archive-dependency-v1",
+      "base": "archive-dependency-v1"
+   },
+   "version": "1"
+}
+
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_plan.EscapePlanTesttest_plan_fails_if_type_is_unknown' class='testcase'>
+            <td class="passCase">
+                test_plan_fails_if_type_is_unknown
+            </td>
+            <td>0:00:00.034624</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_plan.EscapePlanTesttest_plan_fails_if_type_is_unknown')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_plan.EscapePlanTesttest_plan_fails_if_type_is_unknown' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_plan.EscapePlanTesttest_plan_fails_if_type_is_unknown').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_plan.EscapePlanTesttest_plan_fmt' class='testcase'>
+            <td class="passCase">
+                test_plan_fmt
+            </td>
+            <td>0:00:00.014377</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_plan.EscapePlanTesttest_plan_fmt')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_plan.EscapePlanTesttest_plan_fmt' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_plan.EscapePlanTesttest_plan_fmt').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>escape: # This is an Escape Plan for <no value>
+escape: 
+escape: # The build name.  Together with the release type makes up the build
+escape: # identifier. Format: /[a-zA-Z]+[a-zA-Z0-9-]*/
+escape: 
+escape: build: test
+escape: 
+escape: 
+escape: # The release type. One of: ansible, archive, docker, kubespec, docker,
+escape: # terraform
+escape: 
+escape: type: archive
+escape: 
+escape: 
+escape: 
+escape: # The version. Either specify the full version or use the '@' symbol to 
+escape: # let Escape pick the next version at build time. Format: /[0-9]+(.[0-9]+)*/
+escape: # 
+escape: # Examples:
+escape: #
+escape: # Build version 1.5:
+escape: #   version: 1.5
+escape: #
+escape: # Build the next minor release in the 1.* series:
+escape: #   version: 1.@
+escape: #
+escape: # Build the next path release in the 1.1.* series:
+escape: #   version: 1.1.@
+escape: #
+escape: version: 1.0.@
+escape: 
+escape:  
+escape: # An (optional) description for this release.
+escape: 
+escape: description: Beatufiul little long description here iasdojapsodka psodka psdoka psdok apsodk apsodk
+escape:   aposkd paoskd apoksd paoskd paoksd paoksd paoksd paoskd paoskd aposdk
+escape: 
+escape: 
+escape: # Dependencies. Reference dependencies by their full release ID or use
+escape: # the '@' symbol to resolve versions at build time.
+escape: #
+escape: # Examples:
+escape: #
+escape: # Reference the full release ID to pin to a particular version:
+escape: #   depends: [archive-example-v0.1]
+escape: #
+escape: # To always get the latest version of a particular release:
+escape: #   depends: [archive-example-latest]
+escape: #
+escape: # Or:
+escape: #   depends: [archive-example-@]
+escape: #
+escape: # To resolve the latest minor release:
+escape: #   depends: [archive-example-v0.@]
+escape: #
+escape: # To resolve the latest path release:
+escape: #   depends: [archive-example-v0.1.@]
+escape: 
+escape: depends: 
+escape: - any-archive-v1
+escape: - any-test-latest-v@
+escape: 
+escape: consumes: 
+escape: - these
+escape: - two
+escape: 
+escape: provides: 
+escape: - this
+escape: - that
+escape: 
+escape: errands: 
+escape:   test-errand:
+escape:     script: script.sh
+escape: 
+escape: # The files to includes in this release. The files don't have to exist at 
+escape: # build time. Globbing patterns are supported.
+escape: 
+escape: includes: 
+escape: - test.*
+escape: - alles
+escape: 
+escape: inputs: 
+escape: - test-input
+escape: - id: test
+escape:   type: test
+escape: 
+escape: logo: tets.png
+escape: 
+escape: outputs: 
+escape: - test-input
+escape: - id: test
+escape:   type: test
+escape: 
+escape: metadata: 
+escape:   internal: ueaj
+escape:   testing: hello
+escape: 
+escape: path: test.path
+escape: 
+escape: pre_build: klasd.sh
+escape: 
+escape: post_build: test.sh
+escape: 
+escape: pre_destroy: apsoidpasd.sh
+escape: 
+escape: post_destroy: tasdasd.sh
+escape: 
+escape: test: teststigs.sh
+escape: 
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_plan.EscapePlanTesttest_plan_fmt_empty_lists' class='testcase'>
+            <td class="passCase">
+                test_plan_fmt_empty_lists
+            </td>
+            <td>0:00:00.010078</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_plan.EscapePlanTesttest_plan_fmt_empty_lists')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_plan.EscapePlanTesttest_plan_fmt_empty_lists' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_plan.EscapePlanTesttest_plan_fmt_empty_lists').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>escape: # This is an Escape Plan for <no value>
+escape: 
+escape: # The build name.  Together with the release type makes up the build
+escape: # identifier. Format: /[a-zA-Z]+[a-zA-Z0-9-]*/
+escape: 
+escape: build: test
+escape: 
+escape: 
+escape: # The release type. One of: ansible, archive, docker, kubespec, docker,
+escape: # terraform
+escape: 
+escape: type: archive
+escape: 
+escape: 
+escape: 
+escape: # The version. Either specify the full version or use the '@' symbol to 
+escape: # let Escape pick the next version at build time. Format: /[0-9]+(.[0-9]+)*/
+escape: # 
+escape: # Examples:
+escape: #
+escape: # Build version 1.5:
+escape: #   version: 1.5
+escape: #
+escape: # Build the next minor release in the 1.* series:
+escape: #   version: 1.@
+escape: #
+escape: # Build the next path release in the 1.1.* series:
+escape: #   version: 1.1.@
+escape: #
+escape: version: '@'
+escape: 
+escape:  
+escape: # An (optional) description for this release.
+escape: 
+escape: description: ""
+escape: 
+escape: 
+escape: # Dependencies. Reference dependencies by their full release ID or use
+escape: # the '@' symbol to resolve versions at build time.
+escape: #
+escape: # Examples:
+escape: #
+escape: # Reference the full release ID to pin to a particular version:
+escape: #   depends: [archive-example-v0.1]
+escape: #
+escape: # To always get the latest version of a particular release:
+escape: #   depends: [archive-example-latest]
+escape: #
+escape: # Or:
+escape: #   depends: [archive-example-@]
+escape: #
+escape: # To resolve the latest minor release:
+escape: #   depends: [archive-example-v0.@]
+escape: #
+escape: # To resolve the latest path release:
+escape: #   depends: [archive-example-v0.1.@]
+escape: 
+escape: depends: []
+escape: 
+escape: # The files to includes in this release. The files don't have to exist at 
+escape: # build time. Globbing patterns are supported.
+escape: 
+escape: includes: []
+escape: 
+escape: 
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_plan.EscapePlanTesttest_plan_includes_glob_patterns' class='testcase'>
+            <td class="passCase">
+                test_plan_includes_glob_patterns
+            </td>
+            <td>0:00:00.008497</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_plan.EscapePlanTesttest_plan_includes_glob_patterns')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_plan.EscapePlanTesttest_plan_includes_glob_patterns' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_plan.EscapePlanTesttest_plan_includes_glob_patterns').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {
+escape:       "test.txt": "598d4c200461b81522a3328565c25f7c",
+escape:       "test2.txt": "598d4c200461b81522a3328565c25f7c"
+escape:    },
+escape:    "git_revision": "",
+escape:    "inputs": [],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_plan.EscapePlanTesttest_plan_input_variable_dependency_reference' class='testcase'>
+            <td class="passCase">
+                test_plan_input_variable_dependency_reference
+            </td>
+            <td>0:00:00.031544</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_plan.EscapePlanTesttest_plan_input_variable_dependency_reference')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_plan.EscapePlanTesttest_plan_input_variable_dependency_reference' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_plan.EscapePlanTesttest_plan_input_variable_dependency_reference').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [
+escape:       "archive-dependency-v1"
+escape:    ],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {
+escape:       "archive-dependency-v1.tgz": "4097a20b005c9b524fd04cc8ea766aab"
+escape:    },
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "input_variable",
+escape:          "type": "string",
+escape:          "visible": true,
+escape:          "items": null
+escape:       },
+escape:       {
+escape:          "id": "default_variable",
+escape:          "type": "string",
+escape:          "default": "test2",
+escape:          "visible": true,
+escape:          "items": null
+escape:       },
+escape:       {
+escape:          "id": "my_reference_metadata",
+escape:          "type": "string",
+escape:          "default": "meta_dependency",
+escape:          "visible": true,
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {
+escape:       "archive-dependency": "archive-dependency-v1",
+escape:       "base": "archive-dependency-v1"
+escape:    },
+escape:    "version": "1"
+escape: }
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_plan.EscapePlanTesttest_plan_known_input_variable_additional_fields' class='testcase'>
+            <td class="passCase">
+                test_plan_known_input_variable_additional_fields
+            </td>
+            <td>0:00:00.009204</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_plan.EscapePlanTesttest_plan_known_input_variable_additional_fields')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_plan.EscapePlanTesttest_plan_known_input_variable_additional_fields' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_plan.EscapePlanTesttest_plan_known_input_variable_additional_fields').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {},
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "variable",
+escape:          "type": "string",
+escape:          "description": "Helpful description",
+escape:          "friendly": "Variable",
+escape:          "visible": true,
+escape:          "sensitive": true,
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_plan.EscapePlanTesttest_plan_known_input_variable_types' class='testcase'>
+            <td class="passCase">
+                test_plan_known_input_variable_types
+            </td>
+            <td>0:00:00.036046</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_plan.EscapePlanTesttest_plan_known_input_variable_types')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_plan.EscapePlanTesttest_plan_known_input_variable_types' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_plan.EscapePlanTesttest_plan_known_input_variable_types').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {},
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "variable",
+escape:          "type": "string",
+escape:          "visible": true,
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {
+escape:       "escape.yml": "a9bc277a055fbf04f6991bcf78095fe0"
+escape:    },
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "variable",
+escape:          "type": "client",
+escape:          "visible": true,
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {
+escape:       "escape.yml": "dedb79cbfe7703a0f3b8d99b2a456506"
+escape:    },
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "variable",
+escape:          "type": "deployment",
+escape:          "visible": true,
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {
+escape:       "escape.yml": "cf41b5937661d40ad9faf352ea84f0f0"
+escape:    },
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "variable",
+escape:          "type": "version",
+escape:          "visible": true,
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_plan.EscapePlanTesttest_plan_known_input_variable_types_with_options' class='testcase'>
+            <td class="passCase">
+                test_plan_known_input_variable_types_with_options
+            </td>
+            <td>0:00:00.009053</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_plan.EscapePlanTesttest_plan_known_input_variable_types_with_options')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_plan.EscapePlanTesttest_plan_known_input_variable_types_with_options' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_plan.EscapePlanTesttest_plan_known_input_variable_types_with_options').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {},
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "variable",
+escape:          "type": "string",
+escape:          "visible": true,
+escape:          "options": {
+escape:             "long": true
+escape:          },
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_plan.EscapePlanTesttest_plan_logo_gets_compiled' class='testcase'>
+            <td class="passCase">
+                test_plan_logo_gets_compiled
+            </td>
+            <td>0:00:00.009439</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_plan.EscapePlanTesttest_plan_logo_gets_compiled')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_plan.EscapePlanTesttest_plan_logo_gets_compiled' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_plan.EscapePlanTesttest_plan_logo_gets_compiled').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {},
+escape:    "git_revision": "",
+escape:    "inputs": [],
+escape:    "logo": "dGVzdA==",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_plan.EscapePlanTesttest_plan_metadata' class='testcase'>
+            <td class="passCase">
+                test_plan_metadata
+            </td>
+            <td>0:00:00.009558</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_plan.EscapePlanTesttest_plan_metadata')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_plan.EscapePlanTesttest_plan_metadata' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_plan.EscapePlanTesttest_plan_metadata').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {},
+escape:    "git_revision": "",
+escape:    "inputs": [],
+escape:    "logo": "",
+escape:    "metadata": {
+escape:       "version": "1.0"
+escape:    },
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_plan.EscapePlanTesttest_plan_metadata_dependency_reference' class='testcase'>
+            <td class="passCase">
+                test_plan_metadata_dependency_reference
+            </td>
+            <td>0:00:00.030398</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_plan.EscapePlanTesttest_plan_metadata_dependency_reference')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_plan.EscapePlanTesttest_plan_metadata_dependency_reference' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_plan.EscapePlanTesttest_plan_metadata_dependency_reference').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [
+escape:       "archive-dependency-v1"
+escape:    ],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {
+escape:       "archive-dependency-v1.tgz": "4097a20b005c9b524fd04cc8ea766aab"
+escape:    },
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "input_variable",
+escape:          "type": "string",
+escape:          "visible": true,
+escape:          "items": null
+escape:       },
+escape:       {
+escape:          "id": "default_variable",
+escape:          "type": "string",
+escape:          "default": "test2",
+escape:          "visible": true,
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {
+escape:       "ref_variable": "meta_dependency"
+escape:    },
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {
+escape:       "archive-dependency": "archive-dependency-v1",
+escape:       "base": "archive-dependency-v1"
+escape:    },
+escape:    "version": "1"
+escape: }
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_plan.EscapePlanTesttest_plan_metadata_dependency_reference_fails_if_dep_name_undefined' class='testcase'>
+            <td class="passCase">
+                test_plan_metadata_dependency_reference_fails_if_dep_name_undefined
+            </td>
+            <td>0:00:00.025107</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_plan.EscapePlanTesttest_plan_metadata_dependency_reference_fails_if_dep_name_undefined')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_plan.EscapePlanTesttest_plan_metadata_dependency_reference_fails_if_dep_name_undefined' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_plan.EscapePlanTesttest_plan_metadata_dependency_reference_fails_if_dep_name_undefined').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_plan.EscapePlanTesttest_plan_metadata_dependency_reference_fails_if_metadata_field_undefined' class='testcase'>
+            <td class="passCase">
+                test_plan_metadata_dependency_reference_fails_if_metadata_field_undefined
+            </td>
+            <td>0:00:00.026799</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_plan.EscapePlanTesttest_plan_metadata_dependency_reference_fails_if_metadata_field_undefined')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_plan.EscapePlanTesttest_plan_metadata_dependency_reference_fails_if_metadata_field_undefined' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_plan.EscapePlanTesttest_plan_metadata_dependency_reference_fails_if_metadata_field_undefined').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_plan.EscapePlanTesttest_plan_metadata_type' class='testcase'>
+            <td class="passCase">
+                test_plan_metadata_type
+            </td>
+            <td>0:00:00.026011</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_plan.EscapePlanTesttest_plan_metadata_type')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_plan.EscapePlanTesttest_plan_metadata_type' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_plan.EscapePlanTesttest_plan_metadata_type').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_plan.EscapePlanTesttest_plan_metadata_value_type' class='testcase'>
+            <td class="passCase">
+                test_plan_metadata_value_type
+            </td>
+            <td>0:00:00.017553</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_plan.EscapePlanTesttest_plan_metadata_value_type')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_plan.EscapePlanTesttest_plan_metadata_value_type' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_plan.EscapePlanTesttest_plan_metadata_value_type').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_plan.EscapePlanTesttest_plan_shortcut_input_variables_are_compiled' class='testcase'>
+            <td class="passCase">
+                test_plan_shortcut_input_variables_are_compiled
+            </td>
+            <td>0:00:00.009304</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_plan.EscapePlanTesttest_plan_shortcut_input_variables_are_compiled')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_plan.EscapePlanTesttest_plan_shortcut_input_variables_are_compiled' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_plan.EscapePlanTesttest_plan_shortcut_input_variables_are_compiled').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{'inputs': ['test_variable', 'test_variable2'], 'depends': [], 'version': '1', 'description': '', 'build': 'test', 'type': 'archive', 'includes': []}
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {},
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "test_variable",
+escape:          "type": "string",
+escape:          "visible": true,
+escape:          "items": null
+escape:       },
+escape:       {
+escape:          "id": "test_variable2",
+escape:          "type": "string",
+escape:          "visible": true,
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_plan.EscapePlanTesttest_plan_variables_can_be_set_to_invisible_if_a_default_is_set' class='testcase'>
+            <td class="passCase">
+                test_plan_variables_can_be_set_to_invisible_if_a_default_is_set
+            </td>
+            <td>0:00:00.018259</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_plan.EscapePlanTesttest_plan_variables_can_be_set_to_invisible_if_a_default_is_set')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_plan.EscapePlanTesttest_plan_variables_can_be_set_to_invisible_if_a_default_is_set' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_plan.EscapePlanTesttest_plan_variables_can_be_set_to_invisible_if_a_default_is_set').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {},
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "variable",
+escape:          "type": "string",
+escape:          "default": "test",
+escape:          "visible": false,
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {
+escape:       "escape.yml": "42bc57114fafee47ba132f5db77e8225"
+escape:    },
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "variable",
+escape:          "type": "string",
+escape:          "default": "test",
+escape:          "visible": true,
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_plan.EscapePlanTesttest_plan_variables_with_defaults_should_have_the_correct_type' class='testcase'>
+            <td class="passCase">
+                test_plan_variables_with_defaults_should_have_the_correct_type
+            </td>
+            <td>0:00:00.008642</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_plan.EscapePlanTesttest_plan_variables_with_defaults_should_have_the_correct_type')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_plan.EscapePlanTesttest_plan_variables_with_defaults_should_have_the_correct_type' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_plan.EscapePlanTesttest_plan_variables_with_defaults_should_have_the_correct_type').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>    <table class='result_table'>
+	    <colgroup>
+            <col align='left' width="50%" />
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+        </colgroup>
+        <tr class='testclass passClass'>
+            <td>tests.test_build.BuildTest</td>
+            <td>19</td>
+            <td>19</td>
+            <td>0</td>
+            <td>0</td>
+            <td><a href="javascript:void(0)" onclick="showClassDetail(this.parentNode.parentNode)">Detail</a></td>
+        </tr>    
+        <!-- for every test -->
+
+<tr id='tests.test_build.BuildTesttest_build_archive' class='testcase'>
+            <td class="passCase">
+                test_build_archive
+            </td>
+            <td>0:00:00.010665</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build.BuildTesttest_build_archive')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build.BuildTesttest_build_archive' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build.BuildTesttest_build_archive').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build.BuildTesttest_build_fails_if_post_build_script_is_defined_but_does_not_exist' class='testcase'>
+            <td class="passCase">
+                test_build_fails_if_post_build_script_is_defined_but_does_not_exist
+            </td>
+            <td>0:00:00.008614</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build.BuildTesttest_build_fails_if_post_build_script_is_defined_but_does_not_exist')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build.BuildTesttest_build_fails_if_post_build_script_is_defined_but_does_not_exist' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build.BuildTesttest_build_fails_if_post_build_script_is_defined_but_does_not_exist').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build.BuildTesttest_build_fails_if_pre_build_script_is_defined_but_does_not_exist' class='testcase'>
+            <td class="passCase">
+                test_build_fails_if_pre_build_script_is_defined_but_does_not_exist
+            </td>
+            <td>0:00:00.010161</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build.BuildTesttest_build_fails_if_pre_build_script_is_defined_but_does_not_exist')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build.BuildTesttest_build_fails_if_pre_build_script_is_defined_but_does_not_exist' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build.BuildTesttest_build_fails_if_pre_build_script_is_defined_but_does_not_exist').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build.BuildTesttest_build_input_variables_are_stored_in_the_project_state' class='testcase'>
+            <td class="passCase">
+                test_build_input_variables_are_stored_in_the_project_state
+            </td>
+            <td>0:00:00.010027</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build.BuildTesttest_build_input_variables_are_stored_in_the_project_state')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build.BuildTesttest_build_input_variables_are_stored_in_the_project_state' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build.BuildTesttest_build_input_variables_are_stored_in_the_project_state').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build.BuildTesttest_build_metadata_variables_are_passed_in_as_input' class='testcase'>
+            <td class="passCase">
+                test_build_metadata_variables_are_passed_in_as_input
+            </td>
+            <td>0:00:00.013445</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build.BuildTesttest_build_metadata_variables_are_passed_in_as_input')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build.BuildTesttest_build_metadata_variables_are_passed_in_as_input' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build.BuildTesttest_build_metadata_variables_are_passed_in_as_input').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build.BuildTesttest_build_output_variable_can_be_set_in_post_build_script_by_writing_to_json_file' class='testcase'>
+            <td class="passCase">
+                test_build_output_variable_can_be_set_in_post_build_script_by_writing_to_json_file
+            </td>
+            <td>0:00:00.012084</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build.BuildTesttest_build_output_variable_can_be_set_in_post_build_script_by_writing_to_json_file')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build.BuildTesttest_build_output_variable_can_be_set_in_post_build_script_by_writing_to_json_file' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build.BuildTesttest_build_output_variable_can_be_set_in_post_build_script_by_writing_to_json_file').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build.BuildTesttest_build_output_variables_are_stored_in_the_project_state' class='testcase'>
+            <td class="passCase">
+                test_build_output_variables_are_stored_in_the_project_state
+            </td>
+            <td>0:00:00.012295</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build.BuildTesttest_build_output_variables_are_stored_in_the_project_state')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build.BuildTesttest_build_output_variables_are_stored_in_the_project_state' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build.BuildTesttest_build_output_variables_are_stored_in_the_project_state').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build.BuildTesttest_build_output_variables_overrides_fail_if_values_arent_strings' class='testcase'>
+            <td class="passCase">
+                test_build_output_variables_overrides_fail_if_values_arent_strings
+            </td>
+            <td>0:00:00.048876</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build.BuildTesttest_build_output_variables_overrides_fail_if_values_arent_strings')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build.BuildTesttest_build_output_variables_overrides_fail_if_values_arent_strings' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build.BuildTesttest_build_output_variables_overrides_fail_if_values_arent_strings').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {}}}}
+{"environments": {"dev": {"inputs": {}}}}
+{"environments": {"dev": {"inputs": {}}}}
+{"environments": {"dev": {"inputs": {}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build.BuildTesttest_build_with_input_variables_fails_if_variable_is_missing' class='testcase'>
+            <td class="passCase">
+                test_build_with_input_variables_fails_if_variable_is_missing
+            </td>
+            <td>0:00:00.010421</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build.BuildTesttest_build_with_input_variables_fails_if_variable_is_missing')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build.BuildTesttest_build_with_input_variables_fails_if_variable_is_missing' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build.BuildTesttest_build_with_input_variables_fails_if_variable_is_missing').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build.BuildTesttest_build_with_input_variables_runs_if_variables_are_defined_or_variables_have_default_value' class='testcase'>
+            <td class="passCase">
+                test_build_with_input_variables_runs_if_variables_are_defined_or_variables_have_default_value
+            </td>
+            <td>0:00:00.010297</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build.BuildTesttest_build_with_input_variables_runs_if_variables_are_defined_or_variables_have_default_value')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build.BuildTesttest_build_with_input_variables_runs_if_variables_are_defined_or_variables_have_default_value' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build.BuildTesttest_build_with_input_variables_runs_if_variables_are_defined_or_variables_have_default_value').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build.BuildTesttest_build_with_input_variables_runs_post_build_with_input_variables' class='testcase'>
+            <td class="passCase">
+                test_build_with_input_variables_runs_post_build_with_input_variables
+            </td>
+            <td>0:00:00.011460</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build.BuildTesttest_build_with_input_variables_runs_post_build_with_input_variables')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build.BuildTesttest_build_with_input_variables_runs_post_build_with_input_variables' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build.BuildTesttest_build_with_input_variables_runs_post_build_with_input_variables').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build.BuildTesttest_build_with_input_variables_runs_pre_build_with_input_variables' class='testcase'>
+            <td class="passCase">
+                test_build_with_input_variables_runs_pre_build_with_input_variables
+            </td>
+            <td>0:00:00.012104</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build.BuildTesttest_build_with_input_variables_runs_pre_build_with_input_variables')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build.BuildTesttest_build_with_input_variables_runs_pre_build_with_input_variables' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build.BuildTesttest_build_with_input_variables_runs_pre_build_with_input_variables').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build.BuildTesttest_build_with_integer_input_variable' class='testcase'>
+            <td class="passCase">
+                test_build_with_integer_input_variable
+            </td>
+            <td>0:00:00.009932</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build.BuildTesttest_build_with_integer_input_variable')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build.BuildTesttest_build_with_integer_input_variable' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build.BuildTesttest_build_with_integer_input_variable').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {"input_variable": "12"}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build.BuildTesttest_build_with_integer_input_variable_fails_if_string_is_passed_in' class='testcase'>
+            <td class="passCase">
+                test_build_with_integer_input_variable_fails_if_string_is_passed_in
+            </td>
+            <td>0:00:00.009211</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build.BuildTesttest_build_with_integer_input_variable_fails_if_string_is_passed_in')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build.BuildTesttest_build_with_integer_input_variable_fails_if_string_is_passed_in' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build.BuildTesttest_build_with_integer_input_variable_fails_if_string_is_passed_in').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build.BuildTesttest_build_with_list_variable' class='testcase'>
+            <td class="passCase">
+                test_build_with_list_variable
+            </td>
+            <td>0:00:00.009807</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build.BuildTesttest_build_with_list_variable')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build.BuildTesttest_build_with_list_variable' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build.BuildTesttest_build_with_list_variable').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {"input_variable": ["c", "b"]}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build.BuildTesttest_build_with_one_of_input_variable' class='testcase'>
+            <td class="passCase">
+                test_build_with_one_of_input_variable
+            </td>
+            <td>0:00:00.010162</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build.BuildTesttest_build_with_one_of_input_variable')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build.BuildTesttest_build_with_one_of_input_variable' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build.BuildTesttest_build_with_one_of_input_variable').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {"input_variable": "c"}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build.BuildTesttest_build_with_one_of_input_variable_fails_if_value_not_in_items' class='testcase'>
+            <td class="passCase">
+                test_build_with_one_of_input_variable_fails_if_value_not_in_items
+            </td>
+            <td>0:00:00.009254</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build.BuildTesttest_build_with_one_of_input_variable_fails_if_value_not_in_items')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build.BuildTesttest_build_with_one_of_input_variable_fails_if_value_not_in_items' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build.BuildTesttest_build_with_one_of_input_variable_fails_if_value_not_in_items').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {"input_variable": "z"}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build.BuildTesttest_build_with_output_variables_fails_if_variable_is_missing' class='testcase'>
+            <td class="passCase">
+                test_build_with_output_variables_fails_if_variable_is_missing
+            </td>
+            <td>0:00:00.010768</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build.BuildTesttest_build_with_output_variables_fails_if_variable_is_missing')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build.BuildTesttest_build_with_output_variables_fails_if_variable_is_missing' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build.BuildTesttest_build_with_output_variables_fails_if_variable_is_missing').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_build.BuildTesttest_build_with_string_input_variable' class='testcase'>
+            <td class="passCase">
+                test_build_with_string_input_variable
+            </td>
+            <td>0:00:00.009885</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_build.BuildTesttest_build_with_string_input_variable')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_build.BuildTesttest_build_with_string_input_variable' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_build.BuildTesttest_build_with_string_input_variable').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>    <table class='result_table'>
+	    <colgroup>
+            <col align='left' width="50%" />
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+        </colgroup>
+        <tr class='testclass passClass'>
+            <td>tests.test_test.TestTest</td>
+            <td>3</td>
+            <td>3</td>
+            <td>0</td>
+            <td>0</td>
+            <td><a href="javascript:void(0)" onclick="showClassDetail(this.parentNode.parentNode)">Detail</a></td>
+        </tr>    
+        <!-- for every test -->
+
+<tr id='tests.test_test.TestTesttest_fails_if_script_is_missing' class='testcase'>
+            <td class="passCase">
+                test_fails_if_script_is_missing
+            </td>
+            <td>0:00:00.011665</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_test.TestTesttest_fails_if_script_is_missing')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_test.TestTesttest_fails_if_script_is_missing' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_test.TestTesttest_fails_if_script_is_missing').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_test.TestTesttest_fails_if_test_script_fails' class='testcase'>
+            <td class="passCase">
+                test_fails_if_test_script_fails
+            </td>
+            <td>0:00:00.013195</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_test.TestTesttest_fails_if_test_script_fails')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_test.TestTesttest_fails_if_test_script_fails' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_test.TestTesttest_fails_if_test_script_fails').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_test.TestTesttest_happy_path' class='testcase'>
+            <td class="passCase">
+                test_happy_path
+            </td>
+            <td>0:00:00.012962</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_test.TestTesttest_happy_path')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_test.TestTesttest_happy_path' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_test.TestTesttest_happy_path').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>    <table class='result_table'>
+	    <colgroup>
+            <col align='left' width="50%" />
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+            <col align='right' width="10%"/>
+        </colgroup>
+        <tr class='testclass passClass'>
+            <td>tests.test_escape_config.EscapeConfigTest</td>
+            <td>2</td>
+            <td>2</td>
+            <td>0</td>
+            <td>0</td>
+            <td><a href="javascript:void(0)" onclick="showClassDetail(this.parentNode.parentNode)">Detail</a></td>
+        </tr>    
+        <!-- for every test -->
+
+<tr id='tests.test_escape_config.EscapeConfigTesttest_environment_variable_overrides' class='testcase'>
+            <td class="passCase">
+                test_environment_variable_overrides
+            </td>
+            <td>0:00:00.002663</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_escape_config.EscapeConfigTesttest_environment_variable_overrides')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_escape_config.EscapeConfigTesttest_environment_variable_overrides' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_escape_config.EscapeConfigTesttest_environment_variable_overrides').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>escape: {
+escape:    "api_server": "http://",
+escape:    "username": "admin",
+escape:    "password": "test",
+escape:    "escape_auth_token": "abced-efsef",
+escape:    "storage_backend": "gcs",
+escape:    "bucket_url": "gs://bucket"
+escape: }
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr>
+<tr id='tests.test_escape_config.EscapeConfigTesttest_get_default_config' class='testcase'>
+            <td class="passCase">
+                test_get_default_config
+            </td>
+            <td>0:00:00.003194</td>
+            <td colspan='4' align='center'>
+            <!--css div popup start-->
+            <a class="popup_link" onfocus='this.blur();' href="javascript:showTestDetail('div_tests.test_escape_config.EscapeConfigTesttest_get_default_config')" >
+                Pass
+            </a>
+
+            <div id='div_tests.test_escape_config.EscapeConfigTesttest_get_default_config' class="popup_window">
+                <div style='text-align: right; color:red; cursor:pointer;'>
+                <a onfocus='this.blur();' onclick="document.getElementById('div_tests.test_escape_config.EscapeConfigTesttest_get_default_config').style.display = 'none' " >
+                   [x]</a>
+                </div>
+                <pre>escape: {
+escape:    "api_server": "",
+escape:    "username": "",
+escape:    "password": "",
+escape:    "escape_auth_token": "",
+escape:    "storage_backend": "",
+escape:    "bucket_url": ""
+escape: }
+
+
+
+                </pre>
+            </div>
+            <!--css div popup end-->
+
+            </td>
+        </tr></table>
+    <table class='result_table'>
+        <colgroup>
+            <col align='left' width="50%"/>
+            <col align='right' width="10%" id="results_count"/>
+            <col align='right' width="10%" id="results_passed"/>
+            <col align='right' width="10%" id="results_failed"/>
+            <col align='right' width="10%" id="results_errors"/>
+            <col align='right' width="10%"/>
+        </colgroup>
+        <!-- test list end -->
+        <tr id='total_row'>
+            <td>Total</td>
+            <td>78</td>
+            <td>77</td>
+            <td>1</td>
+            <td>0</td>
+            <td>&nbsp;</td>
+        </tr>
+    </table>
+    <br/>
+    <a href="javascript:void(0)" onclick="showRawLog(document.getElementById('rawoutput'))">Full log raw output</a>
+    <div id='rawoutput' class='popup_window'>
+        <pre>{"environments": {"dev": {"inputs": {}}}}
+{"environments": {"dev": {"inputs": {}}}}
+{"environments": {"dev": {"inputs": {}}}}
+{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+{"environments": {"dev": {"inputs": {}}}}
+{"environments": {"dev": {"inputs": {}}}}
+{"environments": {"dev": {"inputs": {}}}}
+{"environments": {"dev": {"inputs": {}}}}
+{"environments": {"dev": {"inputs": {}}}}
+{"environments": {"dev": {"inputs": {}}}}
+{"environments": {"dev": {"inputs": {}}}}
+{"environments": {"dev": {"inputs": {}}}}
+{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+{"environments": {"dev": {"inputs": {"input_variable": "12"}}}}
+{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+{"environments": {"dev": {"inputs": {"input_variable": ["c", "b"]}}}}
+{"environments": {"dev": {"inputs": {"input_variable": "c"}}}}
+{"environments": {"dev": {"inputs": {"input_variable": "z"}}}}
+{"environments": {"dev": {"inputs": {}}}}
+{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+[]
+{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+{"environments": {"dev": {"inputs": {}}}}
+escape: - test-errand: Test description
+{"environments": {"dev": {"inputs": {}}}}
+{"environments": {"dev": {"inputs": {}}}}
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {
+escape:       "test-errand": {
+escape:          "name": "test-errand",
+escape:          "description": "Test description",
+escape:          "script": "test.sh",
+escape:          "inputs": []
+escape:       }
+escape:    },
+escape:    "files": {
+escape:       "test.sh": "b3defcfa2137bb15c01c268ddcf208dc"
+escape:    },
+escape:    "git_revision": "",
+escape:    "inputs": [],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+{"environments": {"dev": {"inputs": {}}}}
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {
+escape:       "test-errand": {
+escape:          "name": "test-errand",
+escape:          "description": "",
+escape:          "script": "test.sh",
+escape:          "inputs": [
+escape:             {
+escape:                "id": "input_variable",
+escape:                "type": "string",
+escape:                "visible": true,
+escape:                "items": null
+escape:             },
+escape:             {
+escape:                "id": "variable2",
+escape:                "type": "client",
+escape:                "description": "Test",
+escape:                "visible": true,
+escape:                "items": null
+escape:             }
+escape:          ]
+escape:       }
+escape:    },
+escape:    "files": {
+escape:       "test.sh": "b3defcfa2137bb15c01c268ddcf208dc"
+escape:    },
+escape:    "git_revision": "",
+escape:    "inputs": [],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+{"environments": {"dev": {"inputs": {}}}}
+{"environments": {"dev": {"inputs": {}}}}
+{"environments": {"dev": {"inputs": {}}}}
+{"environments": {"dev": {"inputs": {"input_variable": "test"}}}}
+
+Expected: a string containing 'test-errand: test'
+     but: was ''
+Traceback (most recent call last):
+  File "/usr/lib/python2.7/unittest/case.py", line 329, in run
+    testMethod()
+  File "/home/bspaans/src/3rdparty/gopath/src/github.com/ankyra/escape-client/tests/test_errand.py", line 191, in test_run_errand_with_input_variables
+    assert_that("".join(stdout), contains_string("test-errand: test"))
+  File "/usr/local/lib/python2.7/dist-packages/hamcrest/core/assert_that.py", line 43, in assert_that
+    _assert_match(actual=arg1, matcher=arg2, reason=arg3)
+  File "/usr/local/lib/python2.7/dist-packages/hamcrest/core/assert_that.py", line 57, in _assert_match
+    raise AssertionError(description)
+AssertionError: 
+Expected: a string containing 'test-errand: test'
+     but: was ''
+
+escape: {
+escape:    "api_server": "http://",
+escape:    "username": "admin",
+escape:    "password": "test",
+escape:    "escape_auth_token": "abced-efsef",
+escape:    "storage_backend": "gcs",
+escape:    "bucket_url": "gs://bucket"
+escape: }
+escape: {
+escape:    "api_server": "",
+escape:    "username": "",
+escape:    "password": "",
+escape:    "escape_auth_token": "",
+escape:    "storage_backend": "",
+escape:    "bucket_url": ""
+escape: }
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {},
+escape:    "git_revision": "",
+escape:    "inputs": [],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [
+escape:       "test",
+escape:       "dependency-provider"
+escape:    ],
+escape:    "depends": [
+escape:       "archive-dependency-v1"
+escape:    ],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {
+escape:       "archive-dependency-v1.tgz": "6094630560c0a1cf6b850c14b2105fe9"
+escape:    },
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "input_variable",
+escape:          "type": "string",
+escape:          "visible": true,
+escape:          "items": null
+escape:       },
+escape:       {
+escape:          "id": "default_variable",
+escape:          "type": "string",
+escape:          "default": "test2",
+escape:          "visible": true,
+escape:          "items": null
+escape:       },
+escape:       {
+escape:          "id": "provider_variable",
+escape:          "type": "string",
+escape:          "default": "$dependency-provider.outputs.provider_variable",
+escape:          "visible": true,
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {
+escape:       "archive-dependency": "archive-dependency-v1",
+escape:       "base": "archive-dependency-v1"
+escape:    },
+escape:    "version": "1"
+escape: }
+{
+   "api_version": "1",
+   "branch": "",
+   "consumes": [
+      "test",
+      "dependency-provider"
+   ],
+   "depends": [
+      "archive-dependency-v1"
+   ],
+   "description": "",
+   "errands": {},
+   "files": {
+      "archive-dependency-v1.tgz": "6094630560c0a1cf6b850c14b2105fe9"
+   },
+   "git_revision": "",
+   "inputs": [
+      {
+         "id": "input_variable",
+         "type": "string",
+         "visible": true,
+         "items": null
+      },
+      {
+         "id": "default_variable",
+         "type": "string",
+         "default": "test2",
+         "visible": true,
+         "items": null
+      },
+      {
+         "id": "provider_variable",
+         "type": "string",
+         "default": "$dependency-provider.outputs.provider_variable",
+         "visible": true,
+         "items": null
+      }
+   ],
+   "logo": "",
+   "metadata": {},
+   "name": "test",
+   "outputs": [],
+   "path": "",
+   "post_build": "",
+   "post_destroy": "",
+   "pre_build": "",
+   "pre_destroy": "",
+   "provides": [],
+   "test": "",
+   "type": "archive",
+   "variable_context": {
+      "archive-dependency": "archive-dependency-v1",
+      "base": "archive-dependency-v1"
+   },
+   "version": "1"
+}
+
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [
+escape:       "archive-dependency-v1"
+escape:    ],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {
+escape:       "archive-dependency-v1.tgz": "5788860cebced5a1cd8c05753bfc690e"
+escape:    },
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "input_variable",
+escape:          "type": "string",
+escape:          "visible": true,
+escape:          "items": null
+escape:       },
+escape:       {
+escape:          "id": "default_variable",
+escape:          "type": "string",
+escape:          "default": "test2",
+escape:          "visible": true,
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {
+escape:       "archive-dependency": "archive-dependency-v1",
+escape:       "base": "archive-dependency-v1"
+escape:    },
+escape:    "version": "1"
+escape: }
+{
+   "api_version": "1",
+   "branch": "",
+   "consumes": [],
+   "depends": [
+      "archive-dependency-v1"
+   ],
+   "description": "",
+   "errands": {},
+   "files": {
+      "archive-dependency-v1.tgz": "5788860cebced5a1cd8c05753bfc690e"
+   },
+   "git_revision": "",
+   "inputs": [
+      {
+         "id": "input_variable",
+         "type": "string",
+         "visible": true,
+         "items": null
+      },
+      {
+         "id": "default_variable",
+         "type": "string",
+         "default": "test2",
+         "visible": true,
+         "items": null
+      }
+   ],
+   "logo": "",
+   "metadata": {},
+   "name": "test",
+   "outputs": [],
+   "path": "",
+   "post_build": "",
+   "post_destroy": "",
+   "pre_build": "",
+   "pre_destroy": "",
+   "provides": [],
+   "test": "",
+   "type": "archive",
+   "variable_context": {
+      "archive-dependency": "archive-dependency-v1",
+      "base": "archive-dependency-v1"
+   },
+   "version": "1"
+}
+
+escape: # This is an Escape Plan for <no value>
+escape: 
+escape: # The build name.  Together with the release type makes up the build
+escape: # identifier. Format: /[a-zA-Z]+[a-zA-Z0-9-]*/
+escape: 
+escape: build: test
+escape: 
+escape: 
+escape: # The release type. One of: ansible, archive, docker, kubespec, docker,
+escape: # terraform
+escape: 
+escape: type: archive
+escape: 
+escape: 
+escape: 
+escape: # The version. Either specify the full version or use the '@' symbol to 
+escape: # let Escape pick the next version at build time. Format: /[0-9]+(.[0-9]+)*/
+escape: # 
+escape: # Examples:
+escape: #
+escape: # Build version 1.5:
+escape: #   version: 1.5
+escape: #
+escape: # Build the next minor release in the 1.* series:
+escape: #   version: 1.@
+escape: #
+escape: # Build the next path release in the 1.1.* series:
+escape: #   version: 1.1.@
+escape: #
+escape: version: 1.0.@
+escape: 
+escape:  
+escape: # An (optional) description for this release.
+escape: 
+escape: description: Beatufiul little long description here iasdojapsodka psodka psdoka psdok apsodk apsodk
+escape:   aposkd paoskd apoksd paoskd paoksd paoksd paoksd paoskd paoskd aposdk
+escape: 
+escape: 
+escape: # Dependencies. Reference dependencies by their full release ID or use
+escape: # the '@' symbol to resolve versions at build time.
+escape: #
+escape: # Examples:
+escape: #
+escape: # Reference the full release ID to pin to a particular version:
+escape: #   depends: [archive-example-v0.1]
+escape: #
+escape: # To always get the latest version of a particular release:
+escape: #   depends: [archive-example-latest]
+escape: #
+escape: # Or:
+escape: #   depends: [archive-example-@]
+escape: #
+escape: # To resolve the latest minor release:
+escape: #   depends: [archive-example-v0.@]
+escape: #
+escape: # To resolve the latest path release:
+escape: #   depends: [archive-example-v0.1.@]
+escape: 
+escape: depends: 
+escape: - any-archive-v1
+escape: - any-test-latest-v@
+escape: 
+escape: consumes: 
+escape: - these
+escape: - two
+escape: 
+escape: provides: 
+escape: - this
+escape: - that
+escape: 
+escape: errands: 
+escape:   test-errand:
+escape:     script: script.sh
+escape: 
+escape: # The files to includes in this release. The files don't have to exist at 
+escape: # build time. Globbing patterns are supported.
+escape: 
+escape: includes: 
+escape: - test.*
+escape: - alles
+escape: 
+escape: inputs: 
+escape: - test-input
+escape: - id: test
+escape:   type: test
+escape: 
+escape: logo: tets.png
+escape: 
+escape: outputs: 
+escape: - test-input
+escape: - id: test
+escape:   type: test
+escape: 
+escape: metadata: 
+escape:   internal: ueaj
+escape:   testing: hello
+escape: 
+escape: path: test.path
+escape: 
+escape: pre_build: klasd.sh
+escape: 
+escape: post_build: test.sh
+escape: 
+escape: pre_destroy: apsoidpasd.sh
+escape: 
+escape: post_destroy: tasdasd.sh
+escape: 
+escape: test: teststigs.sh
+escape: 
+escape: # This is an Escape Plan for <no value>
+escape: 
+escape: # The build name.  Together with the release type makes up the build
+escape: # identifier. Format: /[a-zA-Z]+[a-zA-Z0-9-]*/
+escape: 
+escape: build: test
+escape: 
+escape: 
+escape: # The release type. One of: ansible, archive, docker, kubespec, docker,
+escape: # terraform
+escape: 
+escape: type: archive
+escape: 
+escape: 
+escape: 
+escape: # The version. Either specify the full version or use the '@' symbol to 
+escape: # let Escape pick the next version at build time. Format: /[0-9]+(.[0-9]+)*/
+escape: # 
+escape: # Examples:
+escape: #
+escape: # Build version 1.5:
+escape: #   version: 1.5
+escape: #
+escape: # Build the next minor release in the 1.* series:
+escape: #   version: 1.@
+escape: #
+escape: # Build the next path release in the 1.1.* series:
+escape: #   version: 1.1.@
+escape: #
+escape: version: '@'
+escape: 
+escape:  
+escape: # An (optional) description for this release.
+escape: 
+escape: description: ""
+escape: 
+escape: 
+escape: # Dependencies. Reference dependencies by their full release ID or use
+escape: # the '@' symbol to resolve versions at build time.
+escape: #
+escape: # Examples:
+escape: #
+escape: # Reference the full release ID to pin to a particular version:
+escape: #   depends: [archive-example-v0.1]
+escape: #
+escape: # To always get the latest version of a particular release:
+escape: #   depends: [archive-example-latest]
+escape: #
+escape: # Or:
+escape: #   depends: [archive-example-@]
+escape: #
+escape: # To resolve the latest minor release:
+escape: #   depends: [archive-example-v0.@]
+escape: #
+escape: # To resolve the latest path release:
+escape: #   depends: [archive-example-v0.1.@]
+escape: 
+escape: depends: []
+escape: 
+escape: # The files to includes in this release. The files don't have to exist at 
+escape: # build time. Globbing patterns are supported.
+escape: 
+escape: includes: []
+escape: 
+escape: 
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {
+escape:       "test.txt": "598d4c200461b81522a3328565c25f7c",
+escape:       "test2.txt": "598d4c200461b81522a3328565c25f7c"
+escape:    },
+escape:    "git_revision": "",
+escape:    "inputs": [],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [
+escape:       "archive-dependency-v1"
+escape:    ],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {
+escape:       "archive-dependency-v1.tgz": "4097a20b005c9b524fd04cc8ea766aab"
+escape:    },
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "input_variable",
+escape:          "type": "string",
+escape:          "visible": true,
+escape:          "items": null
+escape:       },
+escape:       {
+escape:          "id": "default_variable",
+escape:          "type": "string",
+escape:          "default": "test2",
+escape:          "visible": true,
+escape:          "items": null
+escape:       },
+escape:       {
+escape:          "id": "my_reference_metadata",
+escape:          "type": "string",
+escape:          "default": "meta_dependency",
+escape:          "visible": true,
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {
+escape:       "archive-dependency": "archive-dependency-v1",
+escape:       "base": "archive-dependency-v1"
+escape:    },
+escape:    "version": "1"
+escape: }
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {},
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "variable",
+escape:          "type": "string",
+escape:          "description": "Helpful description",
+escape:          "friendly": "Variable",
+escape:          "visible": true,
+escape:          "sensitive": true,
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {},
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "variable",
+escape:          "type": "string",
+escape:          "visible": true,
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {
+escape:       "escape.yml": "a9bc277a055fbf04f6991bcf78095fe0"
+escape:    },
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "variable",
+escape:          "type": "client",
+escape:          "visible": true,
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {
+escape:       "escape.yml": "dedb79cbfe7703a0f3b8d99b2a456506"
+escape:    },
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "variable",
+escape:          "type": "deployment",
+escape:          "visible": true,
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {
+escape:       "escape.yml": "cf41b5937661d40ad9faf352ea84f0f0"
+escape:    },
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "variable",
+escape:          "type": "version",
+escape:          "visible": true,
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {},
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "variable",
+escape:          "type": "string",
+escape:          "visible": true,
+escape:          "options": {
+escape:             "long": true
+escape:          },
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {},
+escape:    "git_revision": "",
+escape:    "inputs": [],
+escape:    "logo": "dGVzdA==",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {},
+escape:    "git_revision": "",
+escape:    "inputs": [],
+escape:    "logo": "",
+escape:    "metadata": {
+escape:       "version": "1.0"
+escape:    },
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [
+escape:       "archive-dependency-v1"
+escape:    ],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {
+escape:       "archive-dependency-v1.tgz": "4097a20b005c9b524fd04cc8ea766aab"
+escape:    },
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "input_variable",
+escape:          "type": "string",
+escape:          "visible": true,
+escape:          "items": null
+escape:       },
+escape:       {
+escape:          "id": "default_variable",
+escape:          "type": "string",
+escape:          "default": "test2",
+escape:          "visible": true,
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {
+escape:       "ref_variable": "meta_dependency"
+escape:    },
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {
+escape:       "archive-dependency": "archive-dependency-v1",
+escape:       "base": "archive-dependency-v1"
+escape:    },
+escape:    "version": "1"
+escape: }
+{'inputs': ['test_variable', 'test_variable2'], 'depends': [], 'version': '1', 'description': '', 'build': 'test', 'type': 'archive', 'includes': []}
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {},
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "test_variable",
+escape:          "type": "string",
+escape:          "visible": true,
+escape:          "items": null
+escape:       },
+escape:       {
+escape:          "id": "test_variable2",
+escape:          "type": "string",
+escape:          "visible": true,
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {},
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "variable",
+escape:          "type": "string",
+escape:          "default": "test",
+escape:          "visible": false,
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+escape: {
+escape:    "api_version": "1",
+escape:    "branch": "",
+escape:    "consumes": [],
+escape:    "depends": [],
+escape:    "description": "",
+escape:    "errands": {},
+escape:    "files": {
+escape:       "escape.yml": "42bc57114fafee47ba132f5db77e8225"
+escape:    },
+escape:    "git_revision": "",
+escape:    "inputs": [
+escape:       {
+escape:          "id": "variable",
+escape:          "type": "string",
+escape:          "default": "test",
+escape:          "visible": true,
+escape:          "items": null
+escape:       }
+escape:    ],
+escape:    "logo": "",
+escape:    "metadata": {},
+escape:    "name": "test",
+escape:    "outputs": [],
+escape:    "path": "",
+escape:    "post_build": "",
+escape:    "post_destroy": "",
+escape:    "pre_build": "",
+escape:    "pre_destroy": "",
+escape:    "provides": [],
+escape:    "test": "",
+escape:    "type": "archive",
+escape:    "variable_context": {},
+escape:    "version": "1"
+escape: }
+</pre>
+    </div>
+</body>
+</html>

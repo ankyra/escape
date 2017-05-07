@@ -1,0 +1,91 @@
+# This is an Escape Plan for <no value>
+
+# The build name.  Together with the release type makes up the build
+# identifier. Format: /[a-zA-Z]+[a-zA-Z0-9-]*/
+
+build: escape-client
+
+
+# The release type. One of: ansible, archive, docker, kubespec, docker,
+# terraform
+
+type: archive
+
+
+
+# The version. Either specify the full version or use the '@' symbol to 
+# let Escape pick the next version at build time. Format: /[0-9]+(.[0-9]+)*/
+# 
+# Examples:
+#
+# Build version 1.5:
+#   version: 1.5
+#
+# Build the next minor release in the 1.* series:
+#   version: 1.@
+#
+# Build the next path release in the 1.1.* series:
+#   version: 1.1.@
+#
+version: 0.8.@
+
+ 
+# An (optional) description for this release.
+
+description: >
+    The Escape Client. This release includes the source and one binary for Linux/AMD64. 
+    For full documentation see http://escape.ankyra.io/
+
+
+# Dependencies. Reference dependencies by their full release ID or use
+# the '@' symbol to resolve versions at build time.
+#
+# Examples:
+#
+# Reference the full release ID to pin to a particular version:
+#   depends: [archive-example-v0.1]
+#
+# To always get the latest version of a particular release:
+#   depends: [archive-example-latest]
+#
+# Or:
+#   depends: [archive-example-@]
+#
+# To resolve the latest minor release:
+#   depends: [archive-example-v0.@]
+#
+# To resolve the latest path release:
+#   depends: [archive-example-v0.1.@]
+
+depends: []
+
+# The files to includes in this release. The files don't have to exist at 
+# build time. Globbing patterns are supported.
+
+includes: 
+- escape
+- LICENSE
+- README.md
+- Makefile
+- main.go
+- cmd/
+- controllers/
+- model/
+- util/
+- vendor/
+
+test: build.sh
+
+inputs:
+- version
+
+pre_build: scripts/pre-build.sh
+post_build: scripts/build.sh
+test: scripts/test.sh
+
+errands:
+  upload_to_gcs:
+    description: "Upload the produced linux/amd64 binary to a GCS bucket"
+    script: scripts/upload_to_gcs.sh
+    inputs:
+    - bucket

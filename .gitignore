@@ -1,0 +1,10 @@
+*.swp
+*.swo
+*.pyc
+.escape
+escape-client
+escape
+*.tgz
+escape_state.json
+lock.json
+manifest.json

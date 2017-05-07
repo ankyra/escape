@@ -1,0 +1,83 @@
+{
+    "name": "project_name",
+    "inputs": {
+        "project_level_variable": "project",
+        "input_variable": "test",
+        "list_input": [
+            "string"
+        ]
+    },
+    "environments": {
+        "dev": {
+            "name": "dev",
+            "inputs": {
+                "env_level_variable": "env",
+                "input_variable": "env_override",
+                "list_input": [
+                    "env_override"
+                ]
+            },
+            "deployments": {
+                "archive-full": {
+                    "version": "1",
+                    "inputs": {
+                        "depl_level_variable": "depl",
+                        "input_variable": "depl_override",
+                        "list_input": [
+                            "depl_override"
+                        ]
+                    },
+                    "deployments": {
+                        "archive-dep": {
+                            "version": "1",
+                            "stages": {
+                                "deploy": {
+                                    "version": "1"
+                                }
+                            }
+                        }
+                    },
+                    "providers": {
+                        "gcp": "archive-release"
+                    }
+                },
+                "archive-release": {
+                    "stages": {
+                        "deploy": {
+                            "inputs": {
+                                "user_level": "user"
+                            }
+                        }
+                    },
+                    "inputs": {
+                        "depl_level_variable": "depl",
+                        "input_variable": "depl_override",
+                        "list_input": [
+                            "depl_override"
+                        ]
+                    }
+                },
+                "archive-release-with-deps": {
+                    "deployments": {
+                        "archive-release": {
+                            "providers": {
+                                "kubernetes": "archive-release"
+                            },
+                            "inputs": {
+                                "input_variable": "depl_override2",
+                                "list_input": [
+                                    "depl_override2"
+                                ]
+                            }
+                        }
+                    },
+                    "providers": {
+                        "gcp": "archive-release",
+                        "doesnt-exist": "doesnt-exist"
+                    }
+                }
+            }
+        },
+        "incomplete_env": {}
+    }
+}

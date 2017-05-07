@@ -1,0 +1,11 @@
+build: name
+type: archive
+version: 0.0.1
+depends:
+- archive-dependency-v0.0.1 as dep
+inputs:
+- variable
+outputs:
+- id: output_variable 
+  default: $dep.outputs.output_variable
+
