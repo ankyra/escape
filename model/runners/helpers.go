@@ -85,7 +85,7 @@ func postCommit(ctx RunnerContext, deploymentState DeploymentState, stage string
 	if err != nil {
 		return err
 	}
-	return deploymentState.UpdateOutputs("deploy", processedOutputs)
+	return deploymentState.UpdateOutputs(stage, processedOutputs)
 }
 
 func (b *ScriptStep) Run(ctx RunnerContext) error {
