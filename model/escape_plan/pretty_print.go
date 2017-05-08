@@ -154,5 +154,5 @@ func (e *prettyPrinter) prettyPrintValue(key string, val interface{}) []byte {
 const keyValTpl = `{{ .key }}: {{ if .value }}{{ .value }}{{else}}""{{end}}`
 const listValTpl = `{{ .key }}:{{ if eq .value "[]" }} []{{else if eq .value ""}} []{{else}}
 {{ .value}}{{end}}`
-const mapValTpl = `{{ .key }}:{{ if eq .value "{}" }} {}{{else if eq.value ""}} {}{{else}}
+const mapValTpl = `{{ .key }}:{{ if eq .value "{}" }} {}{{else if eq .value ""}} {}{{else}}
 {{ indent .value }}{{end}}`
