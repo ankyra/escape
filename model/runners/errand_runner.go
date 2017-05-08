@@ -20,18 +20,10 @@ import (
 	. "github.com/ankyra/escape-client/model/interfaces"
 )
 
-type ErrandRunner struct {
-	Errand Errand
-}
-
 func NewErrandRunner(errand Errand) Runner {
-	return &ErrandRunner{
-		Errand: errand,
-	}
-}
-
-func (e *ErrandRunner) Run(ctx RunnerContext) error {
-	step := NewScriptStep(ctx, "deploy", e.Errand.GetName(), true)
-	step.ScriptPath = e.Errand.GetScript()
-	return step.Run(ctx)
+	return NewRunner(func(ctx RunnerContext) error {
+		step := NewScriptStep(ctx, "deploy", errand.GetName(), true)
+		step.ScriptPath = errand.GetScript()
+		return step.Run(ctx)
+	})
 }

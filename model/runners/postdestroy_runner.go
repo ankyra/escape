@@ -20,20 +20,12 @@ import (
 	. "github.com/ankyra/escape-client/model/interfaces"
 )
 
-type postdestroy_runner struct {
-	Stage string
-}
-
 func NewPostDestroyRunner(stage string) Runner {
-	return &postdestroy_runner{
-		Stage: stage,
-	}
-}
-
-func (p *postdestroy_runner) Run(ctx RunnerContext) error {
-	step := NewScriptStep(ctx, p.Stage, "post_destroy", true)
-	step.Commit = deleteCommit
-	return step.Run(ctx)
+	return NewRunner(func(ctx RunnerContext) error {
+		step := NewScriptStep(ctx, stage, "post_destroy", true)
+		step.Commit = deleteCommit
+		return step.Run(ctx)
+	})
 }
 
 func deleteCommit(ctx RunnerContext, depl DeploymentState, stage string) error {

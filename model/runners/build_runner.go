@@ -21,16 +21,15 @@ import (
 	"github.com/ankyra/escape-client/model/types"
 )
 
-type buildRunner struct{}
-
 func NewBuildRunner() Runner {
-	return &buildRunner{}
+	return NewCompoundRunner(
+		NewPreBuildRunner(),
+		NewRunner(buildStep),
+		NewPostBuildRunner(),
+	)
 }
 
-func (b *buildRunner) Run(ctx RunnerContext) error {
-	if err := NewPreBuildRunner().Run(ctx); err != nil {
-		return err
-	}
+func buildStep(ctx RunnerContext) error {
 	ctx.Logger().Log("build.build_step", nil)
 	typ, err := types.ResolveType(ctx.GetReleaseMetadata().GetType())
 	if err != nil {
@@ -40,14 +39,7 @@ func (b *buildRunner) Run(ctx RunnerContext) error {
 	if err != nil {
 		return err
 	}
-	if err := ctx.GetDeploymentState().UpdateOutputs("build", outputs); err != nil {
-		return err
-	}
-
 	ctx.SetBuildOutputs(outputs)
-	if err := NewPostBuildRunner().Run(ctx); err != nil {
-		return err
-	}
 	ctx.Logger().Log("build.build_step_finished", nil)
-	return nil
+	return ctx.GetDeploymentState().UpdateOutputs("build", outputs)
 }

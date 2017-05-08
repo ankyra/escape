@@ -49,18 +49,6 @@ func NewScriptStep(ctx RunnerContext, stage, step string, shouldBeDeployed bool)
 	}
 }
 
-type runner struct {
-	run func(ctx RunnerContext) error
-}
-
-func (r *runner) Run(ctx RunnerContext) error {
-	return r.run(ctx)
-}
-func NewRunner(r func(ctx RunnerContext) error) Runner {
-	return &runner{
-		run: r,
-	}
-}
 func NewPreScriptStepRunner(stage, field string) Runner {
 	return NewRunner(func(ctx RunnerContext) error {
 		step := NewScriptStep(ctx, stage, field, false)
