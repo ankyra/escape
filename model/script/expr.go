@@ -47,6 +47,8 @@ func Lift(val interface{}) (Script, error) {
 	switch val.(type) {
 	case string:
 		return LiftString(val.(string)), nil
+	case float64:
+		return LiftInteger(int(val.(float64))), nil
 	case int:
 		return LiftInteger(val.(int)), nil
 	case []interface{}:

@@ -356,6 +356,8 @@ func (c *Compiler) compileVariable(v interface{}) (Variable, error) {
 
 func (c *Compiler) compileDefault(v *variable) (Variable, error) {
 	switch v.Default.(type) {
+	case int:
+		return v, nil
 	case string:
 		defaultValue := v.Default.(string)
 		_, err := script.ParseScript(defaultValue)

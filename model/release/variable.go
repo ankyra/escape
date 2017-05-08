@@ -200,6 +200,8 @@ func (v *variable) GetValue(variableCtx *map[string]interface{}, env *script.Scr
 
 func (v *variable) validateDefault(env *script.ScriptEnvironment) (interface{}, error) {
 	switch v.Default.(type) {
+	case int:
+		return v.Default.(int), nil
 	case (*string):
 		return v.parseEvalAndGetValue(*v.Default.(*string), env)
 	case string:
