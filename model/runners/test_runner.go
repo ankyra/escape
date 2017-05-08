@@ -17,35 +17,9 @@ limitations under the License.
 package runners
 
 import (
-	"fmt"
 	. "github.com/ankyra/escape-client/model/interfaces"
 )
 
-type TestRunner struct {
-}
-
 func NewTestRunner() Runner {
-	return &TestRunner{}
-}
-
-func (t *TestRunner) Run(ctx RunnerContext) error {
-	metadata := ctx.GetReleaseMetadata()
-	if metadata.GetScript("test") == "" {
-		return nil
-	}
-	state := ctx.GetEnvironmentState()
-	deploymentState, err := state.GetDeploymentState(ctx.GetDepends())
-	if err != nil {
-		return err
-	}
-	version := ctx.GetReleaseMetadata().GetVersion()
-	if !deploymentState.IsDeployed("build", version) {
-		return fmt.Errorf("Build '%s' of version '%s' could not be found", ctx.GetDepends()[0], version)
-	}
-	ctx.SetBuildInputs(deploymentState.GetCalculatedInputs("build"))
-	ctx.SetBuildOutputs(deploymentState.GetCalculatedOutputs("build"))
-	ctx.SetDeploymentState(deploymentState)
-
-	scriptPath := ctx.GetPath().Script(metadata.GetScript("test"))
-	return runScript(ctx, scriptPath, "test")
+	return NewScriptRunner("build", "test")
 }

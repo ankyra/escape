@@ -53,7 +53,7 @@ func (s *testSuite) Test_SmokeRunner_missing_deployment_state(c *C) {
 	c.Assert(err, IsNil)
 	err = NewSmokeRunner().Run(runCtx)
 	c.Assert(err, Not(IsNil))
-	c.Assert(err.Error(), Equals, "Deployment 'archive-name' of version '0.0.1' could not be found")
+	c.Assert(err.Error(), Equals, "Deployment 'archive-name' (version 0.0.1) could not be found")
 }
 
 func (s *testSuite) Test_SmokeRunner(c *C) {

@@ -20,13 +20,6 @@ import (
 	. "github.com/ankyra/escape-client/model/interfaces"
 )
 
-type predeploy_runner struct {
-}
-
 func NewPreDeployRunner() Runner {
-	return &predeploy_runner{}
-}
-
-func (p *predeploy_runner) Run(ctx RunnerContext) error {
-	return runPreScript(ctx, "deploy", "pre_deploy", false)
+	return NewPreScriptStepRunner("deploy", "pre_deploy")
 }

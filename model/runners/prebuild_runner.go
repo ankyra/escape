@@ -20,13 +20,6 @@ import (
 	. "github.com/ankyra/escape-client/model/interfaces"
 )
 
-type prebuild_runner struct {
-}
-
 func NewPreBuildRunner() Runner {
-	return &prebuild_runner{}
-}
-
-func (p *prebuild_runner) Run(ctx RunnerContext) error {
-	return runPreScript(ctx, "build", "pre_build", false)
+	return NewPreScriptStepRunner("build", "pre_build")
 }

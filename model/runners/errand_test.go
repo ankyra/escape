@@ -25,7 +25,7 @@ import (
 func (s *testSuite) Test_ErrandRunner_no_script_defined(c *C) {
 	os.RemoveAll("testdata/escape_state")
 	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/escape_state", "dev", "testdata/errand_plan.yml")
+	err := ctx.InitFromLocalEscapePlanAndState("testdata/errand_state.json", "dev", "testdata/errand_plan.yml")
 	c.Assert(err, IsNil)
 	runCtx, err := NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
@@ -57,7 +57,7 @@ func (s *testSuite) Test_ErrandRunner_missing_deployment_state(c *C) {
 	errand := ctx.GetReleaseMetadata().GetErrands()["my-errand"]
 	err = NewErrandRunner(errand).Run(runCtx)
 	c.Assert(err, Not(IsNil))
-	c.Assert(err.Error(), Equals, "Deployment 'archive-name' could not be found")
+	c.Assert(err.Error(), Equals, "Deployment 'archive-name' (version 0.0.1) could not be found")
 }
 
 func (s *testSuite) Test_ErrandRunner(c *C) {

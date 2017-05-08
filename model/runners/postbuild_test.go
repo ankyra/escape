@@ -53,7 +53,7 @@ func (s *testSuite) Test_PostBuildRunner_missing_deployment_state(c *C) {
 	c.Assert(err, IsNil)
 	err = NewPostBuildRunner().Run(runCtx)
 	c.Assert(err, Not(IsNil))
-	c.Assert(err.Error(), Equals, "Deployment 'archive-name' could not be found")
+	c.Assert(err.Error(), Equals, "Build 'archive-name' (version 0.0.1) could not be found")
 }
 
 func (s *testSuite) Test_PostBuildRunner(c *C) {

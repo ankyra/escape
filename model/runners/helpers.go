@@ -25,76 +25,74 @@ import (
 	"io/ioutil"
 )
 
-func initScript(ctx RunnerContext, stage, field string) (string, error) {
-	metadata := ctx.GetReleaseMetadata()
-	scriptPath := metadata.GetScript(field)
-	if scriptPath == "" {
-		return "", nil
+type ScriptStep struct {
+	ShouldBeDeployed        bool
+	ModifiesOutputVariables bool
+	Stage                   string
+	Step                    string
+	Inputs                  func(ctx RunnerContext, stage string) (*map[string]interface{}, error)
+	LoadOutputs             bool
+	ScriptPath              string
+	Commit                  func(ctx RunnerContext, state DeploymentState, stage string) error
+}
+
+func NewScriptStep(ctx RunnerContext, stage, step string, shouldBeDeployed bool) *ScriptStep {
+	return &ScriptStep{
+		ShouldBeDeployed:        shouldBeDeployed,
+		Stage:                   stage,
+		Step:                    step,
+		Inputs:                  nil,
+		LoadOutputs:             shouldBeDeployed,
+		ScriptPath:              ctx.GetReleaseMetadata().GetScript(step),
+		Commit:                  nil,
+		ModifiesOutputVariables: false,
 	}
-	script := ctx.GetPath().Script(scriptPath)
-	ctx.Logger().Log(stage+".step", map[string]string{
-		"step":   field,
-		"script": script,
+}
+
+type runner struct {
+	run func(ctx RunnerContext) error
+}
+
+func (r *runner) Run(ctx RunnerContext) error {
+	return r.run(ctx)
+}
+func NewRunner(r func(ctx RunnerContext) error) Runner {
+	return &runner{
+		run: r,
+	}
+}
+func NewPreScriptStepRunner(stage, field string) Runner {
+	return NewRunner(func(ctx RunnerContext) error {
+		step := NewScriptStep(ctx, stage, field, false)
+		step.Inputs = NewEnvironmentBuilder().GetInputsForPreStep
+		step.Commit = preCommit
+		return step.Run(ctx)
 	})
-	if !util.PathExists(script) {
-		return "", fmt.Errorf("Referenced %s script '%s' does not exist", field, script)
-	}
-	if err := util.MakeExecutable(script); err != nil {
-		return "", err
-	}
-	return script, nil
+}
+func NewPostScriptStepRunner(stage, field string) Runner {
+	return NewRunner(func(ctx RunnerContext) error {
+		step := NewScriptStep(ctx, stage, field, true)
+		step.Commit = postCommit
+		step.ModifiesOutputVariables = true
+		return step.Run(ctx)
+	})
 }
 
-func initDeploymentState(ctx RunnerContext, stage string, shouldBeDeployed bool) (DeploymentState, error) {
-	deploymentState, err := ctx.GetEnvironmentState().GetDeploymentState(ctx.GetDepends())
-	if err != nil {
-		return nil, err
-	}
+func NewScriptRunner(stage, field string) Runner {
+	return NewRunner(func(ctx RunnerContext) error {
+		return NewScriptStep(ctx, stage, field, true).Run(ctx)
+	})
+}
+
+func preCommit(ctx RunnerContext, deploymentState DeploymentState, stage string) error {
+	inputs := ctx.GetBuildInputs()
 	version := ctx.GetReleaseMetadata().GetVersion()
-	if shouldBeDeployed && !deploymentState.IsDeployed(stage, version) {
-		return nil, fmt.Errorf("Deployment '%s' could not be found", ctx.GetDepends()[0])
-	}
-	ctx.SetDeploymentState(deploymentState)
-	ctx.SetBuildInputs(deploymentState.GetCalculatedInputs(stage))
-	ctx.SetBuildOutputs(deploymentState.GetCalculatedOutputs(stage))
-	return deploymentState, nil
-}
-
-func runPreScript(ctx RunnerContext, stage, field string, shouldBeDeployed bool) error {
-	version := ctx.GetReleaseMetadata().GetVersion()
-	scriptPath, err := initScript(ctx, stage, field)
-	if err != nil {
-		return err
-	}
-	deploymentState, err := initDeploymentState(ctx, stage, shouldBeDeployed)
-	if err != nil {
-		return err
-	}
-	inputs, err := NewEnvironmentBuilder().GetInputsForPreStep(ctx, stage)
-	if err != nil {
-		return err
-	}
-	ctx.SetBuildInputs(inputs)
-	if scriptPath == "" {
-		return updateAfterPreStep(stage, version, inputs, deploymentState)
-	}
-	env := NewEnvironmentBuilder().MergeInputsWithOsEnvironment(ctx)
-	proc := util.NewProcessRecorder()
-	proc.SetWorkingDirectory(ctx.GetPath().GetBaseDir())
-	if err := proc.Run([]string{scriptPath}, env, ctx.Logger()); err != nil {
-		return err
-	}
-	return updateAfterPreStep(stage, version, inputs, deploymentState)
-}
-
-func updateAfterPreStep(stage, version string, inputs *map[string]interface{}, deploymentState DeploymentState) error {
 	if err := deploymentState.SetVersion(stage, version); err != nil {
 		return err
 	}
 	return deploymentState.UpdateInputs(stage, inputs)
 }
-
-func updateAfterPostStep(ctx RunnerContext, stage string, outputs *map[string]interface{}, deploymentState DeploymentState) error {
+func postCommit(ctx RunnerContext, deploymentState DeploymentState, stage string) error {
 	processedOutputs, err := NewEnvironmentBuilder().GetOutputs(ctx, stage)
 	if err != nil {
 		return err
@@ -102,30 +100,110 @@ func updateAfterPostStep(ctx RunnerContext, stage string, outputs *map[string]in
 	return deploymentState.UpdateOutputs("deploy", processedOutputs)
 }
 
-func runPostScript(ctx RunnerContext, stage, field string) error {
-	scriptPath, err := initScript(ctx, stage, field)
+func (b *ScriptStep) Run(ctx RunnerContext) error {
+	if b.ScriptPath != "" {
+		scriptPath, err := b.initScript(ctx)
+		if err != nil {
+			return err
+		}
+		b.ScriptPath = scriptPath
+	}
+	deploymentState, err := b.initDeploymentState(ctx)
 	if err != nil {
 		return err
 	}
-	deploymentState, err := initDeploymentState(ctx, stage, true)
-	if err != nil {
-		return err
+	if b.ScriptPath != "" {
+		if err := b.runScript(ctx); err != nil {
+			return err
+		}
 	}
-	if scriptPath == "" {
-		return updateAfterPostStep(ctx, stage, ctx.GetBuildOutputs(), deploymentState)
+	if b.Commit != nil {
+		return b.Commit(ctx, deploymentState, b.Stage)
 	}
+	return nil
+}
 
-	env := NewEnvironmentBuilder().MergeInputsAndOutputsWithOsEnvironment(ctx)
-	if err := writeOutputsToFile(deploymentState.GetCalculatedOutputs(stage)); err != nil {
+func (b *ScriptStep) initScript(ctx RunnerContext) (string, error) {
+	script := ctx.GetPath().Script(b.ScriptPath)
+	ctx.Logger().Log(b.Stage+".step", map[string]string{
+		"step":   b.Step,
+		"script": script,
+	})
+	if !util.PathExists(script) {
+		return "", fmt.Errorf("Referenced %s script '%s' does not exist", b.Step, script)
+	}
+	if err := util.MakeExecutable(script); err != nil {
+		return "", err
+	}
+	return script, nil
+}
+
+func (b *ScriptStep) initDeploymentState(ctx RunnerContext) (DeploymentState, error) {
+	deploymentState, err := ctx.GetEnvironmentState().GetDeploymentState(ctx.GetDepends())
+	if err != nil {
+		return nil, err
+	}
+	version := ctx.GetReleaseMetadata().GetVersion()
+	if b.ShouldBeDeployed && !deploymentState.IsDeployed(b.Stage, version) {
+		stageName := "Build"
+		if b.Stage == "deploy" {
+			stageName = "Deployment"
+		}
+		return nil, fmt.Errorf("%s '%s' (version %s) could not be found", stageName, ctx.GetDepends()[0], version)
+	}
+	ctx.SetDeploymentState(deploymentState)
+	if b.Inputs != nil {
+		inputs, err := b.Inputs(ctx, b.Stage)
+		if err != nil {
+			return nil, err
+		}
+		ctx.SetBuildInputs(inputs)
+	} else {
+		ctx.SetBuildInputs(deploymentState.GetCalculatedInputs(b.Stage))
+	}
+	if b.LoadOutputs {
+		ctx.SetBuildOutputs(deploymentState.GetCalculatedOutputs(b.Stage))
+	}
+	return deploymentState, nil
+}
+
+func (b *ScriptStep) getEnv(ctx RunnerContext) []string {
+	if !b.LoadOutputs {
+		return NewEnvironmentBuilder().MergeInputsWithOsEnvironment(ctx)
+	}
+	return NewEnvironmentBuilder().MergeInputsAndOutputsWithOsEnvironment(ctx)
+}
+
+func (b *ScriptStep) getCmd(ctx RunnerContext) ([]string, error) {
+	if b.ModifiesOutputVariables {
+		if err := writeOutputsToFile(ctx.GetBuildOutputs()); err != nil {
+			return nil, err
+		}
+		outputsJsonLocation := ctx.GetPath().OutputsFile()
+		return []string{b.ScriptPath, outputsJsonLocation}, nil
+	}
+	return []string{b.ScriptPath}, nil
+}
+
+func (b *ScriptStep) runScript(ctx RunnerContext) error {
+	env := b.getEnv(ctx)
+	cmd, err := b.getCmd(ctx)
+	if err != nil {
 		return err
 	}
-	outputsJsonLocation := ctx.GetPath().OutputsFile()
 	proc := util.NewProcessRecorder()
 	proc.SetWorkingDirectory(ctx.GetPath().GetBaseDir())
-	err = proc.Run([]string{scriptPath, outputsJsonLocation}, env, ctx.Logger())
-	if err != nil {
+	if err := proc.Run(cmd, env, ctx.Logger()); err != nil {
 		return err
 	}
+	return b.readOutputVariables(ctx)
+}
+
+func (b *ScriptStep) readOutputVariables(ctx RunnerContext) error {
+	if !b.ModifiesOutputVariables {
+		return nil
+	}
+	outputsJsonLocation := ctx.GetPath().OutputsFile()
 	outputOverrides, err := readOutputsFromFile(outputsJsonLocation)
 	if err != nil {
 		return err
@@ -145,20 +223,7 @@ func runPostScript(ctx RunnerContext, stage, field string) error {
 		//            applog("build.output_override_variable_value", variable=key, value=value)
 	}
 	ctx.SetBuildOutputs(outputs)
-	return updateAfterPostStep(ctx, stage, outputs, deploymentState)
-}
-
-func runScript(ctx RunnerContext, script, field string) error {
-	if !util.PathExists(script) {
-		return fmt.Errorf("Referenced %s script '%s' does not exist", field, script)
-	}
-	if err := util.MakeExecutable(script); err != nil {
-		return err
-	}
-	env := NewEnvironmentBuilder().MergeInputsAndOutputsWithOsEnvironment(ctx)
-	proc := util.NewProcessRecorder()
-	proc.SetWorkingDirectory(ctx.GetPath().GetBaseDir())
-	return proc.Run([]string{script}, env, ctx.Logger())
+	return nil
 }
 
 func writeOutputsToFile(outputs *map[string]interface{}) error {

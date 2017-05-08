@@ -18,7 +18,6 @@ package runners
 
 import (
 	. "github.com/ankyra/escape-client/model/interfaces"
-	"github.com/ankyra/escape-client/util"
 )
 
 type postdestroy_runner struct {
@@ -32,36 +31,19 @@ func NewPostDestroyRunner(stage string) Runner {
 }
 
 func (p *postdestroy_runner) Run(ctx RunnerContext) error {
-	scriptPath, err := initScript(ctx, p.Stage, "pre_destroy")
-	if err != nil {
-		return err
-	}
-	deploymentState, err := initDeploymentState(ctx, p.Stage, true)
-	if err != nil {
-		return err
-	}
-	ctx.SetBuildInputs(deploymentState.GetCalculatedInputs(p.Stage))
-	ctx.SetBuildOutputs(deploymentState.GetCalculatedOutputs(p.Stage))
-	if scriptPath == "" {
-		return p.deleteState(ctx, deploymentState)
-	}
-	env := NewEnvironmentBuilder().MergeInputsAndOutputsWithOsEnvironment(ctx)
-	proc := util.NewProcessRecorder()
-	proc.SetWorkingDirectory(ctx.GetPath().GetBaseDir())
-	if err := proc.Run([]string{scriptPath}, env, ctx.Logger()); err != nil {
-		return err
-	}
-	return p.deleteState(ctx, deploymentState)
+	step := NewScriptStep(ctx, p.Stage, "post_destroy", true)
+	step.Commit = deleteCommit
+	return step.Run(ctx)
 }
 
-func (p *postdestroy_runner) deleteState(ctx RunnerContext, depl DeploymentState) error {
-	if err := depl.SetVersion(p.Stage, ""); err != nil {
+func deleteCommit(ctx RunnerContext, depl DeploymentState, stage string) error {
+	if err := depl.SetVersion(stage, ""); err != nil {
 		return err
 	}
-	if err := depl.UpdateInputs(p.Stage, nil); err != nil {
+	if err := depl.UpdateInputs(stage, nil); err != nil {
 		return err
 	}
-	if err := depl.UpdateOutputs(p.Stage, nil); err != nil {
+	if err := depl.UpdateOutputs(stage, nil); err != nil {
 		return err
 	}
 	return nil

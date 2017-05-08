@@ -17,35 +17,9 @@ limitations under the License.
 package runners
 
 import (
-	"fmt"
 	. "github.com/ankyra/escape-client/model/interfaces"
 )
 
-type smokeRunner struct {
-}
-
 func NewSmokeRunner() Runner {
-	return &smokeRunner{}
-}
-
-func (t *smokeRunner) Run(ctx RunnerContext) error {
-	metadata := ctx.GetReleaseMetadata()
-	state := ctx.GetEnvironmentState()
-	deploymentState, err := state.GetDeploymentState(ctx.GetDepends())
-	if err != nil {
-		return err
-	}
-	version := ctx.GetReleaseMetadata().GetVersion()
-	if !deploymentState.IsDeployed("deploy", version) {
-		return fmt.Errorf("Deployment '%s' of version '%s' could not be found", ctx.GetDepends()[0], version)
-	}
-	if metadata.GetScript("smoke") == "" {
-		return nil
-	}
-	ctx.SetBuildInputs(deploymentState.GetCalculatedInputs("deploy"))
-	ctx.SetBuildOutputs(deploymentState.GetCalculatedOutputs("deploy"))
-	ctx.SetDeploymentState(deploymentState)
-
-	scriptPath := ctx.GetPath().Script(metadata.GetScript("smoke"))
-	return runScript(ctx, scriptPath, "test")
+	return NewScriptRunner("deploy", "smoke")
 }

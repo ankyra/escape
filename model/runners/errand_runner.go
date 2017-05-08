@@ -17,7 +17,6 @@ limitations under the License.
 package runners
 
 import (
-	"fmt"
 	. "github.com/ankyra/escape-client/model/interfaces"
 )
 
@@ -32,26 +31,7 @@ func NewErrandRunner(errand Errand) Runner {
 }
 
 func (e *ErrandRunner) Run(ctx RunnerContext) error {
-	if e.Errand.GetScript() == "" {
-		return nil
-	}
-	state := ctx.GetEnvironmentState()
-	deploymentState, err := state.GetDeploymentState(ctx.GetDepends())
-	if err != nil {
-		return err
-	}
-	if !deploymentState.IsDeployed("deploy", ctx.GetReleaseMetadata().GetVersion()) {
-		return fmt.Errorf("Deployment '%s' could not be found", ctx.GetDepends()[0])
-	}
-	ctx.SetDeploymentState(deploymentState)
-
-	inputs, err := NewEnvironmentBuilder().GetInputsForErrand(ctx, e.Errand)
-	if err != nil {
-		return err
-	}
-	outputs := deploymentState.GetCalculatedOutputs("deploy")
-	ctx.SetBuildInputs(inputs)
-	ctx.SetBuildOutputs(outputs)
-	scriptPath := ctx.GetPath().Script(e.Errand.GetScript())
-	return runScript(ctx, scriptPath, e.Errand.GetName())
+	step := NewScriptStep(ctx, "deploy", e.Errand.GetName(), true)
+	step.ScriptPath = e.Errand.GetScript()
+	return step.Run(ctx)
 }

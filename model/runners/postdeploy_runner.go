@@ -20,13 +20,6 @@ import (
 	. "github.com/ankyra/escape-client/model/interfaces"
 )
 
-type postdeploy_runner struct {
-}
-
 func NewPostDeployRunner() Runner {
-	return &postdeploy_runner{}
-}
-
-func (p *postdeploy_runner) Run(ctx RunnerContext) error {
-	return runPostScript(ctx, "deploy", "post_deploy")
+	return NewPostScriptStepRunner("deploy", "post_deploy")
 }

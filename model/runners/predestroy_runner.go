@@ -18,38 +18,8 @@ package runners
 
 import (
 	. "github.com/ankyra/escape-client/model/interfaces"
-	"github.com/ankyra/escape-client/util"
 )
 
-type predestroy_runner struct {
-	Stage string
-}
-
 func NewPreDestroyRunner(stage string) Runner {
-	return &predestroy_runner{
-		Stage: stage,
-	}
-}
-
-func (p *predestroy_runner) Run(ctx RunnerContext) error {
-	scriptPath, err := initScript(ctx, p.Stage, "pre_destroy")
-	if err != nil {
-		return err
-	}
-	deploymentState, err := initDeploymentState(ctx, p.Stage, true)
-	if err != nil {
-		return err
-	}
-	ctx.SetBuildInputs(deploymentState.GetCalculatedInputs(p.Stage))
-	ctx.SetBuildOutputs(deploymentState.GetCalculatedOutputs(p.Stage))
-	if scriptPath == "" {
-		return nil
-	}
-	env := NewEnvironmentBuilder().MergeInputsAndOutputsWithOsEnvironment(ctx)
-	proc := util.NewProcessRecorder()
-	proc.SetWorkingDirectory(ctx.GetPath().GetBaseDir())
-	if err := proc.Run([]string{scriptPath}, env, ctx.Logger()); err != nil {
-		return err
-	}
-	return nil
+	return NewPreScriptStepRunner(stage, "pre_destroy")
 }
