@@ -19,6 +19,7 @@ package controllers
 import (
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/runners"
+	"github.com/ankyra/escape-client/model/runners/build"
 )
 
 type BuildController struct{}
@@ -31,7 +32,7 @@ func (BuildController) Build(context Context, buildFatPackage bool) error {
 	if err != nil {
 		return err
 	}
-	if err := runners.NewBuildRunner().Run(runnerContext); err != nil {
+	if err := build.NewBuildRunner().Run(runnerContext); err != nil {
 		return err
 	}
 	if err := context.LoadMetadata(); err != nil {

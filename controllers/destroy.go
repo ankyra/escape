@@ -19,6 +19,7 @@ package controllers
 import (
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/runners"
+	"github.com/ankyra/escape-client/model/runners/destroy"
 )
 
 type DestroyController struct{}
@@ -32,12 +33,12 @@ func (DestroyController) Destroy(context Context, destroyBuild, destroyDeploymen
 		return err
 	}
 	if destroyBuild {
-		if err := runners.NewDestroyRunner("build").Run(runnerContext); err != nil {
+		if err := destroy.NewDestroyRunner("build").Run(runnerContext); err != nil {
 			return err
 		}
 	}
 	if destroyDeployment {
-		if err := runners.NewDestroyRunner("deploy").Run(runnerContext); err != nil {
+		if err := destroy.NewDestroyRunner("deploy").Run(runnerContext); err != nil {
 			return err
 		}
 	}

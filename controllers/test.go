@@ -19,6 +19,7 @@ package controllers
 import (
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/runners"
+	"github.com/ankyra/escape-client/model/runners/build"
 )
 
 type TestController struct{}
@@ -27,7 +28,7 @@ func (TestController) Test(context Context) error {
 	context.PushLogRelease(context.GetReleaseMetadata().GetReleaseId())
 	context.PushLogSection("Test")
 	context.Log("test.start", nil)
-	runner := runners.NewTestRunner()
+	runner := build.NewTestRunner()
 	runnerContext, err := runners.NewRunnerContext(context)
 	if err != nil {
 		return err

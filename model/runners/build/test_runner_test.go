@@ -14,24 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package runners
+package build
 
 import (
 	"github.com/ankyra/escape-client/model"
+	"github.com/ankyra/escape-client/model/runners"
 	. "gopkg.in/check.v1"
 	"os"
 )
-
-type testSuite struct{}
-
-var _ = Suite(&testSuite{})
 
 func (s *testSuite) Test_TestRunner_no_test_script_defined(c *C) {
 	os.RemoveAll("testdata/escape_state")
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/test_state.json", "dev", "testdata/plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx)
+	runCtx, err := runners.NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
 	err = NewTestRunner().Run(runCtx)
 	c.Assert(err, IsNil)
@@ -41,7 +38,7 @@ func (s *testSuite) Test_TestRunner_missing_test_file(c *C) {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/test_state.json", "dev", "testdata/plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx)
+	runCtx, err := runners.NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
 	ctx.GetReleaseMetadata().SetStage("test", "testdata/doesnt_exist.sh")
 	err = NewTestRunner().Run(runCtx)
@@ -53,7 +50,7 @@ func (s *testSuite) Test_TestRunner_missing_deployment_state(c *C) {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/escape_state", "dev", "testdata/test_plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx)
+	runCtx, err := runners.NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
 	err = NewTestRunner().Run(runCtx)
 	c.Assert(err, Not(IsNil))
@@ -64,7 +61,7 @@ func (s *testSuite) Test_TestRunner(c *C) {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/test_state.json", "dev", "testdata/test_plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx)
+	runCtx, err := runners.NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
 	err = NewTestRunner().Run(runCtx)
 	c.Assert(err, IsNil)
@@ -74,7 +71,7 @@ func (s *testSuite) Test_TestRunner_failing_test(c *C) {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/test_state.json", "dev", "testdata/failing_test_plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx)
+	runCtx, err := runners.NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
 	err = NewTestRunner().Run(runCtx)
 	c.Assert(err, Not(IsNil))

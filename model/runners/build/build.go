@@ -14,26 +14,36 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package runners
+package build
 
 import (
 	. "github.com/ankyra/escape-client/model/interfaces"
+	"github.com/ankyra/escape-client/model/runners"
 	"github.com/ankyra/escape-client/model/types"
 )
 
-func NewDeployRunner() Runner {
-	return NewCompoundRunner(
-		NewDependencyRunner("deploy", NewDeployRunner),
-		NewPreDeployRunner(),
-		NewRunner(deployStep),
-		NewPostDeployRunner(),
+func NewPreBuildRunner() Runner {
+	return runners.NewPreScriptStepRunner("build", "pre_build")
+}
+
+func NewPostBuildRunner() Runner {
+	return runners.NewPostScriptStepRunner("build", "post_build")
+}
+
+func NewTestRunner() Runner {
+	return runners.NewScriptRunner("build", "test")
+}
+
+func NewBuildRunner() Runner {
+	return runners.NewCompoundRunner(
+		NewPreBuildRunner(),
+		runners.NewRunner(buildStep),
+		NewPostBuildRunner(),
 	)
 }
 
-func deployStep(ctx RunnerContext) error {
-	//        self._check_file_integrity(metadata.files)
-	//
-	ctx.Logger().Log("deploy.deploy_step", nil)
+func buildStep(ctx RunnerContext) error {
+	ctx.Logger().Log("build.build_step", nil)
 	typ, err := types.ResolveType(ctx.GetReleaseMetadata().GetType())
 	if err != nil {
 		return err
@@ -43,6 +53,6 @@ func deployStep(ctx RunnerContext) error {
 		return err
 	}
 	ctx.SetBuildOutputs(outputs)
-	ctx.Logger().Log("deploy.step_finished", nil)
-	return ctx.GetDeploymentState().UpdateOutputs("deploy", outputs)
+	ctx.Logger().Log("build.build_step_finished", nil)
+	return ctx.GetDeploymentState().UpdateOutputs("build", outputs)
 }

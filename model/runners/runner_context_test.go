@@ -25,6 +25,10 @@ import (
 
 func Test(t *testing.T) { TestingT(t) }
 
+type testSuite struct{}
+
+var _ = Suite(&testSuite{})
+
 func (s *testSuite) Test_NewRunnerContext_fails_if_metadata_is_missing(c *C) {
 	ctx := model.NewContext()
 	_, err := NewRunnerContext(ctx)

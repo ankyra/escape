@@ -14,10 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package runners
+package build
 
 import (
 	"github.com/ankyra/escape-client/model"
+	"github.com/ankyra/escape-client/model/runners"
 	. "gopkg.in/check.v1"
 	"os"
 )
@@ -27,7 +28,7 @@ func (s *testSuite) Test_PostBuildRunner_no_script_defined(c *C) {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/post_build_state.json", "dev", "testdata/plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx)
+	runCtx, err := runners.NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
 	err = NewPostBuildRunner().Run(runCtx)
 	c.Assert(err, IsNil)
@@ -37,7 +38,7 @@ func (s *testSuite) Test_PostBuildRunner_missing_test_file(c *C) {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/post_build_state.json", "dev", "testdata/plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx)
+	runCtx, err := runners.NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
 	ctx.GetReleaseMetadata().SetStage("post_build", "testdata/doesnt_exist.sh")
 	err = NewPostBuildRunner().Run(runCtx)
@@ -49,7 +50,7 @@ func (s *testSuite) Test_PostBuildRunner_missing_deployment_state(c *C) {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/escape_state", "dev", "testdata/post_build_plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx)
+	runCtx, err := runners.NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
 	err = NewPostBuildRunner().Run(runCtx)
 	c.Assert(err, Not(IsNil))
@@ -60,7 +61,7 @@ func (s *testSuite) Test_PostBuildRunner(c *C) {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/post_build_state.json", "dev", "testdata/post_build_plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx)
+	runCtx, err := runners.NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
 	err = NewPostBuildRunner().Run(runCtx)
 	c.Assert(err, IsNil)
@@ -70,7 +71,7 @@ func (s *testSuite) Test_PostBuildRunner_failing_script(c *C) {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/post_build_state.json", "dev", "testdata/post_build_plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx)
+	runCtx, err := runners.NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
 	ctx.GetReleaseMetadata().SetStage("post_build", "testdata/failing_test.sh")
 	err = NewPostBuildRunner().Run(runCtx)

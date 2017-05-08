@@ -14,12 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package runners
+package errand
 
 import (
 	. "github.com/ankyra/escape-client/model/interfaces"
+	"github.com/ankyra/escape-client/model/runners"
 )
 
-func NewSmokeRunner() Runner {
-	return NewScriptRunner("deploy", "smoke")
+func NewErrandRunner(errand Errand) Runner {
+	return runners.NewRunner(func(ctx RunnerContext) error {
+		step := runners.NewScriptStep(ctx, "deploy", errand.GetName(), true)
+		step.ScriptPath = errand.GetScript()
+		return step.Run(ctx)
+	})
 }

@@ -20,6 +20,7 @@ import (
 	"fmt"
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/runners"
+	"github.com/ankyra/escape-client/model/runners/errand"
 )
 
 type ErrandsController struct{}
@@ -39,17 +40,17 @@ func (ErrandsController) List(context Context) error {
 	return nil
 }
 
-func (ErrandsController) Run(context Context, errand string) error {
+func (ErrandsController) Run(context Context, errandStr string) error {
 	//        applog("errand.start", errand=errand, release=escape_plan.get_versionless_build_id())
 	metadata := context.GetReleaseMetadata()
 	if metadata.GetErrands() == nil {
 		return fmt.Errorf("This release doesn't have any errands.")
 	}
-	errandObj, ok := metadata.GetErrands()[errand]
+	errandObj, ok := metadata.GetErrands()[errandStr]
 	if !ok {
-		return fmt.Errorf("The errand '%s' does not exist", errand)
+		return fmt.Errorf("The errand '%s' does not exist", errandStr)
 	}
-	runner := runners.NewErrandRunner(errandObj)
+	runner := errand.NewErrandRunner(errandObj)
 	runnerContext, err := runners.NewRunnerContext(context)
 	if err != nil {
 		return err

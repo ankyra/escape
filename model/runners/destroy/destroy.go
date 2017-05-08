@@ -14,24 +14,34 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package runners
+package destroy
 
 import (
 	. "github.com/ankyra/escape-client/model/interfaces"
+	"github.com/ankyra/escape-client/model/runners"
 	"github.com/ankyra/escape-client/model/types"
 )
 
-type destroyRunner struct {
-	Stage string
+func NewPreDestroyRunner(stage string) Runner {
+	return runners.NewPreScriptStepRunner(stage, "pre_destroy")
 }
 
 func NewDestroyRunner(stage string) Runner {
-	return NewCompoundRunner(
-		NewDependencyRunner(stage, func() Runner { return NewDestroyRunner(stage) }),
+	deferred := func() Runner { return NewDestroyRunner(stage) }
+	return runners.NewCompoundRunner(
+		runners.NewDependencyRunner(stage, deferred),
 		NewPreDestroyRunner(stage),
-		NewRunner(destroyStep),
+		runners.NewRunner(destroyStep),
 		NewPostDestroyRunner(stage),
 	)
+}
+
+func NewPostDestroyRunner(stage string) Runner {
+	return runners.NewRunner(func(ctx RunnerContext) error {
+		step := runners.NewScriptStep(ctx, stage, "post_destroy", true)
+		step.Commit = deleteCommit
+		return step.Run(ctx)
+	})
 }
 
 func destroyStep(ctx RunnerContext) error {
@@ -44,5 +54,18 @@ func destroyStep(ctx RunnerContext) error {
 		return err
 	}
 	ctx.Logger().Log("destroy.step_finished", nil)
+	return nil
+}
+
+func deleteCommit(ctx RunnerContext, depl DeploymentState, stage string) error {
+	if err := depl.SetVersion(stage, ""); err != nil {
+		return err
+	}
+	if err := depl.UpdateInputs(stage, nil); err != nil {
+		return err
+	}
+	if err := depl.UpdateOutputs(stage, nil); err != nil {
+		return err
+	}
 	return nil
 }

@@ -14,20 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package runners
+package deploy
 
 import (
 	"github.com/ankyra/escape-client/model"
+	"github.com/ankyra/escape-client/model/runners"
 	. "gopkg.in/check.v1"
 	"os"
+	"testing"
 )
+
+func Test(t *testing.T) { TestingT(t) }
+
+type testSuite struct{}
+
+var _ = Suite(&testSuite{})
 
 func (s *testSuite) Test_DeployRunner_no_script_defined(c *C) {
 	os.RemoveAll("testdata/escape_state")
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/escape_state", "dev", "testdata/deploy_plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx)
+	runCtx, err := runners.NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
 	err = NewDeployRunner().Run(runCtx)
 	c.Assert(err, IsNil)
@@ -37,7 +45,7 @@ func (s *testSuite) Test_DeployRunner_missing_test_file(c *C) {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/deploy_state.json", "dev", "testdata/deploy_plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx)
+	runCtx, err := runners.NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
 	ctx.GetReleaseMetadata().SetStage("post_deploy", "testdata/doesnt_exist.sh")
 	err = NewDeployRunner().Run(runCtx)
@@ -48,7 +56,7 @@ func (s *testSuite) Test_DeployRunner(c *C) {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/deploy_state.json", "dev", "testdata/deploy_plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx)
+	runCtx, err := runners.NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
 	deploymentState, err := runCtx.GetEnvironmentState().GetDeploymentState(runCtx.GetDepends())
 	c.Assert(err, IsNil)
@@ -63,7 +71,7 @@ func (s *testSuite) Test_DeployRunner_failing_script(c *C) {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/deploy_state.json", "dev", "testdata/deploy_plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx)
+	runCtx, err := runners.NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
 	ctx.GetReleaseMetadata().SetStage("post_deploy", "testdata/failing_test.sh")
 	err = NewDeployRunner().Run(runCtx)
@@ -74,7 +82,7 @@ func (s *testSuite) Test_DeployRunner_variables_are_set_even_if_there_is_no_pre_
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/deploy_no_pre_step_state.json", "dev", "testdata/deploy_no_pre_step_plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx)
+	runCtx, err := runners.NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
 	deploymentState, err := runCtx.GetEnvironmentState().GetDeploymentState(runCtx.GetDepends())
 	c.Assert(err, IsNil)
@@ -94,7 +102,7 @@ func (s *testSuite) Test_DeployRunner_with_dependencies(c *C) {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("deploy_deps_state.json", "dev", "deploy_deps_plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx)
+	runCtx, err := runners.NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
 	deploymentState, err := runCtx.GetEnvironmentState().GetDeploymentState(runCtx.GetDepends())
 	c.Assert(err, IsNil)

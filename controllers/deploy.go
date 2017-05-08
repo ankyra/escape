@@ -19,6 +19,7 @@ package controllers
 import (
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/runners"
+	"github.com/ankyra/escape-client/model/runners/deploy"
 )
 
 type DeployController struct{}
@@ -31,7 +32,7 @@ func (d DeployController) Deploy(context Context) error {
 	if err != nil {
 		return err
 	}
-	if err := runners.NewDeployRunner().Run(runnerContext); err != nil {
+	if err := deploy.NewDeployRunner().Run(runnerContext); err != nil {
 		return err
 	}
 	if err := (SmokeController{}).Smoke(context); err != nil {
