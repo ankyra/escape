@@ -129,25 +129,6 @@ func (d *deploymentState) ValidateAndFixSubDeployment(env EnvironmentState, pare
 	return d.ValidateAndFix(d.Name, env)
 }
 
-func (d *deploymentState) GetReferences() (*map[string]DeploymentState, error) {
-	result := map[string]DeploymentState{}
-	result["this"] = d
-	for key, deplName := range d.GetProviders() {
-		deplState, err := d.environment.LookupDeploymentState(deplName)
-		if err != nil {
-			return nil, err
-		}
-		result[key] = deplState
-	}
-	for key, deplState := range *d.Deployments {
-		version := deplState.GetVersion("deploy")
-		if version != "" {
-			result[key+"-v"+version] = deplState
-		}
-	}
-	return &result, nil
-}
-
 func (d *deploymentState) getStage(stage string) *stage {
 	st, ok := d.Stages[stage]
 	if !ok {
@@ -260,6 +241,32 @@ func (p *deploymentState) ToJson() string {
 		panic(err)
 	}
 	return string(str)
+}
+
+func (d *deploymentState) ToScriptEnvironment(metadataMap map[string]ReleaseMetadata, stage string) (*script.ScriptEnvironment, error) {
+	result := map[string]script.Script{}
+	result["this"] = d.ToScript(metadataMap["this"], stage)
+	for key, deplName := range d.GetProviders() {
+		deplState, err := d.environment.LookupDeploymentState(deplName)
+		if err != nil {
+			return nil, err
+		}
+		result[key] = deplState.ToScript(metadataMap[key], "deploy")
+	}
+	for key, deplState := range *d.Deployments {
+		version := deplState.GetVersion(stage)
+		if deplState.IsDeployed(stage, version) {
+			result[key+"-v"+version] = deplState.ToScript(metadataMap[key], stage)
+		}
+	}
+	for key, metadata := range metadataMap {
+		reference, exists := result[metadata.GetReleaseId()]
+		if exists {
+			result[key] = reference
+		}
+	}
+	return script.NewScriptEnvironmentWithGlobals(result), nil
+
 }
 
 func (d *deploymentState) ToScript(metadata ReleaseMetadata, stage string) script.Script {

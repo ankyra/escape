@@ -101,27 +101,3 @@ func (s *deplSuite) Test_ResolveConsumer_provider_doesnt_exist(c *C) {
 	c.Assert(err, Not(IsNil))
 	c.Assert(err.Error(), Equals, "Deployment 'doesnt-exist' does not exist")
 }
-
-func (s *deplSuite) Test_GetReferences(c *C) {
-	references_, err := depl.GetReferences()
-	c.Assert(err, IsNil)
-	references := *references_
-	c.Assert(references, HasLen, 1)
-	c.Assert(references["this"].GetName(), Equals, "archive-release")
-}
-
-func (s *deplSuite) Test_GetReferences_fails_if_provider_doesnt_exist(c *C) {
-	_, err := deplWithDeps.GetReferences()
-	c.Assert(err, Not(IsNil))
-	c.Assert(err.Error(), Equals, "Deployment 'doesnt-exist' does not exist")
-}
-
-func (s *deplSuite) Test_GetReferences_includes_deps_and_providers(c *C) {
-	references_, err := fullDepl.GetReferences()
-	c.Assert(err, IsNil)
-	references := *references_
-	c.Assert(references, HasLen, 3)
-	c.Assert(references["this"].GetName(), Equals, "archive-full")
-	c.Assert(references["gcp"].GetName(), Equals, "archive-release")
-	c.Assert(references["archive-dep-v1"].GetName(), Equals, "archive-dep")
-}

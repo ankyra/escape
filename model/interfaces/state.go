@@ -45,7 +45,6 @@ type EnvironmentState interface {
 
 type DeploymentState interface {
 	ValidateAndFix(string, EnvironmentState) error
-	GetReferences() (*map[string]DeploymentState, error)
 
 	GetPreStepInputs(stage string) *map[string]interface{}
 
@@ -67,4 +66,5 @@ type DeploymentState interface {
 
 	GetEnvironmentState() EnvironmentState
 	ToScript(metadata ReleaseMetadata, stage string) script.Script
+	ToScriptEnvironment(rm map[string]ReleaseMetadata, stage string) (*script.ScriptEnvironment, error)
 }

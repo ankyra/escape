@@ -128,26 +128,7 @@ func (r *runnerContext) GetScriptEnvironment(stage string) (*script.ScriptEnviro
 		}
 		metadataCtx[metadata.GetVersionlessReleaseId()] = metadataCtx[key]
 	}
-	deployCtx, err := r.GetDeploymentState().GetReferences()
-	if err != nil {
-		return nil, err
-	}
-	return NewScriptEnvironmentForStage(&metadataCtx, deployCtx, r.deploymentState, stage), nil
-}
-
-func NewScriptEnvironmentForStage(metadataCtx *map[string]ReleaseMetadata, deployCtx *map[string]DeploymentState, depl DeploymentState, stage string) *script.ScriptEnvironment {
-	result := map[string]script.Script{}
-	for key, deplState := range *deployCtx {
-		metadata, _ := (*metadataCtx)[key]
-		result[key] = deplState.ToScript(metadata, stage)
-	}
-	for key, metadata := range *metadataCtx {
-		reference, exists := result[metadata.GetReleaseId()]
-		if exists {
-			result[key] = reference
-		}
-	}
-	return script.NewScriptEnvironmentWithGlobals(result)
+	return r.GetDeploymentState().ToScriptEnvironment(metadataCtx, stage)
 }
 
 func (r *runnerContext) NewContextForDependency(metadata ReleaseMetadata) RunnerContext {
