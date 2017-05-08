@@ -254,9 +254,10 @@ func (d *deploymentState) ToScriptEnvironment(metadataMap map[string]ReleaseMeta
 		result[key] = deplState.ToScript(metadataMap[key], "deploy")
 	}
 	for key, deplState := range *d.Deployments {
-		version := deplState.GetVersion(stage)
-		if deplState.IsDeployed(stage, version) {
-			result[key+"-v"+version] = deplState.ToScript(metadataMap[key], stage)
+		metadata := metadataMap[key]
+		version := metadata.GetVersion()
+		if deplState.IsDeployed("deploy", version) {
+			result[key+"-v"+version] = deplState.ToScript(metadataMap[key], "deploy")
 		}
 	}
 	for key, metadata := range metadataMap {
@@ -270,7 +271,10 @@ func (d *deploymentState) ToScriptEnvironment(metadataMap map[string]ReleaseMeta
 }
 
 func (d *deploymentState) ToScript(metadata ReleaseMetadata, stage string) script.Script {
-	result := metadata.ToScriptMap()
+	result := map[string]script.Script{}
+	if metadata != nil {
+		result = metadata.ToScriptMap()
+	}
 	result["inputs"] = script.LiftDict(d.liftScriptValues(d.GetCalculatedInputs(stage)))
 	result["outputs"] = script.LiftDict(d.liftScriptValues(d.GetCalculatedOutputs(stage)))
 	env := d.GetEnvironmentState()

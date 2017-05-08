@@ -19,6 +19,7 @@ package build
 import (
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/runners"
+	"github.com/ankyra/escape-client/model/runners/deploy"
 	"github.com/ankyra/escape-client/model/types"
 )
 
@@ -36,6 +37,7 @@ func NewTestRunner() Runner {
 
 func NewBuildRunner() Runner {
 	return runners.NewCompoundRunner(
+		runners.NewDependencyRunner("deploy", deploy.NewDeployRunner),
 		NewPreBuildRunner(),
 		runners.NewRunner(buildStep),
 		NewPostBuildRunner(),
