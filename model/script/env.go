@@ -40,11 +40,11 @@ func NewScriptEnvironmentForCompileStep(variableCtx map[string]ReleaseMetadata) 
 	return NewScriptEnvironmentWithGlobals(result)
 }
 
-func NewScriptEnvironmentForBuild(metadataCtx *map[string]ReleaseMetadata, deployCtx *map[string]DeploymentState, depl DeploymentState) *ScriptEnvironment {
+func NewScriptEnvironmentForStage(metadataCtx *map[string]ReleaseMetadata, deployCtx *map[string]DeploymentState, depl DeploymentState, stage string) *ScriptEnvironment {
 	result := map[string]Script{}
 	for key, deplState := range *deployCtx {
 		metadata, _ := (*metadataCtx)[key]
-		result[key] = deploymentStateToEscapeDict(deplState, metadata)
+		result[key] = deploymentStateToEscapeDict(deplState, metadata, stage)
 	}
 	for key, metadata := range *metadataCtx {
 		reference, exists := result[metadata.GetReleaseId()]
@@ -59,12 +59,12 @@ func releaseMetadataToEscapeDict(metadata ReleaseMetadata) Script {
 	return LiftDict(releaseMetadataToDict(metadata))
 }
 
-func deploymentStateToEscapeDict(deplState DeploymentState, metadata ReleaseMetadata) Script {
+func deploymentStateToEscapeDict(deplState DeploymentState, metadata ReleaseMetadata, stage string) Script {
 	result := releaseMetadataToDict(metadata)
 	inputsDict := map[string]Script{}
 	outputsDict := map[string]Script{}
-	inputs := deplState.GetCalculatedInputs("deploy")
-	outputs := deplState.GetCalculatedOutputs("deploy")
+	inputs := deplState.GetCalculatedInputs(stage)
+	outputs := deplState.GetCalculatedOutputs(stage)
 	if inputs != nil {
 		for key, val := range *inputs {
 			v, err := Lift(val)

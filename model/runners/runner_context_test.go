@@ -53,7 +53,7 @@ func (s *testSuite) Test_GetScriptEnvironment_fails_if_deployment_state_is_missi
 	c.Assert(err, IsNil)
 	runCtx, err := NewRunnerContext(ctx)
 	c.Assert(runCtx, Not(IsNil))
-	_, err = runCtx.GetScriptEnvironment()
+	_, err = runCtx.GetScriptEnvironment("deploy")
 	c.Assert(err, Not(IsNil))
 	c.Assert(err.Error(), Equals, "Missing deployment state in context. This is a bug in Escape.")
 }
@@ -68,7 +68,7 @@ func (s *testSuite) Test_GetScriptEnvironment_no_depends(c *C) {
 	depl, err := ctx.GetEnvironmentState().GetDeploymentState([]string{"archive-name"})
 	c.Assert(err, IsNil)
 	runCtx.SetDeploymentState(depl)
-	scriptEnv, err := runCtx.GetScriptEnvironment()
+	scriptEnv, err := runCtx.GetScriptEnvironment("deploy")
 	c.Assert(err, IsNil)
 	c.Assert(scriptEnv, Not(IsNil))
 }

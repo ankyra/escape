@@ -34,5 +34,5 @@ type RunnerContext interface {
 	GetBuildOutputs() *map[string]interface{}
 	SetBuildOutputs(*map[string]interface{})
 	NewContextForDependency(ReleaseMetadata) RunnerContext
-	GetScriptEnvironment() (*ScriptEnvironment, error)
+	GetScriptEnvironment(stage string) (*ScriptEnvironment, error)
 }

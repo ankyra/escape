@@ -52,7 +52,7 @@ func (e *environmentBuilder) GetEnviron() []string {
 func (e *environmentBuilder) GetInputsForPreStep(ctx RunnerContext, stage string) (*map[string]interface{}, error) {
 	calculatedInputs := map[string]interface{}{}
 	inputs := ctx.GetDeploymentState().GetPreStepInputs(stage)
-	scriptEnv, err := ctx.GetScriptEnvironment()
+	scriptEnv, err := ctx.GetScriptEnvironment(stage)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func (e *environmentBuilder) GetInputsForErrand(ctx RunnerContext, errand Errand
 	if errand.GetInputs() == nil {
 		return result, nil
 	}
-	scriptEnv, err := ctx.GetScriptEnvironment()
+	scriptEnv, err := ctx.GetScriptEnvironment("deploy")
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +102,7 @@ func (e *environmentBuilder) GetOutputs(ctx RunnerContext, stage string) (*map[s
 		}
 		return &result, nil
 	}
-	scriptEnv, err := ctx.GetScriptEnvironment()
+	scriptEnv, err := ctx.GetScriptEnvironment(stage)
 	if err != nil {
 		return nil, err
 	}

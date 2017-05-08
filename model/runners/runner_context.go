@@ -103,7 +103,7 @@ func (r *runnerContext) SetBuildOutputs(outputs *map[string]interface{}) {
 	r.outputs = outputs
 }
 
-func (r *runnerContext) GetScriptEnvironment() (*ScriptEnvironment, error) {
+func (r *runnerContext) GetScriptEnvironment(stage string) (*ScriptEnvironment, error) {
 	if r.GetDeploymentState() == nil {
 		return nil, fmt.Errorf("Missing deployment state in context. This is a bug in Escape.")
 	}
@@ -133,7 +133,7 @@ func (r *runnerContext) GetScriptEnvironment() (*ScriptEnvironment, error) {
 	if err != nil {
 		return nil, err
 	}
-	return script.NewScriptEnvironmentForBuild(&metadataCtx, deployCtx, r.deploymentState), nil
+	return script.NewScriptEnvironmentForStage(&metadataCtx, deployCtx, r.deploymentState, stage), nil
 }
 
 func (r *runnerContext) NewContextForDependency(metadata ReleaseMetadata) RunnerContext {
