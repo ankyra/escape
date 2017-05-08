@@ -32,11 +32,11 @@ func NewCompoundRunner(runners ...Runner) Runner {
 	})
 }
 
-func NewDependencyRunner(stage string, depRunner func() Runner) Runner {
+func NewDependencyRunner(logKey string, depRunner func() Runner) Runner {
 	return NewRunner(func(ctx RunnerContext) error {
 		metadata := ctx.GetReleaseMetadata()
 		for _, depend := range metadata.GetDependencies() {
-			if err := runDependency(ctx, depend, stage, depRunner()); err != nil {
+			if err := runDependency(ctx, depend, logKey, depRunner()); err != nil {
 				return err
 			}
 		}
@@ -44,9 +44,9 @@ func NewDependencyRunner(stage string, depRunner func() Runner) Runner {
 	})
 }
 
-func runDependency(ctx RunnerContext, dependency, stage string, runner Runner) error {
+func runDependency(ctx RunnerContext, dependency, logKey string, runner Runner) error {
 	ctx.Logger().PushSection("Dependency " + dependency)
-	ctx.Logger().Log(stage+"."+stage+"_dependency", map[string]string{
+	ctx.Logger().Log(logKey+"."+logKey+"_dependency", map[string]string{
 		"dependency": dependency,
 	})
 	ctx.Logger().PushRelease(dependency)
@@ -73,7 +73,7 @@ func runDependency(ctx RunnerContext, dependency, stage string, runner Runner) e
 	if err := os.Chdir(currentDir); err != nil {
 		return err
 	}
-	ctx.Logger().Log(stage+"."+stage+"_dependency_finished", nil)
+	ctx.Logger().Log(logKey+"."+logKey+"_dependency_finished", nil)
 	ctx.Logger().PopRelease()
 	ctx.Logger().PopSection()
 	return nil

@@ -23,13 +23,11 @@ import (
 )
 
 func NewPreDestroyRunner(stage string) Runner {
-	return runners.NewPreScriptStepRunner(stage, "pre_destroy")
+	return runners.NewScriptRunner(stage, "pre_destroy")
 }
 
 func NewDestroyRunner(stage string) Runner {
-	deferred := func() Runner { return NewDestroyRunner(stage) }
 	return runners.NewCompoundRunner(
-		runners.NewDependencyRunner(stage, deferred),
 		NewPreDestroyRunner(stage),
 		runners.NewRunner(destroyStep),
 		NewPostDestroyRunner(stage),
@@ -58,6 +56,11 @@ func destroyStep(ctx RunnerContext) error {
 }
 
 func deleteCommit(ctx RunnerContext, depl DeploymentState, stage string) error {
+	deferred := func() Runner { return NewDestroyRunner("deploy") }
+	err := runners.NewDependencyRunner("destroy", deferred).Run(ctx)
+	if err != nil {
+		return err
+	}
 	if err := depl.SetVersion(stage, ""); err != nil {
 		return err
 	}

@@ -221,6 +221,14 @@ var logMessages = map[string]map[string]string{
 		"msg":   "Successfully ran deployment step.",
 		"level": "info",
 	},
+	"destroy.destroy_dependency": map[string]string{
+		"msg":   "Destroying dependency {{ .dependency }}.",
+		"level": "info",
+	},
+	"destroy.destroy_dependency_finished": map[string]string{
+		"msg":   "Destroying dependency {{ .release }}",
+		"level": "success",
+	},
 	"destroy.destroy_step": map[string]string{
 		"msg":   "Destroying",
 		"level": "success",
