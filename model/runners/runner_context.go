@@ -32,7 +32,6 @@ type runnerContext struct {
 	outputs          *map[string]interface{}
 	depends          []ReleaseMetadata
 	logger           Logger
-	scriptEnv        *ScriptEnvironment
 	context          Context
 }
 
@@ -103,7 +102,7 @@ func (r *runnerContext) SetBuildOutputs(outputs *map[string]interface{}) {
 	r.outputs = outputs
 }
 
-func (r *runnerContext) GetScriptEnvironment(stage string) (*ScriptEnvironment, error) {
+func (r *runnerContext) GetScriptEnvironment(stage string) (*script.ScriptEnvironment, error) {
 	if r.GetDeploymentState() == nil {
 		return nil, fmt.Errorf("Missing deployment state in context. This is a bug in Escape.")
 	}
@@ -133,7 +132,22 @@ func (r *runnerContext) GetScriptEnvironment(stage string) (*ScriptEnvironment, 
 	if err != nil {
 		return nil, err
 	}
-	return script.NewScriptEnvironmentForStage(&metadataCtx, deployCtx, r.deploymentState, stage), nil
+	return NewScriptEnvironmentForStage(&metadataCtx, deployCtx, r.deploymentState, stage), nil
+}
+
+func NewScriptEnvironmentForStage(metadataCtx *map[string]ReleaseMetadata, deployCtx *map[string]DeploymentState, depl DeploymentState, stage string) *script.ScriptEnvironment {
+	result := map[string]script.Script{}
+	for key, deplState := range *deployCtx {
+		metadata, _ := (*metadataCtx)[key]
+		result[key] = deplState.ToScript(metadata, stage)
+	}
+	for key, metadata := range *metadataCtx {
+		reference, exists := result[metadata.GetReleaseId()]
+		if exists {
+			result[key] = reference
+		}
+	}
+	return script.NewScriptEnvironmentWithGlobals(result)
 }
 
 func (r *runnerContext) NewContextForDependency(metadata ReleaseMetadata) RunnerContext {

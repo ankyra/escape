@@ -16,6 +16,10 @@ limitations under the License.
 
 package interfaces
 
+import (
+	"github.com/ankyra/escape-client/model/script"
+)
+
 type ProjectState interface {
 	ValidateAndFix() error
 	GetEnvironmentStateOrMakeNew(string) EnvironmentState
@@ -62,4 +66,5 @@ type DeploymentState interface {
 	GetName() string
 
 	GetEnvironmentState() EnvironmentState
+	ToScript(metadata ReleaseMetadata, stage string) script.Script
 }

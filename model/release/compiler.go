@@ -362,7 +362,7 @@ func (c *Compiler) compileDefault(v *variable) (Variable, error) {
 		if err != nil {
 			return nil, fmt.Errorf("Couldn't parse expression '%s' in default field: %s", defaultValue, err.Error())
 		}
-		str, err := script.RunScriptForCompileStep(defaultValue, c.VariableCtx)
+		str, err := RunScriptForCompileStep(defaultValue, c.VariableCtx)
 		if err == nil {
 			v.Default = &str
 		}
@@ -376,7 +376,7 @@ func (c *Compiler) compileDefault(v *variable) (Variable, error) {
 				if err != nil {
 					return nil, fmt.Errorf("Couldn't parse expression '%s' in default field: %s", k.(string), err.Error())
 				}
-				str, err := script.RunScriptForCompileStep(k.(string), c.VariableCtx)
+				str, err := RunScriptForCompileStep(k.(string), c.VariableCtx)
 				if err == nil {
 					values = append(values, str)
 				} else {
@@ -393,7 +393,7 @@ func (c *Compiler) compileDefault(v *variable) (Variable, error) {
 func (c *Compiler) compileMetadata(metadata map[string]string) error {
 	result := map[string]string{}
 	for key, val := range metadata {
-		str, err := script.RunScriptForCompileStep(val, c.VariableCtx)
+		str, err := RunScriptForCompileStep(val, c.VariableCtx)
 		if err != nil {
 			return fmt.Errorf("%s in metadata field.", err.Error())
 		}
@@ -410,4 +410,34 @@ func (c *Compiler) compileReleaseTypeExtras() error {
 		return err
 	}
 	return releaseType.CompileMetadata(plan, c.metadata)
+}
+
+func RunScriptForCompileStep(scriptStr string, variableCtx map[string]ReleaseMetadata) (string, error) {
+	parsedScript, err := script.ParseScript(scriptStr)
+	if err != nil {
+		return "", err
+	}
+	env := map[string]script.Script{}
+	for key, metadata := range variableCtx {
+		env[key] = metadata.ToScript()
+	}
+	val, err := parsedScript.Eval(script.NewScriptEnvironmentWithGlobals(env))
+	if err != nil {
+		return "", err
+	}
+	if val.Type().IsString() {
+		v, err := val.Value()
+		if err != nil {
+			return "", err
+		}
+		return v.(string), nil
+	}
+	if val.Type().IsInteger() {
+		v, err := val.Value()
+		if err != nil {
+			return "", err
+		}
+		return string(v.(int)), nil
+	}
+	return "", fmt.Errorf("Expression '%s' did not return a string value", scriptStr)
 }

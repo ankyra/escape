@@ -18,7 +18,6 @@ package script
 
 import (
 	"fmt"
-	. "github.com/ankyra/escape-client/model/interfaces"
 )
 
 /*

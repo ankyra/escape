@@ -16,34 +16,10 @@ limitations under the License.
 
 package script
 
-import (
-	"fmt"
-	. "github.com/ankyra/escape-client/model/interfaces"
-)
+import ()
 
-func RunScriptForCompileStep(script string, variableCtx map[string]ReleaseMetadata) (string, error) {
-	parsedScript, err := ParseScript(script)
-	if err != nil {
-		return "", err
-	}
-	env := NewScriptEnvironmentForCompileStep(variableCtx)
-	val, err := parsedScript.Eval(env)
-	if err != nil {
-		return "", err
-	}
-	if val.Type().IsString() {
-		v, err := val.Value()
-		if err != nil {
-			return "", err
-		}
-		return v.(string), nil
-	}
-	if val.Type().IsInteger() {
-		v, err := val.Value()
-		if err != nil {
-			return "", err
-		}
-		return string(v.(int)), nil
-	}
-	return "", fmt.Errorf("Expression '%s' did not return a string value", script)
+type Script interface {
+	Eval(*ScriptEnvironment) (Script, error)
+	Value() (interface{}, error)
+	Type() ValueType
 }

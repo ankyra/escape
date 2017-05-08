@@ -16,6 +16,10 @@ limitations under the License.
 
 package interfaces
 
+import (
+	"github.com/ankyra/escape-client/model/script"
+)
+
 type ReleaseMetadata interface {
 	ToJson() string
 	ToDict() (map[string]interface{}, error)
@@ -51,4 +55,7 @@ type ReleaseMetadata interface {
 
 	SetStage(stage, script string)
 	GetScript(stage string) string
+
+	ToScript() script.Script
+	ToScriptMap() map[string]script.Script
 }

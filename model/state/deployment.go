@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	. "github.com/ankyra/escape-client/model/interfaces"
+	"github.com/ankyra/escape-client/model/script"
 )
 
 type stage struct {
@@ -259,4 +260,30 @@ func (p *deploymentState) ToJson() string {
 		panic(err)
 	}
 	return string(str)
+}
+
+func (d *deploymentState) ToScript(metadata ReleaseMetadata, stage string) script.Script {
+	result := metadata.ToScriptMap()
+	result["inputs"] = script.LiftDict(d.liftScriptValues(d.GetCalculatedInputs(stage)))
+	result["outputs"] = script.LiftDict(d.liftScriptValues(d.GetCalculatedOutputs(stage)))
+	env := d.GetEnvironmentState()
+	prj := env.GetProjectState()
+	result["project"] = script.LiftString(prj.GetName())
+	result["environment"] = script.LiftString(env.GetName())
+	result["deployment"] = script.LiftString(d.GetName())
+	return script.LiftDict(result)
+}
+
+func (d *deploymentState) liftScriptValues(values *map[string]interface{}) map[string]script.Script {
+	result := map[string]script.Script{}
+	if values != nil {
+		for key, val := range *values {
+			v, err := script.Lift(val)
+			if err != nil {
+				panic(err)
+			}
+			result[key] = v
+		}
+	}
+	return result
 }

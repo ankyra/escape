@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	. "github.com/ankyra/escape-client/model/interfaces"
+	"github.com/ankyra/escape-client/model/script"
 	"github.com/ankyra/escape-client/util"
 	"io/ioutil"
 	"path/filepath"
@@ -271,4 +272,27 @@ func (m *releaseMetadata) GetDirectories() []string {
 		}
 	}
 	return result
+}
+
+func (m *releaseMetadata) ToScript() script.Script {
+	return script.LiftDict(m.ToScriptMap())
+}
+
+func (m *releaseMetadata) ToScriptMap() map[string]script.Script {
+	metadataDict := map[string]script.Script{}
+	for key, val := range m.GetMetadata() {
+		metadataDict[key] = script.LiftString(val)
+	}
+	return map[string]script.Script{
+		"metadata": script.LiftDict(metadataDict),
+
+		"branch":      script.LiftString(m.GetBranch()),
+		"description": script.LiftString(m.GetDescription()),
+		"logo":        script.LiftString(m.GetLogo()),
+		"build":       script.LiftString(m.GetName()),
+		"revision":    script.LiftString(m.GetRevision()),
+		"id":          script.LiftString(m.GetReleaseId()),
+		"type":        script.LiftString(m.GetType()),
+		"version":     script.LiftString(m.GetVersion()),
+	}
 }

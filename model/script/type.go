@@ -16,9 +16,16 @@ limitations under the License.
 
 package script
 
-import (
-	. "github.com/ankyra/escape-client/model/interfaces"
-)
+import ()
+
+type ValueType interface {
+	Name() string
+	IsFunc() bool
+	IsInteger() bool
+	IsList() bool
+	IsMap() bool
+	IsString() bool
+}
 
 /*
    Expression types

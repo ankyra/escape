@@ -16,9 +16,13 @@ limitations under the License.
 
 package interfaces
 
+import (
+	"github.com/ankyra/escape-client/model/script"
+)
+
 type Variable interface {
 	AskUserInput() interface{}
-	GetValue(*map[string]interface{}, *ScriptEnvironment) (interface{}, error)
+	GetValue(*map[string]interface{}, *script.ScriptEnvironment) (interface{}, error)
 
 	GetId() string
 	GetType() string

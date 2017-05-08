@@ -126,7 +126,7 @@ func (v *variable) AskUserInput() interface{} {
 	return nil
 }
 
-func (v *variable) GetValue(variableCtx *map[string]interface{}, env *ScriptEnvironment) (interface{}, error) {
+func (v *variable) GetValue(variableCtx *map[string]interface{}, env *script.ScriptEnvironment) (interface{}, error) {
 	var vars map[string]interface{}
 	if variableCtx == nil {
 		vars = map[string]interface{}{}
@@ -198,7 +198,7 @@ func (v *variable) GetValue(variableCtx *map[string]interface{}, env *ScriptEnvi
 	return nil, errors.New("Variable type " + v.Type + " not implemented")
 }
 
-func (v *variable) validateDefault(env *ScriptEnvironment) (interface{}, error) {
+func (v *variable) validateDefault(env *script.ScriptEnvironment) (interface{}, error) {
 	switch v.Default.(type) {
 	case (*string):
 		return v.parseEvalAndGetValue(*v.Default.(*string), env)
@@ -224,7 +224,7 @@ func (v *variable) validateDefault(env *ScriptEnvironment) (interface{}, error) 
 	return nil, fmt.Errorf("Unexpected type '%T' for default field of variable '%s'", v.Default, v.Id)
 }
 
-func (v *variable) parseEvalAndGetValue(str string, env *ScriptEnvironment) (interface{}, error) {
+func (v *variable) parseEvalAndGetValue(str string, env *script.ScriptEnvironment) (interface{}, error) {
 	script, err := script.ParseScript(str)
 	if err != nil {
 		return nil, fmt.Errorf("Couldn't parse default field of variable '%s': %s in '%s'", v.Id, err.Error(), str)

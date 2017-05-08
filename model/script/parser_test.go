@@ -17,7 +17,6 @@ limitations under the License.
 package script
 
 import (
-	. "github.com/ankyra/escape-client/model/interfaces"
 	. "gopkg.in/check.v1"
 )
 
