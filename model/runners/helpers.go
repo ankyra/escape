@@ -105,6 +105,9 @@ func (b *ScriptStep) Run(ctx RunnerContext) error {
 			return err
 		}
 	}
+	if err := b.compileTemplates(ctx); err != nil {
+		return err
+	}
 	if b.Commit != nil {
 		return b.Commit(ctx, deploymentState, b.Stage)
 	}
@@ -171,6 +174,20 @@ func (b *ScriptStep) getCmd(ctx RunnerContext) ([]string, error) {
 		return []string{b.ScriptPath, outputsJsonLocation}, nil
 	}
 	return []string{b.ScriptPath}, nil
+}
+
+func (b *ScriptStep) compileTemplates(ctx RunnerContext) error {
+	env, err := ctx.GetScriptEnvironment(b.Stage)
+	if err != nil {
+		return err
+	}
+	templates := ctx.GetReleaseMetadata().GetTemplates()
+	for _, tpl := range templates {
+		if err := tpl.Render(b.Stage, env); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (b *ScriptStep) runScript(ctx RunnerContext) error {

@@ -74,6 +74,11 @@ includes:
 - util/
 - vendor/
 
+templates:
+- file: util/metadata.go.tpl
+  mapping:
+    version: $this.version
+
 test: build.sh
 
 inputs:
