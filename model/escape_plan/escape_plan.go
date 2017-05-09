@@ -41,7 +41,7 @@ type escapePlan struct {
 	Consumes    []string               `yaml:"consumes,omitempty"`
 	Depends     []string               `yaml:"depends,omitempty"`
 	Description string                 `yaml:"description,omitempty"`
-	Errands     map[string]interface{} `yaml:"errands,omitempty"` // TODO
+	Errands     map[string]interface{} `yaml:"errands,omitempty"`
 	Includes    []string               `yaml:"includes,omitempty"`
 	Inputs      []interface{}          `yaml:"inputs,omitempty"`
 	Logo        string                 `yaml:"logo,omitempty"`
@@ -56,6 +56,7 @@ type escapePlan struct {
 	PreDestroy  string                 `yaml:"pre_destroy,omitempty"`
 	Smoke       string                 `yaml:"smoke,omitempty"`
 	Provides    []string               `yaml:"provides,omitempty"`
+	Templates   []interface{}          `yaml:"templates,omitempty"`
 	Test        string                 `yaml:"test,omitempty"`
 	Type        string                 `yaml:"type"`
 	Version     string                 `yaml:"version"`
@@ -90,6 +91,9 @@ func (e *escapePlan) GetMetadata() map[string]string {
 }
 func (e *escapePlan) GetOutputs() []interface{} {
 	return e.Outputs
+}
+func (e *escapePlan) GetTemplates() []interface{} {
+	return e.Templates
 }
 func (e *escapePlan) GetPath() string {
 	return e.Path

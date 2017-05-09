@@ -45,6 +45,7 @@ type EscapePlan interface {
 	GetSmoke() string
 	GetType() string
 	GetVersion() string
+	GetTemplates() []interface{}
 
 	SetBuild(string)
 	SetConsumes([]string)

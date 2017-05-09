@@ -167,6 +167,9 @@ errands:
     - input2
     script: path/to/script2.sh
 
+templates:
+- template.yml.tpl
+
 path: path.txt
 
 # A script to run before the build.
@@ -214,6 +217,8 @@ test: test.sh
 pre_deploy: pre_deploy.sh
 
 post_deploy: post_deploy.sh
+
+smoke: smoke.sh
 
 pre_destroy: pre_destroy.sh
 

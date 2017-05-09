@@ -50,6 +50,7 @@ var templateMap = map[string]string{
 	"includes":     listValTpl,
 	"inputs":       listValTpl,
 	"outputs":      listValTpl,
+	"templates":    listValTpl,
 	"metadata":     mapValTpl,
 	"errands":      mapValTpl,
 }
@@ -94,8 +95,10 @@ func (e *prettyPrinter) Print(plan *escapePlan) []byte {
 	writer := bytes.NewBuffer([]byte{})
 	ordering := []string{
 		"build", "type", "version", "description", "logo", "depends", "consumes",
-		"provides", "inputs", "outputs", "metadata", "includes", "errands",
-		"path", "pre_build", "post_build", "test", "pre_deploy", "post_deploy", "pre_destroy", "post_destroy"}
+		"provides", "inputs", "outputs", "metadata", "includes", "errands", "templates", "path",
+		"pre_build", "post_build", "test",
+		"pre_deploy", "post_deploy", "smoke",
+		"pre_destroy", "post_destroy"}
 	for _, key := range ordering {
 		val, ok := yamlMap[key]
 		if !ok {

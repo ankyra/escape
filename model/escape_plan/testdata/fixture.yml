@@ -48,6 +48,9 @@ outputs:
   type: string
   default: $test.outputs.test
 
+templates:
+- template.yml.tpl
+
 path: path.txt
 post_build: post_build.sh
 pre_build: pre_build.sh
@@ -61,4 +64,4 @@ provides:
 - consumer2
 
 test: test.sh
-
+smoke: smoke.sh

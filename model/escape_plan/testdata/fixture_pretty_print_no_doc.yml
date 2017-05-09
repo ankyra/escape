@@ -41,11 +41,14 @@ errands:
     - input1
     - input2
     script: path/to/script2.sh
+templates:
+- template.yml.tpl
 path: path.txt
 pre_build: pre_build.sh
 post_build: post_build.sh
 test: test.sh
 pre_deploy: pre_deploy.sh
 post_deploy: post_deploy.sh
+smoke: smoke.sh
 pre_destroy: pre_destroy.sh
 post_destroy: post_destroy.sh
