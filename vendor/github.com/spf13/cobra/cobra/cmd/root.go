@@ -17,14 +17,13 @@ import (
 	"fmt"
 	"os"
 
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
-var userLicense string
+var cfgFile, projectBase, userLicense string // are used for flags
 
-// RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:   "cobra",
 	Short: "A generator for Cobra based Applications",
@@ -33,16 +32,16 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 }
 
-//Execute adds all child commands to the root command sets flags appropriately.
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)
-		os.Exit(-1)
+		os.Exit(1)
 	}
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	initViper()
+
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra.yaml)")
 	RootCmd.PersistentFlags().StringVarP(&projectBase, "projectbase", "b", "", "base project directory, e.g. github.com/spf13/")
 	RootCmd.PersistentFlags().StringP("author", "a", "YOUR NAME", "Author name for copyright attribution")
@@ -53,19 +52,31 @@ func init() {
 	viper.BindPFlag("useViper", RootCmd.PersistentFlags().Lookup("viper"))
 	viper.SetDefault("author", "NAME HERE <EMAIL ADDRESS>")
 	viper.SetDefault("license", "apache")
+
+	RootCmd.AddCommand(initCmd)
+	RootCmd.AddCommand(addCmd)
+
 }
 
-// Read in config file and ENV variables if set.
-func initConfig() {
-	if cfgFile != "" { // enable ability to specify config file via flag
+func initViper() {
+	if cfgFile != "" {
+		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
+	} else {
+		// Find home directory.
+		home, err := homedir.Dir()
+		if err != nil {
+			fmt.Println(home)
+			os.Exit(1)
+		}
+
+		// Search config in home directory with name ".cobra" (without extension).
+		viper.AddConfigPath(home)
+		viper.SetConfigName(".cobra")
 	}
 
-	viper.SetConfigName(".cobra") // name of config file (without extension)
-	viper.AddConfigPath("$HOME")  // adding home directory as first search path
-	viper.AutomaticEnv()          // read in environment variables that match
+	viper.AutomaticEnv()
 
-	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
