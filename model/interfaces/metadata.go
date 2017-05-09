@@ -18,6 +18,7 @@ package interfaces
 
 import (
 	"github.com/ankyra/escape-client/model/script"
+	"github.com/ankyra/escape-client/model/templates"
 )
 
 type ReleaseMetadata interface {
@@ -52,6 +53,7 @@ type ReleaseMetadata interface {
 	GetType() string
 	GetVersion() string
 	GetVariableContext() map[string]string
+	GetTemplates() []*templates.Template
 
 	SetStage(stage, script string)
 	GetScript(stage string) string

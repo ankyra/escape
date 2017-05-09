@@ -22,6 +22,7 @@ import (
 	"fmt"
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/script"
+	"github.com/ankyra/escape-client/model/templates"
 	"github.com/ankyra/escape-client/util"
 	"io/ioutil"
 	"path/filepath"
@@ -48,6 +49,7 @@ type releaseMetadata struct {
 	Outputs     []*variable           `json:"outputs"`
 	Path        string                `json:"path"`
 	Provides    []string              `json:"provides"`
+	Templates   []*templates.Template `json:"templates"`
 	Test        string                `json:"test"`
 	Type        string                `json:"type"`
 	VariableCtx map[string]string     `json:"variable_context"`
@@ -67,6 +69,7 @@ func NewEmptyReleaseMetadata() ReleaseMetadata {
 		Stages:      map[string]*execStage{},
 		Inputs:      []*variable{},
 		Outputs:     []*variable{},
+		Templates:   []*templates.Template{},
 		VariableCtx: map[string]string{},
 	}
 }
@@ -161,6 +164,9 @@ func (m *releaseMetadata) GetInputs() []Variable {
 		result = append(result, i)
 	}
 	return result
+}
+func (m *releaseMetadata) GetTemplates() []*templates.Template {
+	return m.Templates
 }
 func (m *releaseMetadata) GetRevision() string {
 	return m.Revision

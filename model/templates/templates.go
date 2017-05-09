@@ -19,36 +19,35 @@ package templates
 import (
 	"fmt"
 	"github.com/ankyra/escape-client/model/script"
-	"github.com/ankyra/escape-client/util"
 	"github.com/cbroglie/mustache"
 	"io/ioutil"
+	"path/filepath"
 )
 
-type template struct {
-	File    string
-	Target  string
-	Scopes  []string
-	Mapping map[string]interface{}
+type Template struct {
+	File    string                 `json:"file"`
+	Target  string                 `json:"target"`
+	Scopes  []string               `json:"scopes"`
+	Mapping map[string]interface{} `json:"mapping"`
 }
 
-func NewTemplate() *template {
-	return &template{
+func NewTemplate() *Template {
+	return &Template{
 		Mapping: map[string]interface{}{},
 		Scopes:  []string{"build", "deploy"},
 	}
 }
 
-func NewTemplateFromString(file string) *template {
+func NewTemplateFromString(file string) *Template {
 	template := NewTemplate()
-	target, _ := util.SplitExt(file)
-	return template.SetFile(file).SetTarget(target)
+	return template.SetFile(file).SetTarget(fileWithoutExtension(file))
 }
 
-func NewTemplateWithMapping(file string, mapping map[string]interface{}) *template {
+func NewTemplateWithMapping(file string, mapping map[string]interface{}) *Template {
 	return NewTemplateFromString(file).SetMapping(mapping)
 }
 
-func NewTemplateFromInterface(obj interface{}) (*template, error) {
+func NewTemplateFromInterface(obj interface{}) (*Template, error) {
 	switch obj.(type) {
 	case string:
 		return NewTemplateFromString(obj.(string)), nil
@@ -69,7 +68,7 @@ func NewTemplateFromInterface(obj interface{}) (*template, error) {
 	return nil, fmt.Errorf("Unexpected type '%T' for template", obj)
 }
 
-func (t *template) SetFileFromInterface(obj interface{}) error {
+func (t *Template) SetFileFromInterface(obj interface{}) error {
 	file, ok := obj.(string)
 	if !ok {
 		return fmt.Errorf("Unexpected type '%T'", obj)
@@ -78,7 +77,7 @@ func (t *template) SetFileFromInterface(obj interface{}) error {
 	return nil
 }
 
-func (t *template) SetTargetFromInterface(obj interface{}) error {
+func (t *Template) SetTargetFromInterface(obj interface{}) error {
 	file, ok := obj.(string)
 	if !ok {
 		return fmt.Errorf("Unexpected type '%T'", obj)
@@ -87,7 +86,7 @@ func (t *template) SetTargetFromInterface(obj interface{}) error {
 	return nil
 }
 
-func (t *template) SetScopesFromInterface(obj interface{}) error {
+func (t *Template) SetScopesFromInterface(obj interface{}) error {
 	strScope, ok := obj.(string)
 	if ok {
 		t.SetScopes([]string{strScope})
@@ -109,7 +108,7 @@ func (t *template) SetScopesFromInterface(obj interface{}) error {
 	return nil
 }
 
-func (t *template) SetMappingFromInterface(obj interface{}) error {
+func (t *Template) SetMappingFromInterface(obj interface{}) error {
 	mapping, ok := obj.(map[interface{}]interface{})
 	if !ok {
 		return fmt.Errorf("Unexpected type '%T'", obj)
@@ -126,7 +125,7 @@ func (t *template) SetMappingFromInterface(obj interface{}) error {
 	return nil
 }
 
-func NewTemplateFromInterfaceMap(obj map[string]interface{}) (*template, error) {
+func NewTemplateFromInterfaceMap(obj map[string]interface{}) (*Template, error) {
 	template := NewTemplate()
 	for key, obj := range obj {
 		switch key {
@@ -149,30 +148,29 @@ func NewTemplateFromInterfaceMap(obj map[string]interface{}) (*template, error) 
 		}
 	}
 	if template.Target == "" && template.File != "" {
-		target, _ := util.SplitExt(template.File)
-		template.SetTarget(target)
+		template.SetTarget(fileWithoutExtension(template.File))
 	}
 	return template, nil
 }
 
-func (t *template) SetMapping(mapping map[string]interface{}) *template {
+func (t *Template) SetMapping(mapping map[string]interface{}) *Template {
 	t.Mapping = mapping
 	return t
 }
-func (t *template) SetFile(file string) *template {
+func (t *Template) SetFile(file string) *Template {
 	t.File = file
 	return t
 }
-func (t *template) SetTarget(file string) *template {
+func (t *Template) SetTarget(file string) *Template {
 	t.Target = file
 	return t
 }
-func (t *template) SetScopes(scopes []string) *template {
+func (t *Template) SetScopes(scopes []string) *Template {
 	t.Scopes = scopes
 	return t
 }
 
-func (t *template) Render(stage string, env *script.ScriptEnvironment) error {
+func (t *Template) Render(stage string, env *script.ScriptEnvironment) error {
 	if t.File == "" {
 		return fmt.Errorf("Can't run template. Template file has not been defined (missing 'file' key in Escape plan?)")
 	}
@@ -199,7 +197,7 @@ func (t *template) Render(stage string, env *script.ScriptEnvironment) error {
 	return nil
 }
 
-func (t *template) renderToString(env *script.ScriptEnvironment) (string, error) {
+func (t *Template) renderToString(env *script.ScriptEnvironment) (string, error) {
 	mapping := map[string]interface{}{}
 	for key, mappingValue := range t.Mapping {
 		switch mappingValue.(type) {
@@ -224,4 +222,10 @@ func (t *template) renderToString(env *script.ScriptEnvironment) (string, error)
 		}
 	}
 	return mustache.RenderFile(t.File, mapping)
+}
+
+func fileWithoutExtension(path string) (root string) {
+	ext := filepath.Ext(path)
+	root = path[:len(path)-len(ext)]
+	return
 }
