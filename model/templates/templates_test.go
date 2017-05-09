@@ -41,6 +41,14 @@ func (s *testSuite) Test_Template_renderToString(c *C) {
 	c.Assert(str, Equals, "Hello world\n")
 }
 
+func (s *testSuite) Test_Template_renderToString_fails_if_mapping_is_missing(c *C) {
+	mapping := map[string]interface{}{}
+	unit := NewTemplateWithMapping("testdata/helloworld.mustache", mapping)
+	env := script.NewScriptEnvironmentWithGlobals(nil)
+	_, err := unit.renderToString(env)
+	c.Assert(err, Not(IsNil))
+}
+
 func (s *testSuite) Test_Template_renderToString_with_int(c *C) {
 	mapping := map[string]interface{}{
 		"who": 12,

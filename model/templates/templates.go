@@ -221,6 +221,7 @@ func (t *Template) renderToString(env *script.ScriptEnvironment) (string, error)
 
 		}
 	}
+	mustache.AllowMissingVariables = false
 	return mustache.RenderFile(t.File, mapping)
 }
 
