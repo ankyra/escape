@@ -16,8 +16,6 @@ limitations under the License.
 
 package script
 
-import ()
-
 type Script interface {
 	Eval(*ScriptEnvironment) (Script, error)
 	Value() (interface{}, error)
