@@ -28,12 +28,6 @@ func PathExists(path string) bool {
 	return !os.IsNotExist(err)
 }
 
-func SplitExt(path string) (root, ext string) {
-	ext = filepath.Ext(path)
-	root = path[:len(path)-len(ext)]
-	return
-}
-
 func IsDir(path string) bool {
 	st, err := os.Stat(path)
 	if err != nil {

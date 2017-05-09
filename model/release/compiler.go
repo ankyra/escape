@@ -23,6 +23,7 @@ import (
 	"fmt"
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/script"
+	"github.com/ankyra/escape-client/model/templates"
 	"github.com/ankyra/escape-client/util"
 	"io"
 	"io/ioutil"
@@ -87,6 +88,9 @@ func (c *Compiler) Compile(context Context) (ReleaseMetadata, error) {
 		return nil, err
 	}
 	if err := c.compileErrands(plan.GetErrands()); err != nil {
+		return nil, err
+	}
+	if err := c.compileTemplates(plan.GetTemplates()); err != nil {
 		return nil, err
 	}
 	c.compileIncludes(plan.GetIncludes())
@@ -331,6 +335,19 @@ func (c *Compiler) compileErrands(errands map[string]interface{}) error {
 		}
 		c.metadata.Errands[name] = newErrand
 	}
+	return nil
+}
+
+func (c *Compiler) compileTemplates(templateList []interface{}) error {
+	result := []*templates.Template{}
+	for _, tpl := range templateList {
+		template, err := templates.NewTemplateFromInterface(tpl)
+		if err != nil {
+			return err
+		}
+		result = append(result, template)
+	}
+	c.metadata.Templates = result
 	return nil
 }
 
