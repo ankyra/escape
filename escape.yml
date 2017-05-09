@@ -84,7 +84,6 @@ test: build.sh
 inputs:
 - version
 
-pre_build: scripts/pre-build.sh
 post_build: scripts/build.sh
 test: scripts/test.sh
 
