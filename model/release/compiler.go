@@ -180,9 +180,9 @@ func (c *Compiler) compileVersion(version string) error {
 			}
 			version = nextVersion
 		} else if backend == "" || backend == "local" {
-			return errors.New("Not implemented")
+			return fmt.Errorf("Auto versioning backend %s not implemented. The storage backend can be configured in the escape config (see `escape config show`)", backend)
 		} else {
-			return errors.New("Unknown storage backend: " + backend)
+			return fmt.Errorf("Unknown storage backend: " + backend)
 		}
 	}
 	c.metadata.Version = version
