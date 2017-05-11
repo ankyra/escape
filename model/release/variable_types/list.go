@@ -19,7 +19,6 @@ package variable_types
 import (
 	"errors"
 	"fmt"
-	. "github.com/ankyra/escape-client/model/interfaces"
 )
 
 type listVarType struct {

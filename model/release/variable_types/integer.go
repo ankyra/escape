@@ -18,7 +18,6 @@ package variable_types
 
 import (
 	"fmt"
-	. "github.com/ankyra/escape-client/model/interfaces"
 	"strconv"
 )
 

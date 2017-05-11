@@ -19,6 +19,7 @@ package interfaces
 import (
 	"github.com/ankyra/escape-client/model/script"
 	"github.com/ankyra/escape-client/model/templates"
+	"github.com/ankyra/escape-client/model/variable"
 )
 
 type ReleaseMetadata interface {
@@ -29,8 +30,8 @@ type ReleaseMetadata interface {
 	GetVersionlessReleaseId() string
 	GetReleaseId() string
 	ToDependency() Dependency
-	AddInputVariable(Variable)
-	AddOutputVariable(Variable)
+	AddInputVariable(*variable.Variable)
+	AddOutputVariable(*variable.Variable)
 	SetVariableInContext(string, string)
 	AddFileWithDigest(string, string)
 	SetConsumes([]string)
@@ -43,11 +44,11 @@ type ReleaseMetadata interface {
 	GetErrands() map[string]Errand
 	GetFiles() map[string]string
 	GetRevision() string
-	GetInputs() []Variable
+	GetInputs() []*variable.Variable
 	GetLogo() string
 	GetMetadata() map[string]string
 	GetName() string
-	GetOutputs() []Variable
+	GetOutputs() []*variable.Variable
 	GetPath() string
 	GetProvides() []string
 	GetType() string

@@ -16,10 +16,14 @@ limitations under the License.
 
 package interfaces
 
+import (
+	"github.com/ankyra/escape-client/model/variable"
+)
+
 type Errand interface {
 	GetName() string
 	GetDescription() string
 	GetScript() string
-	GetInputs() []Variable
+	GetInputs() []*variable.Variable
 	SetScript(string)
 }

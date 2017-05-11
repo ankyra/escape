@@ -23,6 +23,7 @@ import (
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/script"
 	"github.com/ankyra/escape-client/model/templates"
+	"github.com/ankyra/escape-client/model/variable"
 	"github.com/ankyra/escape-client/util"
 	"io/ioutil"
 	"path/filepath"
@@ -42,11 +43,11 @@ type releaseMetadata struct {
 	Errands     map[string]*errand    `json:"errands"`
 	Files       map[string]string     `json:"files", {}`
 	Revision    string                `json:"git_revision"`
-	Inputs      []*variable           `json:"inputs"`
+	Inputs      []*variable.Variable  `json:"inputs"`
 	Logo        string                `json:"logo"`
 	Metadata    map[string]string     `json:"metadata"`
 	Name        string                `json:"name"`
-	Outputs     []*variable           `json:"outputs"`
+	Outputs     []*variable.Variable  `json:"outputs"`
 	Path        string                `json:"path"`
 	Provides    []string              `json:"provides"`
 	Templates   []*templates.Template `json:"templates"`
@@ -67,8 +68,8 @@ func NewEmptyReleaseMetadata() ReleaseMetadata {
 		Metadata:    map[string]string{},
 		Errands:     map[string]*errand{},
 		Stages:      map[string]*execStage{},
-		Inputs:      []*variable{},
-		Outputs:     []*variable{},
+		Inputs:      []*variable.Variable{},
+		Outputs:     []*variable.Variable{},
 		Templates:   []*templates.Template{},
 		VariableCtx: map[string]string{},
 	}
@@ -158,8 +159,8 @@ func (m *releaseMetadata) GetErrands() map[string]Errand {
 func (m *releaseMetadata) GetFiles() map[string]string {
 	return m.Files
 }
-func (m *releaseMetadata) GetInputs() []Variable {
-	result := []Variable{}
+func (m *releaseMetadata) GetInputs() []*variable.Variable {
+	result := []*variable.Variable{}
 	for _, i := range m.Inputs {
 		result = append(result, i)
 	}
@@ -180,8 +181,8 @@ func (m *releaseMetadata) GetMetadata() map[string]string {
 func (m *releaseMetadata) GetName() string {
 	return m.Name
 }
-func (m *releaseMetadata) GetOutputs() []Variable {
-	result := []Variable{}
+func (m *releaseMetadata) GetOutputs() []*variable.Variable {
+	result := []*variable.Variable{}
 	for _, i := range m.Outputs {
 		result = append(result, i)
 	}
@@ -221,11 +222,11 @@ func (m *releaseMetadata) GetVersionlessReleaseId() string {
 	return m.Type + "-" + m.Name
 }
 
-func (m *releaseMetadata) AddInputVariable(input Variable) {
-	m.Inputs = append(m.Inputs, input.(*variable))
+func (m *releaseMetadata) AddInputVariable(input *variable.Variable) {
+	m.Inputs = append(m.Inputs, input)
 }
-func (m *releaseMetadata) AddOutputVariable(output Variable) {
-	m.Outputs = append(m.Outputs, output.(*variable))
+func (m *releaseMetadata) AddOutputVariable(output *variable.Variable) {
+	m.Outputs = append(m.Outputs, output)
 }
 
 func (m *releaseMetadata) ToJson() string {

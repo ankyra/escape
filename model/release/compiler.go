@@ -24,6 +24,7 @@ import (
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/script"
 	"github.com/ankyra/escape-client/model/templates"
+	"github.com/ankyra/escape-client/model/variable"
 	"github.com/ankyra/escape-client/util"
 	"io"
 	"io/ioutil"
@@ -301,22 +302,22 @@ func (c *Compiler) compileLogo(logo string) error {
 
 func (c *Compiler) compileInputs(inputs []interface{}) error {
 	for _, input := range inputs {
-		variable, err := c.compileVariable(input)
+		v, err := c.compileVariable(input)
 		if err != nil {
 			return errors.New("Error compiling input variable: " + err.Error())
 		}
-		c.metadata.AddInputVariable(variable)
+		c.metadata.AddInputVariable(v)
 	}
 	return nil
 }
 
 func (c *Compiler) compileOutputs(outputs []interface{}) error {
 	for _, output := range outputs {
-		variable, err := c.compileVariable(output)
+		v, err := c.compileVariable(output)
 		if err != nil {
 			return errors.New("Error compiling output variable: " + err.Error())
 		}
-		c.metadata.AddOutputVariable(variable)
+		c.metadata.AddOutputVariable(v)
 	}
 	return nil
 }
@@ -352,17 +353,15 @@ func (c *Compiler) compileTemplates(templateList []interface{}) error {
 	return nil
 }
 
-func (c *Compiler) compileVariable(v interface{}) (Variable, error) {
-	var result *variable
+func (c *Compiler) compileVariable(v interface{}) (result *variable.Variable, err error) {
 	switch v.(type) {
 	case string:
-		result = NewVariableFromString(v.(string), "string").(*variable)
+		result = variable.NewVariableFromString(v.(string), "string")
 	case map[interface{}]interface{}:
-		resultIface, err := NewVariableFromDict(v.(map[interface{}]interface{}))
+		result, err = variable.NewVariableFromDict(v.(map[interface{}]interface{}))
 		if err != nil {
 			return nil, err
 		}
-		result = resultIface.(*variable)
 	default:
 		errors.New("Unexpected type")
 	}
@@ -372,7 +371,7 @@ func (c *Compiler) compileVariable(v interface{}) (Variable, error) {
 	return result, nil
 }
 
-func (c *Compiler) compileDefault(v *variable) (Variable, error) {
+func (c *Compiler) compileDefault(v *variable.Variable) (*variable.Variable, error) {
 	switch v.Default.(type) {
 	case int:
 		return v, nil

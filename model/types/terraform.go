@@ -20,7 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	. "github.com/ankyra/escape-client/model/interfaces"
-	"github.com/ankyra/escape-client/model/release"
+	"github.com/ankyra/escape-client/model/variable"
 	"github.com/ankyra/escape-client/util"
 	"io/ioutil"
 	"os"
@@ -47,7 +47,7 @@ func (a *TerraformReleaseType) CompileMetadata(plan EscapePlan, metadata Release
 			return nil
 		}
 	}
-	v := release.NewVariableFromString("terraform_state", "string")
+	v := variable.NewVariableFromString("terraform_state", "string")
 	defaultValue := "{}"
 	v.SetDefault(&defaultValue)
 	v.SetSensitive(true)

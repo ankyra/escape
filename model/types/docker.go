@@ -21,7 +21,7 @@ import (
 	"strings"
 
 	. "github.com/ankyra/escape-client/model/interfaces"
-	"github.com/ankyra/escape-client/model/release"
+	"github.com/ankyra/escape-client/model/variable"
 	"github.com/ankyra/escape-client/util"
 )
 
@@ -35,7 +35,7 @@ func (a *DockerReleaseType) InitEscapePlan(plan EscapePlan) {
 	plan.SetIncludes([]string{"Dockerfile"})
 }
 
-func checkExistingVariable(v Variable, id string, typ string) (bool, error) {
+func checkExistingVariable(v *variable.Variable, id string, typ string) (bool, error) {
 	if v.GetId() == id {
 		if v.GetType() != typ {
 			return false, fmt.Errorf("Declared variable '%s' is not of expected type '%s', but '%s'", v.GetId(), typ, v.GetType())
@@ -61,14 +61,14 @@ func (a *DockerReleaseType) CompileMetadata(plan EscapePlan, metadata ReleaseMet
 		dockerCmdFound = dockerCmdFound || found
 	}
 	if !dockerRepoFound {
-		v := release.NewVariableFromString("docker_repository", "string")
+		v := variable.NewVariableFromString("docker_repository", "string")
 		defaultValue := ""
 		v.SetDefault(&defaultValue)
 		metadata.AddInputVariable(v)
 	}
 	// TODO
 	if !dockerCmdFound {
-		v := release.NewVariableFromString("docker_cmd", "list")
+		v := variable.NewVariableFromString("docker_cmd", "list")
 		defaultValue := []interface{}{}
 		v.SetDefault(defaultValue)
 		v.SetDescription("Overrides the default Docker command.")
@@ -83,7 +83,7 @@ func (a *DockerReleaseType) CompileMetadata(plan EscapePlan, metadata ReleaseMet
 			return nil
 		}
 	}
-	v := release.NewVariableFromString("image", "string")
+	v := variable.NewVariableFromString("image", "string")
 	metadata.AddOutputVariable(v)
 	return nil
 }

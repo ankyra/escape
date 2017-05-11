@@ -19,7 +19,7 @@ package types
 import (
 	"fmt"
 	. "github.com/ankyra/escape-client/model/interfaces"
-	"github.com/ankyra/escape-client/model/release"
+	"github.com/ankyra/escape-client/model/variable"
 	"github.com/ankyra/escape-client/util"
 	"os"
 	"regexp"
@@ -58,7 +58,7 @@ func (a *PackerReleaseType) CompileMetadata(plan EscapePlan, metadata ReleaseMet
 			return nil
 		}
 	}
-	v := release.NewVariableFromString("image", "string")
+	v := variable.NewVariableFromString("image", "string")
 	metadata.AddOutputVariable(v)
 	return nil
 }

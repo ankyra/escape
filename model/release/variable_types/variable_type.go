@@ -18,8 +18,11 @@ package variable_types
 
 import (
 	"errors"
-	. "github.com/ankyra/escape-client/model/interfaces"
 )
+
+type VariableType interface {
+	Validate(value interface{}, options map[string]interface{}) (interface{}, error)
+}
 
 func GetVariableType(typ string) (VariableType, error) {
 	knownTypes := map[string]func() VariableType{

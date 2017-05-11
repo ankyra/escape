@@ -19,7 +19,7 @@ package types
 import (
 	"fmt"
 	. "github.com/ankyra/escape-client/model/interfaces"
-	"github.com/ankyra/escape-client/model/release"
+	"github.com/ankyra/escape-client/model/variable"
 	"github.com/ankyra/escape-client/util"
 	"io/ioutil"
 	"strings"
@@ -57,7 +57,7 @@ func (a *KubeSpecReleaseType) CompileMetadata(plan EscapePlan, metadata ReleaseM
 		metadata.SetConsumes(consumes)
 	}
 	if !credentialInputFound {
-		v := release.NewVariableFromString("account_credentials", "string")
+		v := variable.NewVariableFromString("account_credentials", "string")
 		defaultValue := "$kubernetes.outputs.kubernetes_kubectl.file"
 		v.SetDefault(&defaultValue)
 		v.SetDescription("The Kubernetes kubectl file.")

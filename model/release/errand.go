@@ -19,13 +19,14 @@ package release
 import (
 	"errors"
 	. "github.com/ankyra/escape-client/model/interfaces"
+	"github.com/ankyra/escape-client/model/variable"
 )
 
 type errand struct {
-	Name        string      `json:"name"`
-	Description string      `json:"description"`
-	Script      string      `json:"script"`
-	Inputs      []*variable `json:"inputs"`
+	Name        string               `json:"name"`
+	Description string               `json:"description"`
+	Script      string               `json:"script"`
+	Inputs      []*variable.Variable `json:"inputs"`
 }
 
 func (e *errand) GetName() string {
@@ -41,8 +42,8 @@ func (e *errand) SetScript(s string) {
 	e.Script = s
 }
 
-func (e *errand) GetInputs() []Variable {
-	result := []Variable{}
+func (e *errand) GetInputs() []*variable.Variable {
+	result := []*variable.Variable{}
 	for _, i := range e.Inputs {
 		result = append(result, i)
 	}
@@ -55,7 +56,7 @@ func NewErrandFromDict(name string, dict interface{}) (Errand, error) {
 		errandMap := dict.(map[interface{}]interface{})
 		description := ""
 		script := ""
-		inputs := []*variable{}
+		inputs := []*variable.Variable{}
 		for key, val := range errandMap {
 			switch key.(type) {
 			case string:
@@ -80,16 +81,15 @@ func NewErrandFromDict(name string, dict interface{}) (Errand, error) {
 							switch inputDict.(type) {
 							case map[interface{}]interface{}:
 								dict := inputDict.(map[interface{}]interface{})
-								variableIface, err := NewVariableFromDict(dict)
+								v, err := variable.NewVariableFromDict(dict)
 								if err != nil {
 									return nil, err
 								}
-								variable := variableIface.(*variable)
-								inputs = append(inputs, variable)
+								inputs = append(inputs, v)
 							case string:
 								stringVar := inputDict.(string)
-								variable := NewVariableFromString(stringVar, "string").(*variable)
-								inputs = append(inputs, variable)
+								v := variable.NewVariableFromString(stringVar, "string")
+								inputs = append(inputs, v)
 							default:
 								return nil, errors.New("Expecting dict type for input item in errand " + name)
 							}

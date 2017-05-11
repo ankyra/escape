@@ -17,6 +17,7 @@ limitations under the License.
 package release
 
 import (
+	"github.com/ankyra/escape-client/model/variable"
 	. "gopkg.in/check.v1"
 )
 
@@ -47,8 +48,8 @@ func (s *metadataSuite) Test_VariableContext(c *C) {
 }
 
 func (s *metadataSuite) Test_InputVariables(c *C) {
-	v1 := NewVariableFromString("input_variable1", "string")
-	v2 := NewVariableFromString("input_variable2", "string")
+	v1 := variable.NewVariableFromString("input_variable1", "string")
+	v2 := variable.NewVariableFromString("input_variable2", "string")
 	m := NewReleaseMetadata("archive", "test-release", "0.1")
 	m.AddInputVariable(v1)
 	m.AddInputVariable(v2)
@@ -59,8 +60,8 @@ func (s *metadataSuite) Test_InputVariables(c *C) {
 }
 
 func (s *metadataSuite) Test_OutputVariables(c *C) {
-	v1 := NewVariableFromString("output_variable1", "string")
-	v2 := NewVariableFromString("output_variable2", "string")
+	v1 := variable.NewVariableFromString("output_variable1", "string")
+	v2 := variable.NewVariableFromString("output_variable2", "string")
 	m := NewReleaseMetadata("archive", "test-release", "0.1")
 	m.AddOutputVariable(v1)
 	m.AddOutputVariable(v2)

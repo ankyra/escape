@@ -14,20 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package release
+package variable
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/parsers"
 	"github.com/ankyra/escape-client/model/release/variable_types"
 	"github.com/ankyra/escape-client/model/script"
 	"gopkg.in/yaml.v2"
 )
 
-type variable struct {
+type Variable struct {
 	Id          string                 `json:"id"`
 	Type        string                 `json:"type"`
 	Default     interface{}            `json:"default,omitempty"`
@@ -36,23 +35,23 @@ type variable struct {
 	Visible     bool                   `json:"visible"`
 	Options     map[string]interface{} `json:"options,omitempty"`
 	Sensitive   bool                   `json:"sensitive,omitempty"`
-	Items       []interface{}          `json:"items"` // Only set for one_of variables
+	Items       []interface{}          `json:"items"`
 }
 
-func (v *variable) GetId() string {
+func (v *Variable) GetId() string {
 	return v.Id
 }
 
 type UntypedVariable map[interface{}]interface{}
 
-func NewVariable() Variable {
-	return &variable{
+func NewVariable() *Variable {
+	return &Variable{
 		Visible: true,
 	}
 }
 
-func NewVariableFromString(id, typ string) Variable {
-	v := NewVariable().(*variable)
+func NewVariableFromString(id, typ string) *Variable {
+	v := NewVariable()
 	v.Id = id
 	v.Type = typ
 	if v.Id == "version" || v.Id == "deployment" || v.Id == "client" || v.Id == "project" || v.Id == "environment" {
@@ -61,12 +60,12 @@ func NewVariableFromString(id, typ string) Variable {
 	return v
 }
 
-func NewVariableFromDict(input UntypedVariable) (Variable, error) {
+func NewVariableFromDict(input UntypedVariable) (*Variable, error) {
 	str, err := yaml.Marshal(input)
 	if err != nil {
 		return nil, errors.New("Invalid input variable format: " + err.Error())
 	}
-	result := NewVariable().(*variable)
+	result := NewVariable()
 	err = yaml.Unmarshal(str, result)
 	if err != nil {
 		return nil, errors.New("Invalid input variable format: " + err.Error())
@@ -80,31 +79,31 @@ func NewVariableFromDict(input UntypedVariable) (Variable, error) {
 	return result, nil
 }
 
-func (v *variable) GetType() string {
+func (v *Variable) GetType() string {
 	return v.Type
 }
 
-func (v *variable) SetDefault(def interface{}) {
+func (v *Variable) SetDefault(def interface{}) {
 	v.Default = def
 }
-func (v *variable) HasDefault() bool {
+func (v *Variable) HasDefault() bool {
 	return v.Default != nil
 }
-func (v *variable) SetSensitive(s bool) {
+func (v *Variable) SetSensitive(s bool) {
 	v.Sensitive = s
 }
-func (v *variable) SetVisible(s bool) {
+func (v *Variable) SetVisible(s bool) {
 	v.Visible = s
 }
-func (v *variable) SetDescription(desc string) {
+func (v *Variable) SetDescription(desc string) {
 	v.Description = desc
 }
 
-func (v *variable) SetOneOfItems(items []interface{}) {
+func (v *Variable) SetOneOfItems(items []interface{}) {
 	v.Items = items
 }
 
-func (v *variable) AskUserInput() interface{} {
+func (v *Variable) AskUserInput() interface{} {
 	if v.Default != nil {
 		return nil
 	}
@@ -126,7 +125,7 @@ func (v *variable) AskUserInput() interface{} {
 	return nil
 }
 
-func (v *variable) GetValue(variableCtx *map[string]interface{}, env *script.ScriptEnvironment) (interface{}, error) {
+func (v *Variable) GetValue(variableCtx *map[string]interface{}, env *script.ScriptEnvironment) (interface{}, error) {
 	var vars map[string]interface{}
 	if variableCtx == nil {
 		vars = map[string]interface{}{}
@@ -160,45 +159,20 @@ func (v *variable) GetValue(variableCtx *map[string]interface{}, env *script.Scr
 		}
 		return v.validateOneOf(val)
 	} else if v.Type == "version" {
-		script, _ := script.ParseScript("$this.version")
-		result, err := script.Eval(env)
-		if err != nil {
-			panic(err)
-		}
-		return result.Value()
+		return script.ParseAndEvalToGoValue("$this.version", env)
 	} else if v.Type == "client" { // backwards compatibility
-		script, _ := script.ParseScript("$this.project")
-		result, err := script.Eval(env)
-		if err != nil {
-			panic(err)
-		}
-		return result.Value()
+		return script.ParseAndEvalToGoValue("$this.client", env)
 	} else if v.Type == "project" {
-		script, _ := script.ParseScript("$this.project")
-		result, err := script.Eval(env)
-		if err != nil {
-			panic(err)
-		}
-		return result.Value()
+		return script.ParseAndEvalToGoValue("$this.project", env)
 	} else if v.Type == "deployment" {
-		script, _ := script.ParseScript("$this.deployment")
-		result, err := script.Eval(env)
-		if err != nil {
-			panic(err)
-		}
-		return result.Value()
+		return script.ParseAndEvalToGoValue("$this.deployment", env)
 	} else if v.Type == "environment" {
-		script, _ := script.ParseScript("$this.environment")
-		result, err := script.Eval(env)
-		if err != nil {
-			panic(err)
-		}
-		return result.Value()
+		return script.ParseAndEvalToGoValue("$this.environment", env)
 	}
 	return nil, errors.New("Variable type " + v.Type + " not implemented")
 }
 
-func (v *variable) validateDefault(env *script.ScriptEnvironment) (interface{}, error) {
+func (v *Variable) validateDefault(env *script.ScriptEnvironment) (interface{}, error) {
 	switch v.Default.(type) {
 	case int:
 		return v.Default.(int), nil
@@ -226,24 +200,16 @@ func (v *variable) validateDefault(env *script.ScriptEnvironment) (interface{}, 
 	return nil, fmt.Errorf("Unexpected type '%T' for default field of variable '%s'", v.Default, v.Id)
 }
 
-func (v *variable) parseEvalAndGetValue(str string, env *script.ScriptEnvironment) (interface{}, error) {
-	script, err := script.ParseScript(str)
-	if err != nil {
-		return nil, fmt.Errorf("Couldn't parse default field of variable '%s': %s in '%s'", v.Id, err.Error(), str)
-	}
-	result, err := script.Eval(env)
+func (v *Variable) parseEvalAndGetValue(str string, env *script.ScriptEnvironment) (interface{}, error) {
+	result, err := script.ParseAndEvalToGoValue(str, env)
 	if err != nil {
 		return nil, fmt.Errorf("Couldn't run expression in default field of variable '%s': %s in '%s'", v.Id, err.Error(), str)
 	}
-	value, err := result.Value()
-	if err != nil {
-		return nil, fmt.Errorf("Couldn't run expression in default field of variable '%s': %s in '%s'", v.Id, err.Error(), str)
-	}
-	return value, nil
+	return result, nil
 
 }
 
-func (v *variable) validateOneOf(item interface{}) (interface{}, error) {
+func (v *Variable) validateOneOf(item interface{}) (interface{}, error) {
 	items := v.Items
 	if items == nil {
 		return item, nil
@@ -260,7 +226,7 @@ func (v *variable) validateOneOf(item interface{}) (interface{}, error) {
 	return nil, fmt.Errorf("Expecting one of %s for variable '%s'", oneOfString, v.Id)
 }
 
-func (v *variable) parseType() error {
+func (v *Variable) parseType() error {
 	if v.Type == "" || v.Type == "string" {
 		switch v.Id {
 		case
