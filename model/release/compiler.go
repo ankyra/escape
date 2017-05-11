@@ -29,6 +29,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -456,7 +457,7 @@ func RunScriptForCompileStep(scriptStr string, variableCtx map[string]ReleaseMet
 		if err != nil {
 			return "", err
 		}
-		return string(v.(int)), nil
+		return strconv.Itoa(v.(int)), nil
 	}
 	return "", fmt.Errorf("Expression '%s' did not return a string value", scriptStr)
 }

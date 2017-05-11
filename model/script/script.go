@@ -16,8 +16,32 @@ limitations under the License.
 
 package script
 
+import (
+	"fmt"
+)
+
 type Script interface {
 	Eval(*ScriptEnvironment) (Script, error)
 	Value() (interface{}, error)
 	Type() ValueType
+}
+
+func EvalToGoValue(script Script, env *ScriptEnvironment) (interface{}, error) {
+	evaled, err := script.Eval(env)
+	if err != nil {
+		return nil, err
+	}
+	return evaled.Value()
+}
+
+func ParseAndEvalToGoValue(scriptStr string, env *ScriptEnvironment) (interface{}, error) {
+	parsed, err := ParseScript(scriptStr)
+	if err != nil {
+		return "", err
+	}
+	evaled, err := EvalToGoValue(parsed, env)
+	if err != nil {
+		return "", fmt.Errorf("Failed to evaluate '%s': %s", scriptStr, err.Error())
+	}
+	return evaled, nil
 }

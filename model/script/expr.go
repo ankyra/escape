@@ -25,18 +25,6 @@ import (
 type scriptFuncType func(*ScriptEnvironment, []Script) (Script, error)
 
 /*
-   Script interface
-*/
-
-func EvalToGoValue(script Script, env *ScriptEnvironment) (interface{}, error) {
-	evaled, err := script.Eval(env)
-	if err != nil {
-		return nil, err
-	}
-	return evaled.Value()
-}
-
-/*
    Lift
 */
 

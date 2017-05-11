@@ -203,19 +203,11 @@ func (t *Template) renderToString(env *script.ScriptEnvironment) (string, error)
 		switch mappingValue.(type) {
 		case string:
 			scriptStr := mappingValue.(string)
-			parsed, err := script.ParseScript(scriptStr)
+			evaled, err := script.ParseAndEvalToGoValue(scriptStr, env)
 			if err != nil {
-				return "", fmt.Errorf("Couldn't parse script in template '%s' mapping key '%s': %s", t.File, key, err.Error())
+				return "", fmt.Errorf("Error in template '%s' mapping key '%s': %s", t.File, key, err.Error())
 			}
-			evaled, err := parsed.Eval(env)
-			if err != nil {
-				return "", fmt.Errorf("Couldn't evaluate script in template '%s' mapping key '%s': %s", t.File, key, err.Error())
-			}
-			value, err := evaled.Value()
-			if err != nil {
-				return "", fmt.Errorf("Couldn't evaluate script in template '%s' mapping key '%s': %s", t.File, key, err.Error())
-			}
-			mapping[key] = value
+			mapping[key] = evaled
 		default:
 			mapping[key] = mappingValue
 
