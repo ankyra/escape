@@ -21,8 +21,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ankyra/escape-client/model/parsers"
-	"github.com/ankyra/escape-client/model/release/variable_types"
 	"github.com/ankyra/escape-client/model/script"
+	"github.com/ankyra/escape-client/model/variable/variable_types"
 	"gopkg.in/yaml.v2"
 )
 
@@ -36,10 +36,6 @@ type Variable struct {
 	Options     map[string]interface{} `json:"options,omitempty"`
 	Sensitive   bool                   `json:"sensitive,omitempty"`
 	Items       []interface{}          `json:"items"`
-}
-
-func (v *Variable) GetId() string {
-	return v.Id
 }
 
 type UntypedVariable map[interface{}]interface{}
@@ -79,28 +75,37 @@ func NewVariableFromDict(input UntypedVariable) (*Variable, error) {
 	return result, nil
 }
 
+func (v *Variable) GetId() string {
+	return v.Id
+}
+
 func (v *Variable) GetType() string {
 	return v.Type
 }
 
-func (v *Variable) SetDefault(def interface{}) {
+func (v *Variable) SetDefault(def interface{}) *Variable {
 	v.Default = def
+	return v
 }
 func (v *Variable) HasDefault() bool {
 	return v.Default != nil
 }
-func (v *Variable) SetSensitive(s bool) {
+func (v *Variable) SetSensitive(s bool) *Variable {
 	v.Sensitive = s
+	return v
 }
-func (v *Variable) SetVisible(s bool) {
+func (v *Variable) SetVisible(s bool) *Variable {
 	v.Visible = s
+	return v
 }
-func (v *Variable) SetDescription(desc string) {
+func (v *Variable) SetDescription(desc string) *Variable {
 	v.Description = desc
+	return v
 }
 
-func (v *Variable) SetOneOfItems(items []interface{}) {
+func (v *Variable) SetOneOfItems(items []interface{}) *Variable {
 	v.Items = items
+	return v
 }
 
 func (v *Variable) AskUserInput() interface{} {
