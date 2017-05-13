@@ -78,8 +78,26 @@ func preCommit(ctx RunnerContext, deploymentState DeploymentState, stage string)
 	if err := deploymentState.SetVersion(stage, version); err != nil {
 		return err
 	}
-	return deploymentState.UpdateInputs(stage, inputs)
+	if err := deploymentState.UpdateInputs(stage, inputs); err != nil {
+		return err
+	}
+	return compileTemplates(ctx, stage)
 }
+
+func compileTemplates(ctx RunnerContext, stage string) error {
+	env, err := ctx.GetScriptEnvironment(stage)
+	if err != nil {
+		return err
+	}
+	templates := ctx.GetReleaseMetadata().GetTemplates()
+	for _, tpl := range templates {
+		if err := tpl.Render(stage, env); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func postCommit(ctx RunnerContext, deploymentState DeploymentState, stage string) error {
 	processedOutputs, err := NewEnvironmentBuilder().GetOutputs(ctx, stage)
 	if err != nil {
@@ -104,9 +122,6 @@ func (b *ScriptStep) Run(ctx RunnerContext) error {
 		if err := b.runScript(ctx); err != nil {
 			return err
 		}
-	}
-	if err := b.compileTemplates(ctx); err != nil {
-		return err
 	}
 	if b.Commit != nil {
 		return b.Commit(ctx, deploymentState, b.Stage)
@@ -174,20 +189,6 @@ func (b *ScriptStep) getCmd(ctx RunnerContext) ([]string, error) {
 		return []string{b.ScriptPath, outputsJsonLocation}, nil
 	}
 	return []string{b.ScriptPath}, nil
-}
-
-func (b *ScriptStep) compileTemplates(ctx RunnerContext) error {
-	env, err := ctx.GetScriptEnvironment(b.Stage)
-	if err != nil {
-		return err
-	}
-	templates := ctx.GetReleaseMetadata().GetTemplates()
-	for _, tpl := range templates {
-		if err := tpl.Render(b.Stage, env); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func (b *ScriptStep) runScript(ctx RunnerContext) error {
