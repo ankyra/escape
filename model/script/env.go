@@ -24,6 +24,10 @@ func NewScriptEnvironment() *ScriptEnvironment {
 	result := ScriptEnvironment{}
 	return &result
 }
+func NewScriptEnvironmentFromMap(m map[string]Script) *ScriptEnvironment {
+	result := ScriptEnvironment(m)
+	return &result
+}
 
 func NewScriptEnvironmentWithGlobals(globals map[string]Script) *ScriptEnvironment {
 	result := ScriptEnvironment{}

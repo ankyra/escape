@@ -27,6 +27,96 @@ var _ = Suite(&exprSuite{})
 
 func Test(t *testing.T) { TestingT(t) }
 
+func (s *exprSuite) Test_Lift_ScriptString(c *C) {
+	v, err := Lift(LiftString("string"))
+	c.Assert(err, IsNil)
+	c.Assert(IsStringAtom(v), Equals, true)
+	c.Assert(ExpectStringAtom(v), Equals, "string")
+}
+func (s *exprSuite) Test_Lift_String(c *C) {
+	v, err := Lift("string")
+	c.Assert(err, IsNil)
+	c.Assert(IsStringAtom(v), Equals, true)
+	c.Assert(ExpectStringAtom(v), Equals, "string")
+}
+func (s *exprSuite) Test_Lift_Integer(c *C) {
+	v, err := Lift(12)
+	c.Assert(err, IsNil)
+	c.Assert(IsIntegerAtom(v), Equals, true)
+	c.Assert(ExpectIntegerAtom(v), Equals, 12)
+}
+func (s *exprSuite) Test_Lift_Float(c *C) {
+	v, err := Lift(12.6)
+	c.Assert(err, IsNil)
+	c.Assert(IsIntegerAtom(v), Equals, true)
+	c.Assert(ExpectIntegerAtom(v), Equals, 12)
+}
+func (s *exprSuite) Test_Lift_List(c *C) {
+	list := []interface{}{"test", 12}
+	v, err := Lift(list)
+	expected := []Script{LiftString("test"), LiftInteger(12)}
+	c.Assert(err, IsNil)
+	c.Assert(IsListAtom(v), Equals, true)
+	c.Assert(ExpectListAtom(v), DeepEquals, expected)
+}
+func (s *exprSuite) Test_Lift_List_fails_if_item_type_not_supported(c *C) {
+	list := []interface{}{"test", struct{}{}}
+	_, err := Lift(list)
+	c.Assert(err, Not(IsNil))
+}
+func (s *exprSuite) Test_Lift_Script_List(c *C) {
+	list := []Script{LiftString("test"), LiftInteger(12)}
+	v, err := Lift(list)
+	c.Assert(err, IsNil)
+	c.Assert(IsListAtom(v), Equals, true)
+	c.Assert(ExpectListAtom(v), DeepEquals, list)
+}
+func (s *exprSuite) Test_Lift_ScriptDict(c *C) {
+	dict := map[string]Script{
+		"test": LiftString("value"),
+	}
+	v, err := Lift(dict)
+	c.Assert(err, IsNil)
+	c.Assert(IsDictAtom(v), Equals, true)
+	c.Assert(ExpectDictAtom(v), DeepEquals, dict)
+}
+func (s *exprSuite) Test_Lift_Dict(c *C) {
+	dict := map[string]interface{}{
+		"test": "value",
+		"recurse": map[string]interface{}{
+			"test": "value2",
+		},
+	}
+	v, err := Lift(dict)
+	expected := map[string]Script{
+		"test": LiftString("value"),
+		"recurse": LiftDict(map[string]Script{
+			"test": LiftString("value2"),
+		}),
+	}
+	c.Assert(err, IsNil)
+	c.Assert(IsDictAtom(v), Equals, true)
+	c.Assert(ExpectDictAtom(v), DeepEquals, expected)
+}
+func (s *exprSuite) Test_Lift_Dict_interface(c *C) {
+	dict := map[interface{}]interface{}{
+		"test": "value",
+		"recurse": map[string]interface{}{
+			"test": "value2",
+		},
+	}
+	v, err := Lift(dict)
+	expected := map[string]Script{
+		"test": LiftString("value"),
+		"recurse": LiftDict(map[string]Script{
+			"test": LiftString("value2"),
+		}),
+	}
+	c.Assert(err, IsNil)
+	c.Assert(IsDictAtom(v), Equals, true)
+	c.Assert(ExpectDictAtom(v), DeepEquals, expected)
+}
+
 func (s *exprSuite) Test_Eval_String(c *C) {
 	v := LiftString("test")
 	result, err := EvalToGoValue(v, nil)
@@ -34,11 +124,95 @@ func (s *exprSuite) Test_Eval_String(c *C) {
 	c.Assert(result, Equals, "test")
 }
 
+func (s *exprSuite) Test_IsStringAtom(c *C) {
+	c.Assert(IsStringAtom(LiftString("test")), Equals, true)
+	c.Assert(IsStringAtom(LiftInteger(12)), Equals, false)
+	c.Assert(IsStringAtom(LiftFunction(builtinId)), Equals, false)
+	c.Assert(IsStringAtom(NewApply(LiftFunction(builtinId), nil)), Equals, false)
+}
+
+func (s *exprSuite) Test_ExpectStringAtom(c *C) {
+	c.Assert(ExpectStringAtom(LiftString("test")), Equals, "test")
+	c.Assert(func() { ExpectStringAtom(LiftInteger(12)) }, Panics, "Expecting string type, got integer")
+}
+
 func (s *exprSuite) Test_Eval_Integer(c *C) {
 	v := LiftInteger(12)
 	result, err := EvalToGoValue(v, nil)
 	c.Assert(err, IsNil)
 	c.Assert(result, Equals, 12)
+}
+
+func (s *exprSuite) Test_IsIntegerAtom(c *C) {
+	c.Assert(IsIntegerAtom(LiftInteger(12)), Equals, true)
+	c.Assert(IsIntegerAtom(LiftString("test")), Equals, false)
+	c.Assert(IsIntegerAtom(LiftFunction(builtinId)), Equals, false)
+	c.Assert(IsIntegerAtom(NewApply(LiftFunction(builtinId), nil)), Equals, false)
+}
+
+func (s *exprSuite) Test_ExpectIntegerAtom(c *C) {
+	c.Assert(ExpectIntegerAtom(LiftInteger(12)), Equals, 12)
+	c.Assert(func() { ExpectIntegerAtom(LiftString("test")) }, Panics, "Expecting integer type, got string")
+}
+
+func (s *exprSuite) Test_Eval_List(c *C) {
+	list := []Script{LiftString("test"), LiftInteger(12)}
+	v := LiftList(list)
+	result, err := EvalToGoValue(v, nil)
+	c.Assert(err, IsNil)
+	c.Assert(result, DeepEquals, list)
+}
+
+func (s *exprSuite) Test_Eval_Dict(c *C) {
+	dict := map[string]Script{
+		"test": LiftString("value"),
+	}
+	v := LiftDict(dict)
+	result, err := EvalToGoValue(v, nil)
+	c.Assert(err, IsNil)
+	c.Assert(result, DeepEquals, dict)
+}
+
+func (s *exprSuite) Test_Eval_IsDictAtom(c *C) {
+	dict := map[string]Script{
+		"test": LiftString("value"),
+	}
+	v := LiftDict(dict)
+	c.Assert(IsDictAtom(v), Equals, true)
+	c.Assert(IsDictAtom(LiftInteger(12)), Equals, false)
+	c.Assert(IsDictAtom(LiftString("test")), Equals, false)
+	c.Assert(IsDictAtom(LiftFunction(builtinId)), Equals, false)
+	c.Assert(IsDictAtom(NewApply(LiftFunction(builtinId), nil)), Equals, false)
+}
+
+func (s *exprSuite) Test_ExpectDictAtom(c *C) {
+	dict := map[string]Script{
+		"test": LiftString("value"),
+	}
+	v := LiftDict(dict)
+	c.Assert(ExpectDictAtom(v), DeepEquals, dict)
+	c.Assert(func() { ExpectDictAtom(LiftString("test")) }, Panics, "Expecting dict type, got string")
+}
+
+func (s *exprSuite) Test_ExpectDict(c *C) {
+	dict := map[string]Script{
+		"test": LiftString("value"),
+	}
+	v := LiftDict(dict)
+	expect := map[string]interface{}{
+		"test": "value",
+	}
+	c.Assert(ExpectDict(v), DeepEquals, expect)
+}
+func (s *exprSuite) Test_ExpectDict_fails_with_wrong_type(c *C) {
+	c.Assert(func() { ExpectDict(LiftString("test")) }, Panics, "Expecting dict type, got string")
+}
+func (s *exprSuite) Test_ExpectDict_fails_with_unapplied_func(c *C) {
+	dict := map[string]Script{
+		"test": NewApply(LiftFunction(builtinId), []Script{}),
+	}
+	v := LiftDict(dict)
+	c.Assert(func() { ExpectDict(v) }, Panics, "Function application can not be converted to Go value (forgot to eval?)")
 }
 
 func (s *exprSuite) Test_Eval_Function(c *C) {

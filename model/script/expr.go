@@ -39,6 +39,12 @@ func Lift(val interface{}) (Script, error) {
 		return LiftInteger(int(val.(float64))), nil
 	case int:
 		return LiftInteger(val.(int)), nil
+	case Script:
+		return val.(Script), nil
+	case map[string]Script:
+		return LiftDict(val.(map[string]Script)), nil
+	case []Script:
+		return LiftList(val.([]Script)), nil
 	case []interface{}:
 		vals := []Script{}
 		for _, k := range val.([]interface{}) {
@@ -49,6 +55,30 @@ func Lift(val interface{}) (Script, error) {
 			vals = append(vals, v)
 		}
 		return LiftList(vals), nil
+	case map[string]interface{}:
+		resultMap := map[string]Script{}
+		for key, val := range val.(map[string]interface{}) {
+			v, err := Lift(val)
+			if err != nil {
+				return nil, err
+			}
+			resultMap[key] = v
+		}
+		return LiftDict(resultMap), nil
+	case map[interface{}]interface{}:
+		resultMap := map[string]Script{}
+		for k, val := range val.(map[interface{}]interface{}) {
+			key, ok := k.(string)
+			if !ok {
+				return nil, fmt.Errorf("Expecting string key for dictionary type, but got %T", k)
+			}
+			v, err := Lift(val)
+			if err != nil {
+				return nil, err
+			}
+			resultMap[key] = v
+		}
+		return LiftDict(resultMap), nil
 	}
 	return nil, fmt.Errorf("Couldn't lift value of type '%T': %v", val, val)
 }
@@ -72,6 +102,16 @@ func (s *stringAtom) Value() (interface{}, error) {
 func (s *stringAtom) Type() ValueType {
 	return NewType("string")
 }
+func IsStringAtom(s Script) (ok bool) {
+	_, ok = s.(*stringAtom)
+	return ok
+}
+func ExpectStringAtom(s Script) string {
+	if IsStringAtom(s) {
+		return s.(*stringAtom).String
+	}
+	panic("Expecting string type, got " + s.Type().Name())
+}
 
 /*
    Integers
@@ -91,6 +131,16 @@ func (i *integerAtom) Value() (interface{}, error) {
 }
 func (i *integerAtom) Type() ValueType {
 	return NewType("integer")
+}
+func IsIntegerAtom(s Script) (ok bool) {
+	_, ok = s.(*integerAtom)
+	return ok
+}
+func ExpectIntegerAtom(s Script) int {
+	if IsIntegerAtom(s) {
+		return s.(*integerAtom).Integer
+	}
+	panic("Expecting integer type, got " + s.Type().Name())
 }
 
 /*
@@ -112,6 +162,16 @@ func (l *list) Value() (interface{}, error) {
 func (l *list) Type() ValueType {
 	return NewType("list")
 }
+func IsListAtom(s Script) (ok bool) {
+	_, ok = s.(*list)
+	return ok
+}
+func ExpectListAtom(s Script) []Script {
+	if IsListAtom(s) {
+		return s.(*list).List
+	}
+	panic("Expecting list type, got " + s.Type().Name())
+}
 
 /*
    Dicts
@@ -131,6 +191,28 @@ func (d *dict) Value() (interface{}, error) {
 }
 func (d *dict) Type() ValueType {
 	return NewType("map")
+}
+func IsDictAtom(s Script) bool {
+	_, ok := s.(*dict)
+	return ok
+}
+func ExpectDictAtom(s Script) map[string]Script {
+	if IsDictAtom(s) {
+		return s.(*dict).Dict
+	}
+	panic("Expecting dict type, got " + s.Type().Name())
+}
+func ExpectDict(s Script) map[string]interface{} {
+	result := map[string]interface{}{}
+	dict := ExpectDictAtom(s)
+	for key, val := range dict {
+		var err error
+		result[key], err = val.Value()
+		if err != nil {
+			panic(err.Error())
+		}
+	}
+	return result
 }
 
 /*
