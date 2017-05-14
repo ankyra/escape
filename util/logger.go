@@ -18,9 +18,26 @@ package util
 
 import (
 	"bytes"
-	. "github.com/ankyra/escape-client/model/interfaces"
 	"text/template"
 )
+
+type LogLevel int
+
+type LogEntry struct {
+	Message      string
+	SectionStack []string
+	Release      string
+	Collapse     bool
+	LogLevel     LogLevel
+}
+
+type Logger interface {
+	Log(string, map[string]string)
+	PushSection(string)
+	PopSection()
+	PushRelease(string)
+	PopRelease()
+}
 
 type logger struct {
 	sections  []string

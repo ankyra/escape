@@ -21,6 +21,7 @@ import (
 	"github.com/ankyra/escape-client/model"
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/script"
+	"github.com/ankyra/escape-client/util"
 )
 
 type runnerContext struct {
@@ -31,7 +32,7 @@ type runnerContext struct {
 	inputs           *map[string]interface{}
 	outputs          *map[string]interface{}
 	depends          []ReleaseMetadata
-	logger           Logger
+	logger           util.Logger
 	context          Context
 }
 
@@ -80,7 +81,7 @@ func (r *runnerContext) GetDepends() []string {
 func (r *runnerContext) SetDeploymentState(d DeploymentState) {
 	r.deploymentState = d
 }
-func (r *runnerContext) Logger() Logger {
+func (r *runnerContext) Logger() util.Logger {
 	return r.logger
 }
 func (r *runnerContext) GetReleaseMetadata() ReleaseMetadata {

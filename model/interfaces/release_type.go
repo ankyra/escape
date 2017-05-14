@@ -16,10 +16,14 @@ limitations under the License.
 
 package interfaces
 
+import (
+	plan "github.com/ankyra/escape-client/model/escape_plan"
+)
+
 type ReleaseType interface {
 	GetType() string
-	InitEscapePlan(EscapePlan)
-	CompileMetadata(EscapePlan, ReleaseMetadata) error
+	InitEscapePlan(*plan.EscapePlan)
+	CompileMetadata(*plan.EscapePlan, ReleaseMetadata) error
 	Run(RunnerContext) (*map[string]interface{}, error)
 	Destroy(RunnerContext) error
 }

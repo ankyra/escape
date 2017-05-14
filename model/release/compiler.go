@@ -21,6 +21,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"github.com/ankyra/escape-client/model/escape_plan"
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/parsers"
 	"github.com/ankyra/escape-client/model/script"
@@ -208,7 +209,7 @@ func (c *Compiler) compileVersion(version string) error {
 	return nil
 }
 
-func (c *Compiler) compileEscapePlanScriptDigests(plan EscapePlan) error {
+func (c *Compiler) compileEscapePlanScriptDigests(plan *escape_plan.EscapePlan) error {
 	paths := []string{
 		plan.GetPreBuild(), plan.GetPreDeploy(), plan.GetPreDestroy(),
 		plan.GetPostBuild(), plan.GetPostDeploy(), plan.GetPostDestroy(),

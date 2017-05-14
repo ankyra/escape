@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/ankyra/escape-client/model/escape_plan"
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/variable"
 	"github.com/ankyra/escape-client/util"
@@ -31,7 +32,7 @@ func (a *DockerReleaseType) GetType() string {
 	return "docker"
 }
 
-func (a *DockerReleaseType) InitEscapePlan(plan EscapePlan) {
+func (a *DockerReleaseType) InitEscapePlan(plan *escape_plan.EscapePlan) {
 	plan.SetIncludes([]string{"Dockerfile"})
 }
 
@@ -45,7 +46,7 @@ func checkExistingVariable(v *variable.Variable, id string, typ string) (bool, e
 	return false, nil
 }
 
-func (a *DockerReleaseType) CompileMetadata(plan EscapePlan, metadata ReleaseMetadata) error {
+func (a *DockerReleaseType) CompileMetadata(plan *escape_plan.EscapePlan, metadata ReleaseMetadata) error {
 	dockerRepoFound := false
 	dockerCmdFound := false
 	for _, i := range metadata.GetInputs() {
@@ -203,7 +204,7 @@ type dockerCmd struct {
 	workingDir string
 }
 
-func (d *dockerCmd) record(args []string, log Logger) (string, error) {
+func (d *dockerCmd) record(args []string, log util.Logger) (string, error) {
 	cmd := []string{}
 	for _, c := range d.cmd {
 		cmd = append(cmd, c)
@@ -216,7 +217,7 @@ func (d *dockerCmd) record(args []string, log Logger) (string, error) {
 	return proc.Record(cmd, nil, log)
 }
 
-func (d *dockerCmd) run(args []string, log Logger) error {
+func (d *dockerCmd) run(args []string, log util.Logger) error {
 	_, err := d.record(args, log)
 	return err
 }

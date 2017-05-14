@@ -29,11 +29,11 @@ import (
 
 type context struct {
 	EscapeConfig       EscapeConfig
-	EscapePlan         EscapePlan
+	EscapePlan         *escape_plan.EscapePlan
 	ReleaseMetadata    ReleaseMetadata
 	ProjectState       ProjectState
 	EnvironmentState   EnvironmentState
-	Logger             Logger
+	Logger             util.Logger
 	LogConsumers       []util.LogConsumer
 	DependencyMetadata map[string]ReleaseMetadata
 }
@@ -64,7 +64,7 @@ func (c *context) InitFromLocalEscapePlanAndState(state, environment, escapePlan
 	return nil
 }
 
-func (c *context) GetLogger() Logger {
+func (c *context) GetLogger() util.Logger {
 	return c.Logger
 }
 func (c *context) Log(key string, values map[string]string) {
@@ -85,7 +85,7 @@ func (c *context) PopLogRelease() {
 func (c *context) GetClient() Client {
 	return c.EscapeConfig.GetClient()
 }
-func (c *context) GetEscapePlan() EscapePlan {
+func (c *context) GetEscapePlan() *escape_plan.EscapePlan {
 	return c.EscapePlan
 }
 func (c *context) GetReleaseMetadata() ReleaseMetadata {

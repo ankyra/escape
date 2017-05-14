@@ -90,7 +90,7 @@ func NewPrettyPrinter(cfg ...printConf) *prettyPrinter {
 	return pp
 }
 
-func (e *prettyPrinter) Print(plan *escapePlan) []byte {
+func (e *prettyPrinter) Print(plan *EscapePlan) []byte {
 	yamlMap := plan.ToDict()
 	writer := bytes.NewBuffer([]byte{})
 	ordering := []string{

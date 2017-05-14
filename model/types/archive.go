@@ -18,6 +18,7 @@ package types
 
 import (
 	"fmt"
+	plan "github.com/ankyra/escape-client/model/escape_plan"
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"io/ioutil"
 	"path/filepath"
@@ -29,8 +30,8 @@ func (a *ArchiveReleaseType) GetType() string {
 	return "archive"
 }
 
-func (a *ArchiveReleaseType) InitEscapePlan(plan EscapePlan) {
-	plan.SetIncludes([]string{})
+func (a *ArchiveReleaseType) InitEscapePlan(p *plan.EscapePlan) {
+	p.SetIncludes([]string{})
 	queue := []string{"."}
 	for len(queue) != 0 {
 		dirPath := queue[0]
@@ -48,15 +49,15 @@ func (a *ArchiveReleaseType) InitEscapePlan(plan EscapePlan) {
 			} else if file.Name()[0] == '.' || joinedPath[0] == '.' {
 				continue
 			} else {
-				newIncludes := append(plan.GetIncludes(), joinedPath)
-				plan.SetIncludes(newIncludes)
+				newIncludes := append(p.GetIncludes(), joinedPath)
+				p.SetIncludes(newIncludes)
 			}
 		}
 		queue = queue[1:]
 	}
 }
 
-func (a *ArchiveReleaseType) CompileMetadata(plan EscapePlan, release ReleaseMetadata) error {
+func (a *ArchiveReleaseType) CompileMetadata(p *plan.EscapePlan, release ReleaseMetadata) error {
 	return nil
 }
 

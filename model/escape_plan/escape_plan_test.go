@@ -47,7 +47,7 @@ func (s *planSuite) Test_LoadConfig_fails_if_invalid_yaml(c *C) {
 	unit := NewEscapePlan()
 	err := unit.LoadConfig("testdata/cant_parse.yml")
 	errorString := err.Error()
-	expectError := "Couldn't parse Escape plan 'testdata/cant_parse.yml': yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `$invalid` into escape_plan.escapePlan"
+	expectError := "Couldn't parse Escape plan 'testdata/cant_parse.yml': yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `$invalid` into escape_plan.EscapePlan"
 	c.Assert(errorString, Equals, expectError)
 }
 
@@ -74,7 +74,7 @@ func (s *planSuite) Test_GetVersionlessReleaseId(c *C) {
 }
 
 func (s *planSuite) Test_PrettyPrint(c *C) {
-	unit := NewEscapePlan().(*escapePlan)
+	unit := NewEscapePlan()
 	err := unit.LoadConfig("testdata/fixture.yml")
 	c.Assert(err, IsNil)
 	pretty := unit.ToYaml()

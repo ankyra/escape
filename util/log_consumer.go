@@ -18,7 +18,6 @@ package util
 
 import (
 	"fmt"
-	. "github.com/ankyra/escape-client/model/interfaces"
 	"golang.org/x/text/transform"
 	"golang.org/x/text/unicode/norm"
 	"os"

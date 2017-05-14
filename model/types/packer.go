@@ -18,6 +18,7 @@ package types
 
 import (
 	"fmt"
+	"github.com/ankyra/escape-client/model/escape_plan"
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/variable"
 	"github.com/ankyra/escape-client/util"
@@ -44,11 +45,11 @@ func (a *PackerReleaseType) GetType() string {
 	return "packer"
 }
 
-func (a *PackerReleaseType) InitEscapePlan(plan EscapePlan) {
+func (a *PackerReleaseType) InitEscapePlan(plan *escape_plan.EscapePlan) {
 	plan.SetPath(plan.GetBuild() + ".json")
 }
 
-func (a *PackerReleaseType) CompileMetadata(plan EscapePlan, metadata ReleaseMetadata) error {
+func (a *PackerReleaseType) CompileMetadata(plan *escape_plan.EscapePlan, metadata ReleaseMetadata) error {
 	for _, i := range metadata.GetOutputs() {
 		found, err := checkExistingVariable(i, "image", "string")
 		if err != nil {
@@ -98,7 +99,7 @@ func (a *PackerReleaseType) buildEnvironment(metadata ReleaseMetadata, inputs ma
 	return env
 }
 
-func (a *PackerReleaseType) runPacker(metadata ReleaseMetadata, env []string, log Logger) (string, int) {
+func (a *PackerReleaseType) runPacker(metadata ReleaseMetadata, env []string, log util.Logger) (string, int) {
 	cmd := []string{"packer", "build", metadata.GetPath()}
 	p := util.NewProcessRecorder()
 	stdout, err := p.Record(cmd, env, log)

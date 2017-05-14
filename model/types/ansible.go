@@ -17,6 +17,7 @@ limitations under the License.
 package types
 
 import (
+	plan "github.com/ankyra/escape-client/model/escape_plan"
 	. "github.com/ankyra/escape-client/model/interfaces"
 )
 
@@ -26,8 +27,8 @@ func (a *AnsibleReleaseType) GetType() string {
 	return "ansible"
 }
 
-func (a *AnsibleReleaseType) InitEscapePlan(plan EscapePlan) {
-	plan.SetIncludes([]string{
+func (a *AnsibleReleaseType) InitEscapePlan(p *plan.EscapePlan) {
+	p.SetIncludes([]string{
 		"defaults/*",
 		"files/*",
 		"handlers/*",
@@ -40,7 +41,7 @@ func (a *AnsibleReleaseType) InitEscapePlan(plan EscapePlan) {
 	})
 }
 
-func (a *AnsibleReleaseType) CompileMetadata(plan EscapePlan, release ReleaseMetadata) error {
+func (a *AnsibleReleaseType) CompileMetadata(p *plan.EscapePlan, release ReleaseMetadata) error {
 	return nil
 }
 

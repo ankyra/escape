@@ -19,6 +19,7 @@ package types
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/ankyra/escape-client/model/escape_plan"
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/variable"
 	"github.com/ankyra/escape-client/util"
@@ -33,11 +34,11 @@ func (a *TerraformReleaseType) GetType() string {
 	return "terraform"
 }
 
-func (a *TerraformReleaseType) InitEscapePlan(plan EscapePlan) {
+func (a *TerraformReleaseType) InitEscapePlan(plan *escape_plan.EscapePlan) {
 	plan.SetPath(plan.GetBuild() + ".tf")
 }
 
-func (a *TerraformReleaseType) CompileMetadata(plan EscapePlan, metadata ReleaseMetadata) error {
+func (a *TerraformReleaseType) CompileMetadata(plan *escape_plan.EscapePlan, metadata ReleaseMetadata) error {
 	for _, i := range metadata.GetOutputs() {
 		found, err := checkExistingVariable(i, "terraform_state", "string")
 		if err != nil {
@@ -175,7 +176,7 @@ func (t *TerraformReleaseType) writeStateFile(inputs map[string]interface{}) (st
 	return "", fmt.Errorf("Expecting string,")
 }
 
-func (t *TerraformReleaseType) runTerraform(args []string, env []string, log Logger) (string, error) {
+func (t *TerraformReleaseType) runTerraform(args []string, env []string, log util.Logger) (string, error) {
 	cmd := []string{"terraform"}
 	cmd = append(cmd, args...)
 	p := util.NewProcessRecorder()

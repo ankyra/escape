@@ -63,6 +63,18 @@ var fmtCmd = &cobra.Command{
 	},
 }
 
+var minifyCmd = &cobra.Command{
+	Use:   "minify",
+	Short: "Minify an existing Escape plan",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		err := context.LoadEscapePlan(escapePlanLocation)
+		if err != nil {
+			return err
+		}
+		return controllers.PlanController{}.Minify(context, escapePlanLocation)
+	},
+}
+
 var compileCmd = &cobra.Command{
 	Use:   "compile",
 	Short: "Compile the Escape plan",
@@ -79,6 +91,7 @@ func init() {
 	RootCmd.AddCommand(planCmd)
 	planCmd.AddCommand(initCmd)
 	planCmd.AddCommand(fmtCmd)
+	planCmd.AddCommand(minifyCmd)
 	planCmd.AddCommand(compileCmd)
 
 	initCmd.Flags().StringVarP(&releaseType, "type", "t", "archive", "The release type")
@@ -91,4 +104,5 @@ func init() {
 	compileCmd.Flags().StringVarP(&environment, "environment", "e", "dev", "The logical environment to target")
 
 	fmtCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location onf the Escape plan.")
+	minifyCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location onf the Escape plan.")
 }

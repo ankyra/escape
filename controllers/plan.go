@@ -38,7 +38,15 @@ func (p PlanController) Format(context Context, outputLocation string) error {
 		return ioutil.WriteFile(outputLocation, yaml, 0644)
 	}
 	return nil
+}
 
+func (p PlanController) Minify(context Context, outputLocation string) error {
+	yaml := context.GetEscapePlan().ToMinifiedYaml()
+	fmt.Print(string(yaml))
+	if outputLocation != "" {
+		return ioutil.WriteFile(outputLocation, yaml, 0644)
+	}
+	return nil
 }
 
 func (p PlanController) Init(context Context, typ, build_id, output_file string, force bool) error {

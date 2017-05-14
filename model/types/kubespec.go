@@ -18,6 +18,7 @@ package types
 
 import (
 	"fmt"
+	"github.com/ankyra/escape-client/model/escape_plan"
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/variable"
 	"github.com/ankyra/escape-client/util"
@@ -31,12 +32,12 @@ func (a *KubeSpecReleaseType) GetType() string {
 	return "kubespec"
 }
 
-func (a *KubeSpecReleaseType) InitEscapePlan(plan EscapePlan) {
+func (a *KubeSpecReleaseType) InitEscapePlan(plan *escape_plan.EscapePlan) {
 	plan.SetIncludes([]string{"*.yml"})
 	plan.SetConsumes([]string{"kubernetes"})
 }
 
-func (a *KubeSpecReleaseType) CompileMetadata(plan EscapePlan, metadata ReleaseMetadata) error {
+func (a *KubeSpecReleaseType) CompileMetadata(plan *escape_plan.EscapePlan, metadata ReleaseMetadata) error {
 	kubernetesConsumerFound := false
 	credentialInputFound := false
 	for _, c := range metadata.GetConsumes() {

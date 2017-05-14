@@ -18,7 +18,6 @@ package escape_plan
 
 import (
 	"fmt"
-	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/util"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -36,7 +35,7 @@ func indent(s string) string {
 	return strings.Join(parts, "\n")
 }
 
-type escapePlan struct {
+type EscapePlan struct {
 	Build       string                 `yaml:"build"`
 	Consumes    []string               `yaml:"consumes,omitempty"`
 	Depends     []string               `yaml:"depends,omitempty"`
@@ -62,141 +61,141 @@ type escapePlan struct {
 	Version     string                 `yaml:"version"`
 }
 
-func (e *escapePlan) GetBuild() string {
+func (e *EscapePlan) GetBuild() string {
 	return e.Build
 }
-func (e *escapePlan) GetConsumes() []string {
+func (e *EscapePlan) GetConsumes() []string {
 	return e.Consumes
 }
-func (e *escapePlan) GetDepends() []string {
+func (e *EscapePlan) GetDepends() []string {
 	return e.Depends
 }
-func (e *escapePlan) GetDescription() string {
+func (e *EscapePlan) GetDescription() string {
 	return e.Description
 }
-func (e *escapePlan) GetErrands() map[string]interface{} {
+func (e *EscapePlan) GetErrands() map[string]interface{} {
 	return e.Errands
 }
-func (e *escapePlan) GetIncludes() []string {
+func (e *EscapePlan) GetIncludes() []string {
 	return e.Includes
 }
-func (e *escapePlan) GetInputs() []interface{} {
+func (e *EscapePlan) GetInputs() []interface{} {
 	return e.Inputs
 }
-func (e *escapePlan) GetLogo() string {
+func (e *EscapePlan) GetLogo() string {
 	return e.Logo
 }
-func (e *escapePlan) GetMetadata() map[string]string {
+func (e *EscapePlan) GetMetadata() map[string]string {
 	return e.Metadata
 }
-func (e *escapePlan) GetOutputs() []interface{} {
+func (e *EscapePlan) GetOutputs() []interface{} {
 	return e.Outputs
 }
-func (e *escapePlan) GetTemplates() []interface{} {
+func (e *EscapePlan) GetTemplates() []interface{} {
 	return e.Templates
 }
-func (e *escapePlan) GetPath() string {
+func (e *EscapePlan) GetPath() string {
 	return e.Path
 }
-func (e *escapePlan) GetPostBuild() string {
+func (e *EscapePlan) GetPostBuild() string {
 	return e.PostBuild
 }
-func (e *escapePlan) GetPostDeploy() string {
+func (e *EscapePlan) GetPostDeploy() string {
 	return e.PostDeploy
 }
-func (e *escapePlan) GetPostDestroy() string {
+func (e *EscapePlan) GetPostDestroy() string {
 	return e.PostDestroy
 }
-func (e *escapePlan) GetPreBuild() string {
+func (e *EscapePlan) GetPreBuild() string {
 	return e.PreBuild
 }
-func (e *escapePlan) GetPreDeploy() string {
+func (e *EscapePlan) GetPreDeploy() string {
 	return e.PreDeploy
 }
-func (e *escapePlan) GetPreDestroy() string {
+func (e *EscapePlan) GetPreDestroy() string {
 	return e.PreDestroy
 }
-func (e *escapePlan) GetProvides() []string {
+func (e *EscapePlan) GetProvides() []string {
 	return e.Provides
 }
-func (e *escapePlan) GetTest() string {
+func (e *EscapePlan) GetTest() string {
 	return e.Test
 }
-func (e *escapePlan) GetSmoke() string {
+func (e *EscapePlan) GetSmoke() string {
 	return e.Smoke
 }
-func (e *escapePlan) GetType() string {
+func (e *EscapePlan) GetType() string {
 	return e.Type
 }
-func (e *escapePlan) GetVersion() string {
+func (e *EscapePlan) GetVersion() string {
 	return e.Version
 }
-func (e *escapePlan) SetBuild(newValue string) {
+func (e *EscapePlan) SetBuild(newValue string) {
 	e.Build = newValue
 }
-func (e *escapePlan) SetConsumes(newValue []string) {
+func (e *EscapePlan) SetConsumes(newValue []string) {
 	e.Consumes = newValue
 }
-func (e *escapePlan) SetDepends(newValue []string) {
+func (e *EscapePlan) SetDepends(newValue []string) {
 	e.Depends = newValue
 }
-func (e *escapePlan) SetDescription(newValue string) {
+func (e *EscapePlan) SetDescription(newValue string) {
 	e.Description = newValue
 }
-func (e *escapePlan) SetErrands(newValue map[string]interface{}) {
+func (e *EscapePlan) SetErrands(newValue map[string]interface{}) {
 	e.Errands = newValue
 }
-func (e *escapePlan) SetIncludes(newValue []string) {
+func (e *EscapePlan) SetIncludes(newValue []string) {
 	e.Includes = newValue
 }
-func (e *escapePlan) SetInputs(newValue []interface{}) {
+func (e *EscapePlan) SetInputs(newValue []interface{}) {
 	e.Inputs = newValue
 }
-func (e *escapePlan) SetLogo(newValue string) {
+func (e *EscapePlan) SetLogo(newValue string) {
 	e.Logo = newValue
 }
-func (e *escapePlan) SetMetadata(newValue map[string]string) {
+func (e *EscapePlan) SetMetadata(newValue map[string]string) {
 	e.Metadata = newValue
 }
-func (e *escapePlan) SetOutputs(newValue []interface{}) {
+func (e *EscapePlan) SetOutputs(newValue []interface{}) {
 	e.Outputs = newValue
 }
-func (e *escapePlan) SetPath(newValue string) {
+func (e *EscapePlan) SetPath(newValue string) {
 	e.Path = newValue
 }
-func (e *escapePlan) SetPostBuild(newValue string) {
+func (e *EscapePlan) SetPostBuild(newValue string) {
 	e.PostBuild = newValue
 }
-func (e *escapePlan) SetPostDeploy(newValue string) {
+func (e *EscapePlan) SetPostDeploy(newValue string) {
 	e.PostDeploy = newValue
 }
-func (e *escapePlan) SetPostDestroy(newValue string) {
+func (e *EscapePlan) SetPostDestroy(newValue string) {
 	e.PostDestroy = newValue
 }
-func (e *escapePlan) SetPreBuild(newValue string) {
+func (e *EscapePlan) SetPreBuild(newValue string) {
 	e.PreBuild = newValue
 }
-func (e *escapePlan) SetPreDeploy(newValue string) {
+func (e *EscapePlan) SetPreDeploy(newValue string) {
 	e.PreDeploy = newValue
 }
-func (e *escapePlan) SetPreDestroy(newValue string) {
+func (e *EscapePlan) SetPreDestroy(newValue string) {
 	e.PreDestroy = newValue
 }
-func (e *escapePlan) SetProvides(newValue []string) {
+func (e *EscapePlan) SetProvides(newValue []string) {
 	e.Provides = newValue
 }
-func (e *escapePlan) SetTest(newValue string) {
+func (e *EscapePlan) SetTest(newValue string) {
 	e.Test = newValue
 }
-func (e *escapePlan) SetType(newValue string) {
+func (e *EscapePlan) SetType(newValue string) {
 	e.Type = newValue
 }
-func (e *escapePlan) SetVersion(newValue string) {
+func (e *EscapePlan) SetVersion(newValue string) {
 	e.Version = newValue
 }
 
-func NewEscapePlan() EscapePlan {
-	return &escapePlan{
+func NewEscapePlan() *EscapePlan {
+	return &EscapePlan{
 		Consumes: []string{},
 		Provides: []string{},
 		Depends:  []string{},
@@ -206,14 +205,14 @@ func NewEscapePlan() EscapePlan {
 	}
 }
 
-func (e *escapePlan) GetReleaseId() string {
+func (e *EscapePlan) GetReleaseId() string {
 	return e.Type + "-" + e.Build + "-v" + e.Version
 }
-func (e *escapePlan) GetVersionlessReleaseId() string {
+func (e *EscapePlan) GetVersionlessReleaseId() string {
 	return e.Type + "-" + e.Build
 }
 
-func (e *escapePlan) LoadConfig(cfgFile string) error {
+func (e *EscapePlan) LoadConfig(cfgFile string) error {
 	if !util.PathExists(cfgFile) {
 		return fmt.Errorf("Escape plan '%s' was not found. Use 'escape plan init' to create it", cfgFile)
 	}
@@ -233,19 +232,28 @@ func (e *escapePlan) LoadConfig(cfgFile string) error {
 	return nil
 }
 
-func (e *escapePlan) Init(typ, buildId string) EscapePlan {
+func (e *EscapePlan) Init(typ, buildId string) *EscapePlan {
 	e.Build = buildId
 	e.Type = typ
 	e.Version = "@"
 	return e
 }
 
-func (e *escapePlan) ToYaml() []byte {
+func (e *EscapePlan) ToYaml() []byte {
 	pr := NewPrettyPrinter()
 	return pr.Print(e)
 }
 
-func (e *escapePlan) ToDict() map[string]interface{} {
+func (e *EscapePlan) ToMinifiedYaml() []byte {
+	pr := NewPrettyPrinter(
+		includeEmpty(false),
+		includeDocs(false),
+		spacing(1),
+	)
+	return pr.Print(e)
+}
+
+func (e *EscapePlan) ToDict() map[string]interface{} {
 	str, err := yaml.Marshal(e)
 	if err != nil {
 		panic(err)

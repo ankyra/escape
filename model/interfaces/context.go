@@ -16,6 +16,11 @@ limitations under the License.
 
 package interfaces
 
+import (
+	plan "github.com/ankyra/escape-client/model/escape_plan"
+	"github.com/ankyra/escape-client/util"
+)
+
 type Context interface {
 	InitFromLocalEscapePlanAndState(string, string, string) error
 	GetDependencyMetadata(string) (ReleaseMetadata, error)
@@ -30,11 +35,11 @@ type Context interface {
 	PopLogSection()
 	PopLogRelease()
 
-	GetEscapePlan() EscapePlan
+	GetEscapePlan() *plan.EscapePlan
 	GetReleaseMetadata() ReleaseMetadata
 	GetProjectState() ProjectState
 	GetEnvironmentState() EnvironmentState
 	GetEscapeConfig() EscapeConfig
 	GetClient() Client
-	GetLogger() Logger
+	GetLogger() util.Logger
 }

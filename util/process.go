@@ -18,7 +18,6 @@ package util
 
 import (
 	"bufio"
-	. "github.com/ankyra/escape-client/model/interfaces"
 	"os"
 	"os/exec"
 	"path/filepath"

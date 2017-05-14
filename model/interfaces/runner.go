@@ -18,6 +18,7 @@ package interfaces
 
 import (
 	"github.com/ankyra/escape-client/model/script"
+	"github.com/ankyra/escape-client/util"
 )
 
 type Runner interface {
@@ -30,7 +31,7 @@ type RunnerContext interface {
 	SetDeploymentState(DeploymentState)
 	GetReleaseMetadata() ReleaseMetadata
 	SetReleaseMetadata(ReleaseMetadata)
-	Logger() Logger
+	Logger() util.Logger
 	GetPath() Paths
 	GetDepends() []string
 	GetBuildInputs() *map[string]interface{}
