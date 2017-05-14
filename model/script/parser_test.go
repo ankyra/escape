@@ -90,7 +90,29 @@ func (p *parserSuite) Test_ParseScript_env_lookup_fails_on_illegal_ident(c *C) {
 	c.Assert(err, Not(IsNil))
 }
 
-func (p *parserSuite) Test_Parse_And_Eval_Env_Lookup(c *C) {
+func (p *parserSuite) Test_ParseScript_method_call(c *C) {
+	result, err := ParseScript("$test.concat($test2)")
+	c.Assert(err, IsNil)
+	c.Assert(IsApplyAtom(result), Equals, true)
+
+	atom := ExpectApplyAtom(result)
+	c.Assert(IsApplyAtom(atom.To), Equals, true)
+	c.Assert(atom.Arguments, HasLen, 2)
+
+	arg := hasStringArgument(c, atom.Arguments[0], "test")
+	arg = hasStringArgument(c, arg.To, "$")
+	c.Assert(IsFunctionAtom(arg.To), Equals, true)
+
+	arg = hasStringArgument(c, atom.Arguments[1], "test2")
+	arg = hasStringArgument(c, arg.To, "$")
+	c.Assert(IsFunctionAtom(arg.To), Equals, true)
+
+	atom = hasStringArgument(c, atom.To, "__concat")
+	atom = hasStringArgument(c, atom.To, "$")
+	c.Assert(IsFunctionAtom(atom.To), Equals, true)
+}
+
+func (p *parserSuite) Test_Parse_And_Eval_Env_Lookup_with_function_calls(c *C) {
 	inputsDict := LiftDict(map[string]Script{
 		"version": LiftString("1.0"),
 		"dash":    LiftString("-"),
@@ -105,6 +127,28 @@ func (p *parserSuite) Test_Parse_And_Eval_Env_Lookup(c *C) {
 	env := NewScriptEnvironmentWithGlobals(globalsDict)
 
 	script, err := ParseScript("$__concat($gcp.inputs.version, $gcp.inputs.dash, $gcp.inputs.extra)")
+	c.Assert(err, IsNil)
+
+	result, err := EvalToGoValue(script, env)
+	c.Assert(err, IsNil)
+	c.Assert(result, Equals, "1.0-alpha")
+}
+
+func (p *parserSuite) Test_Parse_And_Eval_Env_Lookup_with_method_calls(c *C) {
+	inputsDict := LiftDict(map[string]Script{
+		"version": LiftString("1.0"),
+		"dash":    LiftString("-"),
+		"extra":   LiftString("alpha"),
+	})
+	gcpDict := LiftDict(map[string]Script{
+		"inputs": inputsDict,
+	})
+	globalsDict := map[string]Script{
+		"gcp": gcpDict,
+	}
+	env := NewScriptEnvironmentWithGlobals(globalsDict)
+
+	script, err := ParseScript("$gcp.inputs.version.concat($gcp.inputs.dash, $gcp.inputs.extra)")
 	c.Assert(err, IsNil)
 
 	result, err := EvalToGoValue(script, env)
