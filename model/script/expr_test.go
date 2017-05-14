@@ -18,6 +18,8 @@ package script
 
 import (
 	. "gopkg.in/check.v1"
+	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -220,6 +222,19 @@ func (s *exprSuite) Test_Eval_Function(c *C) {
 	_, err := EvalToGoValue(id, nil)
 	c.Assert(err, IsNil)
 }
+func (s *exprSuite) Test_Eval_IsFunction(c *C) {
+	c.Assert(IsFunctionAtom(LiftFunction(builtinId)), Equals, true)
+	c.Assert(IsFunctionAtom(LiftInteger(12)), Equals, false)
+	c.Assert(IsFunctionAtom(LiftString("test")), Equals, false)
+	c.Assert(IsFunctionAtom(NewApply(LiftFunction(builtinId), nil)), Equals, false)
+}
+func (s *exprSuite) Test_Eval_ExpectFunctionAtom(c *C) {
+	id := LiftFunction(builtinId)
+	ExpectFunctionAtom(id)
+}
+func (s *exprSuite) Test_ExpectFunctionAtom_fails_with_wrong_type(c *C) {
+	c.Assert(func() { ExpectFunctionAtom(LiftString("test")) }, Panics, "Expecting function type, got string")
+}
 
 func (s *exprSuite) Test_Eval_Function_Apply(c *C) {
 	id := LiftFunction(builtinId)
@@ -252,6 +267,17 @@ func (s *exprSuite) Test_Eval_Map_Apply(c *C) {
 	result, err := EvalToGoValue(apply, nil)
 	c.Assert(err, IsNil)
 	c.Assert(result, Equals, "test value")
+}
+
+func (s *exprSuite) Test_Eval_String_Apply_file(c *C) {
+	apply := NewApply(LiftString("test content"), []Script{LiftString("file")})
+	filePath, err := apply.Eval(nil)
+	c.Assert(err, IsNil)
+	c.Assert(IsStringAtom(filePath), Equals, true)
+	result, err := ioutil.ReadFile(ExpectStringAtom(filePath))
+	c.Assert(err, IsNil)
+	c.Assert(result, DeepEquals, []byte("test content"))
+	os.RemoveAll(ExpectStringAtom(filePath))
 }
 
 func (s *exprSuite) Test_Eval_Env_Lookup_BuiltIn(c *C) {

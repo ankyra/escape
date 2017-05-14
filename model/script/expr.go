@@ -45,6 +45,10 @@ func Lift(val interface{}) (Script, error) {
 		return LiftDict(val.(map[string]Script)), nil
 	case []Script:
 		return LiftList(val.([]Script)), nil
+	case scriptFuncType:
+		return LiftFunction(val.(scriptFuncType)), nil
+	case func(string) string:
+		return LiftFunc_string_to_string(val.(func(string) string)), nil
 	case []interface{}:
 		vals := []Script{}
 		for _, k := range val.([]interface{}) {
@@ -81,6 +85,14 @@ func Lift(val interface{}) (Script, error) {
 		return LiftDict(resultMap), nil
 	}
 	return nil, fmt.Errorf("Couldn't lift value of type '%T': %v", val, val)
+}
+
+func ShouldLift(v interface{}) Script {
+	result, err := Lift(v)
+	if err != nil {
+		panic(err)
+	}
+	return result
 }
 
 /*
@@ -227,7 +239,6 @@ func LiftFunction(f scriptFuncType) Script {
 		Func: f,
 	}
 }
-
 func (f *function) Eval(env *ScriptEnvironment) (Script, error) {
 	return f, nil
 }
@@ -236,6 +247,16 @@ func (f *function) Value() (interface{}, error) {
 }
 func (f *function) Type() ValueType {
 	return NewType("func")
+}
+func IsFunctionAtom(s Script) bool {
+	_, ok := s.(*function)
+	return ok
+}
+func ExpectFunctionAtom(s Script) scriptFuncType {
+	if IsFunctionAtom(s) {
+		return s.(*function).Func
+	}
+	panic("Expecting function type, got " + s.Type().Name())
 }
 
 /*
@@ -251,6 +272,16 @@ func NewApply(to Script, args []Script) Script {
 		To:        to,
 		Arguments: args,
 	}
+}
+func IsApplyAtom(s Script) bool {
+	_, ok := s.(*apply)
+	return ok
+}
+func ExpectApplyAtom(s Script) *apply {
+	if IsApplyAtom(s) {
+		return s.(*apply)
+	}
+	panic("Expecting function application, got " + s.Type().Name())
 }
 func (f *apply) Eval(env *ScriptEnvironment) (Script, error) {
 	evaledTo, err := f.To.Eval(env)

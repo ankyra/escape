@@ -31,6 +31,12 @@ func NewScriptEnvironmentFromMap(m map[string]Script) *ScriptEnvironment {
 
 func NewScriptEnvironmentWithGlobals(globals map[string]Script) *ScriptEnvironment {
 	result := ScriptEnvironment{}
+	if globals == nil {
+		globals = map[string]Script{}
+	}
+	globals[func_builtinId] = LiftFunction(builtinId)
+	globals[func_builtinEnvLookup] = LiftFunction(builtinEnvLookup)
+	globals[func_builtinConcat] = LiftFunction(builtinConcat)
 	globalsDict := LiftDict(globals)
 	result["$"] = globalsDict
 	return &result

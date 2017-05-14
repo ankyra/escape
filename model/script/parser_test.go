@@ -24,24 +24,90 @@ type parserSuite struct{}
 
 var _ = Suite(&parserSuite{})
 
-// "$gcp.inputs.test"
+func (p *parserSuite) Test_ParseScript_escaped_string(c *C) {
+	result, err := ParseScript("$$escaped")
+	c.Assert(err, IsNil)
+	c.Assert(IsStringAtom(result), Equals, true)
+	c.Assert(ExpectStringAtom(result), Equals, "$$escaped")
+}
+
+func (p *parserSuite) Test_ParseScript_env_lookup(c *C) {
+	result, err := ParseScript("$gcp")
+	c.Assert(err, IsNil)
+	atom := hasStringArgument(c, result, "gcp")
+	atom = hasStringArgument(c, atom.To, "$")
+	c.Assert(IsFunctionAtom(atom.To), Equals, true)
+}
+
+func (p *parserSuite) Test_ParseScript_env_lookup_application_full(c *C) {
+	result, err := ParseScript("$gcp.outputs.key_ident")
+	c.Assert(err, IsNil)
+	atom := hasStringArgument(c, result, "key_ident")
+	atom = hasStringArgument(c, atom.To, "outputs")
+	atom = hasStringArgument(c, atom.To, "gcp")
+	atom = hasStringArgument(c, atom.To, "$")
+	c.Assert(IsFunctionAtom(atom.To), Equals, true)
+}
+
+func hasStringArgument(c *C, s Script, key string) *apply {
+	c.Assert(IsApplyAtom(s), Equals, true)
+	atom := ExpectApplyAtom(s)
+	c.Assert(atom.Arguments, HasLen, 1)
+	c.Assert(ExpectStringAtom(atom.Arguments[0]), Equals, key)
+	return atom
+}
+
+func (p *parserSuite) Test_ParseScript_env_func_call(c *C) {
+	result, err := ParseScript("$__id( $test, $test2 )")
+	c.Assert(err, IsNil)
+	c.Assert(IsApplyAtom(result), Equals, true)
+
+	atom := ExpectApplyAtom(result)
+	c.Assert(IsApplyAtom(atom.To), Equals, true)
+	c.Assert(atom.Arguments, HasLen, 2)
+
+	arg := hasStringArgument(c, atom.Arguments[0], "test")
+	arg = hasStringArgument(c, arg.To, "$")
+	c.Assert(IsFunctionAtom(arg.To), Equals, true)
+
+	arg = hasStringArgument(c, atom.Arguments[1], "test2")
+	arg = hasStringArgument(c, arg.To, "$")
+	c.Assert(IsFunctionAtom(arg.To), Equals, true)
+
+	atom = hasStringArgument(c, atom.To, "__id")
+	atom = hasStringArgument(c, atom.To, "$")
+	c.Assert(IsFunctionAtom(atom.To), Equals, true)
+}
+
+func (p *parserSuite) Test_ParseScript_env_lookup_fails_on_illegal_ident(c *C) {
+	_, err := ParseScript("$_gcp")
+	c.Assert(err, Not(IsNil))
+	_, err = ParseScript("$12gcp")
+	c.Assert(err, Not(IsNil))
+	_, err = ParseScript("$.gcp")
+	c.Assert(err, Not(IsNil))
+	_, err = ParseScript("$-gcp")
+	c.Assert(err, Not(IsNil))
+}
+
 func (p *parserSuite) Test_Parse_And_Eval_Env_Lookup(c *C) {
 	inputsDict := LiftDict(map[string]Script{
 		"version": LiftString("1.0"),
+		"dash":    LiftString("-"),
+		"extra":   LiftString("alpha"),
 	})
 	gcpDict := LiftDict(map[string]Script{
 		"inputs": inputsDict,
 	})
-	globalsDict := LiftDict(map[string]Script{
+	globalsDict := map[string]Script{
 		"gcp": gcpDict,
-	})
-	env := NewScriptEnvironment()
-	(*env)["$"] = globalsDict
+	}
+	env := NewScriptEnvironmentWithGlobals(globalsDict)
 
-	script, err := ParseScript("$gcp.inputs.version")
+	script, err := ParseScript("$__concat($gcp.inputs.version, $gcp.inputs.dash, $gcp.inputs.extra)")
 	c.Assert(err, IsNil)
 
 	result, err := EvalToGoValue(script, env)
 	c.Assert(err, IsNil)
-	c.Assert(result, Equals, "1.0")
+	c.Assert(result, Equals, "1.0-alpha")
 }

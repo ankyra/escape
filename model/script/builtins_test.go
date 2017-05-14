@@ -73,3 +73,33 @@ func (s *exprSuite) Test_Builtin_env_lookup_fails_if_key_is_not_found(c *C) {
 	_, err := builtinEnvLookup(env, []Script{LiftString("not found")})
 	c.Assert(err, Not(IsNil))
 }
+
+func (s *exprSuite) Test_Builtin_Concat_empty(c *C) {
+	result, err := builtinConcat(nil, []Script{})
+	c.Assert(err, IsNil)
+	c.Assert(IsStringAtom(result), Equals, true)
+	c.Assert(ExpectStringAtom(result), Equals, "")
+}
+func (s *exprSuite) Test_Builtin_Concat_1(c *C) {
+	result, err := builtinConcat(nil, []Script{LiftString("test")})
+	c.Assert(err, IsNil)
+	c.Assert(IsStringAtom(result), Equals, true)
+	c.Assert(ExpectStringAtom(result), Equals, "test")
+}
+func (s *exprSuite) Test_Builtin_Concat_2(c *C) {
+	result, err := builtinConcat(nil, []Script{LiftString("test"), LiftString(" testing"), LiftString(" testing")})
+	c.Assert(err, IsNil)
+	c.Assert(IsStringAtom(result), Equals, true)
+	c.Assert(ExpectStringAtom(result), Equals, "test testing testing")
+}
+func (s *exprSuite) Test_Builtin_Concat_with_integer(c *C) {
+	result, err := builtinConcat(nil, []Script{LiftInteger(12), LiftInteger(100), LiftString("test")})
+	c.Assert(err, IsNil)
+	c.Assert(IsStringAtom(result), Equals, true)
+	c.Assert(ExpectStringAtom(result), Equals, "12100test")
+}
+
+func (s *exprSuite) Test_Builtin_Concat_fails_with_wrong_type(c *C) {
+	_, err := builtinConcat(nil, []Script{LiftList([]Script{})})
+	c.Assert(err, Not(IsNil))
+}

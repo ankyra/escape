@@ -72,10 +72,10 @@ func parseExpression(str string) *parseResult {
 	if envLookup.Error != nil {
 		return envLookup
 	}
-	if envLookup.Rest == "" {
-		return envLookup
+	if strings.HasPrefix(envLookup.Rest, ".") {
+		return parseApply(envLookup.Result, envLookup.Rest)
 	}
-	return parseApply(envLookup.Result, envLookup.Rest)
+	return envLookup
 }
 
 func parseEnvLookup(str string) *parseResult {
@@ -85,6 +85,9 @@ func parseEnvLookup(str string) *parseResult {
 	str = str[1:]
 	result, rest := parsers.ParseIdent(str)
 	if result == "" {
+		if strings.HasPrefix(str, "__") {
+			return parseEnvFuncCall(str)
+		}
 		return parseError(fmt.Errorf("Expecting indentifier, got '%s'", str))
 	}
 	envLookup := LiftFunction(builtinEnvLookup)
@@ -92,6 +95,63 @@ func parseEnvLookup(str string) *parseResult {
 	apply2 := NewApply(envLookup, []Script{LiftString("$")})
 	apply1 := NewApply(apply2, []Script{key})
 	return parseSuccess(apply1, rest)
+}
+
+func parseArguments(str string) *parseResult {
+	if !strings.HasPrefix(str, "(") {
+		return parseError(fmt.Errorf("Expecting '(', got '%s'", str))
+	}
+	result := []Script{}
+	orig := str
+	str = strings.TrimSpace(str[1:])
+
+	for {
+		if str == "" {
+			return parseError(fmt.Errorf("Expecting ')', got EOF in %s", orig))
+		}
+		if strings.HasPrefix(str, ")") {
+			break
+		}
+
+		arg := parseExpression(str)
+		if arg.Error != nil {
+			return parseError(fmt.Errorf("Couldn't parse function argument: %s", arg.Error.Error()))
+		}
+		result = append(result, arg.Result)
+
+		str = strings.TrimSpace(arg.Rest)
+		if strings.HasPrefix(str, ")") {
+			break
+		}
+		if !strings.HasPrefix(str, ",") {
+			return parseError(fmt.Errorf("Expecting ',' but got: \"%s\" in \"%s\"", str, orig))
+		}
+		str = strings.TrimSpace(str[1:])
+	}
+	return parseSuccess(LiftList(result), str[1:])
+}
+
+func parseEnvFuncCall(str string) *parseResult {
+	if !strings.HasPrefix(str, "__") {
+		return parseError(fmt.Errorf("Expecting '__', got: '%s'", str))
+	}
+	funcName, rest := parsers.ParseIdent(str[2:])
+	if funcName == "" {
+		return parseError(fmt.Errorf("Expecting __indentifier, got '%s'", str))
+	}
+	if !strings.HasPrefix(rest, "(") {
+		return parseError(fmt.Errorf("Expecting '(', got '%s'", rest))
+	}
+	parseArgsResult := parseArguments(rest)
+	if parseArgsResult.Error != nil {
+		return parseError(fmt.Errorf("Failed to parse function call to __%s: %s", funcName, parseArgsResult.Error.Error()))
+	}
+	envLookup := LiftFunction(builtinEnvLookup)
+	key := LiftString("__" + funcName)
+	apply2 := NewApply(envLookup, []Script{LiftString("$")})
+	apply1 := NewApply(apply2, []Script{key})
+	apply := NewApply(apply1, ExpectListAtom(parseArgsResult.Result))
+	return parseSuccess(apply, parseArgsResult.Rest)
 }
 
 func parseApply(to Script, str string) *parseResult {
@@ -104,8 +164,8 @@ func parseApply(to Script, str string) *parseResult {
 		return parseError(fmt.Errorf("Expecting indentifier, got '%s'", str))
 	}
 	apply := NewApply(to, []Script{LiftString(result)})
-	if rest == "" {
-		return parseSuccess(apply, rest)
+	if strings.HasPrefix(rest, ".") {
+		return parseApply(apply, rest)
 	}
-	return parseApply(apply, rest)
+	return parseSuccess(apply, rest)
 }
