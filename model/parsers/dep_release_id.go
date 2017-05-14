@@ -17,7 +17,8 @@ limitations under the License.
 package parsers
 
 import (
-	"errors"
+	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -30,7 +31,7 @@ type ReleaseId struct {
 func ParseReleaseId(releaseId string) (*ReleaseId, error) {
 	split := strings.Split(releaseId, "-")
 	if len(split) < 3 { // type-build-version
-		return nil, errors.New("Invalid release format: " + releaseId)
+		return nil, fmt.Errorf("Invalid release format: %s", releaseId)
 	}
 	result := &ReleaseId{}
 	result.Type = split[0]
@@ -42,7 +43,39 @@ func ParseReleaseId(releaseId string) (*ReleaseId, error) {
 	} else if strings.HasPrefix(version, "v") {
 		result.Version = version[1:]
 	} else {
-		return nil, errors.New("Invalid version string in release ID '" + releaseId + "': " + version)
+		return nil, fmt.Errorf("Invalid version string in release ID '%s': %s", releaseId, version)
+	}
+
+	if err := result.Validate(); err != nil {
+		return nil, fmt.Errorf("Invalid release ID '%s': %s", releaseId, err.Error())
 	}
 	return result, nil
+}
+
+func (r *ReleaseId) Validate() error {
+	return ValidateVersion(r.Version)
+}
+
+func ValidateVersion(version string) error {
+	if version == "latest" {
+		return nil
+	}
+	re := regexp.MustCompile(`^[0-9]+(\.[0-9]+)*(\.@)?$`)
+	matches := re.Match([]byte(version))
+	if !matches {
+		return fmt.Errorf("Invalid version format: %s", version)
+	}
+	return nil
+}
+
+func (r *ReleaseId) ToString() string {
+	version := r.Version
+	if version != "latest" {
+		version = "v" + version
+	}
+	return r.Type + "-" + r.Build + "-" + version
+}
+
+func (r *ReleaseId) NeedsResolving() bool {
+	return r.Version == "latest" || strings.HasSuffix(r.Version, ".@")
 }

@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	. "github.com/ankyra/escape-client/model/interfaces"
+	"github.com/ankyra/escape-client/model/parsers"
 	"github.com/ankyra/escape-client/model/script"
 	"github.com/ankyra/escape-client/model/templates"
 	"github.com/ankyra/escape-client/model/variable"
@@ -114,6 +115,9 @@ func validate(m *releaseMetadata) error {
 	}
 	if m.Version == "" {
 		return fmt.Errorf("Missing version field in release metadata")
+	}
+	if err := parsers.ValidateVersion(m.Version); err != nil {
+		return err
 	}
 	return nil
 }

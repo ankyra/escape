@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	. "github.com/ankyra/escape-client/model/interfaces"
+	"github.com/ankyra/escape-client/model/parsers"
 	"github.com/ankyra/escape-client/model/script"
 	"github.com/ankyra/escape-client/model/templates"
 	"github.com/ankyra/escape-client/model/variable"
@@ -182,8 +183,12 @@ func (c *Compiler) compileVersion(version string) error {
 	if version == "auto" { // backwards compatibility
 		version = "@"
 	}
+	if err := parsers.ValidateVersion(version); err != nil {
+		return err
+	}
 	client := c.context.GetClient()
 	plan := c.context.GetEscapePlan()
+	plan.SetVersion(version)
 	if strings.HasSuffix(version, "@") {
 		prefix := version[:len(version)-1]
 		backend := c.context.GetEscapeConfig().GetCurrentTarget().GetStorageBackend()
