@@ -68,14 +68,64 @@ func parseExpressionInString(str string) *parseResult {
 }
 
 func parseExpression(str string) *parseResult {
-	envLookup := parseEnvLookup(str)
-	if envLookup.Error != nil {
-		return envLookup
+	var result *parseResult
+	if strings.HasPrefix(str, "$") {
+		result = parseEnvLookup(str)
+	} else if strings.HasPrefix(str, "\"") {
+		result = parseString(str)
 	}
-	if strings.HasPrefix(envLookup.Rest, ".") {
-		return parseApply(envLookup.Result, envLookup.Rest)
+	if result == nil {
+		return parseError(fmt.Errorf("Expecting expression starting with '$' or '\"', got: '%s'", str))
 	}
-	return envLookup
+	if result.Error != nil {
+		return result
+	}
+	if strings.HasPrefix(result.Rest, ".") {
+		return parseApply(result.Result, result.Rest)
+	}
+	return result
+}
+
+func parseString(str string) *parseResult {
+	if !strings.HasPrefix(str, `"`) {
+		return parseError(fmt.Errorf("Expecting '\"'"))
+	}
+	str = str[1:]
+	result := []byte{}
+	escaping := false
+	for {
+		if str == "" {
+			return parseError(fmt.Errorf("Expecting '\"'"))
+		}
+		if strings.HasPrefix(str, "\"") && !escaping {
+			break
+		}
+		if strings.HasPrefix(str, "\\") {
+			if !escaping {
+				str = str[1:]
+				escaping = true
+				continue
+			}
+		}
+		if escaping {
+			if str[0] == 'n' {
+				result = append(result, '\n')
+			} else if str[0] == '"' {
+				result = append(result, '"')
+			} else if str[0] == 't' {
+				result = append(result, '\t')
+			} else if str[0] == '\\' {
+				result = append(result, '\\')
+			} else {
+				return parseError(fmt.Errorf("Unexpected escape character '%s' in '%s'", str[0], str))
+			}
+		} else {
+			result = append(result, str[0])
+		}
+		escaping = false
+		str = str[1:]
+	}
+	return parseSuccess(LiftString(string(result)), str[1:])
 }
 
 func parseEnvLookup(str string) *parseResult {

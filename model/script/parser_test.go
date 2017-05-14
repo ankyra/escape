@@ -24,6 +24,27 @@ type parserSuite struct{}
 
 var _ = Suite(&parserSuite{})
 
+func (p *parserSuite) Test_parseString(c *C) {
+	result := parseString(`"test"  `)
+	c.Assert(result.Error, IsNil)
+	c.Assert(result.Rest, Equals, "  ")
+	c.Assert(IsStringAtom(result.Result), Equals, true)
+	c.Assert(ExpectStringAtom(result.Result), Equals, "test")
+}
+
+func (p *parserSuite) Test_parseString_escaping(c *C) {
+	result := parseString(`"test\"test\n\t\\"`)
+	c.Assert(result.Error, IsNil)
+	c.Assert(result.Rest, Equals, "")
+	c.Assert(IsStringAtom(result.Result), Equals, true)
+	c.Assert(ExpectStringAtom(result.Result), Equals, "test\"test\n\t\\")
+}
+
+func (p *parserSuite) Test_parseString_escaping_on_unknown_characters(c *C) {
+	result := parseString(`"test\atest"`)
+	c.Assert(result.Error, Not(IsNil))
+}
+
 func (p *parserSuite) Test_ParseScript_escaped_string(c *C) {
 	result, err := ParseScript("$$escaped")
 	c.Assert(err, IsNil)
@@ -115,7 +136,6 @@ func (p *parserSuite) Test_ParseScript_method_call(c *C) {
 func (p *parserSuite) Test_Parse_And_Eval_Env_Lookup_with_function_calls(c *C) {
 	inputsDict := LiftDict(map[string]Script{
 		"version": LiftString("1.0"),
-		"dash":    LiftString("-"),
 		"extra":   LiftString("alpha"),
 	})
 	gcpDict := LiftDict(map[string]Script{
@@ -126,7 +146,7 @@ func (p *parserSuite) Test_Parse_And_Eval_Env_Lookup_with_function_calls(c *C) {
 	}
 	env := NewScriptEnvironmentWithGlobals(globalsDict)
 
-	script, err := ParseScript("$__concat($gcp.inputs.version, $gcp.inputs.dash, $gcp.inputs.extra)")
+	script, err := ParseScript(`$__concat($gcp.inputs.version, "-", $gcp.inputs.extra)`)
 	c.Assert(err, IsNil)
 
 	result, err := EvalToGoValue(script, env)
@@ -137,7 +157,6 @@ func (p *parserSuite) Test_Parse_And_Eval_Env_Lookup_with_function_calls(c *C) {
 func (p *parserSuite) Test_Parse_And_Eval_Env_Lookup_with_method_calls(c *C) {
 	inputsDict := LiftDict(map[string]Script{
 		"version": LiftString("1.0"),
-		"dash":    LiftString("-"),
 		"extra":   LiftString("alpha"),
 	})
 	gcpDict := LiftDict(map[string]Script{
@@ -148,7 +167,7 @@ func (p *parserSuite) Test_Parse_And_Eval_Env_Lookup_with_method_calls(c *C) {
 	}
 	env := NewScriptEnvironmentWithGlobals(globalsDict)
 
-	script, err := ParseScript("$gcp.inputs.version.concat($gcp.inputs.dash, $gcp.inputs.extra)")
+	script, err := ParseScript(`$gcp.inputs.version.concat("-", $gcp.inputs.extra)`)
 	c.Assert(err, IsNil)
 
 	result, err := EvalToGoValue(script, env)

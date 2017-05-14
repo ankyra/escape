@@ -170,7 +170,15 @@ func (c *Compiler) compileDependencies(depends []string) error {
 }
 
 func (c *Compiler) compileVersion(version string) error {
-	version = strings.TrimSpace(version)
+	_, err := script.ParseScript(version)
+	if err != nil {
+		return fmt.Errorf("Couldn't parse expression '%s' in version field: %s", version, err.Error())
+	}
+	str, err := RunScriptForCompileStep(version, c.VariableCtx)
+	if err != nil {
+		return fmt.Errorf("Couldn't evaluate expression '%s' in version field: %s", version, err.Error())
+	}
+	version = strings.TrimSpace(str)
 	if version == "auto" { // backwards compatibility
 		version = "@"
 	}

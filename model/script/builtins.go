@@ -28,19 +28,21 @@ const (
 	func_builtinId        = "__id"
 	func_builtinEnvLookup = "__envLookup"
 	func_builtinConcat    = "__concat"
-	func_builtinToLower   = "__toLower"
+	func_builtinToLower   = "__lower"
+	func_builtinToUpper   = "__upper"
 	func_builtinTitle     = "__title"
 )
 
 var builtinToLower = ShouldLift(strings.ToLower)
-var builtinTitle = ShouldLift(strings.Title)
+var builtinToUpper = ShouldLift(strings.ToUpper)
+var builtinTitle = ShouldLift(strings.ToTitle)
 
 func LiftFunc_string_to_string(f func(string) string) Script {
 	name := runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()
-	return LiftFunction(ToScriptFuncType_one_arg("builtin function "+name, wrap_one_arg_string(f)))
+	return LiftFunction(ToScriptFuncType_one_arg("builtin function "+name, wrap_one_arg_string_to_string(f)))
 }
 
-func wrap_one_arg_string(f func(string) string) func(interface{}) (interface{}, error) {
+func wrap_one_arg_string_to_string(f func(string) string) func(interface{}) (interface{}, error) {
 	return func(arg_ interface{}) (interface{}, error) {
 		arg, ok := arg_.(string)
 		if !ok {
