@@ -18,7 +18,10 @@ package escape_plan
 
 import (
 	. "gopkg.in/check.v1"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"reflect"
+	"strings"
 )
 
 type printSuite struct{}
@@ -118,4 +121,22 @@ func (s *printSuite) Test_PrettyPrint_Minimal_Fixture(c *C) {
 	expected, err := ioutil.ReadFile("testdata/minimal_fixture_minified.yml")
 	c.Assert(err, IsNil)
 	c.Assert(string(pretty), Equals, string(expected))
+}
+
+func (s *printSuite) Test_PrettyPrint_includes_all_fields(c *C) {
+	unit := NewPrettyPrinter(includeEmpty(true), includeDocs(true))
+	plan := NewEscapePlan()
+	pretty := unit.Print(plan)
+	result := map[string]interface{}{}
+	err := yaml.Unmarshal(pretty, &result)
+	c.Assert(err, IsNil)
+	val := reflect.Indirect(reflect.ValueOf(plan))
+	for i := 0; i < val.Type().NumField(); i++ {
+		name := val.Type().Field(i).Tag.Get("yaml")
+		key := strings.Split(name, ",")[0]
+		if key != "-" {
+			_, found := result[key]
+			c.Assert(found, Equals, true)
+		}
+	}
 }
