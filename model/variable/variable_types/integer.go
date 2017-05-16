@@ -21,13 +21,7 @@ import (
 	"strconv"
 )
 
-func NewIntegerVariableType() *VariableType {
-	return &VariableType{
-		Type:            "integer",
-		UserCanOverride: true,
-		Validate:        validateInt,
-	}
-}
+var integerType = NewUserManagedVariableType("integer", validateInt)
 
 func validateInt(value interface{}, options map[string]interface{}) (interface{}, error) {
 	switch value.(type) {

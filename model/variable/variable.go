@@ -115,9 +115,6 @@ func (v *Variable) AskUserInput() interface{} {
 	if v.Type == "version" {
 		return nil
 	}
-	if v.Type == "one_of" { // backwards compatible
-		v.Type = "string"
-	}
 	if v.Type == "string" {
 		return ""
 	}
@@ -131,53 +128,47 @@ func (v *Variable) AskUserInput() interface{} {
 }
 
 func (v *Variable) GetValue(variableCtx *map[string]interface{}, env *script.ScriptEnvironment) (interface{}, error) {
-	var vars map[string]interface{}
-	if variableCtx == nil {
-		vars = map[string]interface{}{}
-	} else {
-		vars = *variableCtx
+	typ, err := variable_types.GetVariableType(v.Type)
+	if err != nil {
+		return nil, err
 	}
-	if v.Type == "one_of" { // backwards compatible
-		v.Type = "string"
+	if typ.UserCanOverride {
+		return v.getValueForUserManagedVariable(variableCtx, env)
 	}
-	if v.Type == "string" || v.Type == "integer" || v.Type == "list" {
-		var val interface{}
-		val, ok := vars[v.Id]
-		if !ok {
-			if v.Default != nil {
-				var err error
-				val, err = v.validateDefault(env)
-				if err != nil {
-					return nil, err
-				}
-			} else {
-				return nil, fmt.Errorf("Missing value for variable '%s'", v.Id)
-			}
-		}
-		typ, err := variable_types.GetVariableType(v.Type)
-		if err != nil {
-			return nil, err
-		}
-		val, err = typ.Validate(val, v.Options)
-		if err != nil {
-			return nil, errors.New(err.Error() + " for variable '" + v.Id + "'")
-		}
-		return v.validateOneOf(val)
-	} else if v.Type == "version" {
-		return script.ParseAndEvalToGoValue("$this.version", env)
-	} else if v.Type == "client" { // backwards compatibility
-		return script.ParseAndEvalToGoValue("$this.client", env)
-	} else if v.Type == "project" {
-		return script.ParseAndEvalToGoValue("$this.project", env)
-	} else if v.Type == "deployment" {
-		return script.ParseAndEvalToGoValue("$this.deployment", env)
-	} else if v.Type == "environment" {
-		return script.ParseAndEvalToGoValue("$this.environment", env)
-	}
-	return nil, errors.New("Variable type " + v.Type + " not implemented")
+	return script.ParseAndEvalToGoValue(typ.Script, env)
 }
 
-func (v *Variable) validateDefault(env *script.ScriptEnvironment) (interface{}, error) {
+func (v *Variable) getValueForUserManagedVariable(variableCtx *map[string]interface{}, env *script.ScriptEnvironment) (interface{}, error) {
+	typ, err := variable_types.GetVariableType(v.Type)
+	if err != nil {
+		return nil, err
+	}
+	val, err := v.getValue(variableCtx, env)
+	if err != nil {
+		return nil, err
+	}
+	val, err = typ.Validate(val, v.Options)
+	if err != nil {
+		return nil, errors.New(err.Error() + " for variable '" + v.Id + "'")
+	}
+	return v.validateOneOf(val)
+}
+
+func (v *Variable) getValue(variableCtx *map[string]interface{}, env *script.ScriptEnvironment) (interface{}, error) {
+	if variableCtx == nil {
+		variableCtx = &map[string]interface{}{}
+	}
+	val, ok := (*variableCtx)[v.Id]
+	if ok {
+		return val, nil
+	}
+	return v.getDefaultValue(env)
+}
+
+func (v *Variable) getDefaultValue(env *script.ScriptEnvironment) (interface{}, error) {
+	if v.Default == nil {
+		return nil, fmt.Errorf("Missing value for variable '%s'", v.Id)
+	}
 	switch v.Default.(type) {
 	case int:
 		return v.Default.(int), nil

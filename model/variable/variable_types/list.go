@@ -21,13 +21,7 @@ import (
 	"fmt"
 )
 
-func NewListVariableType() *VariableType {
-	return &VariableType{
-		Type:            "list",
-		UserCanOverride: true,
-		Validate:        validateList,
-	}
-}
+var listType = NewUserManagedVariableType("list", validateList)
 
 func validateList(value interface{}, options map[string]interface{}) (interface{}, error) {
 	result := []interface{}{}
@@ -44,7 +38,7 @@ func validateList(value interface{}, options map[string]interface{}) (interface{
 				if valueType != "string" {
 					return nil, errors.New("Unexpected 'string' value in list, expecting '" + valueType.(string) + "'")
 				}
-				str, err := NewStringVariableType().Validate(val, nil)
+				str, err := stringType.Validate(val, nil)
 				if err != nil {
 					return nil, err
 				}
@@ -53,7 +47,7 @@ func validateList(value interface{}, options map[string]interface{}) (interface{
 				if valueType != "integer" {
 					return nil, errors.New("Unexpected 'integer' value in list, expecting '" + valueType.(string) + "'")
 				}
-				str, err := NewIntegerVariableType().Validate(val, nil)
+				str, err := integerType.Validate(val, nil)
 				if err != nil {
 					return nil, err
 				}

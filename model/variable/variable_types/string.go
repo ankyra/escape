@@ -20,13 +20,7 @@ import (
 	"fmt"
 )
 
-func NewStringVariableType() *VariableType {
-	return &VariableType{
-		Type:            "string",
-		UserCanOverride: true,
-		Validate:        validateString,
-	}
-}
+var stringType = NewUserManagedVariableType("string", validateString)
 
 func validateString(value interface{}, options map[string]interface{}) (interface{}, error) {
 	switch value.(type) {

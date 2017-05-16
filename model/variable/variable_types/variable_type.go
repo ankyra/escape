@@ -17,24 +17,47 @@ limitations under the License.
 package variable_types
 
 import (
-	"errors"
+	"fmt"
 )
+
+var versionType = NewMagicVariable("version", "$this.version")
+var clientType = NewMagicVariable("client", "$this.client")
+var projectType = NewMagicVariable("client", "$this.project")
+var deploymentType = NewMagicVariable("client", "$this.deployment")
+var environmenType = NewMagicVariable("client", "$this.environment")
+
+var knownTypes = []*VariableType{stringType, integerType, listType, versionType,
+	clientType, projectType, deploymentType, environmenType}
+
+type Validator func(value interface{}, options map[string]interface{}) (interface{}, error)
 
 type VariableType struct {
 	Type            string
 	UserCanOverride bool
-	Validate        func(value interface{}, options map[string]interface{}) (interface{}, error)
+	Script          string
+	Validate        Validator
+}
+
+func NewUserManagedVariableType(typ string, validate Validator) *VariableType {
+	return &VariableType{
+		Type:            typ,
+		UserCanOverride: true,
+		Validate:        validate,
+	}
+}
+
+func NewMagicVariable(typ string, script string) *VariableType {
+	return &VariableType{
+		Type:   typ,
+		Script: script,
+	}
 }
 
 func GetVariableType(typ string) (*VariableType, error) {
-	knownTypes := map[string]func() *VariableType{
-		"string":  NewStringVariableType,
-		"integer": NewIntegerVariableType,
-		"list":    NewListVariableType,
+	for _, varType := range knownTypes {
+		if varType.Type == typ {
+			return varType, nil
+		}
 	}
-	result, ok := knownTypes[typ]
-	if !ok {
-		return nil, errors.New("Variable type '" + typ + "' not implemented")
-	}
-	return result(), nil
+	return nil, fmt.Errorf("Unknown variable type '%s'", typ)
 }
