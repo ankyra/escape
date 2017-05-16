@@ -361,6 +361,10 @@ func (c *Compiler) compileTemplates(templateList []interface{}) error {
 		if err != nil {
 			return err
 		}
+		if template.File == "" {
+			return fmt.Errorf("Missing 'file' field in template")
+		}
+		c.addFileDigest(template.File)
 		result = append(result, template)
 	}
 	c.metadata.Templates = result
