@@ -175,6 +175,10 @@ func (v *Variable) getDefaultValue(env *script.ScriptEnvironment) (interface{}, 
 	switch v.Default.(type) {
 	case int:
 		return v.Default.(int), nil
+	case float64:
+		return v.Default, nil
+	case bool:
+		return v.Default, nil
 	case (*string):
 		return v.parseEvalAndGetValue(*v.Default.(*string), env)
 	case string:

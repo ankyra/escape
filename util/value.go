@@ -28,24 +28,37 @@ func InterfaceMapToStringMap(values *map[string]interface{}, keyPrefix string) m
 		return result
 	}
 	for key, val := range *values {
-		stringVal := ""
-		switch val.(type) {
-		case string:
-			stringVal = val.(string)
-		case float64:
-			stringVal = strconv.Itoa(int(val.(float64)))
-		case int:
-			stringVal = strconv.Itoa(val.(int))
-		case []interface{}:
-			jsonBytes, err := json.Marshal(val)
-			if err != nil {
-				panic(err)
-			}
-			stringVal = string(jsonBytes)
-		default:
-			panic(fmt.Sprintf("Type '%T' not supported (key: '%s'). This is a bug in Escape.", val, key))
+		stringVal, err := InterfaceToString(val)
+		if err != nil {
+			panic(fmt.Sprintf("%s (key: '%s'). This is a bug in Escape.", err.Error(), key))
 		}
 		result[keyPrefix+key] = stringVal
 	}
 	return result
+}
+
+func InterfaceToString(val interface{}) (string, error) {
+	stringVal := ""
+	switch val.(type) {
+	case string:
+		stringVal = val.(string)
+	case bool:
+		stringVal = "0"
+		if val.(bool) {
+			stringVal = "1"
+		}
+	case float64:
+		stringVal = strconv.Itoa(int(val.(float64)))
+	case int:
+		stringVal = strconv.Itoa(val.(int))
+	case []interface{}:
+		jsonBytes, err := json.Marshal(val)
+		if err != nil {
+			panic(err)
+		}
+		stringVal = string(jsonBytes)
+	default:
+		return "", fmt.Errorf("Type '%T' not supported", val)
+	}
+	return stringVal, nil
 }

@@ -391,7 +391,7 @@ func (c *Compiler) compileVariable(v interface{}) (result *variable.Variable, er
 
 func (c *Compiler) compileDefault(v *variable.Variable) (*variable.Variable, error) {
 	switch v.Default.(type) {
-	case int:
+	case int, float64, bool:
 		return v, nil
 	case string:
 		defaultValue := v.Default.(string)

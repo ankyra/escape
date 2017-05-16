@@ -68,14 +68,14 @@ func (s *variableSuite) Test_GetValue_OneOf_Variable_Fails(c *C) {
 	c.Assert(err.Error(), DeepEquals, "Expecting one of [\"valid\",\"also valid\"] for variable 'test'")
 }
 
-func (s *variableSuite) Test_String_Variable_Expects_String_Value(c *C) {
+func (s *variableSuite) Test_String_Variable_Converts_To_String_Value(c *C) {
 	unit := NewVariableFromString("test", "string")
 	variableCtx := map[string]interface{}{
 		"test": 12,
 	}
 	val, err := unit.GetValue(&variableCtx, nil)
-	c.Assert(val, IsNil)
-	c.Assert(err.Error(), Equals, "Expecting 'string' value, but got 'int' for variable 'test'")
+	c.Assert(err, IsNil)
+	c.Assert(val, DeepEquals, "12")
 }
 
 func (s *variableSuite) Test_GetValue_Integer_Variable(c *C) {

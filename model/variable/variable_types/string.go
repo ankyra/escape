@@ -18,14 +18,15 @@ package variable_types
 
 import (
 	"fmt"
+	"github.com/ankyra/escape-client/util"
 )
 
 var stringType = NewUserManagedVariableType("string", validateString)
 
 func validateString(value interface{}, options map[string]interface{}) (interface{}, error) {
-	switch value.(type) {
-	case string:
-		return value.(string), nil
+	val, err := util.InterfaceToString(value)
+	if err != nil {
+		return "", fmt.Errorf("Expecting 'string' value, but got '%T'", value)
 	}
-	return "", fmt.Errorf("Expecting 'string' value, but got '%T'", value)
+	return val, nil
 }

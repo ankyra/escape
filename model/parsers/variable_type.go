@@ -18,17 +18,9 @@ package parsers
 
 import (
 	"errors"
+	"github.com/ankyra/escape-client/model/variable/variable_types"
 	"strings"
 )
-
-var SupportedTypes = []string{
-	"client",
-	"deployment",
-	"integer",
-	"string",
-	"version",
-	"list",
-}
 
 type ParsedVariableType struct {
 	Type    string
@@ -58,7 +50,7 @@ func ParseVariableType(str string) (*ParsedVariableType, error) {
 }
 
 func isValidVariableType(typ string) bool {
-	for _, supported := range SupportedTypes {
+	for _, supported := range variable_types.GetSupportedTypes() {
 		if supported == typ {
 			return true
 		}

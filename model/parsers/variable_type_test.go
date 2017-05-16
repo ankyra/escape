@@ -17,6 +17,7 @@ limitations under the License.
 package parsers
 
 import (
+	"github.com/ankyra/escape-client/model/variable/variable_types"
 	. "gopkg.in/check.v1"
 )
 
@@ -25,7 +26,7 @@ type varTypSuite struct{}
 var _ = Suite(&varTypSuite{})
 
 func (s *varTypSuite) Test_Parse_VariableType1(c *C) {
-	for _, typ := range SupportedTypes {
+	for _, typ := range variable_types.GetSupportedTypes() {
 		t, err := ParseVariableType(typ)
 		c.Assert(err, IsNil)
 		c.Assert(t.Type, Equals, typ)

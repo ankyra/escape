@@ -22,9 +22,9 @@ import (
 
 var versionType = NewMagicVariable("version", "$this.version")
 var clientType = NewMagicVariable("client", "$this.client")
-var projectType = NewMagicVariable("client", "$this.project")
-var deploymentType = NewMagicVariable("client", "$this.deployment")
-var environmenType = NewMagicVariable("client", "$this.environment")
+var projectType = NewMagicVariable("project", "$this.project")
+var deploymentType = NewMagicVariable("deployment", "$this.deployment")
+var environmenType = NewMagicVariable("environment", "$this.environment")
 
 var knownTypes = []*VariableType{stringType, boolType, integerType, listType,
 	versionType, clientType, projectType, deploymentType, environmenType}
@@ -69,4 +69,12 @@ func VariableIdIsReservedType(typ string) bool {
 		}
 	}
 	return false
+}
+
+func GetSupportedTypes() []string {
+	result := make([]string, len(knownTypes))
+	for i, varType := range knownTypes {
+		result[i] = varType.Type
+	}
+	return result
 }
