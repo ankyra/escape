@@ -4,7 +4,19 @@ Please see http://escape.ankyra.io for the full documentation.
 
 ## Features
 
-## Usage
+## Installation
+
+The easiest way to install Escape is to download the binaries from the website. 
+
+### Build
+
+This program can be build using standard Go tools. 
+
+```
+git clone https://github.com/ankyra/escape-client.git "$GOPATH/src/github.com/ankyra/escape-client"
+go install
+mv "$GOPATH/bin/escape-client" "$GOPATH/bin/escape"
+```
 
 ## License
 
