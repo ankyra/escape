@@ -26,8 +26,8 @@ var projectType = NewMagicVariable("client", "$this.project")
 var deploymentType = NewMagicVariable("client", "$this.deployment")
 var environmenType = NewMagicVariable("client", "$this.environment")
 
-var knownTypes = []*VariableType{stringType, integerType, listType, versionType,
-	clientType, projectType, deploymentType, environmenType}
+var knownTypes = []*VariableType{stringType, boolType, integerType, listType,
+	versionType, clientType, projectType, deploymentType, environmenType}
 
 type Validator func(value interface{}, options map[string]interface{}) (interface{}, error)
 
@@ -60,4 +60,13 @@ func GetVariableType(typ string) (*VariableType, error) {
 		}
 	}
 	return nil, fmt.Errorf("Unknown variable type '%s'", typ)
+}
+
+func VariableIdIsReservedType(typ string) bool {
+	for _, varType := range knownTypes {
+		if varType.Type == typ {
+			return !varType.UserCanOverride
+		}
+	}
+	return false
 }

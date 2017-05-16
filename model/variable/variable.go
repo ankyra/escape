@@ -50,7 +50,7 @@ func NewVariableFromString(id, typ string) *Variable {
 	v := NewVariable()
 	v.Id = id
 	v.Type = typ
-	if v.Id == "version" || v.Id == "deployment" || v.Id == "client" || v.Id == "project" || v.Id == "environment" {
+	if variable_types.VariableIdIsReservedType(v.Id) {
 		v.Type = v.Id
 	}
 	return v
@@ -120,6 +120,9 @@ func (v *Variable) AskUserInput() interface{} {
 	}
 	if v.Type == "integer" {
 		return 0
+	}
+	if v.Type == "bool" {
+		return false
 	}
 	if v.Type == "list" {
 		return []interface{}{}
@@ -202,7 +205,6 @@ func (v *Variable) parseEvalAndGetValue(str string, env *script.ScriptEnvironmen
 		return nil, fmt.Errorf("Couldn't run expression in default field of variable '%s': %s in '%s'", v.Id, err.Error(), str)
 	}
 	return result, nil
-
 }
 
 func (v *Variable) validateOneOf(item interface{}) (interface{}, error) {
@@ -223,17 +225,10 @@ func (v *Variable) validateOneOf(item interface{}) (interface{}, error) {
 }
 
 func (v *Variable) parseType() error {
-	if v.Type == "" || v.Type == "string" {
-		switch v.Id {
-		case
-			"version",
-			"project",
-			"environment",
-			"deployment",
-			"client":
+	if v.Type == "" {
+		v.Type = "string"
+		if variable_types.VariableIdIsReservedType(v.Id) {
 			v.Type = v.Id
-		default:
-			v.Type = "string"
 		}
 	}
 	parsed, err := parsers.ParseVariableType(v.Type)
