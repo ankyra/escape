@@ -17,13 +17,12 @@ limitations under the License.
 package runners
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
 	. "github.com/ankyra/escape-client/model/interfaces"
+	"github.com/ankyra/escape-client/util"
 )
 
 type environmentBuilder struct {
@@ -117,26 +116,9 @@ func (e *environmentBuilder) GetOutputs(ctx RunnerContext, stage string) (*map[s
 }
 
 func addToEnvironmentWithKeyPrefix(env []string, values *map[string]interface{}, prefix string) []string {
-	if values == nil {
-		return env
-	}
-	for key, val := range *values {
-		stringVal := ""
-		switch val.(type) {
-		case string:
-			stringVal = val.(string)
-		case int:
-			stringVal = strconv.Itoa(val.(int))
-		case []interface{}:
-			jsonBytes, err := json.Marshal(val)
-			if err != nil {
-				panic(err)
-			}
-			stringVal = string(jsonBytes)
-		default:
-			panic(fmt.Sprintf("Type '%T' not supported (key: '%s'). This is a bug in Escape.", val, key))
-		}
-		envEntry := prefix + key + "=" + stringVal
+	stringValues := util.InterfaceMapToStringMap(values, prefix)
+	for key, val := range stringValues {
+		envEntry := key + "=" + val
 		env = append(env, envEntry)
 	}
 	return env

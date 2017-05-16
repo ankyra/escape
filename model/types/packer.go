@@ -88,13 +88,9 @@ func (a *PackerReleaseType) Destroy(ctx RunnerContext) error {
 
 func (a *PackerReleaseType) buildEnvironment(metadata ReleaseMetadata, inputs map[string]interface{}) []string {
 	env := os.Environ()
-	for k, v := range inputs {
-		switch v.(type) {
-		case string:
-			env = append(env, strings.ToUpper(k)+"="+v.(string))
-		default:
-			panic("yo, expecting a string fam")
-		}
+	stringValues := util.InterfaceMapToStringMap(&inputs, "T")
+	for k, v := range stringValues {
+		env = append(env, strings.ToUpper(k)+"="+v)
 	}
 	return env
 }

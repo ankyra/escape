@@ -25,7 +25,6 @@ import (
 	"github.com/ankyra/escape-client/util"
 	"io/ioutil"
 	"os"
-	"strconv"
 )
 
 type TerraformReleaseType struct{}
@@ -133,25 +132,9 @@ func (t *TerraformReleaseType) Destroy(ctx RunnerContext) error {
 
 func (t *TerraformReleaseType) buildEnvironment(metadata ReleaseMetadata, inputs map[string]interface{}) []string {
 	env := os.Environ()
-	for k, v := range inputs {
-		stringVal := ""
-		switch v.(type) {
-		case string:
-			stringVal = v.(string)
-		case float64:
-			stringVal = strconv.Itoa(int(v.(float64)))
-		case int:
-			stringVal = strconv.Itoa(v.(int))
-		case []interface{}:
-			jsonBytes, err := json.Marshal(v)
-			if err != nil {
-				panic(err)
-			}
-			stringVal = string(jsonBytes)
-		default:
-			panic(fmt.Sprintf("Unexpected type '%T' for variable %s", v, k))
-		}
-		env = append(env, "TF_VAR_"+k+"="+stringVal)
+	stringValues := util.InterfaceMapToStringMap(&inputs, "TF_VAR_")
+	for k, v := range stringValues {
+		env = append(env, k+"="+v)
 	}
 	return env
 }

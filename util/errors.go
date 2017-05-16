@@ -24,5 +24,4 @@ import (
 func RecordError(cmd []string, err error) error {
 	cmdString := strings.Join(cmd, " ")
 	return errors.New("Failed to successfully execute command '" + cmdString + "': " + err.Error())
-
 }
