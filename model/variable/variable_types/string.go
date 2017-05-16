@@ -20,14 +20,15 @@ import (
 	"fmt"
 )
 
-type stringVarType struct {
+func NewStringVariableType() *VariableType {
+	return &VariableType{
+		Type:            "string",
+		UserCanOverride: true,
+		Validate:        validateString,
+	}
 }
 
-func NewStringVariableType() VariableType {
-	return &stringVarType{}
-}
-
-func (s *stringVarType) Validate(value interface{}, options map[string]interface{}) (interface{}, error) {
+func validateString(value interface{}, options map[string]interface{}) (interface{}, error) {
 	switch value.(type) {
 	case string:
 		return value.(string), nil

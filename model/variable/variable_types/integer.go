@@ -21,14 +21,15 @@ import (
 	"strconv"
 )
 
-type integerVarType struct {
+func NewIntegerVariableType() *VariableType {
+	return &VariableType{
+		Type:            "integer",
+		UserCanOverride: true,
+		Validate:        validateInt,
+	}
 }
 
-func NewIntegerVariableType() VariableType {
-	return &integerVarType{}
-}
-
-func (s *integerVarType) Validate(value interface{}, options map[string]interface{}) (interface{}, error) {
+func validateInt(value interface{}, options map[string]interface{}) (interface{}, error) {
 	switch value.(type) {
 	case int:
 		return value.(int), nil

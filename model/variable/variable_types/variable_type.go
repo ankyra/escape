@@ -20,12 +20,14 @@ import (
 	"errors"
 )
 
-type VariableType interface {
-	Validate(value interface{}, options map[string]interface{}) (interface{}, error)
+type VariableType struct {
+	Type            string
+	UserCanOverride bool
+	Validate        func(value interface{}, options map[string]interface{}) (interface{}, error)
 }
 
-func GetVariableType(typ string) (VariableType, error) {
-	knownTypes := map[string]func() VariableType{
+func GetVariableType(typ string) (*VariableType, error) {
+	knownTypes := map[string]func() *VariableType{
 		"string":  NewStringVariableType,
 		"integer": NewIntegerVariableType,
 		"list":    NewListVariableType,

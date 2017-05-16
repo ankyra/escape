@@ -21,14 +21,15 @@ import (
 	"fmt"
 )
 
-type listVarType struct {
+func NewListVariableType() *VariableType {
+	return &VariableType{
+		Type:            "list",
+		UserCanOverride: true,
+		Validate:        validateList,
+	}
 }
 
-func NewListVariableType() VariableType {
-	return &listVarType{}
-}
-
-func (s *listVarType) Validate(value interface{}, options map[string]interface{}) (interface{}, error) {
+func validateList(value interface{}, options map[string]interface{}) (interface{}, error) {
 	result := []interface{}{}
 	valueType, ok := options["type"]
 	if !ok {
