@@ -57,7 +57,7 @@ func (r *ReleaseId) Validate() error {
 }
 
 func ValidateVersion(version string) error {
-	if version == "latest" {
+	if version == "latest" || version == "@" {
 		return nil
 	}
 	re := regexp.MustCompile(`^[0-9]+(\.[0-9]+)*(\.@)?$`)
