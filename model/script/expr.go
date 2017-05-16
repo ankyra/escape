@@ -35,6 +35,8 @@ func Lift(val interface{}) (Script, error) {
 	switch val.(type) {
 	case string:
 		return LiftString(val.(string)), nil
+	case bool:
+		return LiftBool(val.(bool)), nil
 	case float64:
 		return LiftInteger(int(val.(float64))), nil
 	case int:
@@ -123,6 +125,38 @@ func ExpectStringAtom(s Script) string {
 		return s.(*stringAtom).String
 	}
 	panic("Expecting string type, got " + s.Type().Name())
+}
+
+/*
+   Booleans
+*/
+type boolAtom struct {
+	Bool bool
+}
+
+func LiftBool(b bool) Script {
+	return &boolAtom{Bool: b}
+}
+
+func (b *boolAtom) Eval(env *ScriptEnvironment) (Script, error) {
+	return b, nil
+}
+func (i *boolAtom) Value() (interface{}, error) {
+	return i.Bool, nil
+}
+func (i *boolAtom) Type() ValueType {
+	return NewType("bool")
+}
+
+func IsBoolAtom(s Script) (ok bool) {
+	_, ok = s.(*boolAtom)
+	return ok
+}
+func ExpectBoolAtom(s Script) bool {
+	if IsBoolAtom(s) {
+		return s.(*boolAtom).Bool
+	}
+	panic("Expecting bool type, got " + s.Type().Name())
 }
 
 /*
@@ -320,16 +354,15 @@ func (f *apply) evalDictApply(dict Script, args []Script) (Script, error) {
 		return nil, fmt.Errorf("Expecting one argument in dict lookup call, but got '%d'", len(args))
 	}
 	arg := args[0]
-	typ := arg.Type()
-	if !typ.IsString() {
-		return nil, fmt.Errorf("Expecting string argument in dict lookup call, but got '%s'", typ.Name())
+	if !IsStringAtom(arg) {
+		return nil, fmt.Errorf("Expecting string argument in dict lookup call, but got '%s'", arg.Type().Name())
 	}
-	key, _ := arg.Value()
-	d, _ := dict.Value()
-	result, ok := d.(map[string]Script)[key.(string)]
+	key := ExpectStringAtom(arg)
+	d := ExpectDictAtom(dict)
+	result, ok := d[key]
 	if !ok {
 		keys := []string{}
-		for k, _ := range d.(map[string]Script) {
+		for k, _ := range d {
 			keys = append(keys, k)
 		}
 		expects := strings.Join(keys, ", ")
@@ -346,20 +379,19 @@ func (f *apply) evalStringApply(str Script, args []Script) (Script, error) {
 		return nil, fmt.Errorf("Expecting one argument in string call, but got '%d'", len(args))
 	}
 	arg := args[0]
-	typ := arg.Type()
-	if !typ.IsString() {
-		return nil, fmt.Errorf("Expecting string argument in string call, but got '%s'", typ.Name())
+	if !IsStringAtom(arg) {
+		return nil, fmt.Errorf("Expecting string argument in string call, but got '%s'", arg.Type().Name())
 	}
-	s, _ := str.Value()
-	fun, _ := arg.Value()
-	if fun.(string) == "file" {
-		result, err := builtinFileStringFunc(s.(string))
+	applyTo := ExpectStringAtom(str)
+	fun := ExpectStringAtom(arg)
+	if fun == "file" {
+		result, err := builtinFileStringFunc(applyTo)
 		if err != nil {
 			return nil, err
 		}
 		return LiftString(result), nil
 	}
-	return nil, fmt.Errorf("Calling unknown function '%s' on string", fun.(string))
+	return nil, fmt.Errorf("Calling unknown function '%s' on string", fun)
 }
 
 func (f *apply) Value() (interface{}, error) {

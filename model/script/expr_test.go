@@ -41,6 +41,12 @@ func (s *exprSuite) Test_Lift_String(c *C) {
 	c.Assert(IsStringAtom(v), Equals, true)
 	c.Assert(ExpectStringAtom(v), Equals, "string")
 }
+func (s *exprSuite) Test_Lift_Bool(c *C) {
+	v, err := Lift(true)
+	c.Assert(err, IsNil)
+	c.Assert(IsBoolAtom(v), Equals, true)
+	c.Assert(ExpectBoolAtom(v), Equals, true)
+}
 func (s *exprSuite) Test_Lift_Integer(c *C) {
 	v, err := Lift(12)
 	c.Assert(err, IsNil)
@@ -136,6 +142,25 @@ func (s *exprSuite) Test_IsStringAtom(c *C) {
 func (s *exprSuite) Test_ExpectStringAtom(c *C) {
 	c.Assert(ExpectStringAtom(LiftString("test")), Equals, "test")
 	c.Assert(func() { ExpectStringAtom(LiftInteger(12)) }, Panics, "Expecting string type, got integer")
+}
+
+func (s *exprSuite) Test_Eval_Bool(c *C) {
+	v := LiftBool(false)
+	result, err := EvalToGoValue(v, nil)
+	c.Assert(err, IsNil)
+	c.Assert(result, Equals, false)
+}
+
+func (s *exprSuite) Test_IsBoolAtom(c *C) {
+	c.Assert(IsBoolAtom(LiftBool(true)), Equals, true)
+	c.Assert(IsBoolAtom(LiftInteger(12)), Equals, false)
+	c.Assert(IsBoolAtom(LiftFunction(builtinId)), Equals, false)
+	c.Assert(IsBoolAtom(NewApply(LiftFunction(builtinId), nil)), Equals, false)
+}
+
+func (s *exprSuite) Test_ExpectBoolAtom(c *C) {
+	c.Assert(ExpectBoolAtom(LiftBool(false)), Equals, false)
+	c.Assert(func() { ExpectBoolAtom(LiftInteger(12)) }, Panics, "Expecting bool type, got integer")
 }
 
 func (s *exprSuite) Test_Eval_Integer(c *C) {
