@@ -57,7 +57,7 @@ type releaseMetadata struct {
 
 func NewEmptyReleaseMetadata() ReleaseMetadata {
 	return &releaseMetadata{
-		ApiVersion:  "1",
+		ApiVersion:  "2",
 		Consumes:    []string{},
 		Provides:    []string{},
 		Depends:     []string{},
