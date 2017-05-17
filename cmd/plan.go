@@ -23,7 +23,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var releaseType string
 var releaseName string
 var outputPath string
 var force bool
@@ -47,7 +46,7 @@ var initCmd = &cobra.Command{
 		if releaseName == "" {
 			return fmt.Errorf("Missing 'name' parameter")
 		}
-		return controllers.PlanController{}.Init(context, releaseType, releaseName, outputPath, force)
+		return controllers.PlanController{}.Init(context, releaseName, outputPath, force)
 	},
 }
 
@@ -94,7 +93,6 @@ func init() {
 	planCmd.AddCommand(minifyCmd)
 	planCmd.AddCommand(compileCmd)
 
-	initCmd.Flags().StringVarP(&releaseType, "type", "t", "archive", "The release type")
 	initCmd.Flags().StringVarP(&releaseName, "name", "n", "", "The release name (eg. hello-world)")
 	initCmd.Flags().StringVarP(&outputPath, "output", "o", "escape.yml", "The output location")
 	initCmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite output file if it exists")

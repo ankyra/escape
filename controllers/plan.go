@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"github.com/ankyra/escape-client/model/escape_plan"
 	. "github.com/ankyra/escape-client/model/interfaces"
-	"github.com/ankyra/escape-client/model/types"
 	"github.com/ankyra/escape-client/util"
 	"io/ioutil"
 )
@@ -49,16 +48,10 @@ func (p PlanController) Minify(context Context, outputLocation string) error {
 	return nil
 }
 
-func (p PlanController) Init(context Context, typ, build_id, output_file string, force bool) error {
-	plan := escape_plan.NewEscapePlan().Init(typ, build_id)
+func (p PlanController) Init(context Context, build_id, output_file string, force bool) error {
+	plan := escape_plan.NewEscapePlan().Init(build_id)
 	if util.PathExists(output_file) && !force {
 		return fmt.Errorf("'%s' already exists. Use --force / -f to overwrite.", output_file)
-
 	}
-	releaseType, err := types.ResolveType(typ)
-	if err != nil {
-		return err
-	}
-	releaseType.InitEscapePlan(plan)
 	return ioutil.WriteFile(output_file, plan.ToYaml(), 0644)
 }

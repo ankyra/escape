@@ -11,6 +11,21 @@
                "stages": {
                   "build": {
                      "inputs": {},
+                     "calculated_inputs": {},
+                     "calculated_outputs": {},
+                     "version": "",
+                     "step": ""
+                  }
+               },
+               "inputs": {},
+               "deployments": {},
+               "providers": {}
+            },
+            "name": {
+               "name": "name",
+               "stages": {
+                  "build": {
+                     "inputs": {},
                      "calculated_inputs": null,
                      "calculated_outputs": {},
                      "version": "",

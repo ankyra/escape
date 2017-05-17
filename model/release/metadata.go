@@ -50,7 +50,6 @@ type releaseMetadata struct {
 	Provides    []string              `json:"provides"`
 	Templates   []*templates.Template `json:"templates"`
 	Test        string                `json:"test"`
-	Type        string                `json:"type"`
 	VariableCtx map[string]string     `json:"variable_context"`
 	Version     string                `json:"version"`
 	Stages      map[string]*ExecStage `json:"stages"`
@@ -74,9 +73,8 @@ func NewEmptyReleaseMetadata() ReleaseMetadata {
 	}
 }
 
-func NewReleaseMetadata(typ, name, version string) ReleaseMetadata {
+func NewReleaseMetadata(name, version string) ReleaseMetadata {
 	m := NewEmptyReleaseMetadata()
-	m.(*releaseMetadata).Type = typ
 	m.(*releaseMetadata).Name = name
 	m.(*releaseMetadata).Version = version
 	return m
@@ -105,9 +103,6 @@ func NewReleaseMetadataFromFile(metadataFile string) (ReleaseMetadata, error) {
 }
 
 func validate(m *releaseMetadata) error {
-	if m.Type == "" {
-		return fmt.Errorf("Missing type field in release metadata")
-	}
 	if m.Name == "" {
 		return fmt.Errorf("Missing name field in release metadata")
 	}
@@ -204,9 +199,6 @@ func (m *releaseMetadata) GetPath() string {
 func (m *releaseMetadata) GetProvides() []string {
 	return m.Provides
 }
-func (m *releaseMetadata) GetType() string {
-	return m.Type
-}
 func (m *releaseMetadata) GetVersion() string {
 	return m.Version
 }
@@ -225,11 +217,11 @@ func (m *releaseMetadata) SetVariableInContext(v string, ref string) {
 	m.VariableCtx = ctx
 }
 func (m *releaseMetadata) GetReleaseId() string {
-	return m.Type + "-" + m.Name + "-v" + m.Version
+	return m.Name + "-v" + m.Version
 }
 
 func (m *releaseMetadata) GetVersionlessReleaseId() string {
-	return m.Type + "-" + m.Name
+	return m.Name
 }
 
 func (m *releaseMetadata) AddInputVariable(input *variable.Variable) {
@@ -309,7 +301,6 @@ func (m *releaseMetadata) ToScriptMap() map[string]script.Script {
 		"build":       script.LiftString(m.GetName()),
 		"revision":    script.LiftString(m.GetRevision()),
 		"id":          script.LiftString(m.GetReleaseId()),
-		"type":        script.LiftString(m.GetType()),
 		"version":     script.LiftString(m.GetVersion()),
 	}
 }

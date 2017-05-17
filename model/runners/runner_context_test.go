@@ -46,7 +46,7 @@ func (s *testSuite) Test_NewRunnerContext(c *C) {
 	c.Assert(runCtx.GetEnvironmentState(), Equals, ctx.GetEnvironmentState())
 	c.Assert(runCtx.GetReleaseMetadata(), Equals, ctx.GetReleaseMetadata())
 	c.Assert(runCtx.Logger(), Equals, ctx.GetLogger())
-	c.Assert(runCtx.GetDepends(), DeepEquals, []string{"archive-name"})
+	c.Assert(runCtx.GetDepends(), DeepEquals, []string{"name"})
 	c.Assert(runCtx.GetDeploymentState(), IsNil)
 }
 
@@ -69,7 +69,7 @@ func (s *testSuite) Test_GetScriptEnvironment_no_depends(c *C) {
 	c.Assert(err, IsNil)
 	runCtx, err := NewRunnerContext(ctx)
 	c.Assert(runCtx, Not(IsNil))
-	depl, err := ctx.GetEnvironmentState().GetDeploymentState([]string{"archive-name"})
+	depl, err := ctx.GetEnvironmentState().GetDeploymentState([]string{"name"})
 	c.Assert(err, IsNil)
 	runCtx.SetDeploymentState(depl)
 	scriptEnv, err := runCtx.GetScriptEnvironment("deploy")

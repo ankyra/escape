@@ -167,7 +167,7 @@ func (b *ScriptStep) initDeploymentState(ctx RunnerContext) (DeploymentState, er
 		if b.Stage == "deploy" {
 			stageName = "Deployment"
 		}
-		return nil, fmt.Errorf("%s '%s' (version %s) could not be found", stageName, ctx.GetDepends()[0], version)
+		return nil, fmt.Errorf("%s state '%s' (version %s) could not be found", stageName, ctx.GetDepends()[0], version)
 	}
 	ctx.SetDeploymentState(deploymentState)
 	if b.Inputs != nil {

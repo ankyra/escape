@@ -50,7 +50,6 @@ type EscapePlan struct {
 	Provides    []string               `yaml:"provides,omitempty"`
 	Templates   []interface{}          `yaml:"templates,omitempty"`
 	Test        string                 `yaml:"test,omitempty"`
-	Type        string                 `yaml:"type"`
 	Version     string                 `yaml:"version"`
 }
 
@@ -140,9 +139,6 @@ func (e *EscapePlan) GetTest() string {
 func (e *EscapePlan) GetSmoke() string {
 	return e.Smoke
 }
-func (e *EscapePlan) GetType() string {
-	return e.Type
-}
 func (e *EscapePlan) GetVersion() string {
 	return e.Version
 }
@@ -203,18 +199,14 @@ func (e *EscapePlan) SetProvides(newValue []string) {
 func (e *EscapePlan) SetTest(newValue string) {
 	e.Test = newValue
 }
-func (e *EscapePlan) SetType(newValue string) {
-	e.Type = newValue
-}
 func (e *EscapePlan) SetVersion(newValue string) {
 	e.Version = newValue
 }
-
 func (e *EscapePlan) GetReleaseId() string {
-	return e.Type + "-" + e.Name + "-v" + e.Version
+	return e.Name + "-v" + e.Version
 }
 func (e *EscapePlan) GetVersionlessReleaseId() string {
-	return e.Type + "-" + e.Name
+	return e.Name
 }
 
 func (e *EscapePlan) LoadConfig(cfgFile string) error {
@@ -237,9 +229,8 @@ func (e *EscapePlan) LoadConfig(cfgFile string) error {
 	return nil
 }
 
-func (e *EscapePlan) Init(typ, name string) *EscapePlan {
+func (e *EscapePlan) Init(name string) *EscapePlan {
 	e.Name = name
-	e.Type = typ
 	e.Version = "@"
 	return e
 }

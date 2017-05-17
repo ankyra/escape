@@ -46,13 +46,11 @@ type Compiler struct {
 	// => VariableCtx["base"] = "archive-test-v1"
 	//
 	VariableCtx map[string]ReleaseMetadata
-	ResolveType ReleaseTypeResolver
 }
 
-func NewCompiler(typeResolver ReleaseTypeResolver) *Compiler {
+func NewCompiler() *Compiler {
 	return &Compiler{
 		VariableCtx: map[string]ReleaseMetadata{},
-		ResolveType: typeResolver,
 	}
 }
 
@@ -66,7 +64,6 @@ func (c *Compiler) Compile(context Context) (ReleaseMetadata, error) {
 		return nil, fmt.Errorf("Missing build name. Add a 'name' field to your Escape plan")
 	}
 	c.metadata.Name = plan.GetName()
-	c.metadata.Type = plan.GetType()
 	c.metadata.Description = plan.GetDescription()
 	c.metadata.Logo = plan.GetLogo()
 	c.metadata.Provides = plan.GetProvides()
@@ -103,9 +100,6 @@ func (c *Compiler) Compile(context Context) (ReleaseMetadata, error) {
 	if err := c.compileLogo(plan.GetLogo()); err != nil {
 		return nil, err
 	}
-	if err := c.compileReleaseTypeExtras(); err != nil {
-		return nil, err
-	}
 	//if build_fat_package:
 	//    self._add_dependencies(escape_config, escape_plan)
 	context.PopLogSection()
@@ -123,7 +117,6 @@ func (c *Compiler) compileExtensions(plan *escape_plan.EscapePlan) error {
 		provides[c] = true
 	}
 	for _, extend := range plan.GetExtends() {
-		fmt.Println("Compiling extends", extend)
 		dep, err := NewDependencyFromString(extend)
 		if err != nil {
 			return err
@@ -194,7 +187,15 @@ func (c *Compiler) compileExtensions(plan *escape_plan.EscapePlan) error {
 			c.metadata.SetStage(name, c.extensionPath(metadata, stage.Script))
 		}
 		for _, d := range metadata.GetDependencies() {
-			plan.Depends = append(plan.Depends, d)
+			found := false
+			for _, existing := range plan.Depends {
+				if existing == d {
+					found = true
+				}
+			}
+			if !found {
+				plan.Depends = append(plan.Depends, d)
+			}
 		}
 		c.VariableCtx[versionlessDep] = metadata
 		c.metadata.SetVariableInContext(versionlessDep, metadata.GetReleaseId())
@@ -526,15 +527,6 @@ func (c *Compiler) compileMetadata(metadata map[string]string) error {
 	}
 	c.metadata.Metadata = result
 	return nil
-}
-
-func (c *Compiler) compileReleaseTypeExtras() error {
-	plan := c.context.GetEscapePlan()
-	releaseType, err := c.ResolveType(c.metadata.GetType())
-	if err != nil {
-		return err
-	}
-	return releaseType.CompileMetadata(plan, c.metadata)
 }
 
 func RunScriptForCompileStep(scriptStr string, variableCtx map[string]ReleaseMetadata) (string, error) {

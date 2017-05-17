@@ -18,7 +18,6 @@ package escape_plan
 
 var docMap = map[string]string{
 	"name":        nameDoc,
-	"type":        typeDoc,
 	"version":     versionDoc,
 	"description": descriptionDoc,
 	"depends":     dependsDoc,
@@ -41,11 +40,7 @@ func GetDoc(key string) []byte {
 	return []byte(doc)
 }
 
-const nameDoc = `# The build name.  Together with the release type makes up the build
-# identifier. Format: /[a-zA-Z]+[a-zA-Z0-9-]*/
-#`
-
-const typeDoc = `# The release type. One of: ansible, archive, docker, kubespec, terraform
+const nameDoc = `# The build name. Format: /[a-zA-Z]+[a-zA-Z0-9-]*/
 #`
 
 const versionDoc = `# The version. Either specify the full version or use the '@' symbol to 

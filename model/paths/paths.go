@@ -55,7 +55,7 @@ func (p *Path) GetBaseDir() string {
 }
 
 func (p *Path) NewPathForDependency(metadata ReleaseMetadata) Paths {
-	return NewPathWithBaseDir(filepath.Join(p.baseDir, metadata.GetType(), metadata.GetName()))
+	return NewPathWithBaseDir(filepath.Join(p.baseDir, "deps", metadata.GetName()))
 }
 
 func (p *Path) GetAppConfigDir() string {
@@ -117,11 +117,11 @@ func (p *Path) LocalReleaseMetadata(metadata ReleaseMetadata) string {
 }
 
 func (p *Path) ExtensionPath(extension ReleaseMetadata, path string) string {
-	return filepath.Join(extension.GetType(), extension.GetName(), path)
+	return filepath.Join("deps", extension.GetName(), path)
 }
 
 func (p *Path) DepTypeDirectory(dependency Dependency) string {
-	return filepath.Join(p.baseDir, dependency.GetType())
+	return filepath.Join(p.baseDir, "deps")
 }
 func (p *Path) UnpackedDepDirectory(dependency Dependency) string {
 	return filepath.Join(p.DepTypeDirectory(dependency), dependency.GetBuild())

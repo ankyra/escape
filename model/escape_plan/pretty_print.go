@@ -31,7 +31,6 @@ type prettyPrinter struct {
 
 var templateMap = map[string]string{
 	"name":         keyValTpl,
-	"type":         keyValTpl,
 	"version":      keyValTpl,
 	"description":  keyValTpl,
 	"logo":         keyValTpl,
@@ -98,7 +97,7 @@ func (e *prettyPrinter) Print(plan *EscapePlan) []byte {
 	yamlMap := plan.ToDict()
 	writer := bytes.NewBuffer([]byte{})
 	ordering := []string{
-		"name", "type", "version", "description", "logo", "extends", "depends", "consumes",
+		"name", "version", "description", "logo", "extends", "depends", "consumes",
 		"provides", "inputs", "outputs", "metadata", "includes", "errands", "templates", "path",
 		"pre_build", "build", "post_build", "test",
 		"pre_deploy", "deploy", "post_deploy", "smoke",

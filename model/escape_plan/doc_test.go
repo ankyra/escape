@@ -27,8 +27,6 @@ var _ = Suite(&docSuite{})
 func (s *docSuite) Test_Doc(c *C) {
 	doc := GetDoc("name")
 	c.Assert(string(doc), Equals, nameDoc)
-	doc = GetDoc("type")
-	c.Assert(string(doc), Equals, typeDoc)
 	doc = GetDoc("version")
 	c.Assert(string(doc), Equals, versionDoc)
 	doc = GetDoc("depends")

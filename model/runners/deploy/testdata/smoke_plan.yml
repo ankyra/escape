@@ -1,5 +1,4 @@
 name: name
-type: archive
 version: 0.0.1
 smoke: testdata/test.sh
 inputs:

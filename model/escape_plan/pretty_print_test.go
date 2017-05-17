@@ -30,7 +30,7 @@ var _ = Suite(&printSuite{})
 
 func (s *printSuite) Test_PrettyPrint_KeyVal(c *C) {
 	unit := NewPrettyPrinter(includeDocs(false), includeEmpty(true))
-	keys := []string{"name", "type", "version", "description", "logo", "path",
+	keys := []string{"name", "version", "description", "logo", "path",
 		"pre_build", "build", "post_build", "pre_destroy", "destroy", "post_destroy", "test",
 		"pre_deploy", "deploy", "post_deploy", "smoke"}
 	for _, key := range keys {

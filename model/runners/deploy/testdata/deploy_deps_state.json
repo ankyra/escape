@@ -6,23 +6,8 @@
          "name": "dev",
          "inputs": null,
          "deployments": {
-            "archive-": {
-               "name": "archive-",
-               "stages": {
-                  "deploy": {
-                     "inputs": {},
-                     "calculated_inputs": {},
-                     "calculated_outputs": {},
-                     "version": "",
-                     "step": ""
-                  }
-               },
-               "inputs": {},
-               "deployments": {},
-               "providers": {}
-            },
-            "archive-name": {
-               "name": "archive-name",
+            "name": {
+               "name": "name",
                "stages": {
                   "build": {
                      "inputs": {},
@@ -47,8 +32,8 @@
                },
                "inputs": {},
                "deployments": {
-                  "archive-dependency": {
-                     "name": "archive-dependency",
+                  "dependency": {
+                     "name": "dependency",
                      "stages": {
                         "deploy": {
                            "inputs": {},

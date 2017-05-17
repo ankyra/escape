@@ -3,6 +3,7 @@
    "branch": "",
    "consumes": [],
    "depends": [],
+   "extends": [],
    "description": "",
    "errands": {},
    "files": {},
@@ -22,32 +23,11 @@
    ],
    "path": "",
    "provides": [],
+   "templates": [],
    "test": "",
-   "type": "archive",
    "variable_context": {},
    "version": "0.0.1",
    "stages": {
-      "post_build": {
-         "script": ""
-      },
-      "post_deploy": {
-         "script": ""
-      },
-      "post_destroy": {
-         "script": ""
-      },
-      "pre_build": {
-         "script": ""
-      },
-      "pre_deploy": {
-         "script": ""
-      },
-      "pre_destroy": {
-         "script": ""
-      },
-      "smoke": {
-         "script": ""
-      },
       "test": {
          "script": ""
       }
