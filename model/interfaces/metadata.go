@@ -22,6 +22,10 @@ import (
 	"github.com/ankyra/escape-client/model/variable"
 )
 
+type ExecStage struct {
+	Script string `json:"script"`
+}
+
 type ReleaseMetadata interface {
 	ToJson() string
 	ToDict() (map[string]interface{}, error)
@@ -56,6 +60,7 @@ type ReleaseMetadata interface {
 	GetVariableContext() map[string]string
 	GetTemplates() []*templates.Template
 
+	GetStages() map[string]*ExecStage
 	SetStage(stage, script string)
 	GetScript(stage string) string
 

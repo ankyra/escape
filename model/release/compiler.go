@@ -45,14 +45,12 @@ type Compiler struct {
 	// => VariableCtx["base"] = "archive-test-v1"
 	//
 	VariableCtx map[string]ReleaseMetadata
-	Consumers   map[string]bool
 	ResolveType ReleaseTypeResolver
 }
 
 func NewCompiler(typeResolver ReleaseTypeResolver) *Compiler {
 	return &Compiler{
 		VariableCtx: map[string]ReleaseMetadata{},
-		Consumers:   map[string]bool{},
 		ResolveType: typeResolver,
 	}
 }
@@ -70,7 +68,7 @@ func (c *Compiler) Compile(context Context) (ReleaseMetadata, error) {
 	c.metadata.Provides = plan.GetProvides()
 	c.metadata.Consumes = plan.GetConsumes()
 
-	if err := c.compileConsumers(plan.GetConsumes()); err != nil {
+	if err := c.compileExtensions(plan); err != nil {
 		return nil, err
 	}
 	if err := c.compileDependencies(plan.GetDepends()); err != nil {
@@ -104,9 +102,6 @@ func (c *Compiler) Compile(context Context) (ReleaseMetadata, error) {
 	if err := c.compileReleaseTypeExtras(); err != nil {
 		return nil, err
 	}
-	if err := c.compileExtensions(plan.GetExtends()); err != nil {
-		return nil, err
-	}
 	//if build_fat_package:
 	//    self._add_dependencies(escape_config, escape_plan)
 	context.PopLogSection()
@@ -114,20 +109,16 @@ func (c *Compiler) Compile(context Context) (ReleaseMetadata, error) {
 
 }
 
-func (c *Compiler) compileConsumers(consumes []string) error {
-	for _, consumer := range consumes {
-		c.Consumers[consumer] = true
-	}
-	c.metadata.Consumes = consumes
-	return nil
-}
-
-func (c *Compiler) compileExtensions(extends []string) error {
+func (c *Compiler) compileExtensions(plan *escape_plan.EscapePlan) error {
 	consumes := map[string]bool{}
+	provides := map[string]bool{}
 	for _, c := range c.metadata.Consumes {
 		consumes[c] = true
 	}
-	for _, extend := range extends {
+	for _, c := range c.metadata.Provides {
+		provides[c] = true
+	}
+	for _, extend := range plan.GetExtends() {
 		fmt.Println("Compiling extends", extend)
 		dep, err := NewDependencyFromString(extend)
 		if err != nil {
@@ -147,6 +138,12 @@ func (c *Compiler) compileExtensions(extends []string) error {
 			if !consumes[consume] {
 				consumes[consume] = true
 				c.metadata.Consumes = append(c.metadata.Consumes, consume)
+			}
+		}
+		for _, provide := range metadata.GetProvides() {
+			if !provides[provide] {
+				provides[provide] = true
+				c.metadata.Provides = append(c.metadata.Provides, provide)
 			}
 		}
 		for _, input := range metadata.GetInputs() {
@@ -172,6 +169,29 @@ func (c *Compiler) compileExtensions(extends []string) error {
 			if !found {
 				c.metadata.AddOutputVariable(output)
 			}
+		}
+		for name, newErrand := range metadata.GetErrands() {
+			_, exists := c.metadata.Errands[name]
+			if exists {
+				continue
+			}
+			script := newErrand.GetScript()
+			if err := c.compileEscapePlanScriptDigest(script); err != nil {
+				return err
+			}
+			c.metadata.Errands[name] = newErrand.(*errand)
+		}
+		for key, val := range metadata.GetMetadata() {
+			c.metadata.Metadata[key] = val
+		}
+		for _, tpl := range metadata.GetTemplates() {
+			c.metadata.Templates = append(c.metadata.Templates, tpl)
+		}
+		for name, stage := range metadata.GetStages() {
+			c.metadata.SetStage(name, stage.Script)
+		}
+		for _, d := range metadata.GetDependencies() {
+			plan.Depends = append(plan.Depends, d)
 		}
 		c.VariableCtx[versionlessDep] = metadata
 		c.metadata.SetVariableInContext(versionlessDep, metadata.GetReleaseId())
@@ -398,24 +418,19 @@ func (c *Compiler) compileOutputs(outputs []interface{}) error {
 
 func (c *Compiler) compileErrands(errands map[string]interface{}) error {
 	for name, errandDict := range errands {
-		errandIface, err := NewErrandFromDict(name, errandDict)
+		newErrand, err := NewErrandFromDict(name, errandDict)
 		if err != nil {
 			return err
 		}
-		newErrand := errandIface.(*errand)
-		if newErrand.Script == "" {
-			return errors.New("Errand " + newErrand.Name + " is missing a script")
-		}
-		if err := c.compileEscapePlanScriptDigest(newErrand.Script); err != nil {
+		if err := c.compileEscapePlanScriptDigest(newErrand.GetScript()); err != nil {
 			return err
 		}
-		c.metadata.Errands[name] = newErrand
+		c.metadata.Errands[name] = newErrand.(*errand)
 	}
 	return nil
 }
 
 func (c *Compiler) compileTemplates(templateList []interface{}) error {
-	result := []*templates.Template{}
 	for _, tpl := range templateList {
 		template, err := templates.NewTemplateFromInterface(tpl)
 		if err != nil {
@@ -425,9 +440,8 @@ func (c *Compiler) compileTemplates(templateList []interface{}) error {
 			return fmt.Errorf("Missing 'file' field in template")
 		}
 		c.addFileDigest(template.File)
-		result = append(result, template)
+		c.metadata.Templates = append(c.metadata.Templates, template)
 	}
-	c.metadata.Templates = result
 	return nil
 }
 
