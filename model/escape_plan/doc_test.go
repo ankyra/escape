@@ -25,8 +25,8 @@ type docSuite struct{}
 var _ = Suite(&docSuite{})
 
 func (s *docSuite) Test_Doc(c *C) {
-	doc := GetDoc("build")
-	c.Assert(string(doc), Equals, buildDoc)
+	doc := GetDoc("name")
+	c.Assert(string(doc), Equals, nameDoc)
 	doc = GetDoc("type")
 	c.Assert(string(doc), Equals, typeDoc)
 	doc = GetDoc("version")

@@ -30,7 +30,7 @@ type prettyPrinter struct {
 }
 
 var templateMap = map[string]string{
-	"build":        keyValTpl,
+	"name":         keyValTpl,
 	"type":         keyValTpl,
 	"version":      keyValTpl,
 	"description":  keyValTpl,
@@ -95,7 +95,7 @@ func (e *prettyPrinter) Print(plan *EscapePlan) []byte {
 	yamlMap := plan.ToDict()
 	writer := bytes.NewBuffer([]byte{})
 	ordering := []string{
-		"build", "type", "version", "description", "logo", "extends", "depends", "consumes",
+		"name", "type", "version", "description", "logo", "extends", "depends", "consumes",
 		"provides", "inputs", "outputs", "metadata", "includes", "errands", "templates", "path",
 		"pre_build", "post_build", "test",
 		"pre_deploy", "post_deploy", "smoke",
@@ -153,6 +153,16 @@ func (e *prettyPrinter) prettyPrintValue(key string, val interface{}) []byte {
 		panic(err)
 	}
 	return writer.Bytes()
+}
+
+func indent(s string) string {
+	parts := []string{}
+	for _, part := range strings.Split(s, "\n") {
+		if part != "" {
+			parts = append(parts, "  "+part)
+		}
+	}
+	return strings.Join(parts, "\n")
 }
 
 const keyValTpl = `{{ .key }}: {{ if .value }}{{ .value }}{{else}}""{{end}}`

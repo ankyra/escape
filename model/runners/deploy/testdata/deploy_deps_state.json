@@ -6,6 +6,21 @@
          "name": "dev",
          "inputs": null,
          "deployments": {
+            "archive-": {
+               "name": "archive-",
+               "stages": {
+                  "deploy": {
+                     "inputs": {},
+                     "calculated_inputs": {},
+                     "calculated_outputs": {},
+                     "version": "",
+                     "step": ""
+                  }
+               },
+               "inputs": {},
+               "deployments": {},
+               "providers": {}
+            },
             "archive-name": {
                "name": "archive-name",
                "stages": {

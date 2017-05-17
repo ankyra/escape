@@ -1,4 +1,4 @@
-build: name
+name: name
 type: archive
 version: 0.0.1
 pre_build: testdata/pre_build.sh

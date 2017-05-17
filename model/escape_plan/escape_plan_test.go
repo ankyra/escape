@@ -55,7 +55,7 @@ func (s *planSuite) Test_Init(c *C) {
 	unit := NewEscapePlan()
 	unit.Init("archive", "test")
 	c.Assert(unit.GetType(), Equals, "archive")
-	c.Assert(unit.GetBuild(), Equals, "test")
+	c.Assert(unit.GetName(), Equals, "test")
 	c.Assert(unit.GetVersion(), Equals, "@")
 }
 

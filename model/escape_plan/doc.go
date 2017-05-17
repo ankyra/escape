@@ -17,7 +17,7 @@ limitations under the License.
 package escape_plan
 
 var docMap = map[string]string{
-	"build":       buildDoc,
+	"name":        nameDoc,
 	"type":        typeDoc,
 	"version":     versionDoc,
 	"description": descriptionDoc,
@@ -41,7 +41,7 @@ func GetDoc(key string) []byte {
 	return []byte(doc)
 }
 
-const buildDoc = `# The build name.  Together with the release type makes up the build
+const nameDoc = `# The build name.  Together with the release type makes up the build
 # identifier. Format: /[a-zA-Z]+[a-zA-Z0-9-]*/
 #`
 

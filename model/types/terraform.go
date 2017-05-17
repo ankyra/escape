@@ -34,7 +34,7 @@ func (a *TerraformReleaseType) GetType() string {
 }
 
 func (a *TerraformReleaseType) InitEscapePlan(plan *escape_plan.EscapePlan) {
-	plan.SetPath(plan.GetBuild() + ".tf")
+	plan.SetPath(plan.GetName() + ".tf")
 }
 
 func (a *TerraformReleaseType) CompileMetadata(plan *escape_plan.EscapePlan, metadata ReleaseMetadata) error {

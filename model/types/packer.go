@@ -46,7 +46,7 @@ func (a *PackerReleaseType) GetType() string {
 }
 
 func (a *PackerReleaseType) InitEscapePlan(plan *escape_plan.EscapePlan) {
-	plan.SetPath(plan.GetBuild() + ".json")
+	plan.SetPath(plan.GetName() + ".json")
 }
 
 func (a *PackerReleaseType) CompileMetadata(plan *escape_plan.EscapePlan, metadata ReleaseMetadata) error {

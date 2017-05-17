@@ -62,7 +62,7 @@ func (c *Compiler) Compile(context Context) (ReleaseMetadata, error) {
 	c.context = context
 	c.metadata = NewEmptyReleaseMetadata().(*releaseMetadata)
 
-	c.metadata.Name = plan.GetBuild()
+	c.metadata.Name = plan.GetName()
 	c.metadata.Type = plan.GetType()
 	c.metadata.Description = plan.GetDescription()
 	c.metadata.Logo = plan.GetLogo()

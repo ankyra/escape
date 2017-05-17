@@ -1,7 +1,7 @@
 # The build name.  Together with the release type makes up the build
 # identifier. Format: /[a-zA-Z]+[a-zA-Z0-9-]*/
 #
-build: test
+name: test
 
 # The release type. One of: ansible, archive, docker, kubespec, terraform
 #

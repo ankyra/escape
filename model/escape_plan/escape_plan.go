@@ -22,21 +22,10 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
-	"strings"
 )
 
-func indent(s string) string {
-	parts := []string{}
-	for _, part := range strings.Split(s, "\n") {
-		if part != "" {
-			parts = append(parts, "  "+part)
-		}
-	}
-	return strings.Join(parts, "\n")
-}
-
 type EscapePlan struct {
-	Build       string                 `yaml:"build"`
+	Name        string                 `yaml:"name"`
 	Consumes    []string               `yaml:"consumes,omitempty"`
 	Depends     []string               `yaml:"depends,omitempty"`
 	Description string                 `yaml:"description,omitempty"`
@@ -62,8 +51,19 @@ type EscapePlan struct {
 	Version     string                 `yaml:"version"`
 }
 
-func (e *EscapePlan) GetBuild() string {
-	return e.Build
+func NewEscapePlan() *EscapePlan {
+	return &EscapePlan{
+		Consumes: []string{},
+		Provides: []string{},
+		Depends:  []string{},
+		Includes: []string{},
+		Metadata: map[string]string{},
+		Errands:  map[string]interface{}{},
+	}
+}
+
+func (e *EscapePlan) GetName() string {
+	return e.Name
 }
 func (e *EscapePlan) GetConsumes() []string {
 	return e.Consumes
@@ -134,8 +134,8 @@ func (e *EscapePlan) GetType() string {
 func (e *EscapePlan) GetVersion() string {
 	return e.Version
 }
-func (e *EscapePlan) SetBuild(newValue string) {
-	e.Build = newValue
+func (e *EscapePlan) SetName(newValue string) {
+	e.Name = newValue
 }
 func (e *EscapePlan) SetConsumes(newValue []string) {
 	e.Consumes = newValue
@@ -198,22 +198,11 @@ func (e *EscapePlan) SetVersion(newValue string) {
 	e.Version = newValue
 }
 
-func NewEscapePlan() *EscapePlan {
-	return &EscapePlan{
-		Consumes: []string{},
-		Provides: []string{},
-		Depends:  []string{},
-		Includes: []string{},
-		Metadata: map[string]string{},
-		Errands:  map[string]interface{}{},
-	}
-}
-
 func (e *EscapePlan) GetReleaseId() string {
-	return e.Type + "-" + e.Build + "-v" + e.Version
+	return e.Type + "-" + e.Name + "-v" + e.Version
 }
 func (e *EscapePlan) GetVersionlessReleaseId() string {
-	return e.Type + "-" + e.Build
+	return e.Type + "-" + e.Name
 }
 
 func (e *EscapePlan) LoadConfig(cfgFile string) error {
@@ -236,8 +225,8 @@ func (e *EscapePlan) LoadConfig(cfgFile string) error {
 	return nil
 }
 
-func (e *EscapePlan) Init(typ, buildId string) *EscapePlan {
-	e.Build = buildId
+func (e *EscapePlan) Init(typ, name string) *EscapePlan {
+	e.Name = name
 	e.Type = typ
 	e.Version = "@"
 	return e
