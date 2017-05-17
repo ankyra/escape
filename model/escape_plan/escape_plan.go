@@ -40,6 +40,7 @@ type EscapePlan struct {
 	Consumes    []string               `yaml:"consumes,omitempty"`
 	Depends     []string               `yaml:"depends,omitempty"`
 	Description string                 `yaml:"description,omitempty"`
+	Extends     []string               `yaml:"extends,omitempty"`
 	Errands     map[string]interface{} `yaml:"errands,omitempty"`
 	Includes    []string               `yaml:"includes,omitempty"`
 	Inputs      []interface{}          `yaml:"inputs,omitempty"`

@@ -3,6 +3,8 @@ type: archive
 version: 0.1.@
 description: Test description
 logo: logo.png
+extends:
+- extends1
 depends:
 - depends1
 - depends2
