@@ -19,11 +19,13 @@ package deploy
 import (
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/runners"
-	"github.com/ankyra/escape-client/model/types"
 )
 
 func NewPreDeployRunner() Runner {
 	return runners.NewPreScriptStepRunner("deploy", "pre_deploy")
+}
+func NewMainDeployRunner() Runner {
+	return runners.NewMainStepRunner("deploy", "deploy")
 }
 
 func NewPostDeployRunner() Runner {
@@ -38,24 +40,7 @@ func NewDeployRunner() Runner {
 	return runners.NewCompoundRunner(
 		runners.NewDependencyRunner("deploy", NewDeployRunner),
 		NewPreDeployRunner(),
-		runners.NewRunner(deployStep),
+		NewMainDeployRunner(),
 		NewPostDeployRunner(),
 	)
-}
-
-func deployStep(ctx RunnerContext) error {
-	//        self._check_file_integrity(metadata.files)
-	//
-	ctx.Logger().Log("deploy.deploy_step", nil)
-	typ, err := types.ResolveType(ctx.GetReleaseMetadata().GetType())
-	if err != nil {
-		return err
-	}
-	outputs, err := typ.Run(ctx)
-	if err != nil {
-		return err
-	}
-	ctx.SetBuildOutputs(outputs)
-	ctx.Logger().Log("deploy.step_finished", nil)
-	return ctx.GetDeploymentState().UpdateOutputs("deploy", outputs)
 }

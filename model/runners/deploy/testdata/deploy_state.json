@@ -36,7 +36,7 @@
                         "variable": "testinput"
                      },
                      "calculated_inputs": {},
-                     "calculated_outputs": null,
+                     "calculated_outputs": {},
                      "version": "0.0.1",
                      "step": ""
                   }

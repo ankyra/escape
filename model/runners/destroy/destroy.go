@@ -19,7 +19,6 @@ package destroy
 import (
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/runners"
-	"github.com/ankyra/escape-client/model/types"
 )
 
 func NewPreDestroyRunner(stage string) Runner {
@@ -29,9 +28,17 @@ func NewPreDestroyRunner(stage string) Runner {
 func NewDestroyRunner(stage string) Runner {
 	return runners.NewCompoundRunner(
 		NewPreDestroyRunner(stage),
-		runners.NewRunner(destroyStep),
+		NewMainDestroyRunner(stage),
 		NewPostDestroyRunner(stage),
 	)
+}
+
+func NewMainDestroyRunner(stage string) Runner {
+	return runners.NewRunner(func(ctx RunnerContext) error {
+		step := runners.NewScriptStep(ctx, stage, "destroy", true)
+		step.ModifiesOutputVariables = true
+		return step.Run(ctx)
+	})
 }
 
 func NewPostDestroyRunner(stage string) Runner {
@@ -40,19 +47,6 @@ func NewPostDestroyRunner(stage string) Runner {
 		step.Commit = deleteCommit
 		return step.Run(ctx)
 	})
-}
-
-func destroyStep(ctx RunnerContext) error {
-	ctx.Logger().Log("destroy.destroy_step", nil)
-	typ, err := types.ResolveType(ctx.GetReleaseMetadata().GetType())
-	if err != nil {
-		return err
-	}
-	if err := typ.Destroy(ctx); err != nil {
-		return err
-	}
-	ctx.Logger().Log("destroy.step_finished", nil)
-	return nil
 }
 
 func deleteCommit(ctx RunnerContext, depl DeploymentState, stage string) error {

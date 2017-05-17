@@ -20,17 +20,17 @@ import (
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/runners"
 	"github.com/ankyra/escape-client/model/runners/deploy"
-	"github.com/ankyra/escape-client/model/types"
 )
 
 func NewPreBuildRunner() Runner {
 	return runners.NewPreScriptStepRunner("build", "pre_build")
 }
-
+func NewMainBuildRunner() Runner {
+	return runners.NewMainStepRunner("build", "build")
+}
 func NewPostBuildRunner() Runner {
 	return runners.NewPostScriptStepRunner("build", "post_build")
 }
-
 func NewTestRunner() Runner {
 	return runners.NewScriptRunner("build", "test")
 }
@@ -39,22 +39,7 @@ func NewBuildRunner() Runner {
 	return runners.NewCompoundRunner(
 		runners.NewDependencyRunner("deploy", deploy.NewDeployRunner),
 		NewPreBuildRunner(),
-		runners.NewRunner(buildStep),
+		NewMainBuildRunner(),
 		NewPostBuildRunner(),
 	)
-}
-
-func buildStep(ctx RunnerContext) error {
-	ctx.Logger().Log("build.build_step", nil)
-	typ, err := types.ResolveType(ctx.GetReleaseMetadata().GetType())
-	if err != nil {
-		return err
-	}
-	outputs, err := typ.Run(ctx)
-	if err != nil {
-		return err
-	}
-	ctx.SetBuildOutputs(outputs)
-	ctx.Logger().Log("build.build_step_finished", nil)
-	return ctx.GetDeploymentState().UpdateOutputs("build", outputs)
 }
