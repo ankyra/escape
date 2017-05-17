@@ -6,6 +6,9 @@ consumes:
 - provider1
 - provider2
 
+extends:
+- extends1
+
 depends:
 - depends1
 - depends2

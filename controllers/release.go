@@ -19,8 +19,8 @@ package controllers
 import (
 	"fmt"
 
-	"github.com/ankyra/escape-client/model"
 	. "github.com/ankyra/escape-client/model/interfaces"
+	"github.com/ankyra/escape-client/model/paths"
 	"github.com/ankyra/escape-client/util"
 )
 
@@ -58,7 +58,7 @@ func (r ReleaseController) Release(context Context, buildFatPackage, skipTests, 
 }
 
 func (r ReleaseController) cacheRelease(context Context, forceOverwrite bool) error {
-	path := model.NewPath()
+	path := paths.NewPath()
 	metadata := context.GetReleaseMetadata()
 	packagePath := path.ReleaseLocation(metadata)
 	if err := path.EnsureDependencyCacheDirectoryExists(); err != nil {

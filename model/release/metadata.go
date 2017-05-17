@@ -31,15 +31,12 @@ import (
 	"strings"
 )
 
-type execStage struct {
-	Script string `json:"script"`
-}
-
 type releaseMetadata struct {
 	ApiVersion  string                `json:"api_version"`
 	Branch      string                `json:"branch"`
 	Consumes    []string              `json:"consumes"`
 	Depends     []string              `json:"depends"`
+	Extends     []string              `json:"extends"`
 	Description string                `json:"description"`
 	Errands     map[string]*errand    `json:"errands"`
 	Files       map[string]string     `json:"files", {}`
@@ -56,7 +53,7 @@ type releaseMetadata struct {
 	Type        string                `json:"type"`
 	VariableCtx map[string]string     `json:"variable_context"`
 	Version     string                `json:"version"`
-	Stages      map[string]*execStage `json:"stages"`
+	Stages      map[string]*ExecStage `json:"stages"`
 }
 
 func NewEmptyReleaseMetadata() ReleaseMetadata {
@@ -65,10 +62,11 @@ func NewEmptyReleaseMetadata() ReleaseMetadata {
 		Consumes:    []string{},
 		Provides:    []string{},
 		Depends:     []string{},
+		Extends:     []string{},
 		Files:       map[string]string{},
 		Metadata:    map[string]string{},
 		Errands:     map[string]*errand{},
-		Stages:      map[string]*execStage{},
+		Stages:      map[string]*ExecStage{},
 		Inputs:      []*variable.Variable{},
 		Outputs:     []*variable.Variable{},
 		Templates:   []*templates.Template{},
@@ -121,17 +119,22 @@ func validate(m *releaseMetadata) error {
 	}
 	return nil
 }
-
-func (m *releaseMetadata) GetStage(stage string) *execStage {
+func (m *releaseMetadata) GetStages() map[string]*ExecStage {
+	return m.Stages
+}
+func (m *releaseMetadata) GetStage(stage string) *ExecStage {
 	result, ok := m.Stages[stage]
 	if !ok {
-		result = &execStage{}
+		result = &ExecStage{}
 		m.Stages[stage] = result
 	}
 	return result
 }
 
 func (m *releaseMetadata) SetStage(stage, script string) {
+	if script == "" {
+		return
+	}
 	st := m.GetStage(stage)
 	st.Script = script
 }

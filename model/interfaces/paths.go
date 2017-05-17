@@ -34,6 +34,7 @@ type Paths interface {
 	UnpackedDepDirectoryReleaseMetadata(Dependency) string
 	LocalReleaseMetadata(ReleaseMetadata) string
 	EnsureEscapeDirectoryExists() error
+	ExtensionPath(ReleaseMetadata, string) string
 
 	EnsureDependencyTypeDirectoryExists(Dependency) error
 	EnsureScratchSpaceDirectoryExists(ReleaseMetadata) error

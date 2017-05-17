@@ -18,6 +18,7 @@ package release
 
 import (
 	"errors"
+	"fmt"
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/variable"
 )
@@ -48,6 +49,23 @@ func (e *errand) GetInputs() []*variable.Variable {
 		result = append(result, i)
 	}
 	return result
+}
+
+func (e *errand) Validate() error {
+	if e.Name == "" {
+		return fmt.Errorf("Missing name in errand")
+	} else if e.Script == "" {
+		return fmt.Errorf("Missing script in errand '%s'", e.Name)
+	}
+	if e.Inputs == nil {
+		return nil
+	}
+	for _, v := range e.Inputs {
+		if err := v.Validate(); err != nil {
+			return fmt.Errorf("Error in errand '%s' variable: %s", e.Name, err.Error())
+		}
+	}
+	return nil
 }
 
 func NewErrandFromDict(name string, dict interface{}) (Errand, error) {
@@ -104,12 +122,13 @@ func NewErrandFromDict(name string, dict interface{}) (Errand, error) {
 			}
 
 		}
-		return &errand{
+		result := &errand{
 			Name:        name,
 			Description: description,
 			Script:      script,
 			Inputs:      inputs,
-		}, nil
+		}
+		return result, result.Validate()
 	default:
 		return nil, errors.New("Expecting a dictionary for errand " + name)
 	}

@@ -75,6 +75,13 @@ func NewVariableFromDict(input UntypedVariable) (*Variable, error) {
 	return result, nil
 }
 
+func (v *Variable) Validate() error {
+	if v.Id == "" {
+		return fmt.Errorf("Variable object is missing an 'id'")
+	}
+	return nil
+}
+
 func (v *Variable) GetId() string {
 	return v.Id
 }

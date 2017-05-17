@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package model
+package paths
 
 import (
 	"os"
@@ -114,6 +114,10 @@ func (p *Path) DependencyDownloadTarget(dependency Dependency) string {
 
 func (p *Path) LocalReleaseMetadata(metadata ReleaseMetadata) string {
 	return filepath.Join(p.DependencyCacheDirectory(), metadata.GetReleaseId()+".json")
+}
+
+func (p *Path) ExtensionPath(extension ReleaseMetadata, path string) string {
+	return filepath.Join(extension.GetType(), extension.GetName(), path)
 }
 
 func (p *Path) DepTypeDirectory(dependency Dependency) string {

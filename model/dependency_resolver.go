@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	. "github.com/ankyra/escape-client/model/interfaces"
+	"github.com/ankyra/escape-client/model/paths"
 	"github.com/ankyra/escape-client/model/release"
 	"github.com/ankyra/escape-client/util"
 	"io"
@@ -34,7 +35,7 @@ type DependencyResolver struct{}
 type ReleaseFetcher struct{}
 
 func (resolver DependencyResolver) Resolve(cfg EscapeConfig, resolveDependencies []string) error {
-	path := NewPath()
+	path := paths.NewPath()
 	for _, dep := range resolveDependencies {
 		if err := resolver.resolve(cfg, path, dep); err != nil {
 			return err

@@ -29,6 +29,9 @@ description: Test description
 
 logo: logo.png
 
+extends:
+- extends1
+
 # Dependencies. Reference dependencies by their full release ID or use
 # the '@' symbol to resolve versions at build time.
 #

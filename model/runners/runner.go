@@ -1,8 +1,8 @@
 package runners
 
 import (
-	"github.com/ankyra/escape-client/model"
 	. "github.com/ankyra/escape-client/model/interfaces"
+	"github.com/ankyra/escape-client/model/paths"
 	"github.com/ankyra/escape-client/model/release"
 	"os"
 )
@@ -80,6 +80,6 @@ func runDependency(ctx RunnerContext, dependency, logKey string, runner Runner) 
 }
 
 func newMetadataFromReleaseDir(releaseDir string) (ReleaseMetadata, error) {
-	path := model.NewPathWithBaseDir(releaseDir).ReleaseJson()
+	path := paths.NewPathWithBaseDir(releaseDir).ReleaseJson()
 	return release.NewReleaseMetadataFromFile(path)
 }

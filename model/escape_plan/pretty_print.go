@@ -45,6 +45,7 @@ var templateMap = map[string]string{
 	"smoke":        keyValTpl,
 	"test":         keyValTpl,
 	"depends":      listValTpl,
+	"extends":      listValTpl,
 	"consumes":     listValTpl,
 	"provides":     listValTpl,
 	"includes":     listValTpl,
@@ -94,7 +95,7 @@ func (e *prettyPrinter) Print(plan *EscapePlan) []byte {
 	yamlMap := plan.ToDict()
 	writer := bytes.NewBuffer([]byte{})
 	ordering := []string{
-		"build", "type", "version", "description", "logo", "depends", "consumes",
+		"build", "type", "version", "description", "logo", "extends", "depends", "consumes",
 		"provides", "inputs", "outputs", "metadata", "includes", "errands", "templates", "path",
 		"pre_build", "post_build", "test",
 		"pre_deploy", "post_deploy", "smoke",

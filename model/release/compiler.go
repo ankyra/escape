@@ -24,6 +24,7 @@ import (
 	"github.com/ankyra/escape-client/model/escape_plan"
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/parsers"
+	"github.com/ankyra/escape-client/model/paths"
 	"github.com/ankyra/escape-client/model/script"
 	"github.com/ankyra/escape-client/model/templates"
 	"github.com/ankyra/escape-client/model/variable"
@@ -45,14 +46,12 @@ type Compiler struct {
 	// => VariableCtx["base"] = "archive-test-v1"
 	//
 	VariableCtx map[string]ReleaseMetadata
-	Consumers   map[string]bool
 	ResolveType ReleaseTypeResolver
 }
 
 func NewCompiler(typeResolver ReleaseTypeResolver) *Compiler {
 	return &Compiler{
 		VariableCtx: map[string]ReleaseMetadata{},
-		Consumers:   map[string]bool{},
 		ResolveType: typeResolver,
 	}
 }
@@ -70,7 +69,7 @@ func (c *Compiler) Compile(context Context) (ReleaseMetadata, error) {
 	c.metadata.Provides = plan.GetProvides()
 	c.metadata.Consumes = plan.GetConsumes()
 
-	if err := c.compileConsumers(plan.GetConsumes()); err != nil {
+	if err := c.compileExtensions(plan); err != nil {
 		return nil, err
 	}
 	if err := c.compileDependencies(plan.GetDepends()); err != nil {
@@ -111,12 +110,100 @@ func (c *Compiler) Compile(context Context) (ReleaseMetadata, error) {
 
 }
 
-func (c *Compiler) compileConsumers(consumes []string) error {
-	for _, consumer := range consumes {
-		c.Consumers[consumer] = true
+func (c *Compiler) compileExtensions(plan *escape_plan.EscapePlan) error {
+	consumes := map[string]bool{}
+	provides := map[string]bool{}
+	for _, c := range c.metadata.Consumes {
+		consumes[c] = true
 	}
-	c.metadata.Consumes = consumes
+	for _, c := range c.metadata.Provides {
+		provides[c] = true
+	}
+	for _, extend := range plan.GetExtends() {
+		fmt.Println("Compiling extends", extend)
+		dep, err := NewDependencyFromString(extend)
+		if err != nil {
+			return err
+		}
+		dep = dep.(*dependency)
+		if err := dep.ResolveVersion(c.context); err != nil {
+			return err
+		}
+		resolvedDep := dep.GetReleaseId()
+		versionlessDep := dep.GetVersionlessReleaseId()
+		metadata, err := c.context.GetDependencyMetadata(resolvedDep)
+		if err != nil {
+			return err
+		}
+		for _, consume := range metadata.GetConsumes() {
+			if !consumes[consume] {
+				consumes[consume] = true
+				c.metadata.Consumes = append(c.metadata.Consumes, consume)
+			}
+		}
+		for _, provide := range metadata.GetProvides() {
+			if !provides[provide] {
+				provides[provide] = true
+				c.metadata.Provides = append(c.metadata.Provides, provide)
+			}
+		}
+		for _, input := range metadata.GetInputs() {
+			found := false
+			for _, i := range c.metadata.GetInputs() {
+				if i.GetId() == input.GetId() {
+					found = true
+					break
+				}
+			}
+			if !found {
+				c.metadata.AddInputVariable(input)
+			}
+		}
+		for _, output := range metadata.GetOutputs() {
+			found := false
+			for _, i := range c.metadata.GetOutputs() {
+				if i.GetId() == output.GetId() {
+					found = true
+					break
+				}
+			}
+			if !found {
+				c.metadata.AddOutputVariable(output)
+			}
+		}
+		for name, newErrand := range metadata.GetErrands() {
+			_, exists := c.metadata.Errands[name]
+			if exists {
+				continue
+			}
+			newErrand.(*errand).Script = c.extensionPath(metadata, newErrand.GetScript())
+			c.metadata.Errands[name] = newErrand.(*errand)
+		}
+		for key, val := range metadata.GetMetadata() {
+			c.metadata.Metadata[key] = val
+		}
+		for _, tpl := range metadata.GetTemplates() {
+			tpl.File = c.extensionPath(metadata, tpl.File)
+			tpl.Target = c.extensionPath(metadata, tpl.Target)
+			c.metadata.Templates = append(c.metadata.Templates, tpl)
+		}
+		for name, stage := range metadata.GetStages() {
+			c.metadata.SetStage(name, c.extensionPath(metadata, stage.Script))
+		}
+		for _, d := range metadata.GetDependencies() {
+			plan.Depends = append(plan.Depends, d)
+		}
+		c.VariableCtx[versionlessDep] = metadata
+		c.metadata.SetVariableInContext(versionlessDep, metadata.GetReleaseId())
+	}
 	return nil
+}
+
+func (c *Compiler) extensionPath(extension ReleaseMetadata, path string) string {
+	if path == "" {
+		return ""
+	}
+	return paths.NewPath().ExtensionPath(extension, path)
 }
 
 func (c *Compiler) compileDependencies(depends []string) error {
@@ -338,24 +425,19 @@ func (c *Compiler) compileOutputs(outputs []interface{}) error {
 
 func (c *Compiler) compileErrands(errands map[string]interface{}) error {
 	for name, errandDict := range errands {
-		errandIface, err := NewErrandFromDict(name, errandDict)
+		newErrand, err := NewErrandFromDict(name, errandDict)
 		if err != nil {
 			return err
 		}
-		newErrand := errandIface.(*errand)
-		if newErrand.Script == "" {
-			return errors.New("Errand " + newErrand.Name + " is missing a script")
-		}
-		if err := c.compileEscapePlanScriptDigest(newErrand.Script); err != nil {
+		if err := c.compileEscapePlanScriptDigest(newErrand.GetScript()); err != nil {
 			return err
 		}
-		c.metadata.Errands[name] = newErrand
+		c.metadata.Errands[name] = newErrand.(*errand)
 	}
 	return nil
 }
 
 func (c *Compiler) compileTemplates(templateList []interface{}) error {
-	result := []*templates.Template{}
 	for _, tpl := range templateList {
 		template, err := templates.NewTemplateFromInterface(tpl)
 		if err != nil {
@@ -365,9 +447,8 @@ func (c *Compiler) compileTemplates(templateList []interface{}) error {
 			return fmt.Errorf("Missing 'file' field in template")
 		}
 		c.addFileDigest(template.File)
-		result = append(result, template)
+		c.metadata.Templates = append(c.metadata.Templates, template)
 	}
-	c.metadata.Templates = result
 	return nil
 }
 

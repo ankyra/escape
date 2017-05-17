@@ -21,6 +21,7 @@ import (
 
 	"github.com/ankyra/escape-client/model/escape_plan"
 	. "github.com/ankyra/escape-client/model/interfaces"
+	"github.com/ankyra/escape-client/model/paths"
 	"github.com/ankyra/escape-client/model/release"
 	"github.com/ankyra/escape-client/model/state"
 	"github.com/ankyra/escape-client/model/types"
@@ -126,7 +127,7 @@ func (c *context) FetchDependencyAndReadMetadata(depReleaseId string) (ReleaseMe
 	if err != nil {
 		return nil, err
 	}
-	unpacked := NewPath().UnpackedDepDirectoryReleaseMetadata(dep)
+	unpacked := paths.NewPath().UnpackedDepDirectoryReleaseMetadata(dep)
 	c.Log("fetch.finished", map[string]string{"dependency": depReleaseId})
 	return release.NewReleaseMetadataFromFile(unpacked)
 }
