@@ -19,8 +19,8 @@ package controllers
 import (
 	"fmt"
 
-	"github.com/ankyra/escape-client/model"
 	. "github.com/ankyra/escape-client/model/interfaces"
+	"github.com/ankyra/escape-client/model/paths"
 )
 
 type PushController struct{}
@@ -43,7 +43,7 @@ func (p PushController) Push(context Context, buildFatPackage bool) error {
 func (p PushController) register(context Context) error {
 	context.Log("register.start", nil)
 	backend := context.GetEscapeConfig().GetCurrentTarget().GetStorageBackend()
-	path := model.NewPath()
+	path := paths.NewPath()
 	if err := path.EnsureDependencyCacheDirectoryExists(); err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ func (p PushController) register(context Context) error {
 func (p PushController) upload(context Context) error {
 	context.Log("upload.start", nil)
 	backend := context.GetEscapeConfig().GetCurrentTarget().GetStorageBackend()
-	releasePath := model.NewPath().ReleaseLocation(context.GetReleaseMetadata())
+	releasePath := paths.NewPath().ReleaseLocation(context.GetReleaseMetadata())
 	if backend == "" || backend == "local" {
 		context.Log("upload.finished", nil)
 		return nil

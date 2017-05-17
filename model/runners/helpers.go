@@ -19,8 +19,8 @@ package runners
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ankyra/escape-client/model"
 	. "github.com/ankyra/escape-client/model/interfaces"
+	"github.com/ankyra/escape-client/model/paths"
 	"github.com/ankyra/escape-client/util"
 	"io/ioutil"
 )
@@ -233,7 +233,7 @@ func (b *ScriptStep) readOutputVariables(ctx RunnerContext) error {
 }
 
 func writeOutputsToFile(outputs *map[string]interface{}) error {
-	path := model.NewPath()
+	path := paths.NewPath()
 	path.EnsureEscapeDirectoryExists()
 	contents, err := json.Marshal(outputs)
 	if err != nil {

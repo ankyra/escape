@@ -24,6 +24,7 @@ import (
 	"github.com/ankyra/escape-client/model/escape_plan"
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/parsers"
+	"github.com/ankyra/escape-client/model/paths"
 	"github.com/ankyra/escape-client/model/script"
 	"github.com/ankyra/escape-client/model/templates"
 	"github.com/ankyra/escape-client/model/variable"
@@ -175,20 +176,19 @@ func (c *Compiler) compileExtensions(plan *escape_plan.EscapePlan) error {
 			if exists {
 				continue
 			}
-			script := newErrand.GetScript()
-			if err := c.compileEscapePlanScriptDigest(script); err != nil {
-				return err
-			}
+			newErrand.(*errand).Script = c.extensionPath(metadata, newErrand.GetScript())
 			c.metadata.Errands[name] = newErrand.(*errand)
 		}
 		for key, val := range metadata.GetMetadata() {
 			c.metadata.Metadata[key] = val
 		}
 		for _, tpl := range metadata.GetTemplates() {
+			tpl.File = c.extensionPath(metadata, tpl.File)
+			tpl.Target = c.extensionPath(metadata, tpl.Target)
 			c.metadata.Templates = append(c.metadata.Templates, tpl)
 		}
 		for name, stage := range metadata.GetStages() {
-			c.metadata.SetStage(name, stage.Script)
+			c.metadata.SetStage(name, c.extensionPath(metadata, stage.Script))
 		}
 		for _, d := range metadata.GetDependencies() {
 			plan.Depends = append(plan.Depends, d)
@@ -197,6 +197,13 @@ func (c *Compiler) compileExtensions(plan *escape_plan.EscapePlan) error {
 		c.metadata.SetVariableInContext(versionlessDep, metadata.GetReleaseId())
 	}
 	return nil
+}
+
+func (c *Compiler) extensionPath(extension ReleaseMetadata, path string) string {
+	if path == "" {
+		return ""
+	}
+	return paths.NewPath().ExtensionPath(extension, path)
 }
 
 func (c *Compiler) compileDependencies(depends []string) error {

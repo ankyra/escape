@@ -18,8 +18,8 @@ package runners
 
 import (
 	"fmt"
-	"github.com/ankyra/escape-client/model"
 	. "github.com/ankyra/escape-client/model/interfaces"
+	"github.com/ankyra/escape-client/model/paths"
 	"github.com/ankyra/escape-client/model/script"
 	"github.com/ankyra/escape-client/util"
 )
@@ -53,7 +53,7 @@ func NewRunnerContext(context Context) (RunnerContext, error) {
 		}
 	}
 	return &runnerContext{
-		path:             model.NewPath(),
+		path:             paths.NewPath(),
 		environmentState: context.GetEnvironmentState(),
 		releaseMetadata:  context.GetReleaseMetadata(),
 		logger:           context.GetLogger(),

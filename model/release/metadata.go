@@ -132,6 +132,9 @@ func (m *releaseMetadata) GetStage(stage string) *ExecStage {
 }
 
 func (m *releaseMetadata) SetStage(stage, script string) {
+	if script == "" {
+		return
+	}
 	st := m.GetStage(stage)
 	st.Script = script
 }

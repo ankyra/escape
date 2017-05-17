@@ -21,6 +21,7 @@ import (
 	"compress/gzip"
 	"errors"
 	. "github.com/ankyra/escape-client/model/interfaces"
+	"github.com/ankyra/escape-client/model/paths"
 	"github.com/ankyra/escape-client/util"
 	"io"
 	"io/ioutil"
@@ -39,7 +40,7 @@ func (a *archiver) Archive(metadata ReleaseMetadata, forceOverwrite bool) error 
 	if err := buildReleaseAndTargetDirectories(metadata); err != nil {
 		return err
 	}
-	path := NewPath()
+	path := paths.NewPath()
 	scratchSpace := path.ScratchSpaceDirectory(metadata)
 	releaseJsonPath := path.ScratchSpaceReleaseMetadata(metadata)
 	if err := metadata.WriteJsonFile(releaseJsonPath); err != nil {
@@ -57,7 +58,7 @@ func (a *archiver) Archive(metadata ReleaseMetadata, forceOverwrite bool) error 
 }
 
 func (a *archiver) buildTarArchive(metadata ReleaseMetadata, forceOverwrite bool) error {
-	path := NewPath()
+	path := paths.NewPath()
 	scratchSpace := path.ScratchSpaceDirectory(metadata)
 	packageId := metadata.GetReleaseId()
 	packageGzip := packageId + ".tgz"
@@ -86,7 +87,7 @@ func (a *archiver) buildTarArchive(metadata ReleaseMetadata, forceOverwrite bool
 }
 
 func buildReleaseAndTargetDirectories(metadata ReleaseMetadata) error {
-	path := NewPath()
+	path := paths.NewPath()
 	scratchSpace := path.ScratchSpaceDirectory(metadata)
 	if util.PathExists(scratchSpace) {
 		if err := util.RemoveTree(scratchSpace); err != nil {
