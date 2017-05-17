@@ -27,6 +27,8 @@ func validateInt(value interface{}, options map[string]interface{}) (interface{}
 	switch value.(type) {
 	case int:
 		return value.(int), nil
+	case float64:
+		return int(value.(float64)), nil
 	case string:
 		i, err := strconv.Atoi(value.(string))
 		if err != nil {
