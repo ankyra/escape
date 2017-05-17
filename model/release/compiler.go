@@ -62,6 +62,9 @@ func (c *Compiler) Compile(context Context) (ReleaseMetadata, error) {
 	c.context = context
 	c.metadata = NewEmptyReleaseMetadata().(*releaseMetadata)
 
+	if plan.GetName() == "" {
+		return nil, fmt.Errorf("Missing build name. Add a 'name' field to your Escape plan")
+	}
 	c.metadata.Name = plan.GetName()
 	c.metadata.Type = plan.GetType()
 	c.metadata.Description = plan.GetDescription()
@@ -298,6 +301,7 @@ func (c *Compiler) compileVersion(version string) error {
 
 func (c *Compiler) compileEscapePlanScriptDigests(plan *escape_plan.EscapePlan) error {
 	paths := []string{
+		plan.GetBuild(), plan.GetDeploy(), plan.GetDestroy(),
 		plan.GetPreBuild(), plan.GetPreDeploy(), plan.GetPreDestroy(),
 		plan.GetPostBuild(), plan.GetPostDeploy(), plan.GetPostDestroy(),
 		plan.GetTest(), plan.GetPath(),
@@ -308,6 +312,9 @@ func (c *Compiler) compileEscapePlanScriptDigests(plan *escape_plan.EscapePlan) 
 		}
 	}
 	c.metadata.Path = plan.GetPath()
+	c.metadata.SetStage("build", plan.GetBuild())
+	c.metadata.SetStage("deploy", plan.GetDeploy())
+	c.metadata.SetStage("destroy", plan.GetDestroy())
 	c.metadata.SetStage("pre_build", plan.GetPreBuild())
 	c.metadata.SetStage("pre_deploy", plan.GetPreDeploy())
 	c.metadata.SetStage("pre_destroy", plan.GetPreDestroy())
