@@ -20,7 +20,8 @@ import (
 	"encoding/json"
 	"fmt"
 	. "github.com/ankyra/escape-client/model/interfaces"
-	"github.com/ankyra/escape-client/model/script"
+	core "github.com/ankyra/escape-core"
+	"github.com/ankyra/escape-core/script"
 )
 
 type stage struct {
@@ -243,7 +244,7 @@ func (p *deploymentState) ToJson() string {
 	return string(str)
 }
 
-func (d *deploymentState) ToScriptEnvironment(metadataMap map[string]ReleaseMetadata, stage string) (*script.ScriptEnvironment, error) {
+func (d *deploymentState) ToScriptEnvironment(metadataMap map[string]*core.ReleaseMetadata, stage string) (*script.ScriptEnvironment, error) {
 	result := map[string]script.Script{}
 	result["this"] = d.ToScript(metadataMap["this"], stage)
 	for key, deplName := range d.GetProviders() {
@@ -270,7 +271,7 @@ func (d *deploymentState) ToScriptEnvironment(metadataMap map[string]ReleaseMeta
 
 }
 
-func (d *deploymentState) ToScript(metadata ReleaseMetadata, stage string) script.Script {
+func (d *deploymentState) ToScript(metadata *core.ReleaseMetadata, stage string) script.Script {
 	result := map[string]script.Script{}
 	if metadata != nil {
 		result = metadata.ToScriptMap()

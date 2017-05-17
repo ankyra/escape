@@ -17,8 +17,9 @@ limitations under the License.
 package interfaces
 
 import (
-	"github.com/ankyra/escape-client/model/script"
 	"github.com/ankyra/escape-client/util"
+	core "github.com/ankyra/escape-core"
+	"github.com/ankyra/escape-core/script"
 )
 
 type Runner interface {
@@ -29,8 +30,8 @@ type RunnerContext interface {
 	GetEnvironmentState() EnvironmentState
 	GetDeploymentState() DeploymentState
 	SetDeploymentState(DeploymentState)
-	GetReleaseMetadata() ReleaseMetadata
-	SetReleaseMetadata(ReleaseMetadata)
+	GetReleaseMetadata() *core.ReleaseMetadata
+	SetReleaseMetadata(*core.ReleaseMetadata)
 	Logger() util.Logger
 	GetPath() Paths
 	GetDepends() []string
@@ -38,6 +39,6 @@ type RunnerContext interface {
 	SetBuildInputs(*map[string]interface{})
 	GetBuildOutputs() *map[string]interface{}
 	SetBuildOutputs(*map[string]interface{})
-	NewContextForDependency(ReleaseMetadata) RunnerContext
+	NewContextForDependency(*core.ReleaseMetadata) RunnerContext
 	GetScriptEnvironment(stage string) (*script.ScriptEnvironment, error)
 }

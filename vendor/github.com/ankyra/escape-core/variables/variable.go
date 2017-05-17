@@ -14,15 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package variable
+package variables
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/ankyra/escape-client/model/parsers"
-	"github.com/ankyra/escape-client/model/script"
-	"github.com/ankyra/escape-client/model/variable/variable_types"
+	"github.com/ankyra/escape-core/parsers"
+	"github.com/ankyra/escape-core/script"
+	"github.com/ankyra/escape-core/variables/variable_types"
 	"gopkg.in/yaml.v2"
 )
 

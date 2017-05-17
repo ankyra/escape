@@ -29,7 +29,7 @@ import (
 	"strings"
 
 	. "github.com/ankyra/escape-client/model/interfaces"
-	"github.com/ankyra/escape-client/model/release"
+	core "github.com/ankyra/escape-core"
 )
 
 type client struct {
@@ -149,7 +149,7 @@ func (c *client) Login(url, username, password string, storeCredentials bool) er
 	return nil
 }
 
-func (c *client) ReleaseQuery(releaseQuery string) (ReleaseMetadata, error) {
+func (c *client) ReleaseQuery(releaseQuery string) (*core.ReleaseMetadata, error) {
 
 	//        applog("client.release_query", release=release_id_string)
 	url := c.endpoints.ReleaseQuery(releaseQuery)
@@ -162,7 +162,7 @@ func (c *client) ReleaseQuery(releaseQuery string) (ReleaseMetadata, error) {
 	} else if resp.StatusCode != 200 {
 		return nil, errors.New("Couldn't query release " + releaseQuery + ": " + resp.Status)
 	}
-	result := release.NewEmptyReleaseMetadata()
+	result := core.NewEmptyReleaseMetadata()
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, err
 	}
@@ -220,7 +220,7 @@ func (c *client) NextVersionQuery(releaseId, prefix string) (string, error) {
 	return string(result), nil
 }
 
-func (c *client) Register(metadata ReleaseMetadata) error {
+func (c *client) Register(metadata *core.ReleaseMetadata) error {
 	//        applog("client.register", release="%s-%s-v%s" % (release_metadata['type'], release_metadata['name'], release_metadata['version']))
 	url := c.endpoints.RegisterPackage()
 	resp, err := c.authPostJson(url, metadata)

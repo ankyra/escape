@@ -20,18 +20,19 @@ import (
 	"fmt"
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/paths"
-	"github.com/ankyra/escape-client/model/script"
 	"github.com/ankyra/escape-client/util"
+	core "github.com/ankyra/escape-core"
+	"github.com/ankyra/escape-core/script"
 )
 
 type runnerContext struct {
 	environmentState EnvironmentState
 	deploymentState  DeploymentState
-	releaseMetadata  ReleaseMetadata
+	releaseMetadata  *core.ReleaseMetadata
 	path             Paths
 	inputs           *map[string]interface{}
 	outputs          *map[string]interface{}
-	depends          []ReleaseMetadata
+	depends          []*core.ReleaseMetadata
 	logger           util.Logger
 	context          Context
 }
@@ -57,7 +58,7 @@ func NewRunnerContext(context Context) (RunnerContext, error) {
 		environmentState: context.GetEnvironmentState(),
 		releaseMetadata:  context.GetReleaseMetadata(),
 		logger:           context.GetLogger(),
-		depends:          []ReleaseMetadata{context.GetReleaseMetadata()},
+		depends:          []*core.ReleaseMetadata{context.GetReleaseMetadata()},
 		context:          context,
 	}, nil
 }
@@ -84,10 +85,10 @@ func (r *runnerContext) SetDeploymentState(d DeploymentState) {
 func (r *runnerContext) Logger() util.Logger {
 	return r.logger
 }
-func (r *runnerContext) GetReleaseMetadata() ReleaseMetadata {
+func (r *runnerContext) GetReleaseMetadata() *core.ReleaseMetadata {
 	return r.releaseMetadata
 }
-func (r *runnerContext) SetReleaseMetadata(m ReleaseMetadata) {
+func (r *runnerContext) SetReleaseMetadata(m *core.ReleaseMetadata) {
 	r.releaseMetadata = m
 }
 func (r *runnerContext) GetBuildInputs() *map[string]interface{} {
@@ -107,7 +108,7 @@ func (r *runnerContext) GetScriptEnvironment(stage string) (*script.ScriptEnviro
 	if r.GetDeploymentState() == nil {
 		return nil, fmt.Errorf("Missing deployment state in context. This is a bug in Escape.")
 	}
-	metadataCtx := map[string]ReleaseMetadata{}
+	metadataCtx := map[string]*core.ReleaseMetadata{}
 	for _, depend := range r.GetReleaseMetadata().GetDependencies() {
 		metadata, err := r.context.GetDependencyMetadata(depend)
 		if err != nil {
@@ -132,7 +133,7 @@ func (r *runnerContext) GetScriptEnvironment(stage string) (*script.ScriptEnviro
 	return r.GetDeploymentState().ToScriptEnvironment(metadataCtx, stage)
 }
 
-func (r *runnerContext) NewContextForDependency(metadata ReleaseMetadata) RunnerContext {
+func (r *runnerContext) NewContextForDependency(metadata *core.ReleaseMetadata) RunnerContext {
 	return &runnerContext{
 		environmentState: r.environmentState,
 		deploymentState:  r.deploymentState,

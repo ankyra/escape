@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package release
+package compiler
 
 import (
 	"crypto/md5"
@@ -23,12 +23,13 @@ import (
 	"fmt"
 	"github.com/ankyra/escape-client/model/escape_plan"
 	. "github.com/ankyra/escape-client/model/interfaces"
-	"github.com/ankyra/escape-client/model/parsers"
 	"github.com/ankyra/escape-client/model/paths"
-	"github.com/ankyra/escape-client/model/script"
-	"github.com/ankyra/escape-client/model/templates"
-	"github.com/ankyra/escape-client/model/variable"
 	"github.com/ankyra/escape-client/util"
+	core "github.com/ankyra/escape-core"
+	"github.com/ankyra/escape-core/parsers"
+	"github.com/ankyra/escape-core/script"
+	"github.com/ankyra/escape-core/templates"
+	"github.com/ankyra/escape-core/variables"
 	"io"
 	"io/ioutil"
 	"os"
@@ -38,27 +39,27 @@ import (
 )
 
 type Compiler struct {
-	metadata *releaseMetadata
+	metadata *core.ReleaseMetadata
 	context  Context
 	// depends:
 	// - archive-test-latest as base
 	//
 	// => VariableCtx["base"] = "archive-test-v1"
 	//
-	VariableCtx map[string]ReleaseMetadata
+	VariableCtx map[string]*core.ReleaseMetadata
 }
 
 func NewCompiler() *Compiler {
 	return &Compiler{
-		VariableCtx: map[string]ReleaseMetadata{},
+		VariableCtx: map[string]*core.ReleaseMetadata{},
 	}
 }
 
-func (c *Compiler) Compile(context Context) (ReleaseMetadata, error) {
+func (c *Compiler) Compile(context Context) (*core.ReleaseMetadata, error) {
 	context.PushLogSection("Compile")
 	plan := context.GetEscapePlan()
 	c.context = context
-	c.metadata = NewEmptyReleaseMetadata().(*releaseMetadata)
+	c.metadata = core.NewEmptyReleaseMetadata()
 
 	if plan.GetName() == "" {
 		return nil, fmt.Errorf("Missing build name. Add a 'name' field to your Escape plan")
@@ -117,12 +118,11 @@ func (c *Compiler) compileExtensions(plan *escape_plan.EscapePlan) error {
 		provides[c] = true
 	}
 	for _, extend := range plan.GetExtends() {
-		dep, err := NewDependencyFromString(extend)
+		dep, err := core.NewDependencyFromString(extend)
 		if err != nil {
 			return err
 		}
-		dep = dep.(*dependency)
-		if err := dep.ResolveVersion(c.context); err != nil {
+		if err := c.ResolveVersion(dep, c.context); err != nil {
 			return err
 		}
 		resolvedDep := dep.GetReleaseId()
@@ -172,8 +172,8 @@ func (c *Compiler) compileExtensions(plan *escape_plan.EscapePlan) error {
 			if exists {
 				continue
 			}
-			newErrand.(*errand).Script = c.extensionPath(metadata, newErrand.GetScript())
-			c.metadata.Errands[name] = newErrand.(*errand)
+			newErrand.Script = c.extensionPath(metadata, newErrand.GetScript())
+			c.metadata.Errands[name] = newErrand
 		}
 		for key, val := range metadata.GetMetadata() {
 			c.metadata.Metadata[key] = val
@@ -203,11 +203,30 @@ func (c *Compiler) compileExtensions(plan *escape_plan.EscapePlan) error {
 	return nil
 }
 
-func (c *Compiler) extensionPath(extension ReleaseMetadata, path string) string {
+func (c *Compiler) extensionPath(extension *core.ReleaseMetadata, path string) string {
 	if path == "" {
 		return ""
 	}
 	return paths.NewPath().ExtensionPath(extension, path)
+}
+
+func (c *Compiler) ResolveVersion(d *core.Dependency, context Context) error {
+	if d.Version != "latest" && !strings.HasSuffix(d.Version, "@") {
+		return nil
+	}
+	backend := context.GetEscapeConfig().GetCurrentTarget().GetStorageBackend()
+	if backend == "escape" {
+		metadata, err := context.GetClient().ReleaseQuery(d.GetReleaseId())
+		if err != nil {
+			return err
+		}
+		d.Version = metadata.GetVersion()
+	} else if backend == "" || backend == "local" {
+		return errors.New("Backend not implemented: " + backend)
+	} else {
+		return errors.New("Unsupported Escape storage backend: " + backend)
+	}
+	return nil
 }
 
 func (c *Compiler) compileDependencies(depends []string) error {
@@ -218,12 +237,11 @@ func (c *Compiler) compileDependencies(depends []string) error {
 	}
 	result := []string{}
 	for _, depend := range depends {
-		dep, err := NewDependencyFromString(depend)
+		dep, err := core.NewDependencyFromString(depend)
 		if err != nil {
 			return err
 		}
-		dep = dep.(*dependency)
-		if err := dep.ResolveVersion(c.context); err != nil {
+		if err := c.ResolveVersion(dep, c.context); err != nil {
 			return err
 		}
 		resolvedDep := dep.GetReleaseId()
@@ -433,14 +451,14 @@ func (c *Compiler) compileOutputs(outputs []interface{}) error {
 
 func (c *Compiler) compileErrands(errands map[string]interface{}) error {
 	for name, errandDict := range errands {
-		newErrand, err := NewErrandFromDict(name, errandDict)
+		newErrand, err := core.NewErrandFromDict(name, errandDict)
 		if err != nil {
 			return err
 		}
 		if err := c.compileEscapePlanScriptDigest(newErrand.GetScript()); err != nil {
 			return err
 		}
-		c.metadata.Errands[name] = newErrand.(*errand)
+		c.metadata.Errands[name] = newErrand
 	}
 	return nil
 }
@@ -460,12 +478,12 @@ func (c *Compiler) compileTemplates(templateList []interface{}) error {
 	return nil
 }
 
-func (c *Compiler) compileVariable(v interface{}) (result *variable.Variable, err error) {
+func (c *Compiler) compileVariable(v interface{}) (result *variables.Variable, err error) {
 	switch v.(type) {
 	case string:
-		result = variable.NewVariableFromString(v.(string), "string")
+		result = variables.NewVariableFromString(v.(string), "string")
 	case map[interface{}]interface{}:
-		result, err = variable.NewVariableFromDict(v.(map[interface{}]interface{}))
+		result, err = variables.NewVariableFromDict(v.(map[interface{}]interface{}))
 		if err != nil {
 			return nil, err
 		}
@@ -478,7 +496,7 @@ func (c *Compiler) compileVariable(v interface{}) (result *variable.Variable, er
 	return result, nil
 }
 
-func (c *Compiler) compileDefault(v *variable.Variable) (*variable.Variable, error) {
+func (c *Compiler) compileDefault(v *variables.Variable) (*variables.Variable, error) {
 	switch v.Default.(type) {
 	case int, float64, bool:
 		return v, nil
@@ -529,7 +547,7 @@ func (c *Compiler) compileMetadata(metadata map[string]string) error {
 	return nil
 }
 
-func RunScriptForCompileStep(scriptStr string, variableCtx map[string]ReleaseMetadata) (string, error) {
+func RunScriptForCompileStep(scriptStr string, variableCtx map[string]*core.ReleaseMetadata) (string, error) {
 	parsedScript, err := script.ParseScript(scriptStr)
 	if err != nil {
 		return "", err

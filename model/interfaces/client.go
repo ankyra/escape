@@ -16,11 +16,15 @@ limitations under the License.
 
 package interfaces
 
+import (
+	core "github.com/ankyra/escape-core"
+)
+
 type Client interface {
 	Login(url, username, password string, storeCredentials bool) error
-	ReleaseQuery(releaseQuery string) (ReleaseMetadata, error)
+	ReleaseQuery(releaseQuery string) (*core.ReleaseMetadata, error)
 	NextVersionQuery(releaseId, prefix string) (string, error)
-	Register(ReleaseMetadata) error
+	Register(*core.ReleaseMetadata) error
 	UploadRelease(releaseId, releasePath string) error
 	DownloadRelease(releaseId, targetDir string) error
 }

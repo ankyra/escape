@@ -23,8 +23,8 @@ import (
 	"errors"
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/paths"
-	"github.com/ankyra/escape-client/model/release"
 	"github.com/ankyra/escape-client/util"
+	core "github.com/ankyra/escape-core"
 	"io"
 	"io/ioutil"
 	"os"
@@ -46,7 +46,7 @@ func (resolver DependencyResolver) Resolve(cfg EscapeConfig, resolveDependencies
 
 func (resolver DependencyResolver) resolve(cfg EscapeConfig, path Paths, dep string) error {
 	fetcher := ReleaseFetcher{}
-	d, err := release.NewDependencyFromString(dep)
+	d, err := core.NewDependencyFromString(dep)
 	if err != nil {
 		return err
 	}
@@ -55,7 +55,7 @@ func (resolver DependencyResolver) resolve(cfg EscapeConfig, path Paths, dep str
 		return err
 	}
 	releaseJson := path.UnpackedDepDirectoryReleaseMetadata(d)
-	metadata, err := release.NewReleaseMetadataFromFile(releaseJson)
+	metadata, err := core.NewReleaseMetadataFromFile(releaseJson)
 	if err != nil {
 		return err
 	}
@@ -74,8 +74,8 @@ func (resolver DependencyResolver) resolve(cfg EscapeConfig, path Paths, dep str
 	return nil
 }
 
-func (ReleaseFetcher) Fetch(cfg EscapeConfig, path Paths, dep Dependency) error {
-	fetchers := []func(EscapeConfig, Paths, Dependency) (bool, error){
+func (ReleaseFetcher) Fetch(cfg EscapeConfig, path Paths, dep *core.Dependency) error {
+	fetchers := []func(EscapeConfig, Paths, *core.Dependency) (bool, error){
 		localFileReleaseFetcherStrategy,
 		archiveReleaseFetcherStrategy,
 		escapeServerReleaseFetcherStrategy,
@@ -92,7 +92,7 @@ func (ReleaseFetcher) Fetch(cfg EscapeConfig, path Paths, dep Dependency) error 
 	return errors.New("Could not resolve dependency: " + dep.GetReleaseId())
 }
 
-func localFileReleaseFetcherStrategy(cfg EscapeConfig, path Paths, dep Dependency) (bool, error) {
+func localFileReleaseFetcherStrategy(cfg EscapeConfig, path Paths, dep *core.Dependency) (bool, error) {
 	releaseJson := path.UnpackedDepDirectoryReleaseMetadata(dep)
 	if util.PathExists(releaseJson) {
 		contents, err := ioutil.ReadFile(releaseJson)
@@ -118,7 +118,7 @@ func localFileReleaseFetcherStrategy(cfg EscapeConfig, path Paths, dep Dependenc
 	return false, nil
 }
 
-func archiveReleaseFetcherStrategy(cfg EscapeConfig, path Paths, dep Dependency) (bool, error) {
+func archiveReleaseFetcherStrategy(cfg EscapeConfig, path Paths, dep *core.Dependency) (bool, error) {
 	localArchive := path.DependencyReleaseArchive(dep)
 	buildDirArchive := path.DependencyDownloadTarget(dep)
 	if !util.PathExists(localArchive) && !util.PathExists(buildDirArchive) {
@@ -163,7 +163,7 @@ func archiveReleaseFetcherStrategy(cfg EscapeConfig, path Paths, dep Dependency)
 	return localFileReleaseFetcherStrategy(cfg, path, dep)
 }
 
-func escapeServerReleaseFetcherStrategy(cfg EscapeConfig, path Paths, dep Dependency) (bool, error) {
+func escapeServerReleaseFetcherStrategy(cfg EscapeConfig, path Paths, dep *core.Dependency) (bool, error) {
 	backend := cfg.GetCurrentTarget().GetStorageBackend()
 	if backend != "escape" {
 		return false, nil

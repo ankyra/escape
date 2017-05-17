@@ -16,32 +16,36 @@ limitations under the License.
 
 package interfaces
 
+import (
+	core "github.com/ankyra/escape-core"
+)
+
 type Paths interface {
 	GetBaseDir() string
 	GetAppConfigDir() string
 	EscapeDirectory() string
 	ReleaseJson() string
-	ScratchSpaceDirectory(ReleaseMetadata) string
-	ScratchSpaceReleaseMetadata(ReleaseMetadata) string
+	ScratchSpaceDirectory(*core.ReleaseMetadata) string
+	ScratchSpaceReleaseMetadata(*core.ReleaseMetadata) string
 	ReleaseTargetDirectory() string
-	ReleaseLocation(ReleaseMetadata) string
+	ReleaseLocation(*core.ReleaseMetadata) string
 	DependencyCacheDirectory() string
-	DependencyReleaseArchive(Dependency) string
-	DependencyDownloadTarget(Dependency) string
+	DependencyReleaseArchive(*core.Dependency) string
+	DependencyDownloadTarget(*core.Dependency) string
 	OutputsFile() string
-	DepTypeDirectory(Dependency) string
-	UnpackedDepDirectory(Dependency) string
-	UnpackedDepDirectoryReleaseMetadata(Dependency) string
-	LocalReleaseMetadata(ReleaseMetadata) string
+	DepTypeDirectory(*core.Dependency) string
+	UnpackedDepDirectory(*core.Dependency) string
+	UnpackedDepDirectoryReleaseMetadata(*core.Dependency) string
+	LocalReleaseMetadata(*core.ReleaseMetadata) string
 	EnsureEscapeDirectoryExists() error
-	ExtensionPath(ReleaseMetadata, string) string
+	ExtensionPath(*core.ReleaseMetadata, string) string
 
-	EnsureDependencyTypeDirectoryExists(Dependency) error
-	EnsureScratchSpaceDirectoryExists(ReleaseMetadata) error
+	EnsureDependencyTypeDirectoryExists(*core.Dependency) error
+	EnsureScratchSpaceDirectoryExists(*core.ReleaseMetadata) error
 	EnsureReleaseTargetDirectoryExists() error
 	EnsureDependencyCacheDirectoryExists() error
 
 	Script(script string) string
 
-	NewPathForDependency(ReleaseMetadata) Paths
+	NewPathForDependency(*core.ReleaseMetadata) Paths
 }

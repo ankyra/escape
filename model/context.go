@@ -19,23 +19,24 @@ package model
 import (
 	"errors"
 
+	"github.com/ankyra/escape-client/model/compiler"
 	"github.com/ankyra/escape-client/model/escape_plan"
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/paths"
-	"github.com/ankyra/escape-client/model/release"
 	"github.com/ankyra/escape-client/model/state"
 	"github.com/ankyra/escape-client/util"
+	core "github.com/ankyra/escape-core"
 )
 
 type context struct {
 	EscapeConfig       EscapeConfig
 	EscapePlan         *escape_plan.EscapePlan
-	ReleaseMetadata    ReleaseMetadata
+	ReleaseMetadata    *core.ReleaseMetadata
 	ProjectState       ProjectState
 	EnvironmentState   EnvironmentState
 	Logger             util.Logger
 	LogConsumers       []util.LogConsumer
-	DependencyMetadata map[string]ReleaseMetadata
+	DependencyMetadata map[string]*core.ReleaseMetadata
 }
 
 func NewContext() Context {
@@ -44,7 +45,7 @@ func NewContext() Context {
 	ctx.Logger = util.NewLogger([]util.LogConsumer{
 		util.NewFancyTerminalOutputLogConsumer(),
 	})
-	ctx.DependencyMetadata = map[string]ReleaseMetadata{}
+	ctx.DependencyMetadata = map[string]*core.ReleaseMetadata{}
 	return ctx
 }
 
@@ -88,7 +89,7 @@ func (c *context) GetClient() Client {
 func (c *context) GetEscapePlan() *escape_plan.EscapePlan {
 	return c.EscapePlan
 }
-func (c *context) GetReleaseMetadata() ReleaseMetadata {
+func (c *context) GetReleaseMetadata() *core.ReleaseMetadata {
 	return c.ReleaseMetadata
 }
 func (c *context) GetProjectState() ProjectState {
@@ -101,7 +102,7 @@ func (c *context) GetEscapeConfig() EscapeConfig {
 	return c.EscapeConfig
 }
 
-func (c *context) GetDependencyMetadata(depReleaseId string) (ReleaseMetadata, error) {
+func (c *context) GetDependencyMetadata(depReleaseId string) (*core.ReleaseMetadata, error) {
 	metadata, ok := c.DependencyMetadata[depReleaseId]
 	if ok {
 		return metadata, nil
@@ -116,19 +117,19 @@ func (c *context) GetDependencyMetadata(depReleaseId string) (ReleaseMetadata, e
 
 }
 
-func (c *context) FetchDependencyAndReadMetadata(depReleaseId string) (ReleaseMetadata, error) {
+func (c *context) FetchDependencyAndReadMetadata(depReleaseId string) (*core.ReleaseMetadata, error) {
 	c.Log("fetch.start", map[string]string{"dependency": depReleaseId})
 	err := DependencyResolver{}.Resolve(c.EscapeConfig, []string{depReleaseId})
 	if err != nil {
 		return nil, err
 	}
-	dep, err := release.NewDependencyFromString(depReleaseId)
+	dep, err := core.NewDependencyFromString(depReleaseId)
 	if err != nil {
 		return nil, err
 	}
 	unpacked := paths.NewPath().UnpackedDepDirectoryReleaseMetadata(dep)
 	c.Log("fetch.finished", map[string]string{"dependency": depReleaseId})
-	return release.NewReleaseMetadataFromFile(unpacked)
+	return core.NewReleaseMetadataFromFile(unpacked)
 }
 
 func (c *context) LoadEscapeConfig(cfgFile, cfgProfile string) error {
@@ -145,7 +146,7 @@ func (c *context) LoadEscapePlan(cfgFile string) error {
 }
 
 func (c *context) LoadMetadata() error {
-	metadata, err := release.NewCompiler().Compile(c)
+	metadata, err := compiler.NewCompiler().Compile(c)
 	if err != nil {
 		return err
 	}

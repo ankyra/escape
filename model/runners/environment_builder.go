@@ -23,6 +23,7 @@ import (
 
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/util"
+	core "github.com/ankyra/escape-core"
 )
 
 type environmentBuilder struct {
@@ -65,7 +66,7 @@ func (e *environmentBuilder) GetInputsForPreStep(ctx RunnerContext, stage string
 	return prepInputs(ctx, stage, &calculatedInputs)
 }
 
-func (e *environmentBuilder) GetInputsForErrand(ctx RunnerContext, errand Errand) (*map[string]interface{}, error) {
+func (e *environmentBuilder) GetInputsForErrand(ctx RunnerContext, errand *core.Errand) (*map[string]interface{}, error) {
 	deplState := ctx.GetDeploymentState()
 	inputs := deplState.GetCalculatedInputs("deploy")
 	result, err := prepInputs(ctx, "deploy", inputs)

@@ -3,7 +3,7 @@ package runners
 import (
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/paths"
-	"github.com/ankyra/escape-client/model/release"
+	core "github.com/ankyra/escape-core"
 	"os"
 )
 
@@ -50,7 +50,7 @@ func runDependency(ctx RunnerContext, dependency, logKey string, runner Runner) 
 		"dependency": dependency,
 	})
 	ctx.Logger().PushRelease(dependency)
-	dep, err := release.NewDependencyFromString(dependency)
+	dep, err := core.NewDependencyFromString(dependency)
 	if err != nil {
 		return err
 	}
@@ -79,7 +79,7 @@ func runDependency(ctx RunnerContext, dependency, logKey string, runner Runner) 
 	return nil
 }
 
-func newMetadataFromReleaseDir(releaseDir string) (ReleaseMetadata, error) {
+func newMetadataFromReleaseDir(releaseDir string) (*core.ReleaseMetadata, error) {
 	path := paths.NewPathWithBaseDir(releaseDir).ReleaseJson()
-	return release.NewReleaseMetadataFromFile(path)
+	return core.NewReleaseMetadataFromFile(path)
 }

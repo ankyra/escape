@@ -17,13 +17,16 @@ limitations under the License.
 package release
 
 import (
-	"github.com/ankyra/escape-client/model/variable"
+	"github.com/ankyra/escape-core/variables"
 	. "gopkg.in/check.v1"
+	"testing"
 )
 
 type metadataSuite struct{}
 
 var _ = Suite(&metadataSuite{})
+
+func Test(t *testing.T) { TestingT(t) }
 
 func (s *metadataSuite) Test_GetReleaseId(c *C) {
 	m := NewReleaseMetadata("test-release", "0.1")
@@ -48,8 +51,8 @@ func (s *metadataSuite) Test_VariableContext(c *C) {
 }
 
 func (s *metadataSuite) Test_InputVariables(c *C) {
-	v1 := variable.NewVariableFromString("input_variable1", "string")
-	v2 := variable.NewVariableFromString("input_variable2", "string")
+	v1 := variables.NewVariableFromString("input_variable1", "string")
+	v2 := variables.NewVariableFromString("input_variable2", "string")
 	m := NewReleaseMetadata("test-release", "0.1")
 	m.AddInputVariable(v1)
 	m.AddInputVariable(v2)
@@ -60,8 +63,8 @@ func (s *metadataSuite) Test_InputVariables(c *C) {
 }
 
 func (s *metadataSuite) Test_OutputVariables(c *C) {
-	v1 := variable.NewVariableFromString("output_variable1", "string")
-	v2 := variable.NewVariableFromString("output_variable2", "string")
+	v1 := variables.NewVariableFromString("output_variable1", "string")
+	v2 := variables.NewVariableFromString("output_variable2", "string")
 	m := NewReleaseMetadata("test-release", "0.1")
 	m.AddOutputVariable(v1)
 	m.AddOutputVariable(v2)

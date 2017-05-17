@@ -17,7 +17,7 @@ limitations under the License.
 package templates
 
 import (
-	"github.com/ankyra/escape-client/model/script"
+	"github.com/ankyra/escape-core/script"
 	. "gopkg.in/check.v1"
 	"io/ioutil"
 	"os"

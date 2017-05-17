@@ -14,16 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package interfaces
+package variable_types
 
 import (
-	"github.com/ankyra/escape-client/model/variable"
+	"fmt"
+	"github.com/ankyra/escape-core/util"
 )
 
-type Errand interface {
-	GetName() string
-	GetDescription() string
-	GetScript() string
-	GetInputs() []*variable.Variable
-	SetScript(string)
+var stringType = NewUserManagedVariableType("string", validateString)
+
+func validateString(value interface{}, options map[string]interface{}) (interface{}, error) {
+	val, err := util.InterfaceToString(value)
+	if err != nil {
+		return "", fmt.Errorf("Expecting 'string' value, but got '%T'", value)
+	}
+	return val, nil
 }

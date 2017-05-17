@@ -17,7 +17,7 @@ limitations under the License.
 package parsers
 
 import (
-	"github.com/ankyra/escape-client/model/variable/variable_types"
+	"github.com/ankyra/escape-core/variables/variable_types"
 	. "gopkg.in/check.v1"
 )
 

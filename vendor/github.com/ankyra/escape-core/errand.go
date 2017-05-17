@@ -19,39 +19,38 @@ package release
 import (
 	"errors"
 	"fmt"
-	. "github.com/ankyra/escape-client/model/interfaces"
-	"github.com/ankyra/escape-client/model/variable"
+	"github.com/ankyra/escape-core/variables"
 )
 
-type errand struct {
-	Name        string               `json:"name"`
-	Description string               `json:"description"`
-	Script      string               `json:"script"`
-	Inputs      []*variable.Variable `json:"inputs"`
+type Errand struct {
+	Name        string                `json:"name"`
+	Description string                `json:"description"`
+	Script      string                `json:"script"`
+	Inputs      []*variables.Variable `json:"inputs"`
 }
 
-func (e *errand) GetName() string {
+func (e *Errand) GetName() string {
 	return e.Name
 }
-func (e *errand) GetDescription() string {
+func (e *Errand) GetDescription() string {
 	return e.Description
 }
-func (e *errand) GetScript() string {
+func (e *Errand) GetScript() string {
 	return e.Script
 }
-func (e *errand) SetScript(s string) {
+func (e *Errand) SetScript(s string) {
 	e.Script = s
 }
 
-func (e *errand) GetInputs() []*variable.Variable {
-	result := []*variable.Variable{}
+func (e *Errand) GetInputs() []*variables.Variable {
+	result := []*variables.Variable{}
 	for _, i := range e.Inputs {
 		result = append(result, i)
 	}
 	return result
 }
 
-func (e *errand) Validate() error {
+func (e *Errand) Validate() error {
 	if e.Name == "" {
 		return fmt.Errorf("Missing name in errand")
 	} else if e.Script == "" {
@@ -68,13 +67,13 @@ func (e *errand) Validate() error {
 	return nil
 }
 
-func NewErrandFromDict(name string, dict interface{}) (Errand, error) {
+func NewErrandFromDict(name string, dict interface{}) (*Errand, error) {
 	switch dict.(type) {
 	case map[interface{}]interface{}:
 		errandMap := dict.(map[interface{}]interface{})
 		description := ""
 		script := ""
-		inputs := []*variable.Variable{}
+		inputs := []*variables.Variable{}
 		for key, val := range errandMap {
 			switch key.(type) {
 			case string:
@@ -99,14 +98,14 @@ func NewErrandFromDict(name string, dict interface{}) (Errand, error) {
 							switch inputDict.(type) {
 							case map[interface{}]interface{}:
 								dict := inputDict.(map[interface{}]interface{})
-								v, err := variable.NewVariableFromDict(dict)
+								v, err := variables.NewVariableFromDict(dict)
 								if err != nil {
 									return nil, err
 								}
 								inputs = append(inputs, v)
 							case string:
 								stringVar := inputDict.(string)
-								v := variable.NewVariableFromString(stringVar, "string")
+								v := variables.NewVariableFromString(stringVar, "string")
 								inputs = append(inputs, v)
 							default:
 								return nil, errors.New("Expecting dict type for input item in errand " + name)
@@ -122,7 +121,7 @@ func NewErrandFromDict(name string, dict interface{}) (Errand, error) {
 			}
 
 		}
-		result := &errand{
+		result := &Errand{
 			Name:        name,
 			Description: description,
 			Script:      script,

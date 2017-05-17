@@ -1,0 +1,3 @@
+*.swp
+.escape/
+escape_state.json

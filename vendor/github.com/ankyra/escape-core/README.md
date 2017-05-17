@@ -1,4 +1,25 @@
-/*
+# Escape Core
+
+Please see http://escape.ankyra.io for the full documentation.
+
+## Build
+
+This library can be build using standard Go tools. 
+
+```
+git clone https://github.com/ankyra/escape-core.git "$GOPATH/src/github.com/ankyra/escape-core"
+go build
+```
+
+## Build
+
+```
+make test
+```
+
+## License
+
+```
 Copyright 2017 Ankyra
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,21 +33,4 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-*/
-
-package variable_types
-
-import (
-	"fmt"
-	"github.com/ankyra/escape-client/util"
-)
-
-var stringType = NewUserManagedVariableType("string", validateString)
-
-func validateString(value interface{}, options map[string]interface{}) (interface{}, error) {
-	val, err := util.InterfaceToString(value)
-	if err != nil {
-		return "", fmt.Errorf("Expecting 'string' value, but got '%T'", value)
-	}
-	return val, nil
-}
+```

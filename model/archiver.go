@@ -20,22 +20,22 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"errors"
-	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/paths"
 	"github.com/ankyra/escape-client/util"
+	core "github.com/ankyra/escape-core"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 )
 
-type archiver struct{}
+type Archiver struct{}
 
-func NewReleaseArchiver() Archiver {
-	return &archiver{}
+func NewReleaseArchiver() *Archiver {
+	return &Archiver{}
 }
 
-func (a *archiver) Archive(metadata ReleaseMetadata, forceOverwrite bool) error {
+func (a *Archiver) Archive(metadata *core.ReleaseMetadata, forceOverwrite bool) error {
 	//    applog("archive.start", release=metadata.get_full_build_id())
 	if err := buildReleaseAndTargetDirectories(metadata); err != nil {
 		return err
@@ -57,7 +57,7 @@ func (a *archiver) Archive(metadata ReleaseMetadata, forceOverwrite bool) error 
 	//    applog("archive.finished", release=metadata.get_full_build_id(), path=os.path.realpath(tar))
 }
 
-func (a *archiver) buildTarArchive(metadata ReleaseMetadata, forceOverwrite bool) error {
+func (a *Archiver) buildTarArchive(metadata *core.ReleaseMetadata, forceOverwrite bool) error {
 	path := paths.NewPath()
 	scratchSpace := path.ScratchSpaceDirectory(metadata)
 	packageId := metadata.GetReleaseId()
@@ -86,7 +86,7 @@ func (a *archiver) buildTarArchive(metadata ReleaseMetadata, forceOverwrite bool
 	return os.Rename(pkg, target)
 }
 
-func buildReleaseAndTargetDirectories(metadata ReleaseMetadata) error {
+func buildReleaseAndTargetDirectories(metadata *core.ReleaseMetadata) error {
 	path := paths.NewPath()
 	scratchSpace := path.ScratchSpaceDirectory(metadata)
 	if util.PathExists(scratchSpace) {

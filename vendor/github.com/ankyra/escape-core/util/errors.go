@@ -14,14 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package interfaces
+package util
 
-type Dependency interface {
-	GetReleaseId() string
-	GetVersionlessReleaseId() string
-	ResolveVersion(Context) error
+import (
+	"errors"
+	"strings"
+)
 
-	GetBuild() string
-	GetVersion() string
-	GetVariableName() string
+func RecordError(cmd []string, err error) error {
+	cmdString := strings.Join(cmd, " ")
+	return errors.New("Failed to successfully execute command '" + cmdString + "': " + err.Error())
 }

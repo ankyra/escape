@@ -19,12 +19,13 @@ package interfaces
 import (
 	plan "github.com/ankyra/escape-client/model/escape_plan"
 	"github.com/ankyra/escape-client/util"
+	core "github.com/ankyra/escape-core"
 )
 
 type Context interface {
 	InitFromLocalEscapePlanAndState(string, string, string) error
-	GetDependencyMetadata(string) (ReleaseMetadata, error)
-	FetchDependencyAndReadMetadata(string) (ReleaseMetadata, error)
+	GetDependencyMetadata(string) (*core.ReleaseMetadata, error)
+	FetchDependencyAndReadMetadata(string) (*core.ReleaseMetadata, error)
 	LoadEscapeConfig(cfgFile string, cfgProfile string) error
 	LoadEscapePlan(string) error
 	LoadMetadata() error
@@ -36,7 +37,7 @@ type Context interface {
 	PopLogRelease()
 
 	GetEscapePlan() *plan.EscapePlan
-	GetReleaseMetadata() ReleaseMetadata
+	GetReleaseMetadata() *core.ReleaseMetadata
 	GetProjectState() ProjectState
 	GetEnvironmentState() EnvironmentState
 	GetEscapeConfig() EscapeConfig

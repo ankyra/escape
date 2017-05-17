@@ -18,7 +18,7 @@ package parsers
 
 import (
 	"errors"
-	"github.com/ankyra/escape-client/model/variable/variable_types"
+	"github.com/ankyra/escape-core/variables/variable_types"
 	"strings"
 )
 

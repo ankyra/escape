@@ -19,9 +19,10 @@ package errand
 import (
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/runners"
+	core "github.com/ankyra/escape-core"
 )
 
-func NewErrandRunner(errand Errand) Runner {
+func NewErrandRunner(errand *core.Errand) Runner {
 	return runners.NewRunner(func(ctx RunnerContext) error {
 		step := runners.NewScriptStep(ctx, "deploy", errand.GetName(), true)
 		step.ScriptPath = errand.GetScript()

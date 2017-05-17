@@ -18,7 +18,7 @@ package script
 
 import (
 	"fmt"
-	"github.com/ankyra/escape-client/model/parsers"
+	"github.com/ankyra/escape-core/parsers"
 	"strings"
 )
 

@@ -18,7 +18,7 @@ package templates
 
 import (
 	"fmt"
-	"github.com/ankyra/escape-client/model/script"
+	"github.com/ankyra/escape-core/script"
 	"github.com/cbroglie/mustache"
 	"io/ioutil"
 	"path/filepath"

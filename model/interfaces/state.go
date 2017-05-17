@@ -17,7 +17,8 @@ limitations under the License.
 package interfaces
 
 import (
-	"github.com/ankyra/escape-client/model/script"
+	core "github.com/ankyra/escape-core"
+	"github.com/ankyra/escape-core/script"
 )
 
 type ProjectState interface {
@@ -65,6 +66,6 @@ type DeploymentState interface {
 	GetName() string
 
 	GetEnvironmentState() EnvironmentState
-	ToScript(metadata ReleaseMetadata, stage string) script.Script
-	ToScriptEnvironment(rm map[string]ReleaseMetadata, stage string) (*script.ScriptEnvironment, error)
+	ToScript(metadata *core.ReleaseMetadata, stage string) script.Script
+	ToScriptEnvironment(rm map[string]*core.ReleaseMetadata, stage string) (*script.ScriptEnvironment, error)
 }
