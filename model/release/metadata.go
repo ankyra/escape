@@ -119,6 +119,9 @@ func validate(m *releaseMetadata) error {
 	}
 	return nil
 }
+func (m *releaseMetadata) GetExtends() []string {
+	return m.Extends
+}
 func (m *releaseMetadata) GetStages() map[string]*ExecStage {
 	return m.Stages
 }

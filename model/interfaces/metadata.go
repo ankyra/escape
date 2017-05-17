@@ -59,6 +59,7 @@ type ReleaseMetadata interface {
 	GetVersion() string
 	GetVariableContext() map[string]string
 	GetTemplates() []*templates.Template
+	GetExtends() []string
 
 	GetStages() map[string]*ExecStage
 	SetStage(stage, script string)
