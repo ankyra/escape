@@ -6,8 +6,8 @@
          "name": "dev",
          "inputs": null,
          "deployments": {
-            "archive-name": {
-               "name": "archive-name",
+            "name": {
+               "name": "name",
                "stages": {
                   "build": {
                      "inputs": {},
@@ -21,7 +21,7 @@
                         "variable": "testinput"
                      },
                      "calculated_inputs": {},
-                     "calculated_outputs": null,
+                     "calculated_outputs": {},
                      "version": "0.0.1",
                      "step": ""
                   }

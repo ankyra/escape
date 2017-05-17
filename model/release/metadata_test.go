@@ -26,19 +26,19 @@ type metadataSuite struct{}
 var _ = Suite(&metadataSuite{})
 
 func (s *metadataSuite) Test_GetReleaseId(c *C) {
-	m := NewReleaseMetadata("archive", "test-release", "0.1")
+	m := NewReleaseMetadata("test-release", "0.1")
 	releaseId := m.GetReleaseId()
-	c.Assert(releaseId, Equals, "archive-test-release-v0.1")
+	c.Assert(releaseId, Equals, "test-release-v0.1")
 }
 
 func (s *metadataSuite) Test_GetVersionlessReleaseId(c *C) {
-	m := NewReleaseMetadata("archive", "test-release", "0.1")
+	m := NewReleaseMetadata("test-release", "0.1")
 	releaseId := m.GetVersionlessReleaseId()
-	c.Assert(releaseId, Equals, "archive-test-release")
+	c.Assert(releaseId, Equals, "test-release")
 }
 
 func (s *metadataSuite) Test_VariableContext(c *C) {
-	m := NewReleaseMetadata("archive", "test-release", "0.1")
+	m := NewReleaseMetadata("test-release", "0.1")
 	m.SetVariableInContext("test_key1", "test_value1")
 	m.SetVariableInContext("test_key2", "test_value2")
 	ctx := m.GetVariableContext()
@@ -50,7 +50,7 @@ func (s *metadataSuite) Test_VariableContext(c *C) {
 func (s *metadataSuite) Test_InputVariables(c *C) {
 	v1 := variable.NewVariableFromString("input_variable1", "string")
 	v2 := variable.NewVariableFromString("input_variable2", "string")
-	m := NewReleaseMetadata("archive", "test-release", "0.1")
+	m := NewReleaseMetadata("test-release", "0.1")
 	m.AddInputVariable(v1)
 	m.AddInputVariable(v2)
 	vars := m.GetInputs()
@@ -62,7 +62,7 @@ func (s *metadataSuite) Test_InputVariables(c *C) {
 func (s *metadataSuite) Test_OutputVariables(c *C) {
 	v1 := variable.NewVariableFromString("output_variable1", "string")
 	v2 := variable.NewVariableFromString("output_variable2", "string")
-	m := NewReleaseMetadata("archive", "test-release", "0.1")
+	m := NewReleaseMetadata("test-release", "0.1")
 	m.AddOutputVariable(v1)
 	m.AddOutputVariable(v2)
 	vars := m.GetOutputs()
@@ -72,7 +72,7 @@ func (s *metadataSuite) Test_OutputVariables(c *C) {
 }
 
 func (s *metadataSuite) Test_GetDirectores(c *C) {
-	m := NewReleaseMetadata("archive", "test-release", "0.1")
+	m := NewReleaseMetadata("test-release", "0.1")
 	m.AddFileWithDigest("test/file1.txt", "abcdef")
 	m.AddFileWithDigest("test/file2.txt", "abcdef")
 	m.AddFileWithDigest("test2/file3.txt", "abcdef")
@@ -98,11 +98,10 @@ func (s *metadataSuite) Test_FromJson(c *C) {
         "consumes": ["provider1", "provider2"],
         "name": "test-release",
         "description": "Test release",
-        "type": "archive",
         "version": "0.1",
         "variable_context": {
-            "base": "archive-test-depends-v1",
-            "archive-test-depends": "archive-test-depends-v1"
+            "base": "test-depends-v1",
+            "test-depends": "test-depends-v1"
         }
     }`
 	m, err := NewReleaseMetadataFromJsonString(json)
@@ -110,10 +109,9 @@ func (s *metadataSuite) Test_FromJson(c *C) {
 	c.Assert(m.GetApiVersion(), Equals, "1")
 	c.Assert(m.GetName(), Equals, "test-release")
 	c.Assert(m.GetDescription(), Equals, "Test release")
-	c.Assert(m.GetType(), Equals, "archive")
 	c.Assert(m.GetVersion(), Equals, "0.1")
 	c.Assert(m.GetConsumes()[0], Equals, "provider1")
 	c.Assert(m.GetConsumes()[1], Equals, "provider2")
-	c.Assert(m.GetVariableContext()["base"], Equals, "archive-test-depends-v1")
-	c.Assert(m.GetVariableContext()["archive-test-depends"], Equals, "archive-test-depends-v1")
+	c.Assert(m.GetVariableContext()["base"], Equals, "test-depends-v1")
+	c.Assert(m.GetVariableContext()["test-depends"], Equals, "test-depends-v1")
 }

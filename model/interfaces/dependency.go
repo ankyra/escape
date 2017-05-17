@@ -21,7 +21,6 @@ type Dependency interface {
 	GetVersionlessReleaseId() string
 	ResolveVersion(Context) error
 
-	GetType() string
 	GetBuild() string
 	GetVersion() string
 	GetVariableName() string

@@ -25,9 +25,8 @@ type dependencySuite struct{}
 var _ = Suite(&dependencySuite{})
 
 func (s *dependencySuite) Test_Dependency_Happy_Path1(c *C) {
-	dep, err := ParseDependency("type-name-v1.0")
+	dep, err := ParseDependency("name-v1.0")
 	c.Assert(err, IsNil)
-	c.Assert(dep.Type, Equals, "type")
 	c.Assert(dep.Build, Equals, "name")
 	c.Assert(dep.Version, Equals, "1.0")
 	c.Assert(dep.VariableName, Equals, "")
@@ -36,25 +35,23 @@ func (s *dependencySuite) Test_Dependency_Happy_Path1(c *C) {
 func (s *dependencySuite) Test_Dependency_Happy_Path2(c *C) {
 	dep, err := ParseDependency("type-name-v1.0 as dep")
 	c.Assert(err, IsNil)
-	c.Assert(dep.Type, Equals, "type")
-	c.Assert(dep.Build, Equals, "name")
+	c.Assert(dep.Build, Equals, "type-name")
 	c.Assert(dep.Version, Equals, "1.0")
 	c.Assert(dep.VariableName, Equals, "dep")
 }
 
 func (s *dependencySuite) Test_Dependency_WhiteSpace(c *C) {
-	dep, err := ParseDependency("   type-name-v1.0    as   dep  ")
+	dep, err := ParseDependency("   name-v1.0    as   dep  ")
 	c.Assert(err, IsNil)
-	c.Assert(dep.Type, Equals, "type")
 	c.Assert(dep.Build, Equals, "name")
 	c.Assert(dep.Version, Equals, "1.0")
 	c.Assert(dep.VariableName, Equals, "dep")
 }
 
 func (s *dependencySuite) Test_Dependency_Missing_Id(c *C) {
-	dep, err := ParseDependency("type-name-v1.0 as")
+	dep, err := ParseDependency("name-v1.0 as")
 	c.Assert(dep, IsNil)
-	c.Assert(err.Error(), Equals, "Malformed dependency string 'type-name-v1.0 as'")
+	c.Assert(err.Error(), Equals, "Malformed dependency string 'name-v1.0 as'")
 }
 
 func (s *dependencySuite) Test_Dependency_Second_Word_Not_As(c *C) {

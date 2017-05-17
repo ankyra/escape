@@ -1,4 +1,3 @@
-build: name
-type: archive
+name: name
 version: 0.0.1
 test: testdata/failing_test.sh

@@ -24,7 +24,6 @@ import (
 	"github.com/ankyra/escape-client/model/paths"
 	"github.com/ankyra/escape-client/model/release"
 	"github.com/ankyra/escape-client/model/state"
-	"github.com/ankyra/escape-client/model/types"
 	"github.com/ankyra/escape-client/util"
 )
 
@@ -146,7 +145,7 @@ func (c *context) LoadEscapePlan(cfgFile string) error {
 }
 
 func (c *context) LoadMetadata() error {
-	metadata, err := release.NewCompiler(types.ResolveType).Compile(c)
+	metadata, err := release.NewCompiler().Compile(c)
 	if err != nil {
 		return err
 	}

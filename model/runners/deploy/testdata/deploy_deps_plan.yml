@@ -1,8 +1,8 @@
-build: name
+name: name
 type: archive
 version: 0.0.1
 depends:
-- archive-dependency-v0.0.1 as dep
+- dependency-v0.0.1 as dep
 inputs:
 - variable
 outputs:

@@ -30,17 +30,19 @@ type prettyPrinter struct {
 }
 
 var templateMap = map[string]string{
-	"build":        keyValTpl,
-	"type":         keyValTpl,
+	"name":         keyValTpl,
 	"version":      keyValTpl,
 	"description":  keyValTpl,
 	"logo":         keyValTpl,
 	"path":         keyValTpl,
 	"pre_build":    keyValTpl,
+	"build":        keyValTpl,
 	"post_build":   keyValTpl,
 	"pre_deploy":   keyValTpl,
+	"deploy":       keyValTpl,
 	"post_deploy":  keyValTpl,
 	"pre_destroy":  keyValTpl,
+	"destroy":      keyValTpl,
 	"post_destroy": keyValTpl,
 	"smoke":        keyValTpl,
 	"test":         keyValTpl,
@@ -95,11 +97,11 @@ func (e *prettyPrinter) Print(plan *EscapePlan) []byte {
 	yamlMap := plan.ToDict()
 	writer := bytes.NewBuffer([]byte{})
 	ordering := []string{
-		"build", "type", "version", "description", "logo", "extends", "depends", "consumes",
+		"name", "version", "description", "logo", "extends", "depends", "consumes",
 		"provides", "inputs", "outputs", "metadata", "includes", "errands", "templates", "path",
-		"pre_build", "post_build", "test",
-		"pre_deploy", "post_deploy", "smoke",
-		"pre_destroy", "post_destroy"}
+		"pre_build", "build", "post_build", "test",
+		"pre_deploy", "deploy", "post_deploy", "smoke",
+		"pre_destroy", "destroy", "post_destroy"}
 	for _, key := range ordering {
 		val, ok := yamlMap[key]
 		if !ok {
@@ -153,6 +155,16 @@ func (e *prettyPrinter) prettyPrintValue(key string, val interface{}) []byte {
 		panic(err)
 	}
 	return writer.Bytes()
+}
+
+func indent(s string) string {
+	parts := []string{}
+	for _, part := range strings.Split(s, "\n") {
+		if part != "" {
+			parts = append(parts, "  "+part)
+		}
+	}
+	return strings.Join(parts, "\n")
 }
 
 const keyValTpl = `{{ .key }}: {{ if .value }}{{ .value }}{{else}}""{{end}}`

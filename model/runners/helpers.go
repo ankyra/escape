@@ -57,6 +57,14 @@ func NewPreScriptStepRunner(stage, field string) Runner {
 		return step.Run(ctx)
 	})
 }
+func NewMainStepRunner(stage, field string) Runner {
+	return NewRunner(func(ctx RunnerContext) error {
+		step := NewScriptStep(ctx, stage, field, true)
+		step.Commit = mainCommit
+		step.ModifiesOutputVariables = true
+		return step.Run(ctx)
+	})
+}
 func NewPostScriptStepRunner(stage, field string) Runner {
 	return NewRunner(func(ctx RunnerContext) error {
 		step := NewScriptStep(ctx, stage, field, true)
@@ -72,18 +80,6 @@ func NewScriptRunner(stage, field string) Runner {
 	})
 }
 
-func preCommit(ctx RunnerContext, deploymentState DeploymentState, stage string) error {
-	inputs := ctx.GetBuildInputs()
-	version := ctx.GetReleaseMetadata().GetVersion()
-	if err := deploymentState.SetVersion(stage, version); err != nil {
-		return err
-	}
-	if err := deploymentState.UpdateInputs(stage, inputs); err != nil {
-		return err
-	}
-	return compileTemplates(ctx, stage)
-}
-
 func compileTemplates(ctx RunnerContext, stage string) error {
 	env, err := ctx.GetScriptEnvironment(stage)
 	if err != nil {
@@ -96,6 +92,22 @@ func compileTemplates(ctx RunnerContext, stage string) error {
 		}
 	}
 	return nil
+}
+
+func preCommit(ctx RunnerContext, deploymentState DeploymentState, stage string) error {
+	inputs := ctx.GetBuildInputs()
+	version := ctx.GetReleaseMetadata().GetVersion()
+	if err := deploymentState.SetVersion(stage, version); err != nil {
+		return err
+	}
+	if err := deploymentState.UpdateInputs(stage, inputs); err != nil {
+		return err
+	}
+	return compileTemplates(ctx, stage)
+}
+
+func mainCommit(ctx RunnerContext, deploymentState DeploymentState, stage string) error {
+	return ctx.GetDeploymentState().UpdateOutputs(stage, ctx.GetBuildOutputs())
 }
 
 func postCommit(ctx RunnerContext, deploymentState DeploymentState, stage string) error {
@@ -155,7 +167,7 @@ func (b *ScriptStep) initDeploymentState(ctx RunnerContext) (DeploymentState, er
 		if b.Stage == "deploy" {
 			stageName = "Deployment"
 		}
-		return nil, fmt.Errorf("%s '%s' (version %s) could not be found", stageName, ctx.GetDepends()[0], version)
+		return nil, fmt.Errorf("%s state '%s' (version %s) could not be found", stageName, ctx.GetDepends()[0], version)
 	}
 	ctx.SetDeploymentState(deploymentState)
 	if b.Inputs != nil {

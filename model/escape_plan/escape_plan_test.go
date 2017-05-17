@@ -53,9 +53,8 @@ func (s *planSuite) Test_LoadConfig_fails_if_invalid_yaml(c *C) {
 
 func (s *planSuite) Test_Init(c *C) {
 	unit := NewEscapePlan()
-	unit.Init("archive", "test")
-	c.Assert(unit.GetType(), Equals, "archive")
-	c.Assert(unit.GetBuild(), Equals, "test")
+	unit.Init("test")
+	c.Assert(unit.GetName(), Equals, "test")
 	c.Assert(unit.GetVersion(), Equals, "@")
 }
 
@@ -63,14 +62,14 @@ func (s *planSuite) Test_GetReleaseId(c *C) {
 	unit := NewEscapePlan()
 	err := unit.LoadConfig("testdata/fixture.yml")
 	c.Assert(err, IsNil)
-	c.Assert(unit.GetReleaseId(), Equals, "archive-test-v0.1.@")
+	c.Assert(unit.GetReleaseId(), Equals, "test-v0.1.@")
 }
 
 func (s *planSuite) Test_GetVersionlessReleaseId(c *C) {
 	unit := NewEscapePlan()
 	err := unit.LoadConfig("testdata/fixture.yml")
 	c.Assert(err, IsNil)
-	c.Assert(unit.GetVersionlessReleaseId(), Equals, "archive-test")
+	c.Assert(unit.GetVersionlessReleaseId(), Equals, "test")
 }
 
 func (s *planSuite) Test_PrettyPrint(c *C) {

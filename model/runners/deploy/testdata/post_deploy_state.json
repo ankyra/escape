@@ -6,8 +6,25 @@
          "name": "dev",
          "inputs": null,
          "deployments": {
-            "archive-name": {
-               "name": "archive-name",
+            "-name": {
+               "name": "-name",
+               "stages": {
+                  "deploy": {
+                     "inputs": {},
+                     "calculated_inputs": {},
+                     "calculated_outputs": {
+                        "output_variable": "testinput"
+                     },
+                     "version": "",
+                     "step": ""
+                  }
+               },
+               "inputs": {},
+               "deployments": {},
+               "providers": {}
+            },
+            "name": {
+               "name": "name",
                "stages": {
                   "deploy": {
                      "inputs": {},

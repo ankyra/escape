@@ -22,23 +22,14 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
-	"strings"
 )
 
-func indent(s string) string {
-	parts := []string{}
-	for _, part := range strings.Split(s, "\n") {
-		if part != "" {
-			parts = append(parts, "  "+part)
-		}
-	}
-	return strings.Join(parts, "\n")
-}
-
 type EscapePlan struct {
-	Build       string                 `yaml:"build"`
+	Build       string                 `yaml:"build,omitempty"`
 	Consumes    []string               `yaml:"consumes,omitempty"`
 	Depends     []string               `yaml:"depends,omitempty"`
+	Deploy      string                 `yaml:"deploy,omitempty"`
+	Destroy     string                 `yaml:"destroy,omitempty"`
 	Description string                 `yaml:"description,omitempty"`
 	Extends     []string               `yaml:"extends,omitempty"`
 	Errands     map[string]interface{} `yaml:"errands,omitempty"`
@@ -46,6 +37,7 @@ type EscapePlan struct {
 	Inputs      []interface{}          `yaml:"inputs,omitempty"`
 	Logo        string                 `yaml:"logo,omitempty"`
 	Metadata    map[string]string      `yaml:"metadata,omitempty"`
+	Name        string                 `yaml:"name"`
 	Outputs     []interface{}          `yaml:"outputs,omitempty"`
 	Path        string                 `yaml:"path,omitempty"`
 	PostBuild   string                 `yaml:"post_build,omitempty"`
@@ -58,12 +50,22 @@ type EscapePlan struct {
 	Provides    []string               `yaml:"provides,omitempty"`
 	Templates   []interface{}          `yaml:"templates,omitempty"`
 	Test        string                 `yaml:"test,omitempty"`
-	Type        string                 `yaml:"type"`
 	Version     string                 `yaml:"version"`
 }
 
-func (e *EscapePlan) GetBuild() string {
-	return e.Build
+func NewEscapePlan() *EscapePlan {
+	return &EscapePlan{
+		Consumes: []string{},
+		Provides: []string{},
+		Depends:  []string{},
+		Includes: []string{},
+		Metadata: map[string]string{},
+		Errands:  map[string]interface{}{},
+	}
+}
+
+func (e *EscapePlan) GetName() string {
+	return e.Name
 }
 func (e *EscapePlan) GetConsumes() []string {
 	return e.Consumes
@@ -101,6 +103,15 @@ func (e *EscapePlan) GetTemplates() []interface{} {
 func (e *EscapePlan) GetPath() string {
 	return e.Path
 }
+func (e *EscapePlan) GetBuild() string {
+	return e.Build
+}
+func (e *EscapePlan) GetDestroy() string {
+	return e.Destroy
+}
+func (e *EscapePlan) GetDeploy() string {
+	return e.Deploy
+}
 func (e *EscapePlan) GetPostBuild() string {
 	return e.PostBuild
 }
@@ -128,14 +139,11 @@ func (e *EscapePlan) GetTest() string {
 func (e *EscapePlan) GetSmoke() string {
 	return e.Smoke
 }
-func (e *EscapePlan) GetType() string {
-	return e.Type
-}
 func (e *EscapePlan) GetVersion() string {
 	return e.Version
 }
-func (e *EscapePlan) SetBuild(newValue string) {
-	e.Build = newValue
+func (e *EscapePlan) SetName(newValue string) {
+	e.Name = newValue
 }
 func (e *EscapePlan) SetConsumes(newValue []string) {
 	e.Consumes = newValue
@@ -191,29 +199,14 @@ func (e *EscapePlan) SetProvides(newValue []string) {
 func (e *EscapePlan) SetTest(newValue string) {
 	e.Test = newValue
 }
-func (e *EscapePlan) SetType(newValue string) {
-	e.Type = newValue
-}
 func (e *EscapePlan) SetVersion(newValue string) {
 	e.Version = newValue
 }
-
-func NewEscapePlan() *EscapePlan {
-	return &EscapePlan{
-		Consumes: []string{},
-		Provides: []string{},
-		Depends:  []string{},
-		Includes: []string{},
-		Metadata: map[string]string{},
-		Errands:  map[string]interface{}{},
-	}
-}
-
 func (e *EscapePlan) GetReleaseId() string {
-	return e.Type + "-" + e.Build + "-v" + e.Version
+	return e.Name + "-v" + e.Version
 }
 func (e *EscapePlan) GetVersionlessReleaseId() string {
-	return e.Type + "-" + e.Build
+	return e.Name
 }
 
 func (e *EscapePlan) LoadConfig(cfgFile string) error {
@@ -236,9 +229,8 @@ func (e *EscapePlan) LoadConfig(cfgFile string) error {
 	return nil
 }
 
-func (e *EscapePlan) Init(typ, buildId string) *EscapePlan {
-	e.Build = buildId
-	e.Type = typ
+func (e *EscapePlan) Init(name string) *EscapePlan {
+	e.Name = name
 	e.Version = "@"
 	return e
 }

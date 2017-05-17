@@ -6,7 +6,7 @@
          "name": "dev",
          "inputs": null,
          "deployments": {
-            "archive-name": {
+            "name": {
                "name": "archive-name",
                "stages": {
                   "build": {

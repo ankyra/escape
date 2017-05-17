@@ -1,5 +1,4 @@
-build: test
-type: archive
+name: test
 version: 0.1.@
 description: Test description
 logo: logo.png
@@ -47,10 +46,13 @@ templates:
 - template.yml.tpl
 path: path.txt
 pre_build: pre_build.sh
+build: build.sh
 post_build: post_build.sh
 test: test.sh
 pre_deploy: pre_deploy.sh
+deploy: deploy.sh
 post_deploy: post_deploy.sh
 smoke: smoke.sh
 pre_destroy: pre_destroy.sh
+destroy: destroy.sh
 post_destroy: post_destroy.sh

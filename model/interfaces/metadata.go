@@ -55,10 +55,10 @@ type ReleaseMetadata interface {
 	GetOutputs() []*variable.Variable
 	GetPath() string
 	GetProvides() []string
-	GetType() string
 	GetVersion() string
 	GetVariableContext() map[string]string
 	GetTemplates() []*templates.Template
+	GetExtends() []string
 
 	GetStages() map[string]*ExecStage
 	SetStage(stage, script string)

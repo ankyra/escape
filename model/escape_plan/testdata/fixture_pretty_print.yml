@@ -1,11 +1,6 @@
-# The build name.  Together with the release type makes up the build
-# identifier. Format: /[a-zA-Z]+[a-zA-Z0-9-]*/
+# The build name. Format: /[a-zA-Z]+[a-zA-Z0-9-]*/
 #
-build: test
-
-# The release type. One of: ansible, archive, docker, kubespec, terraform
-#
-type: archive
+name: test
 
 # The version. Either specify the full version or use the '@' symbol to 
 # let Escape pick the next version at build time. Format: /[0-9]+(\.[0-9]+)*(\.@)?/
@@ -194,6 +189,8 @@ path: path.txt
 #
 pre_build: pre_build.sh
 
+build: build.sh
+
 # A script to run after the build.
 #
 # The script has access to the input variables (prepended with INPUT_) 
@@ -219,11 +216,15 @@ test: test.sh
 
 pre_deploy: pre_deploy.sh
 
+deploy: deploy.sh
+
 post_deploy: post_deploy.sh
 
 smoke: smoke.sh
 
 pre_destroy: pre_destroy.sh
+
+destroy: destroy.sh
 
 post_destroy: post_destroy.sh
 

@@ -2,7 +2,7 @@
     "environments": {
         "dev": {
             "deployments": {
-                "archive-name": {
+                "name": {
                     "stages": {
                         "deploy": {
                             "inputs": {
