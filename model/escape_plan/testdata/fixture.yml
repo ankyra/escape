@@ -56,10 +56,13 @@ templates:
 
 path: path.txt
 post_build: post_build.sh
+build: build.sh
 pre_build: pre_build.sh
 pre_deploy: pre_deploy.sh
+deploy: deploy.sh
 post_deploy: post_deploy.sh
 pre_destroy: pre_destroy.sh
+destroy: destroy.sh
 post_destroy: post_destroy.sh
 
 provides:

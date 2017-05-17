@@ -25,9 +25,11 @@ import (
 )
 
 type EscapePlan struct {
-	Name        string                 `yaml:"name"`
+	Build       string                 `yaml:"build,omitempty"`
 	Consumes    []string               `yaml:"consumes,omitempty"`
 	Depends     []string               `yaml:"depends,omitempty"`
+	Deploy      string                 `yaml:"deploy,omitempty"`
+	Destroy     string                 `yaml:"destroy,omitempty"`
 	Description string                 `yaml:"description,omitempty"`
 	Extends     []string               `yaml:"extends,omitempty"`
 	Errands     map[string]interface{} `yaml:"errands,omitempty"`
@@ -35,6 +37,7 @@ type EscapePlan struct {
 	Inputs      []interface{}          `yaml:"inputs,omitempty"`
 	Logo        string                 `yaml:"logo,omitempty"`
 	Metadata    map[string]string      `yaml:"metadata,omitempty"`
+	Name        string                 `yaml:"name"`
 	Outputs     []interface{}          `yaml:"outputs,omitempty"`
 	Path        string                 `yaml:"path,omitempty"`
 	PostBuild   string                 `yaml:"post_build,omitempty"`
@@ -100,6 +103,15 @@ func (e *EscapePlan) GetTemplates() []interface{} {
 }
 func (e *EscapePlan) GetPath() string {
 	return e.Path
+}
+func (e *EscapePlan) GetBuild() string {
+	return e.Build
+}
+func (e *EscapePlan) GetDestroy() string {
+	return e.Destroy
+}
+func (e *EscapePlan) GetDeploy() string {
+	return e.Deploy
 }
 func (e *EscapePlan) GetPostBuild() string {
 	return e.PostBuild
