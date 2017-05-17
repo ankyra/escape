@@ -104,6 +104,9 @@ func (c *Compiler) Compile(context Context) (ReleaseMetadata, error) {
 	if err := c.compileReleaseTypeExtras(); err != nil {
 		return nil, err
 	}
+	if err := c.compileExtensions(plan.GetExtends()); err != nil {
+		return nil, err
+	}
 	//if build_fat_package:
 	//    self._add_dependencies(escape_config, escape_plan)
 	context.PopLogSection()
@@ -116,6 +119,63 @@ func (c *Compiler) compileConsumers(consumes []string) error {
 		c.Consumers[consumer] = true
 	}
 	c.metadata.Consumes = consumes
+	return nil
+}
+
+func (c *Compiler) compileExtensions(extends []string) error {
+	consumes := map[string]bool{}
+	for _, c := range c.metadata.Consumes {
+		consumes[c] = true
+	}
+	for _, extend := range extends {
+		fmt.Println("Compiling extends", extend)
+		dep, err := NewDependencyFromString(extend)
+		if err != nil {
+			return err
+		}
+		dep = dep.(*dependency)
+		if err := dep.ResolveVersion(c.context); err != nil {
+			return err
+		}
+		resolvedDep := dep.GetReleaseId()
+		versionlessDep := dep.GetVersionlessReleaseId()
+		metadata, err := c.context.GetDependencyMetadata(resolvedDep)
+		if err != nil {
+			return err
+		}
+		for _, consume := range metadata.GetConsumes() {
+			if !consumes[consume] {
+				consumes[consume] = true
+				c.metadata.Consumes = append(c.metadata.Consumes, consume)
+			}
+		}
+		for _, input := range metadata.GetInputs() {
+			found := false
+			for _, i := range c.metadata.GetInputs() {
+				if i.GetId() == input.GetId() {
+					found = true
+					break
+				}
+			}
+			if !found {
+				c.metadata.AddInputVariable(input)
+			}
+		}
+		for _, output := range metadata.GetOutputs() {
+			found := false
+			for _, i := range c.metadata.GetOutputs() {
+				if i.GetId() == output.GetId() {
+					found = true
+					break
+				}
+			}
+			if !found {
+				c.metadata.AddOutputVariable(output)
+			}
+		}
+		c.VariableCtx[versionlessDep] = metadata
+		c.metadata.SetVariableInContext(versionlessDep, metadata.GetReleaseId())
+	}
 	return nil
 }
 

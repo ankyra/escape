@@ -40,6 +40,7 @@ type releaseMetadata struct {
 	Branch      string                `json:"branch"`
 	Consumes    []string              `json:"consumes"`
 	Depends     []string              `json:"depends"`
+	Extends     []string              `json:"extends"`
 	Description string                `json:"description"`
 	Errands     map[string]*errand    `json:"errands"`
 	Files       map[string]string     `json:"files", {}`
@@ -65,6 +66,7 @@ func NewEmptyReleaseMetadata() ReleaseMetadata {
 		Consumes:    []string{},
 		Provides:    []string{},
 		Depends:     []string{},
+		Extends:     []string{},
 		Files:       map[string]string{},
 		Metadata:    map[string]string{},
 		Errands:     map[string]*errand{},

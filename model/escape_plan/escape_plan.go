@@ -71,6 +71,9 @@ func (e *EscapePlan) GetConsumes() []string {
 func (e *EscapePlan) GetDepends() []string {
 	return e.Depends
 }
+func (e *EscapePlan) GetExtends() []string {
+	return e.Extends
+}
 func (e *EscapePlan) GetDescription() string {
 	return e.Description
 }
