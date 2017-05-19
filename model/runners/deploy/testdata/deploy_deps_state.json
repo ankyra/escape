@@ -8,6 +8,7 @@
          "deployments": {
             "name": {
                "name": "name",
+               "release": "name",
                "stages": {
                   "build": {
                      "inputs": {},
@@ -34,6 +35,7 @@
                "deployments": {
                   "dependency": {
                      "name": "dependency",
+                     "release": "dependency",
                      "stages": {
                         "deploy": {
                            "inputs": {},

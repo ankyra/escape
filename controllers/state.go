@@ -71,5 +71,5 @@ func (p StateController) CreateDeployment(context Context) error {
 	}
 	// TODO check and set providers
 	fmt.Println(deplState.ToJson())
-	return context.GetEnvironmentState().Save()
+	return deplState.Save()
 }

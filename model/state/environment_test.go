@@ -35,7 +35,7 @@ func (s *envSuite) Test_LookupDeploymentState(c *C) {
 	p, err := NewProjectStateFromFile("testdata/project.json")
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
-	depl_, err := env.LookupDeploymentState("archive-release")
+	depl_, err := env.(*environmentState).LookupDeploymentState("archive-release")
 	depl := depl_.(*deploymentState)
 	c.Assert(err, IsNil)
 	c.Assert(depl.GetName(), Equals, "archive-release")
@@ -47,7 +47,7 @@ func (s *envSuite) Test_LookupDeploymentState_doesnt_exist(c *C) {
 	p, err := NewProjectStateFromFile("testdata/project.json")
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
-	_, err = env.LookupDeploymentState("doesnt-exist")
+	_, err = env.(*environmentState).LookupDeploymentState("doesnt-exist")
 	c.Assert(err, Not(IsNil))
 	c.Assert(err.Error(), Equals, "Deployment 'doesnt-exist' does not exist")
 }

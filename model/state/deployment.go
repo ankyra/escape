@@ -20,20 +20,11 @@ import (
 	"encoding/json"
 	"fmt"
 	. "github.com/ankyra/escape-client/model/interfaces"
-	core "github.com/ankyra/escape-core"
-	"github.com/ankyra/escape-core/script"
 )
-
-type stage struct {
-	UserInputs map[string]interface{} `json:"inputs"`
-	Inputs     map[string]interface{} `json:"calculated_inputs"`
-	Outputs    map[string]interface{} `json:"calculated_outputs"`
-	Version    string                 `json:"version"`
-	Step       string                 `json:"step"`
-}
 
 type deploymentState struct {
 	Name        string                      `json:"name"`
+	Release     string                      `json:"release"`
 	Stages      map[string]*stage           `json:"stages"`
 	Inputs      map[string]interface{}      `json:"inputs"`
 	Deployments map[string]*deploymentState `json:"deployments"`
@@ -42,17 +33,10 @@ type deploymentState struct {
 	parent      *deploymentState            `json:"-"`
 }
 
-func newStage() *stage {
-	return &stage{
-		UserInputs: map[string]interface{}{},
-		Inputs:     map[string]interface{}{},
-		Outputs:    map[string]interface{}{},
-	}
-}
-
-func NewDeploymentState(env *environmentState, name string) DeploymentState {
+func NewDeploymentState(env *environmentState, name, release string) DeploymentState {
 	return &deploymentState{
 		Name:        name,
+		Release:     release,
 		Stages:      map[string]*stage{},
 		Inputs:      map[string]interface{}{},
 		Providers:   map[string]string{},
@@ -60,128 +44,108 @@ func NewDeploymentState(env *environmentState, name string) DeploymentState {
 		environment: env,
 	}
 }
+func (d *deploymentState) NewDependencyDeploymentState(dep string) DeploymentState {
+	depl := NewDeploymentState(d.environment, dep, dep).(*deploymentState)
+	depl.parent = d
+	d.Deployments[dep] = depl
+	return depl
+}
 
 func (d *deploymentState) GetName() string {
 	return d.Name
 }
+
+func (d *deploymentState) GetRelease() string {
+	return d.Release
+}
+
 func (d *deploymentState) GetVersion(stage string) string {
 	return d.getStage(stage).Version
-}
-func (d *deploymentState) SetVersion(stage, version string) error {
-	st := d.getStage(stage)
-	st.Version = version
-	return nil
-}
-func (d *deploymentState) IsDeployed(stage, version string) bool {
-	return d.getStage(stage).Version == version
 }
 
 func (d *deploymentState) GetEnvironmentState() EnvironmentState {
 	return d.environment
 }
 
-func (d *deploymentState) NewDependencyDeploymentState(dep string) DeploymentState {
-	depl := NewDeploymentState(d.environment, dep).(*deploymentState)
-	depl.parent = d
-	d.Deployments[dep] = depl
-	return depl
+func (d *deploymentState) GetDeployments() []DeploymentState {
+	result := []DeploymentState{}
+	for _, val := range d.Deployments {
+		result = append(result, val)
+	}
+	return result
 }
 
-func (d *deploymentState) ValidateAndFix(name string, env *environmentState) error {
-	d.Name = name
-	d.environment = env
-	if d.Name == "" {
-		return fmt.Errorf("Deployment name is missing from DeploymentState")
-	}
-	if d.Inputs == nil {
-		d.Inputs = map[string]interface{}{}
-	}
-	if d.Providers == nil {
-		d.Providers = map[string]string{}
-	}
-	if d.Deployments == nil {
-		d.Deployments = map[string]*deploymentState{}
-	}
-	for name, depl := range d.Deployments {
-		depl.Name = name
-		if err := depl.ValidateAndFixSubDeployment(env, d); err != nil {
-			return err
-		}
-	}
-	if d.Stages == nil {
-		d.Stages = map[string]*stage{}
-	}
-	for _, st := range d.Stages {
-		st.ValidateAndFix()
-	}
-	return nil
-}
-
-func (st *stage) ValidateAndFix() error {
-	if st.UserInputs == nil {
-		st.UserInputs = map[string]interface{}{}
-	}
-	if st.Inputs == nil {
-		st.Inputs = map[string]interface{}{}
-	}
-	if st.Outputs == nil {
-		st.Outputs = map[string]interface{}{}
-	}
-	return nil
-}
-
-func (d *deploymentState) ValidateAndFixSubDeployment(env *environmentState, parent *deploymentState) error {
-	d.parent = parent
-	return d.ValidateAndFix(d.Name, env)
-}
-
-func (d *deploymentState) getStage(stage string) *stage {
-	st, ok := d.Stages[stage]
-	if !ok || st == nil {
-		st = newStage()
-		d.Stages[stage] = st
-	}
-	st.ValidateAndFix()
-	return st
-}
 func (d *deploymentState) GetUserInputs(stage string) map[string]interface{} {
 	return d.getStage(stage).UserInputs
 }
+
 func (d *deploymentState) GetCalculatedInputs(stage string) map[string]interface{} {
 	return d.getStage(stage).Inputs
 }
+
 func (d *deploymentState) GetCalculatedOutputs(stage string) map[string]interface{} {
 	return d.getStage(stage).Outputs
 }
 
 func (d *deploymentState) UpdateInputs(stage string, inputs map[string]interface{}) error {
-	st := d.getStage(stage)
-	if inputs == nil {
-		inputs = map[string]interface{}{}
-	}
-	st.Inputs = inputs
+	d.getStage(stage).setInputs(inputs)
 	return d.Save()
 }
+
 func (d *deploymentState) UpdateUserInputs(stage string, inputs map[string]interface{}) error {
-	st := d.getStage(stage)
-	if inputs == nil {
-		inputs = map[string]interface{}{}
-	}
-	st.UserInputs = inputs
+	d.getStage(stage).setUserInputs(inputs)
 	return d.Save()
 }
+
 func (d *deploymentState) UpdateOutputs(stage string, outputs map[string]interface{}) error {
-	st := d.getStage(stage)
-	st.Outputs = outputs
+	d.getStage(stage).setOutputs(outputs)
 	return d.Save()
+}
+
+func (d *deploymentState) SetVersion(stage, version string) error {
+	d.getStage(stage).setVersion(version)
+	return nil
+}
+
+func (d *deploymentState) IsDeployed(stage, version string) bool {
+	return d.getStage(stage).Version == version
+}
+
+func (d *deploymentState) Save() error {
+	return d.environment.save()
+}
+
+func (p *deploymentState) ToJson() string {
+	str, err := json.MarshalIndent(p, "", "   ")
+	if err != nil {
+		panic(err)
+	}
+	return string(str)
+}
+
+func (d *deploymentState) GetProviders() map[string]string {
+	result := map[string]string{}
+	for key, val := range d.Providers {
+		result[key] = val
+	}
+	current := d
+	for current.parent != nil {
+		current = current.parent
+		for key, val := range current.Providers {
+			if _, alreadySet := result[key]; !alreadySet {
+				result[key] = val
+			}
+		}
+	}
+	return result
 }
 
 func (d *deploymentState) GetPreStepInputs(stage string) map[string]interface{} {
 	result := map[string]interface{}{}
-	for key, val := range d.environment.GetProjectState().GetInputs() {
+	for key, val := range d.environment.getProjectState().getInputs() {
 		result[key] = val
 	}
-	for key, val := range d.environment.GetInputs() {
+	for key, val := range d.environment.getInputs() {
 		result[key] = val
 	}
 	deps := []*deploymentState{d}
@@ -208,127 +172,50 @@ func (d *deploymentState) GetPreStepInputs(stage string) map[string]interface{} 
 	return result
 }
 
-func (d *deploymentState) Save() error {
-	if d.environment.IsRemote() {
-		//            self._update_remote_config(release_inputs, release_outputs)
-		return nil
-	} else {
-		return d.environment.Save()
+func (d *deploymentState) validateAndFix(name string, env *environmentState) error {
+	d.Name = name
+	d.environment = env
+	if d.Name == "" {
+		return fmt.Errorf("Deployment name is missing from DeploymentState")
 	}
-}
-
-func (d *deploymentState) GetProviders() map[string]string {
-	result := map[string]string{}
+	if d.Release == "" {
+		d.Release = name
+	}
+	if d.Inputs == nil {
+		d.Inputs = map[string]interface{}{}
+	}
 	if d.Providers == nil {
-		return result
+		d.Providers = map[string]string{}
 	}
-	for key, val := range d.Providers {
-		result[key] = val
+	if d.Deployments == nil {
+		d.Deployments = map[string]*deploymentState{}
 	}
-	current := d
-	for current.parent != nil {
-		current = current.parent
-		for key, val := range current.Providers {
-			_, alreadySet := result[key]
-			if !alreadySet {
-				result[key] = val
-			}
+	for name, depl := range d.Deployments {
+		depl.Name = name
+		if err := depl.validateAndFixSubDeployment(env, d); err != nil {
+			return err
 		}
 	}
-	return result
+	if d.Stages == nil {
+		d.Stages = map[string]*stage{}
+	}
+	for _, st := range d.Stages {
+		st.validateAndFix()
+	}
+	return nil
 }
 
-func (d *deploymentState) ResolveConsumer(consumer string) (DeploymentState, error) {
-
-	providers := d.GetProviders()
-	val, ok := providers[consumer]
-	if !ok {
-		return nil, fmt.Errorf("No provider of type '%s' was configured in the deployment state.", consumer)
-	}
-	return d.environment.LookupDeploymentState(val)
+func (d *deploymentState) validateAndFixSubDeployment(env *environmentState, parent *deploymentState) error {
+	d.parent = parent
+	return d.validateAndFix(d.Name, env)
 }
 
-func (p *deploymentState) ToJson() string {
-	str, err := json.MarshalIndent(p, "", "   ")
-	if err != nil {
-		panic(err)
+func (d *deploymentState) getStage(stage string) *stage {
+	st, ok := d.Stages[stage]
+	if !ok || st == nil {
+		st = newStage()
+		d.Stages[stage] = st
 	}
-	return string(str)
-}
-
-func (d *deploymentState) ToScriptEnvironment(metadataMap map[string]*core.ReleaseMetadata, stage string) (*script.ScriptEnvironment, error) {
-	result := map[string]script.Script{}
-	result["this"] = d.ToScript(metadataMap["this"], stage)
-	for key, deplName := range d.GetProviders() {
-		deplState, err := d.environment.LookupDeploymentState(deplName)
-		if err != nil {
-			return nil, err
-		}
-		result[key] = deplState.ToScript(metadataMap[key], "deploy")
-	}
-	// TODO: only add deployments for dependencies that are found in
-	// release metadata
-	for key, deplState := range d.Deployments {
-		metadata, ok := metadataMap[key]
-		if !ok {
-			return nil, fmt.Errorf("Couldn't find metadata for '%s'. This is a bug in Escape", key)
-		}
-		version := metadata.GetVersion()
-		if deplState.IsDeployed("deploy", version) {
-			result[key+"-v"+version] = deplState.ToScript(metadataMap[key], "deploy")
-		}
-	}
-	for key, metadata := range metadataMap {
-		reference, exists := result[metadata.GetReleaseId()]
-		if exists {
-			result[key] = reference
-		}
-	}
-	return script.NewScriptEnvironmentWithGlobals(result), nil
-
-}
-
-func (d *deploymentState) ToScript(metadata *core.ReleaseMetadata, stage string) script.Script {
-	result := map[string]script.Script{}
-	if metadata != nil {
-		result = metadata.ToScriptMap()
-	}
-	inputs := map[string]interface{}{}
-	for key, val := range d.GetCalculatedInputs(stage) {
-		for _, defined := range metadata.GetInputs() {
-			if key == defined.GetId() {
-				inputs[key] = val
-			}
-		}
-	}
-	outputs := map[string]interface{}{}
-	for key, val := range d.GetCalculatedOutputs(stage) {
-		for _, defined := range metadata.GetOutputs() {
-			if key == defined.GetId() {
-				outputs[key] = val
-			}
-		}
-	}
-	result["inputs"] = script.LiftDict(d.liftScriptValues(inputs))
-	result["outputs"] = script.LiftDict(d.liftScriptValues(outputs))
-	env := d.environment
-	prj := env.GetProjectState()
-	result["project"] = script.LiftString(prj.GetName())
-	result["environment"] = script.LiftString(env.GetName())
-	result["deployment"] = script.LiftString(d.GetName())
-	return script.LiftDict(result)
-}
-
-func (d *deploymentState) liftScriptValues(values map[string]interface{}) map[string]script.Script {
-	result := map[string]script.Script{}
-	if values != nil {
-		for key, val := range values {
-			v, err := script.Lift(val)
-			if err != nil {
-				panic(err)
-			}
-			result[key] = v
-		}
-	}
-	return result
+	st.validateAndFix()
+	return st
 }

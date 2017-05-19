@@ -30,7 +30,6 @@ type projectState struct {
 	Name         string                       `json:"name"`
 	Inputs       map[string]interface{}       `json:"inputs"`
 	Environments map[string]*environmentState `json:"environments"`
-	remote       bool
 	saveLocation string
 }
 
@@ -62,8 +61,7 @@ func NewProjectStateFromJsonString(data string) (*projectState, error) {
 	if err := json.Unmarshal([]byte(data), prjState); err != nil {
 		return nil, err
 	}
-	prjState.remote = false
-	if err := prjState.ValidateAndFix(); err != nil {
+	if err := prjState.validateAndFix(); err != nil {
 		return nil, err
 	}
 	return prjState, nil
@@ -82,9 +80,8 @@ func NewProjectStateFromFile(cfgFile string) (*projectState, error) {
 		if err != nil {
 			return nil, err
 		}
-		p.remote = false
 		p.saveLocation = cfgFile
-		return p, p.ValidateAndFix()
+		return p, p.validateAndFix()
 	}
 	data, err := ioutil.ReadFile(cfgFile)
 	if err != nil {
@@ -98,11 +95,11 @@ func NewProjectStateFromFile(cfgFile string) (*projectState, error) {
 	return result, nil
 }
 
-func (p *projectState) GetInputs() map[string]interface{} {
+func (p *projectState) getInputs() map[string]interface{} {
 	return p.Inputs
 }
 
-func (p *projectState) ValidateAndFix() error {
+func (p *projectState) validateAndFix() error {
 	if p.Name == "" {
 		defaultName, err := getDefaultName()
 		if err != nil {
@@ -117,7 +114,7 @@ func (p *projectState) ValidateAndFix() error {
 		p.Environments = map[string]*environmentState{}
 	}
 	for name, env := range p.Environments {
-		if err := env.ValidateAndFix(name, p); err != nil {
+		if err := env.validateAndFix(name, p); err != nil {
 			return err
 		}
 	}
@@ -134,14 +131,7 @@ func (p *projectState) GetEnvironmentStateOrMakeNew(env string) EnvironmentState
 	return e
 }
 
-func (p *projectState) IsRemote() bool {
-	return p.remote
-}
-
 func (p *projectState) Save() error {
-	if p.remote {
-		return nil
-	}
 	if p.saveLocation == "" {
 		return fmt.Errorf("Save location has not been set. Inexplicably")
 	}

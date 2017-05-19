@@ -20,6 +20,7 @@ import (
 	"fmt"
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/paths"
+	"github.com/ankyra/escape-client/model/state"
 	"github.com/ankyra/escape-client/util"
 	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/script"
@@ -41,17 +42,6 @@ func NewRunnerContext(context Context) (RunnerContext, error) {
 	metadata := context.GetReleaseMetadata()
 	if metadata == nil {
 		return nil, fmt.Errorf("Missing metadata in context. This is a bug in Escape.")
-	}
-	for _, consumer := range metadata.GetConsumes() {
-		envState := context.GetEnvironmentState()
-		deplState, err := envState.GetDeploymentState([]string{metadata.GetVersionlessReleaseId()})
-		if err != nil {
-			return nil, err
-		}
-		deplState, err = deplState.ResolveConsumer(consumer)
-		if err != nil {
-			return nil, err
-		}
 	}
 	return &runnerContext{
 		path:             paths.NewPath(),
@@ -130,7 +120,7 @@ func (r *runnerContext) GetScriptEnvironment(stage string) (*script.ScriptEnviro
 		}
 		metadataCtx[metadata.GetVersionlessReleaseId()] = metadataCtx[key]
 	}
-	return r.GetDeploymentState().ToScriptEnvironment(metadataCtx, stage)
+	return state.ToScriptEnvironment(r.GetDeploymentState(), metadataCtx, stage)
 }
 
 func (r *runnerContext) NewContextForDependency(metadata *core.ReleaseMetadata) RunnerContext {

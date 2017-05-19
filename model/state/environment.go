@@ -45,33 +45,30 @@ func (e *environmentState) GetDeployments() []DeploymentState {
 	return result
 }
 
-func (e *environmentState) GetProjectState() *projectState {
+func (e *environmentState) getProjectState() *projectState {
 	return e.projectState
 }
-func (e *environmentState) GetInputs() map[string]interface{} {
+func (e *environmentState) GetProjectName() string {
+	return e.projectState.GetName()
+}
+func (e *environmentState) getInputs() map[string]interface{} {
 	return e.Inputs
 }
-
 func (e *environmentState) GetName() string {
 	return e.Name
 }
-
-func (e *environmentState) IsRemote() bool {
-	return e.projectState.IsRemote()
-}
-
-func (e *environmentState) Save() error {
+func (e *environmentState) save() error {
 	return e.projectState.Save()
 }
 
-func (e *environmentState) ValidateAndFix(name string, p *projectState) error {
+func (e *environmentState) validateAndFix(name string, p *projectState) error {
 	e.Name = name
 	e.projectState = p
 	if e.Deployments == nil {
 		e.Deployments = map[string]*deploymentState{}
 	}
 	for deplName, depl := range e.Deployments {
-		if err := depl.ValidateAndFix(deplName, e); err != nil {
+		if err := depl.validateAndFix(deplName, e); err != nil {
 			return err
 		}
 	}
@@ -97,20 +94,10 @@ func (e *environmentState) GetDeploymentState(deps []string) (DeploymentState, e
 		return nil, fmt.Errorf("Missing name to resolve deployment state. This is a bug in Escape.")
 	}
 	if len(deps) == 1 {
-		return e.getDeploymentState(deps[0])
+		return e.getOrCreateRootDeploymentState(deps[0]), nil
 	} else {
 		return e.getDeploymentStateForDependency(deps)
 	}
-}
-
-func (e *environmentState) getDeploymentState(versionlessReleaseId string) (DeploymentState, error) {
-	deploymentName := versionlessReleaseId
-	depl, ok := e.Deployments[deploymentName]
-	if !ok {
-		depl = NewDeploymentState(e, deploymentName).(*deploymentState)
-		e.Deployments[deploymentName] = depl
-	}
-	return depl, nil
 }
 
 func (e *environmentState) getDeploymentStateForDependency(deps []string) (DeploymentState, error) {
@@ -130,7 +117,7 @@ func (e *environmentState) getDeploymentStateForDependency(deps []string) (Deplo
 func (e *environmentState) getOrCreateRootDeploymentState(deploymentName string) *deploymentState {
 	depl, ok := e.Deployments[deploymentName]
 	if !ok {
-		depl = NewDeploymentState(e, deploymentName).(*deploymentState)
+		depl = NewDeploymentState(e, deploymentName, deploymentName).(*deploymentState)
 		e.Deployments[deploymentName] = depl
 	}
 	return depl

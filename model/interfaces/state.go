@@ -16,24 +16,24 @@ limitations under the License.
 
 package interfaces
 
-import (
-	core "github.com/ankyra/escape-core"
-	"github.com/ankyra/escape-core/script"
-)
-
 type EnvironmentState interface {
-	LookupDeploymentState(deploymentName string) (DeploymentState, error)
-	GetDeploymentState(deps []string) (DeploymentState, error)
-	GetInputs() map[string]interface{}
-	IsRemote() bool
-	Save() error
-	GetDeployments() []DeploymentState
+	GetProjectName() string
 	GetName() string
+	GetDeployments() []DeploymentState
+	GetDeploymentState(deps []string) (DeploymentState, error)
+	LookupDeploymentState(name string) (DeploymentState, error)
 }
 
 type DeploymentState interface {
-	GetPreStepInputs(stage string) map[string]interface{}
+	GetName() string
+	GetVersion(stage string) string
+	GetRelease() string
+	GetEnvironmentState() EnvironmentState
+	GetDeployments() []DeploymentState
+	GetProviders() map[string]string
+	IsDeployed(stage, version string) bool
 
+	GetPreStepInputs(stage string) map[string]interface{}
 	GetUserInputs(stage string) map[string]interface{}
 	GetCalculatedInputs(stage string) map[string]interface{}
 	GetCalculatedOutputs(stage string) map[string]interface{}
@@ -41,16 +41,8 @@ type DeploymentState interface {
 	UpdateUserInputs(stage string, v map[string]interface{}) error
 	UpdateInputs(stage string, v map[string]interface{}) error
 	UpdateOutputs(stage string, v map[string]interface{}) error
-
-	ResolveConsumer(string) (DeploymentState, error)
-	ToJson() string
-
-	IsDeployed(stage, version string) bool
-	GetVersion(stage string) string
 	SetVersion(stage, version string) error
-	GetName() string
+	Save() error
 
-	GetEnvironmentState() EnvironmentState
-	ToScript(metadata *core.ReleaseMetadata, stage string) script.Script
-	ToScriptEnvironment(rm map[string]*core.ReleaseMetadata, stage string) (*script.ScriptEnvironment, error)
+	ToJson() string
 }

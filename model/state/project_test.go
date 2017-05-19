@@ -38,28 +38,26 @@ func (s *projectSuite) Test_FromJson(c *C) {
     }`
 	p, err := NewProjectStateFromJsonString(json)
 	c.Assert(err, IsNil)
-	c.Assert(p.GetInputs(), HasLen, 1)
+	c.Assert(p.getInputs(), HasLen, 1)
 }
 
 func (s *projectSuite) Test_From_File(c *C) {
 	p, err := NewProjectStateFromFile("testdata/project.json")
 	c.Assert(err, IsNil)
 	c.Assert(p.GetName(), Equals, "project_name")
-	c.Assert(p.IsRemote(), Equals, false)
-	c.Assert(p.GetInputs(), HasLen, 3)
-	c.Assert(p.GetInputs()["project_level_variable"], DeepEquals, "project")
-	c.Assert(p.GetInputs()["input_variable"], DeepEquals, "test")
-	c.Assert(p.GetInputs()["list_input"], DeepEquals, []interface{}{"string"})
+	c.Assert(p.getInputs(), HasLen, 3)
+	c.Assert(p.getInputs()["project_level_variable"], DeepEquals, "project")
+	c.Assert(p.getInputs()["input_variable"], DeepEquals, "test")
+	c.Assert(p.getInputs()["list_input"], DeepEquals, []interface{}{"string"})
 	env := p.GetEnvironmentStateOrMakeNew("dev")
-	c.Assert(env.GetInputs()["input_variable"], DeepEquals, "env_override")
+	c.Assert(env.(*environmentState).getInputs()["input_variable"], DeepEquals, "env_override")
 
 }
 
 func (s *projectSuite) Test_From_File_That_Doesnt_Exist_Returns_Empty_State(c *C) {
 	p, err := NewProjectStateFromFile("asodifjaowijefowaiejfoawijefoiasjdfoiasdf.state")
 	c.Assert(err, IsNil)
-	c.Assert(p.GetInputs(), HasLen, 0)
-	c.Assert(p.IsRemote(), Equals, false)
+	c.Assert(p.getInputs(), HasLen, 0)
 }
 
 func (s *projectSuite) Test_Save_Non_Existing_File(c *C) {
@@ -67,8 +65,7 @@ func (s *projectSuite) Test_Save_Non_Existing_File(c *C) {
 	p, err := NewProjectStateFromFile("testdata/doesnt_exist.state")
 	c.Assert(err, IsNil)
 	c.Assert(p.GetName(), Not(Equals), "overwrite")
-	c.Assert(p.GetInputs(), HasLen, 0)
-	c.Assert(p.IsRemote(), Equals, false)
+	c.Assert(p.getInputs(), HasLen, 0)
 	p.SetName("overwrite")
 	err = p.Save()
 	c.Assert(err, IsNil)
