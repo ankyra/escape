@@ -144,9 +144,7 @@ func (c *Compiler) compileExtensions(plan *escape_plan.EscapePlan) error {
 			}
 		}
 		for _, input := range metadata.GetInputs() {
-			if !input.HasDefault() {
-				c.metadata.AddInputVariable(input)
-			}
+			c.metadata.AddInputVariable(input)
 		}
 		for _, output := range metadata.GetOutputs() {
 			c.metadata.AddOutputVariable(output)
