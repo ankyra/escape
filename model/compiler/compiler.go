@@ -179,6 +179,14 @@ func (c *Compiler) compileExtensions(plan *escape_plan.EscapePlan) error {
 				plan.Depends = append(plan.Depends, d)
 			}
 		}
+		for key, val := range metadata.GetVariableContext() {
+			metadata, err := c.context.GetDependencyMetadata(val)
+			if err != nil {
+				return err
+			}
+			c.VariableCtx[key] = metadata
+			c.metadata.SetVariableInContext(key, metadata.GetReleaseId())
+		}
 		c.VariableCtx[versionlessDep] = metadata
 		c.metadata.SetVariableInContext(versionlessDep, metadata.GetReleaseId())
 		c.metadata.AddExtension(metadata.GetReleaseId())
