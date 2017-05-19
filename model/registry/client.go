@@ -230,7 +230,11 @@ func (c *client) Register(metadata *core.ReleaseMetadata) error {
 	if resp.StatusCode == 401 {
 		return errors.New("Unauthorized")
 	} else if resp.StatusCode != 200 {
-		return errors.New("Couldn't register package: " + resp.Status)
+		result, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return fmt.Errorf("Couldn't register package: %s", resp.Status)
+		}
+		return fmt.Errorf("Couldn't register package (%s): %s", resp.Status, result)
 	}
 	return nil
 }
