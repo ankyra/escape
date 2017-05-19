@@ -199,6 +199,7 @@ func (c *Compiler) compileExtensions(plan *escape_plan.EscapePlan) error {
 		}
 		c.VariableCtx[versionlessDep] = metadata
 		c.metadata.SetVariableInContext(versionlessDep, metadata.GetReleaseId())
+		c.metadata.AddExtension(metadata.GetReleaseId())
 	}
 	return nil
 }

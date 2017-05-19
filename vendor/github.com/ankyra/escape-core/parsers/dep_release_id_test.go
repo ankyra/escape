@@ -30,14 +30,14 @@ var _ = Suite(&releaseIdSuite{})
 func (s *releaseIdSuite) Test_ReleaseId_Happy_Path(c *C) {
 	id, err := ParseReleaseId("name-v1.0")
 	c.Assert(err, IsNil)
-	c.Assert(id.Build, Equals, "name")
+	c.Assert(id.Name, Equals, "name")
 	c.Assert(id.Version, Equals, "1.0")
 }
 
 func (s *releaseIdSuite) Test_ReleaseId_Can_Have_Dashes(c *C) {
 	id, err := ParseReleaseId("name-with-dashes-v1.0")
 	c.Assert(err, IsNil)
-	c.Assert(id.Build, Equals, "name-with-dashes")
+	c.Assert(id.Name, Equals, "name-with-dashes")
 }
 
 func (s *releaseIdSuite) Test_ReleaseId_Parse_Latest1(c *C) {

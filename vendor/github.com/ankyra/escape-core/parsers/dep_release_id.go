@@ -23,7 +23,7 @@ import (
 )
 
 type ReleaseId struct {
-	Build   string
+	Name    string
 	Version string
 }
 
@@ -33,7 +33,7 @@ func ParseReleaseId(releaseId string) (*ReleaseId, error) {
 		return nil, fmt.Errorf("Invalid release format: %s", releaseId)
 	}
 	result := &ReleaseId{}
-	result.Build = strings.Join(split[:len(split)-1], "-")
+	result.Name = strings.Join(split[:len(split)-1], "-")
 
 	version := split[len(split)-1]
 	if version == "latest" || version == "@" || version == "v@" {
@@ -71,7 +71,7 @@ func (r *ReleaseId) ToString() string {
 	if version != "latest" {
 		version = "v" + version
 	}
-	return r.Build + "-" + version
+	return r.Name + "-" + version
 }
 
 func (r *ReleaseId) NeedsResolving() bool {

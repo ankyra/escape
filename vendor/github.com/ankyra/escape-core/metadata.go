@@ -120,6 +120,14 @@ func validate(m *ReleaseMetadata) error {
 func (m *ReleaseMetadata) GetExtends() []string {
 	return m.Extends
 }
+func (m *ReleaseMetadata) AddExtension(releaseId string) {
+    for _, e := range m.Extends {
+        if e == releaseId {
+            return
+        }
+    }
+    m.Extends = append(m.Extends, releaseId)
+}
 func (m *ReleaseMetadata) GetStages() map[string]*ExecStage {
 	return m.Stages
 }

@@ -27,7 +27,7 @@ var _ = Suite(&dependencySuite{})
 func (s *dependencySuite) Test_Dependency_Happy_Path1(c *C) {
 	dep, err := ParseDependency("name-v1.0")
 	c.Assert(err, IsNil)
-	c.Assert(dep.Build, Equals, "name")
+	c.Assert(dep.Name, Equals, "name")
 	c.Assert(dep.Version, Equals, "1.0")
 	c.Assert(dep.VariableName, Equals, "")
 }
@@ -35,7 +35,7 @@ func (s *dependencySuite) Test_Dependency_Happy_Path1(c *C) {
 func (s *dependencySuite) Test_Dependency_Happy_Path2(c *C) {
 	dep, err := ParseDependency("type-name-v1.0 as dep")
 	c.Assert(err, IsNil)
-	c.Assert(dep.Build, Equals, "type-name")
+	c.Assert(dep.Name, Equals, "type-name")
 	c.Assert(dep.Version, Equals, "1.0")
 	c.Assert(dep.VariableName, Equals, "dep")
 }
@@ -43,7 +43,7 @@ func (s *dependencySuite) Test_Dependency_Happy_Path2(c *C) {
 func (s *dependencySuite) Test_Dependency_WhiteSpace(c *C) {
 	dep, err := ParseDependency("   name-v1.0    as   dep  ")
 	c.Assert(err, IsNil)
-	c.Assert(dep.Build, Equals, "name")
+	c.Assert(dep.Name, Equals, "name")
 	c.Assert(dep.Version, Equals, "1.0")
 	c.Assert(dep.VariableName, Equals, "dep")
 }

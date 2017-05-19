@@ -21,14 +21,14 @@ import (
 )
 
 type Dependency struct {
-	Build        string
+	Name         string
 	Version      string
 	VariableName string
 }
 
 func NewDependencyFromMetadata(metadata *ReleaseMetadata) *Dependency {
 	return &Dependency{
-		Build:   metadata.GetName(),
+		Name:    metadata.GetName(),
 		Version: metadata.GetVersion(),
 	}
 }
@@ -39,14 +39,14 @@ func NewDependencyFromString(str string) (*Dependency, error) {
 		return nil, err
 	}
 	return &Dependency{
-		Build:        parsed.Build,
+		Name:         parsed.Name,
 		Version:      parsed.Version,
 		VariableName: parsed.VariableName,
 	}, nil
 }
 
 func (d *Dependency) GetBuild() string {
-	return d.Build
+	return d.Name
 }
 func (d *Dependency) GetVariableName() string {
 	return d.VariableName
@@ -60,8 +60,8 @@ func (d *Dependency) GetReleaseId() string {
 	if d.Version == "latest" {
 		version = d.Version
 	}
-	return d.Build + "-" + version
+	return d.Name + "-" + version
 }
 func (d *Dependency) GetVersionlessReleaseId() string {
-	return d.Build
+	return d.Name
 }
