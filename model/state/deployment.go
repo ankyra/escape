@@ -254,8 +254,13 @@ func (d *deploymentState) ToScriptEnvironment(metadataMap map[string]*core.Relea
 		}
 		result[key] = deplState.ToScript(metadataMap[key], "deploy")
 	}
+	// TODO: only add deployments for dependencies that are found in
+	// release metadata
 	for key, deplState := range *d.Deployments {
-		metadata := metadataMap[key]
+		metadata, ok := metadataMap[key]
+		if !ok {
+			return nil, fmt.Errorf("Couldn't find metadata for '%s'. This is a bug in Escape", key)
+		}
 		version := metadata.GetVersion()
 		if deplState.IsDeployed("deploy", version) {
 			result[key+"-v"+version] = deplState.ToScript(metadataMap[key], "deploy")
