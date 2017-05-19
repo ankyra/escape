@@ -25,10 +25,10 @@ type environmentState struct {
 	Name         string                      `json:"name"`
 	Inputs       map[string]interface{}      `json:"inputs"`
 	Deployments  map[string]*deploymentState `json:"deployments"`
-	projectState ProjectState                `json:"-"`
+	projectState *projectState               `json:"-"`
 }
 
-func NewEnvironmentState(prj ProjectState, envName string) EnvironmentState {
+func NewEnvironmentState(prj *projectState, envName string) EnvironmentState {
 	return &environmentState{
 		projectState: prj,
 		Name:         envName,
@@ -45,7 +45,7 @@ func (e *environmentState) GetDeployments() []DeploymentState {
 	return result
 }
 
-func (e *environmentState) GetProjectState() ProjectState {
+func (e *environmentState) GetProjectState() *projectState {
 	return e.projectState
 }
 func (e *environmentState) GetInputs() map[string]interface{} {
@@ -64,7 +64,7 @@ func (e *environmentState) Save() error {
 	return e.projectState.Save()
 }
 
-func (e *environmentState) ValidateAndFix(name string, p ProjectState) error {
+func (e *environmentState) ValidateAndFix(name string, p *projectState) error {
 	e.Name = name
 	e.projectState = p
 	if e.Deployments == nil {

@@ -46,6 +46,9 @@
                         "deploy": {
                             "inputs": {
                                 "user_level": "user"
+                            },
+                            "calculated_inputs": {
+                                "user_level": "user"
                             }
                         }
                     },

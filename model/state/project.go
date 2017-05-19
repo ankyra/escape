@@ -42,7 +42,7 @@ func getDefaultName() (string, error) {
 	return currentUser.Name, nil
 }
 
-func newProjectState() (ProjectState, error) {
+func newProjectState() (*projectState, error) {
 	defaultName, err := getDefaultName()
 	if err != nil {
 		return nil, err
@@ -54,12 +54,11 @@ func newProjectState() (ProjectState, error) {
 	}, nil
 }
 
-func NewProjectStateFromJsonString(data string) (ProjectState, error) {
-	result, err := newProjectState()
+func NewProjectStateFromJsonString(data string) (*projectState, error) {
+	prjState, err := newProjectState()
 	if err != nil {
 		return nil, err
 	}
-	prjState := result.(*projectState)
 	if err := json.Unmarshal([]byte(data), prjState); err != nil {
 		return nil, err
 	}
@@ -70,7 +69,7 @@ func NewProjectStateFromJsonString(data string) (ProjectState, error) {
 	return prjState, nil
 }
 
-func NewProjectStateFromFile(cfgFile string) (ProjectState, error) {
+func NewProjectStateFromFile(cfgFile string) (*projectState, error) {
 	if cfgFile == "" {
 		return nil, fmt.Errorf("Configuration file path is required.")
 	}
@@ -79,11 +78,10 @@ func NewProjectStateFromFile(cfgFile string) (ProjectState, error) {
 		return nil, err
 	}
 	if !util.PathExists(cfgFile) {
-		prjState, err := newProjectState()
+		p, err := newProjectState()
 		if err != nil {
 			return nil, err
 		}
-		p := prjState.(*projectState)
 		p.remote = false
 		p.saveLocation = cfgFile
 		return p, p.ValidateAndFix()
@@ -96,7 +94,7 @@ func NewProjectStateFromFile(cfgFile string) (ProjectState, error) {
 	if err != nil {
 		return nil, err
 	}
-	result.(*projectState).saveLocation = cfgFile
+	result.saveLocation = cfgFile
 	return result, nil
 }
 

@@ -42,7 +42,8 @@ var showStateCmd = &cobra.Command{
 		if err := context.LoadLocalState(state, environment); err != nil {
 			return err
 		}
-		return controllers.StateController{}.Show(context)
+		//return controllers.StateController{}.Show(context)
+		return nil
 	},
 }
 

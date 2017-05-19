@@ -17,6 +17,8 @@ limitations under the License.
 package state
 
 import (
+	"github.com/ankyra/escape-core"
+	"github.com/ankyra/escape-core/script"
 	. "gopkg.in/check.v1"
 )
 
@@ -100,4 +102,40 @@ func (s *deplSuite) Test_ResolveConsumer_provider_doesnt_exist(c *C) {
 	_, err := deplWithDeps.ResolveConsumer("doesnt-exist")
 	c.Assert(err, Not(IsNil))
 	c.Assert(err.Error(), Equals, "Deployment 'doesnt-exist' does not exist")
+}
+
+func (s *deplSuite) Test_ToScript(c *C) {
+	metadata := core.NewReleaseMetadata("test", "1.0")
+	unit := depl.ToScript(metadata, "deploy")
+	c.Assert(script.IsDictAtom(unit), Equals, true)
+	dict := script.ExpectDictAtom(unit)
+	strings := map[string]string{
+		"version":     "1.0",
+		"description": "",
+		"logo":        "",
+		"id":          "test-v1.0",
+		"name":        "test",
+		"branch":      "",
+		"revision":    "",
+		"project":     "project_name",
+		"environment": "dev",
+		"deployment":  "archive-release",
+	}
+	for key, val := range strings {
+		c.Assert(script.IsStringAtom(dict[key]), Equals, true, Commentf("Expecting %s to be of type string, but was %T", key, dict[key]))
+		c.Assert(script.ExpectStringAtom(dict[key]), Equals, val)
+	}
+	dicts := map[string][]string{
+		"inputs":   []string{"user_level"},
+		"outputs":  []string{},
+		"metadata": []string{},
+	}
+	for key, keys := range dicts {
+		c.Assert(script.IsDictAtom(dict[key]), Equals, true, Commentf("Expecting %s to be of type dict, but was %T", key, dict[key]))
+		d := script.ExpectDictAtom(dict[key])
+		c.Assert(d, HasLen, len(keys), Commentf("Expecting %d values.", len(keys)))
+		for _, k := range keys {
+			c.Assert(script.IsStringAtom(d[k]), Equals, true, Commentf("Expecting %s to be of type string, but was %T", k, d[k]))
+		}
+	}
 }

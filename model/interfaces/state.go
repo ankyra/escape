@@ -21,22 +21,9 @@ import (
 	"github.com/ankyra/escape-core/script"
 )
 
-type ProjectState interface {
-	ValidateAndFix() error
-	GetEnvironmentStateOrMakeNew(string) EnvironmentState
-	GetInputs() map[string]interface{}
-	IsRemote() bool
-	Save() error
-	ToJson() string
-	GetName() string
-	SetName(name string)
-}
-
 type EnvironmentState interface {
-	ValidateAndFix(string, ProjectState) error
 	LookupDeploymentState(deploymentName string) (DeploymentState, error)
 	GetDeploymentState(deps []string) (DeploymentState, error)
-	GetProjectState() ProjectState
 	GetInputs() map[string]interface{}
 	IsRemote() bool
 	Save() error
@@ -45,8 +32,6 @@ type EnvironmentState interface {
 }
 
 type DeploymentState interface {
-	ValidateAndFix(string, EnvironmentState) error
-
 	GetPreStepInputs(stage string) *map[string]interface{}
 
 	GetUserInputs(stage string) *map[string]interface{}

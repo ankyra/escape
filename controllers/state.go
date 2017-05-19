@@ -24,7 +24,7 @@ import (
 type StateController struct{}
 
 func (p StateController) Show(context Context) error {
-	fmt.Println(context.GetProjectState().ToJson())
+	//fmt.Println(context.GetProjectState().ToJson())
 	return nil
 }
 

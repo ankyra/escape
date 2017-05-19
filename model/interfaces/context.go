@@ -38,7 +38,6 @@ type Context interface {
 
 	GetEscapePlan() *plan.EscapePlan
 	GetReleaseMetadata() *core.ReleaseMetadata
-	GetProjectState() ProjectState
 	GetEnvironmentState() EnvironmentState
 	GetEscapeConfig() EscapeConfig
 	GetClient() Client

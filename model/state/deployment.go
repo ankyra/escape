@@ -38,7 +38,7 @@ type deploymentState struct {
 	Inputs      *map[string]interface{}      `json:"inputs"`
 	Deployments *map[string]*deploymentState `json:"deployments"`
 	Providers   *map[string]string           `json:"providers"`
-	environment EnvironmentState             `json:"-"`
+	environment *environmentState            `json:"-"`
 	parent      *deploymentState             `json:"-"`
 }
 
@@ -50,7 +50,7 @@ func newStage() *stage {
 	}
 }
 
-func NewDeploymentState(env EnvironmentState, name string) DeploymentState {
+func NewDeploymentState(env *environmentState, name string) DeploymentState {
 	return &deploymentState{
 		Name:        name,
 		Stages:      map[string]*stage{},
@@ -87,7 +87,7 @@ func (d *deploymentState) NewDependencyDeploymentState(dep string) DeploymentSta
 	return depl
 }
 
-func (d *deploymentState) ValidateAndFix(name string, env EnvironmentState) error {
+func (d *deploymentState) ValidateAndFix(name string, env *environmentState) error {
 	d.Name = name
 	d.environment = env
 	if d.Name == "" {
@@ -125,7 +125,7 @@ func (d *deploymentState) ValidateAndFix(name string, env EnvironmentState) erro
 	return nil
 }
 
-func (d *deploymentState) ValidateAndFixSubDeployment(env EnvironmentState, parent *deploymentState) error {
+func (d *deploymentState) ValidateAndFixSubDeployment(env *environmentState, parent *deploymentState) error {
 	d.parent = parent
 	return d.ValidateAndFix(d.Name, env)
 }
@@ -283,7 +283,7 @@ func (d *deploymentState) ToScript(metadata *core.ReleaseMetadata, stage string)
 	}
 	result["inputs"] = script.LiftDict(d.liftScriptValues(d.GetCalculatedInputs(stage)))
 	result["outputs"] = script.LiftDict(d.liftScriptValues(d.GetCalculatedOutputs(stage)))
-	env := d.GetEnvironmentState()
+	env := d.environment
 	prj := env.GetProjectState()
 	result["project"] = script.LiftString(prj.GetName())
 	result["environment"] = script.LiftString(env.GetName())

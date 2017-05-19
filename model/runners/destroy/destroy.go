@@ -21,16 +21,16 @@ import (
 	"github.com/ankyra/escape-client/model/runners"
 )
 
-func NewPreDestroyRunner(stage string) Runner {
-	return runners.NewScriptRunner(stage, "pre_destroy")
-}
-
 func NewDestroyRunner(stage string) Runner {
 	return runners.NewCompoundRunner(
 		NewPreDestroyRunner(stage),
 		NewMainDestroyRunner(stage),
 		NewPostDestroyRunner(stage),
 	)
+}
+
+func NewPreDestroyRunner(stage string) Runner {
+	return runners.NewScriptRunner(stage, "pre_destroy")
 }
 
 func NewMainDestroyRunner(stage string) Runner {
