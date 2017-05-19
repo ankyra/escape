@@ -54,7 +54,7 @@ func (p StateController) CreateDeployment(context Context) error {
 	if err != nil {
 		return err
 	}
-	inputs := *deplState.GetPreStepInputs("deploy")
+	inputs := deplState.GetPreStepInputs("deploy")
 	changed := false
 	for _, i := range context.GetReleaseMetadata().GetInputs() {
 		val, ok := inputs[i.GetId()]
@@ -67,7 +67,7 @@ func (p StateController) CreateDeployment(context Context) error {
 		}
 	}
 	if changed {
-		deplState.UpdateUserInputs("deploy", &inputs)
+		deplState.UpdateUserInputs("deploy", inputs)
 	}
 	// TODO check and set providers
 	fmt.Println(deplState.ToJson())

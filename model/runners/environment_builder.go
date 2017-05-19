@@ -49,7 +49,7 @@ func (e *environmentBuilder) GetEnviron() []string {
 	return result
 }
 
-func (e *environmentBuilder) GetInputsForPreStep(ctx RunnerContext, stage string) (*map[string]interface{}, error) {
+func (e *environmentBuilder) GetInputsForPreStep(ctx RunnerContext, stage string) (map[string]interface{}, error) {
 	calculatedInputs := map[string]interface{}{}
 	inputs := ctx.GetDeploymentState().GetPreStepInputs(stage)
 	scriptEnv, err := ctx.GetScriptEnvironment(stage)
@@ -57,7 +57,7 @@ func (e *environmentBuilder) GetInputsForPreStep(ctx RunnerContext, stage string
 		return nil, err
 	}
 	for _, inputVar := range ctx.GetReleaseMetadata().GetInputs() {
-		val, err := inputVar.GetValue(inputs, scriptEnv)
+		val, err := inputVar.GetValue(&inputs, scriptEnv)
 		if err != nil {
 			return nil, err
 		}
@@ -66,10 +66,10 @@ func (e *environmentBuilder) GetInputsForPreStep(ctx RunnerContext, stage string
 	return prepInputs(ctx, stage, &calculatedInputs)
 }
 
-func (e *environmentBuilder) GetInputsForErrand(ctx RunnerContext, errand *core.Errand) (*map[string]interface{}, error) {
+func (e *environmentBuilder) GetInputsForErrand(ctx RunnerContext, errand *core.Errand) (map[string]interface{}, error) {
 	deplState := ctx.GetDeploymentState()
 	inputs := deplState.GetCalculatedInputs("deploy")
-	result, err := prepInputs(ctx, "deploy", inputs)
+	result, err := prepInputs(ctx, "deploy", &inputs)
 	if err != nil {
 		return nil, err
 	}
@@ -81,43 +81,43 @@ func (e *environmentBuilder) GetInputsForErrand(ctx RunnerContext, errand *core.
 		return nil, err
 	}
 	for _, inputVar := range errand.GetInputs() {
-		val, err := inputVar.GetValue(inputs, scriptEnv)
+		val, err := inputVar.GetValue(&inputs, scriptEnv)
 		if err != nil {
 			return nil, err
 		}
-		(*result)[inputVar.GetId()] = val
+		result[inputVar.GetId()] = val
 	}
 	return result, nil
 }
 
-func (e *environmentBuilder) GetOutputs(ctx RunnerContext, stage string) (*map[string]interface{}, error) {
+func (e *environmentBuilder) GetOutputs(ctx RunnerContext, stage string) (map[string]interface{}, error) {
 	metadata := ctx.GetReleaseMetadata()
 	buildOutputs := ctx.GetBuildOutputs()
 	result := map[string]interface{}{}
 	if len(metadata.GetOutputs()) == 0 {
-		if buildOutputs != nil && len(*buildOutputs) > 0 {
-			for key, _ := range *buildOutputs {
+		if buildOutputs != nil && len(buildOutputs) > 0 {
+			for key, _ := range buildOutputs {
 				fmt.Printf("Warning: received unexpected output variable '%s'\n", key)
 			}
 		}
-		return &result, nil
+		return result, nil
 	}
 	scriptEnv, err := ctx.GetScriptEnvironment(stage)
 	if err != nil {
 		return nil, err
 	}
 	for _, outputVar := range metadata.GetOutputs() {
-		val, err := outputVar.GetValue(buildOutputs, scriptEnv)
+		val, err := outputVar.GetValue(&buildOutputs, scriptEnv)
 		if err != nil {
 			return nil, err
 		}
 		result[outputVar.GetId()] = val
 	}
-	return &result, nil
+	return result, nil
 }
 
-func addToEnvironmentWithKeyPrefix(env []string, values *map[string]interface{}, prefix string) []string {
-	stringValues := util.InterfaceMapToStringMap(values, prefix)
+func addToEnvironmentWithKeyPrefix(env []string, values map[string]interface{}, prefix string) []string {
+	stringValues := util.InterfaceMapToStringMap(&values, prefix)
 	for key, val := range stringValues {
 		envEntry := key + "=" + val
 		env = append(env, envEntry)
@@ -151,15 +151,17 @@ func addValues(result, values *map[string]interface{}, prefix string) {
 	}
 }
 
-func prepInputs(ctx RunnerContext, stage string, inputs *map[string]interface{}) (*map[string]interface{}, error) {
+func prepInputs(ctx RunnerContext, stage string, inputs *map[string]interface{}) (map[string]interface{}, error) {
 	metadata := ctx.GetReleaseMetadata()
 	deplState := ctx.GetDeploymentState()
 	result := map[string]interface{}{}
 	for key, val := range metadata.GetMetadata() {
 		result["METADATA_"+key] = val
 	}
-	addValues(&result, deplState.GetCalculatedInputs(stage), "PREVIOUS_")
-	addValues(&result, deplState.GetCalculatedOutputs(stage), "PREVIOUS_OUTPUT_")
+	calcInputs := deplState.GetCalculatedInputs(stage)
+	calcOutputs := deplState.GetCalculatedOutputs(stage)
+	addValues(&result, &calcInputs, "PREVIOUS_")
+	addValues(&result, &calcOutputs, "PREVIOUS_OUTPUT_")
 	addValues(&result, inputs, "")
-	return &result, nil
+	return result, nil
 }

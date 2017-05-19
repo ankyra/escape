@@ -39,8 +39,8 @@ func (s *envSuite) Test_LookupDeploymentState(c *C) {
 	depl := depl_.(*deploymentState)
 	c.Assert(err, IsNil)
 	c.Assert(depl.GetName(), Equals, "archive-release")
-	c.Assert((*depl.Inputs)["input_variable"], DeepEquals, "depl_override")
-	c.Assert((*depl.Inputs)["list_input"], DeepEquals, []interface{}{"depl_override"})
+	c.Assert(depl.Inputs["input_variable"], DeepEquals, "depl_override")
+	c.Assert(depl.Inputs["list_input"], DeepEquals, []interface{}{"depl_override"})
 }
 
 func (s *envSuite) Test_LookupDeploymentState_doesnt_exist(c *C) {
@@ -73,8 +73,8 @@ func (s *envSuite) Test_GetDeploymentState_no_deps(c *C) {
 	depl := depl_.(*deploymentState)
 	c.Assert(err, IsNil)
 	c.Assert(depl.GetName(), Equals, "archive-release")
-	c.Assert((*depl.Inputs)["input_variable"], DeepEquals, "depl_override")
-	c.Assert((*depl.Inputs)["list_input"], DeepEquals, []interface{}{"depl_override"})
+	c.Assert(depl.Inputs["input_variable"], DeepEquals, "depl_override")
+	c.Assert(depl.Inputs["list_input"], DeepEquals, []interface{}{"depl_override"})
 }
 
 func (s *envSuite) Test_GetDeploymentState_doesnt_exist_no_deps_returns_new(c *C) {
@@ -85,7 +85,7 @@ func (s *envSuite) Test_GetDeploymentState_doesnt_exist_no_deps_returns_new(c *C
 	depl := depl_.(*deploymentState)
 	c.Assert(err, IsNil)
 	c.Assert(depl.GetName(), Equals, "doesnt-exist")
-	c.Assert((*depl.Inputs), HasLen, 0)
+	c.Assert(depl.Inputs, HasLen, 0)
 }
 
 func (s *envSuite) Test_GetDeploymentState_with_deps(c *C) {
@@ -96,8 +96,8 @@ func (s *envSuite) Test_GetDeploymentState_with_deps(c *C) {
 	depl := depl_.(*deploymentState)
 	c.Assert(err, IsNil)
 	c.Assert(depl.GetName(), Equals, "archive-release")
-	c.Assert((*depl.Inputs)["input_variable"], DeepEquals, "depl_override2")
-	c.Assert((*depl.Inputs)["list_input"], DeepEquals, []interface{}{"depl_override2"})
+	c.Assert(depl.Inputs["input_variable"], DeepEquals, "depl_override2")
+	c.Assert(depl.Inputs["list_input"], DeepEquals, []interface{}{"depl_override2"})
 }
 
 func (s *envSuite) Test_GetDeploymentState_doesnt_exist_with_deps_returns_new(c *C) {
@@ -108,7 +108,7 @@ func (s *envSuite) Test_GetDeploymentState_doesnt_exist_with_deps_returns_new(c 
 	depl := depl_.(*deploymentState)
 	c.Assert(err, IsNil)
 	c.Assert(depl.GetName(), Equals, "doesnt-exist")
-	c.Assert((*depl.Inputs), HasLen, 0)
+	c.Assert(depl.Inputs, HasLen, 0)
 }
 
 func (s *envSuite) Test_GetDeploymentState_doesnt_exist_with_non_existing_roots_returns_new(c *C) {
@@ -119,5 +119,5 @@ func (s *envSuite) Test_GetDeploymentState_doesnt_exist_with_non_existing_roots_
 	depl := depl_.(*deploymentState)
 	c.Assert(err, IsNil)
 	c.Assert(depl.GetName(), Equals, "doesnt-exist2")
-	c.Assert((*depl.Inputs), HasLen, 0)
+	c.Assert(depl.Inputs, HasLen, 0)
 }

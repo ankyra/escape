@@ -35,10 +35,10 @@ type RunnerContext interface {
 	Logger() util.Logger
 	GetPath() Paths
 	GetDepends() []string
-	GetBuildInputs() *map[string]interface{}
-	SetBuildInputs(*map[string]interface{})
-	GetBuildOutputs() *map[string]interface{}
-	SetBuildOutputs(*map[string]interface{})
+	GetBuildInputs() map[string]interface{}
+	SetBuildInputs(map[string]interface{})
+	GetBuildOutputs() map[string]interface{}
+	SetBuildOutputs(map[string]interface{})
 	NewContextForDependency(*core.ReleaseMetadata) RunnerContext
 	GetScriptEnvironment(stage string) (*script.ScriptEnvironment, error)
 }

@@ -30,9 +30,8 @@ func (s *testSuite) Test_GetInputsForPreStep(c *C) {
 	depl, err := ctx.GetEnvironmentState().GetDeploymentState([]string{"name"})
 	c.Assert(err, IsNil)
 	runCtx.SetDeploymentState(depl)
-	inputs_, err := NewEmptyEnvEnvironmentBuilder().GetInputsForPreStep(runCtx, "deploy")
+	inputs, err := NewEmptyEnvEnvironmentBuilder().GetInputsForPreStep(runCtx, "deploy")
 	c.Assert(err, IsNil)
-	inputs := *inputs_
 	c.Assert(inputs, HasLen, 4)
 	c.Assert(inputs["input_variable"], DeepEquals, "testinput")
 	c.Assert(inputs["PREVIOUS_input_variable"], DeepEquals, "previous testinput")
@@ -50,9 +49,8 @@ func (s *testSuite) Test_GetInputsForPreStep_calculated_inputs(c *C) {
 	c.Assert(err, IsNil)
 	runCtx.SetDeploymentState(depl)
 	depl.UpdateInputs("build", nil)
-	inputs_, err := NewEmptyEnvEnvironmentBuilder().GetInputsForPreStep(runCtx, "deploy")
+	inputs, err := NewEmptyEnvEnvironmentBuilder().GetInputsForPreStep(runCtx, "deploy")
 	c.Assert(err, IsNil)
-	inputs := *inputs_
 	c.Assert(inputs, HasLen, 5)
 	c.Assert(inputs["input_variable"], DeepEquals, "0.0.1")
 	c.Assert(inputs["version"], DeepEquals, "0.0.1")
@@ -73,7 +71,7 @@ func (s *testSuite) Test_AddToEnvironmentWithKeyPrefix_empty_env(c *C) {
 		"other_test": 12,
 		"list_test":  []interface{}{"test", "test2"},
 	}
-	newEnv := addToEnvironmentWithKeyPrefix(nil, &values, "PREFIX_")
+	newEnv := addToEnvironmentWithKeyPrefix(nil, values, "PREFIX_")
 	c.Assert(newEnv, HasLen, 3)
 	var testFound, otherFound, listFound bool
 	for _, e := range newEnv {
@@ -94,7 +92,7 @@ func (s *testSuite) Test_AddToEnvironmentWithKeyPrefix_unsupported_type(c *C) {
 	values := map[string]interface{}{
 		"test": map[string]interface{}{},
 	}
-	c.Assert(func() { addToEnvironmentWithKeyPrefix(nil, &values, "PREFIX_") }, PanicMatches,
+	c.Assert(func() { addToEnvironmentWithKeyPrefix(nil, values, "PREFIX_") }, PanicMatches,
 		`Type '.*' not supported \(key: 'test'\). This is a bug in Escape.`)
 }
 
@@ -108,7 +106,7 @@ func (s *testSuite) Test_MergeInputsWithOsEnvironment(c *C) {
 	c.Assert(err, IsNil)
 	runCtx.SetDeploymentState(depl)
 	inputs := map[string]interface{}{"input_variable": "yo"}
-	runCtx.SetBuildInputs(&inputs)
+	runCtx.SetBuildInputs(inputs)
 
 	unit := NewEnvironmentBuilderWithEnv([]string{"test=test"})
 	c.Assert(unit.GetEnviron(), DeepEquals, []string{"test=test"})
@@ -128,8 +126,8 @@ func (s *testSuite) Test_MergeInputsAndOutputsWithOsEnvironment(c *C) {
 	runCtx.SetDeploymentState(depl)
 	inputs := map[string]interface{}{"input_variable": "yo"}
 	outputs := map[string]interface{}{"output_variable": "yo"}
-	runCtx.SetBuildInputs(&inputs)
-	runCtx.SetBuildOutputs(&outputs)
+	runCtx.SetBuildInputs(inputs)
+	runCtx.SetBuildOutputs(outputs)
 
 	unit := NewEnvironmentBuilderWithEnv([]string{"test=test"})
 	c.Assert(unit.GetEnviron(), DeepEquals, []string{"test=test"})
@@ -161,10 +159,9 @@ func (s *testSuite) Test_GetOutputs(c *C) {
 	depl, err := ctx.GetEnvironmentState().GetDeploymentState([]string{"archive-name"})
 	c.Assert(err, IsNil)
 	runCtx.SetDeploymentState(depl)
-	runCtx.SetBuildOutputs(&map[string]interface{}{"output_variable": "test"})
-	outputs_, err := NewEmptyEnvEnvironmentBuilder().GetOutputs(runCtx, "deploy")
+	runCtx.SetBuildOutputs(map[string]interface{}{"output_variable": "test"})
+	outputs, err := NewEmptyEnvEnvironmentBuilder().GetOutputs(runCtx, "deploy")
 	c.Assert(err, IsNil)
-	outputs := *outputs_
 	c.Assert(outputs, HasLen, 1)
 	c.Assert(outputs["output_variable"], DeepEquals, "test")
 }

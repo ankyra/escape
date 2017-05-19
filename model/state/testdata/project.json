@@ -49,6 +49,9 @@
                             },
                             "calculated_inputs": {
                                 "user_level": "user"
+                            },
+                            "calculated_outputs": {
+                                "user_level": "user"
                             }
                         }
                     },

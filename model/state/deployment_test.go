@@ -19,6 +19,7 @@ package state
 import (
 	"github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/script"
+	"github.com/ankyra/escape-core/variables"
 	. "gopkg.in/check.v1"
 )
 
@@ -61,7 +62,7 @@ func (s *deplSuite) Test_SetVersion(c *C) {
 }
 
 func (s *deplSuite) Test_GetBuildInputs(c *C) {
-	inputs := *depl.GetPreStepInputs("deploy")
+	inputs := depl.GetPreStepInputs("deploy")
 	c.Assert(inputs["input_variable"], DeepEquals, "depl_override")
 	c.Assert(inputs["list_input"], DeepEquals, []interface{}{"depl_override"})
 	c.Assert(inputs["project_level_variable"], DeepEquals, "project")
@@ -106,7 +107,31 @@ func (s *deplSuite) Test_ResolveConsumer_provider_doesnt_exist(c *C) {
 
 func (s *deplSuite) Test_ToScript(c *C) {
 	metadata := core.NewReleaseMetadata("test", "1.0")
+	metadata.Metadata["value"] = "yo"
+	input := variables.NewVariableFromString("user_level", "string")
+	metadata.AddInputVariable(input)
+	metadata.AddOutputVariable(input)
 	unit := depl.ToScript(metadata, "deploy")
+	dicts := map[string][]string{
+		"inputs":   []string{"user_level"},
+		"outputs":  []string{"user_level"},
+		"metadata": []string{"value"},
+	}
+	test_helper_check_script_environment(c, unit, dicts)
+}
+
+func (s *deplSuite) Test_ToScript_doesnt_include_variable_that_are_not_defined_in_release_metadata(c *C) {
+	metadata := core.NewReleaseMetadata("test", "1.0")
+	unit := depl.ToScript(metadata, "deploy")
+	dicts := map[string][]string{
+		"inputs":   []string{},
+		"outputs":  []string{},
+		"metadata": []string{},
+	}
+	test_helper_check_script_environment(c, unit, dicts)
+}
+
+func test_helper_check_script_environment(c *C, unit script.Script, dicts map[string][]string) {
 	c.Assert(script.IsDictAtom(unit), Equals, true)
 	dict := script.ExpectDictAtom(unit)
 	strings := map[string]string{
@@ -125,15 +150,10 @@ func (s *deplSuite) Test_ToScript(c *C) {
 		c.Assert(script.IsStringAtom(dict[key]), Equals, true, Commentf("Expecting %s to be of type string, but was %T", key, dict[key]))
 		c.Assert(script.ExpectStringAtom(dict[key]), Equals, val)
 	}
-	dicts := map[string][]string{
-		"inputs":   []string{"user_level"},
-		"outputs":  []string{},
-		"metadata": []string{},
-	}
 	for key, keys := range dicts {
 		c.Assert(script.IsDictAtom(dict[key]), Equals, true, Commentf("Expecting %s to be of type dict, but was %T", key, dict[key]))
 		d := script.ExpectDictAtom(dict[key])
-		c.Assert(d, HasLen, len(keys), Commentf("Expecting %d values.", len(keys)))
+		c.Assert(d, HasLen, len(keys), Commentf("Expecting %d values in %s dict.", len(keys), key))
 		for _, k := range keys {
 			c.Assert(script.IsStringAtom(d[k]), Equals, true, Commentf("Expecting %s to be of type string, but was %T", k, d[k]))
 		}

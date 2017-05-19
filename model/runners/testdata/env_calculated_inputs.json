@@ -11,7 +11,7 @@
                "stages": {
                   "build": {
                      "inputs": {},
-                     "calculated_inputs": null,
+                     "calculated_inputs": {},
                      "calculated_outputs": {},
                      "version": "",
                      "step": ""

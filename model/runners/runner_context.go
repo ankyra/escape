@@ -30,8 +30,8 @@ type runnerContext struct {
 	deploymentState  DeploymentState
 	releaseMetadata  *core.ReleaseMetadata
 	path             Paths
-	inputs           *map[string]interface{}
-	outputs          *map[string]interface{}
+	inputs           map[string]interface{}
+	outputs          map[string]interface{}
 	depends          []*core.ReleaseMetadata
 	logger           util.Logger
 	context          Context
@@ -91,16 +91,16 @@ func (r *runnerContext) GetReleaseMetadata() *core.ReleaseMetadata {
 func (r *runnerContext) SetReleaseMetadata(m *core.ReleaseMetadata) {
 	r.releaseMetadata = m
 }
-func (r *runnerContext) GetBuildInputs() *map[string]interface{} {
+func (r *runnerContext) GetBuildInputs() map[string]interface{} {
 	return r.inputs
 }
-func (r *runnerContext) SetBuildInputs(inputs *map[string]interface{}) {
+func (r *runnerContext) SetBuildInputs(inputs map[string]interface{}) {
 	r.inputs = inputs
 }
-func (r *runnerContext) GetBuildOutputs() *map[string]interface{} {
+func (r *runnerContext) GetBuildOutputs() map[string]interface{} {
 	return r.outputs
 }
-func (r *runnerContext) SetBuildOutputs(outputs *map[string]interface{}) {
+func (r *runnerContext) SetBuildOutputs(outputs map[string]interface{}) {
 	r.outputs = outputs
 }
 

@@ -32,15 +32,15 @@ type EnvironmentState interface {
 }
 
 type DeploymentState interface {
-	GetPreStepInputs(stage string) *map[string]interface{}
+	GetPreStepInputs(stage string) map[string]interface{}
 
-	GetUserInputs(stage string) *map[string]interface{}
-	GetCalculatedInputs(stage string) *map[string]interface{}
-	GetCalculatedOutputs(stage string) *map[string]interface{}
+	GetUserInputs(stage string) map[string]interface{}
+	GetCalculatedInputs(stage string) map[string]interface{}
+	GetCalculatedOutputs(stage string) map[string]interface{}
 
-	UpdateUserInputs(stage string, v *map[string]interface{}) error
-	UpdateInputs(stage string, v *map[string]interface{}) error
-	UpdateOutputs(stage string, v *map[string]interface{}) error
+	UpdateUserInputs(stage string, v map[string]interface{}) error
+	UpdateInputs(stage string, v map[string]interface{}) error
+	UpdateOutputs(stage string, v map[string]interface{}) error
 
 	ResolveConsumer(string) (DeploymentState, error)
 	ToJson() string

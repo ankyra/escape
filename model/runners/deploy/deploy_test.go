@@ -87,13 +87,13 @@ func (s *testSuite) Test_DeployRunner_variables_are_set_even_if_there_is_no_pre_
 	deploymentState, err := runCtx.GetEnvironmentState().GetDeploymentState(runCtx.GetDepends())
 	c.Assert(err, IsNil)
 	deploymentState.UpdateInputs("deploy", nil)
-	c.Assert(deploymentState.GetCalculatedInputs("deploy"), IsNil)
-	c.Assert(*deploymentState.GetUserInputs("deploy"), HasLen, 1)
+	c.Assert(deploymentState.GetCalculatedInputs("deploy"), HasLen, 0)
+	c.Assert(deploymentState.GetUserInputs("deploy"), HasLen, 1)
 	deploymentState.SetVersion("deploy", "")
 	err = NewDeployRunner().Run(runCtx)
 	c.Assert(err, IsNil)
 	c.Assert(deploymentState.GetVersion("deploy"), Equals, "0.0.1")
-	c.Assert(*deploymentState.GetCalculatedInputs("deploy"), HasLen, 1)
+	c.Assert(deploymentState.GetCalculatedInputs("deploy"), HasLen, 1)
 }
 
 func (s *testSuite) Test_DeployRunner_with_dependencies(c *C) {
@@ -108,12 +108,12 @@ func (s *testSuite) Test_DeployRunner_with_dependencies(c *C) {
 	c.Assert(err, IsNil)
 	deploymentState.UpdateInputs("deploy", nil)
 	deploymentState.UpdateOutputs("deploy", nil)
-	c.Assert(deploymentState.GetCalculatedInputs("deploy"), IsNil)
-	c.Assert(*deploymentState.GetUserInputs("deploy"), HasLen, 1)
+	c.Assert(deploymentState.GetCalculatedInputs("deploy"), HasLen, 0)
+	c.Assert(deploymentState.GetUserInputs("deploy"), HasLen, 1)
 	deploymentState.SetVersion("deploy", "")
 	err = NewDeployRunner().Run(runCtx)
 	c.Assert(err, IsNil)
 	c.Assert(deploymentState.GetVersion("deploy"), Equals, "0.0.1")
-	c.Assert(*deploymentState.GetCalculatedInputs("deploy"), HasLen, 1)
-	c.Assert(*deploymentState.GetCalculatedOutputs("deploy"), HasLen, 1)
+	c.Assert(deploymentState.GetCalculatedInputs("deploy"), HasLen, 1)
+	c.Assert(deploymentState.GetCalculatedOutputs("deploy"), HasLen, 1)
 }

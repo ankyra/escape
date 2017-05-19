@@ -30,7 +30,7 @@ type ScriptStep struct {
 	ModifiesOutputVariables bool
 	Stage                   string
 	Step                    string
-	Inputs                  func(ctx RunnerContext, stage string) (*map[string]interface{}, error)
+	Inputs                  func(ctx RunnerContext, stage string) (map[string]interface{}, error)
 	LoadOutputs             bool
 	ScriptPath              string
 	Commit                  func(ctx RunnerContext, state DeploymentState, stage string) error
@@ -228,7 +228,7 @@ func (b *ScriptStep) readOutputVariables(ctx RunnerContext) error {
 	}
 	outputs := ctx.GetBuildOutputs()
 	if outputs == nil {
-		outputs = &map[string]interface{}{}
+		outputs = map[string]interface{}{}
 	}
 	for key, val := range outputOverrides {
 		switch val.(type) {
@@ -237,14 +237,13 @@ func (b *ScriptStep) readOutputVariables(ctx RunnerContext) error {
 		default:
 			return fmt.Errorf("Expecting string value for output variable '%s'", key)
 		}
-		(*outputs)[key] = val
-		//            applog("build.output_override_variable_value", variable=key, value=value)
+		outputs[key] = val
 	}
 	ctx.SetBuildOutputs(outputs)
 	return nil
 }
 
-func writeOutputsToFile(outputs *map[string]interface{}) error {
+func writeOutputsToFile(outputs map[string]interface{}) error {
 	path := paths.NewPath()
 	path.EnsureEscapeDirectoryExists()
 	contents, err := json.Marshal(outputs)
