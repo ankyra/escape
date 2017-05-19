@@ -121,12 +121,12 @@ func (m *ReleaseMetadata) GetExtends() []string {
 	return m.Extends
 }
 func (m *ReleaseMetadata) AddExtension(releaseId string) {
-    for _, e := range m.Extends {
-        if e == releaseId {
-            return
-        }
-    }
-    m.Extends = append(m.Extends, releaseId)
+	for _, e := range m.Extends {
+		if e == releaseId {
+			return
+		}
+	}
+	m.Extends = append(m.Extends, releaseId)
 }
 func (m *ReleaseMetadata) GetStages() map[string]*ExecStage {
 	return m.Stages
@@ -236,9 +236,22 @@ func (m *ReleaseMetadata) GetVersionlessReleaseId() string {
 }
 
 func (m *ReleaseMetadata) AddInputVariable(input *variables.Variable) {
+	for _, i := range m.Inputs {
+		if i.GetId() == input.GetId() {
+			if !i.HasDefault() {
+				i.Default = input.Default
+			}
+			return
+		}
+	}
 	m.Inputs = append(m.Inputs, input)
 }
 func (m *ReleaseMetadata) AddOutputVariable(output *variables.Variable) {
+	for _, i := range m.Outputs {
+		if i.GetId() == output.GetId() {
+			return
+		}
+	}
 	m.Outputs = append(m.Outputs, output)
 }
 

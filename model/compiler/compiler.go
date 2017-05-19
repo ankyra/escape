@@ -144,28 +144,12 @@ func (c *Compiler) compileExtensions(plan *escape_plan.EscapePlan) error {
 			}
 		}
 		for _, input := range metadata.GetInputs() {
-			found := false
-			for _, i := range c.metadata.GetInputs() {
-				if i.GetId() == input.GetId() {
-					found = true
-					break
-				}
-			}
-			if !found {
+			if !input.HasDefault() {
 				c.metadata.AddInputVariable(input)
 			}
 		}
 		for _, output := range metadata.GetOutputs() {
-			found := false
-			for _, i := range c.metadata.GetOutputs() {
-				if i.GetId() == output.GetId() {
-					found = true
-					break
-				}
-			}
-			if !found {
-				c.metadata.AddOutputVariable(output)
-			}
+			c.metadata.AddOutputVariable(output)
 		}
 		for name, newErrand := range metadata.GetErrands() {
 			_, exists := c.metadata.Errands[name]
@@ -258,14 +242,7 @@ func (c *Compiler) compileDependencies(depends []string) error {
 			}
 		}
 		for _, input := range metadata.GetInputs() {
-			found := false
-			for _, i := range c.metadata.GetInputs() {
-				if i.GetId() == input.GetId() {
-					found = true
-					break
-				}
-			}
-			if !found && !input.HasDefault() {
+			if !input.HasDefault() {
 				c.metadata.AddInputVariable(input)
 			}
 		}
