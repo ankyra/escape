@@ -19,7 +19,6 @@
             },
             "deployments": {
                 "archive-full": {
-                    "version": "1",
                     "inputs": {
                         "depl_level_variable": "depl",
                         "input_variable": "depl_override",
@@ -27,12 +26,22 @@
                             "depl_override"
                         ]
                     },
+                    "stages": {
+                        "deploy": {
+                            "version": "1",
+                            "inputs": {
+                            },
+                            "calculated_inputs": {
+                            },
+                            "calculated_outputs": {
+                            }
+                        }
+                    },
                     "deployments": {
                         "archive-dep": {
-                            "version": "1",
                             "stages": {
                                 "deploy": {
-                                    "version": "1"
+                                    "version": "1.0"
                                 }
                             }
                         }

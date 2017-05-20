@@ -58,6 +58,10 @@ func (d *DeploymentState) GetRelease() string {
 	return d.Release
 }
 
+func (d *DeploymentState) GetReleaseId(stage string) string {
+	return d.GetRelease() + "-v" + d.GetVersion(stage)
+}
+
 func (d *DeploymentState) GetVersion(stage string) string {
 	return d.getStage(stage).Version
 }

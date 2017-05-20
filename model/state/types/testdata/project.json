@@ -12,13 +12,22 @@
             },
             "deployments": {
                 "archive-full": {
-                    "version": "1",
                     "inputs": {
                         "depl_level_variable": "depl",
                         "input_variable": "depl_override",
                         "list_input": [
                             "depl_override"
                         ]
+                    },
+                    "stages": {
+                        "deploy": {
+                            "inputs": {
+                            },
+                            "calculated_inputs": {
+                            },
+                            "calculated_outputs": {
+                            }
+                        }
                     },
                     "deployments": {
                         "archive-dep": {

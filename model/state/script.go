@@ -23,11 +23,19 @@ import (
 	"github.com/ankyra/escape-core/script"
 )
 
+func ToScriptEnv(d *DeploymentState, metadata *core.ReleaseMetadata, stage string) (*script.ScriptEnvironment, error) {
+	if d == nil {
+		return nil, fmt.Errorf("Missing deployment state. This is a bug in Escape.")
+	}
+	return nil, nil
+}
+
 func ToScriptEnvironment(d *DeploymentState, metadataMap map[string]*core.ReleaseMetadata, stage string) (*script.ScriptEnvironment, error) {
 	result := map[string]script.Script{}
-	result["this"] = toScript(d, metadataMap["this"], stage)
+	thisMetadata := metadataMap["this"]
+	result["this"] = toScript(d, thisMetadata, stage)
 	providers := d.GetProviders()
-	for _, consumes := range metadataMap["this"].GetConsumes() {
+	for _, consumes := range thisMetadata.GetConsumes() {
 		deplName, ok := providers[consumes]
 		if !ok {
 			return nil, fmt.Errorf("No provider of type '%s' was configured in the deployment state.", consumes)
@@ -36,20 +44,28 @@ func ToScriptEnvironment(d *DeploymentState, metadataMap map[string]*core.Releas
 		if err != nil {
 			return nil, err
 		}
-		result[consumes] = toScript(deplState, metadataMap[consumes], "deploy")
+		releaseId := deplState.GetRelease()
+		if _, ok = metadataMap[releaseId]; !ok {
+			return nil, fmt.Errorf("Metadata for provider '%s' (%s, deployment %s) was not found.", consumes, releaseId, deplName)
+		}
+		result[consumes] = toScript(deplState, metadataMap[releaseId], "deploy")
 	}
-	// TODO: only add deployments for dependencies that are found in
-	// release metadata
 	for _, deplState := range d.GetDeployments() {
+		found := false
+		for _, dep := range thisMetadata.GetDependencies() {
+			if dep == deplState.GetReleaseId("deploy") {
+				found = true
+				break
+			}
+		}
+		if !found {
+			continue
+		}
 		key := deplState.GetRelease()
-		metadata, ok := metadataMap[key]
-		if !ok {
+		if _, ok := metadataMap[key]; !ok {
 			return nil, fmt.Errorf("Couldn't find metadata for '%s'. This is a bug in Escape", key)
 		}
-		version := metadata.GetVersion()
-		if deplState.IsDeployed("deploy", version) {
-			result[key+"-v"+version] = toScript(deplState, metadataMap[key], "deploy")
-		}
+		result[deplState.GetReleaseId("deploy")] = toScript(deplState, metadataMap[key], "deploy")
 	}
 	for key, metadata := range metadataMap {
 		reference, exists := result[metadata.GetReleaseId()]
