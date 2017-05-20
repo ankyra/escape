@@ -87,3 +87,20 @@ func (s *testSuite) Test_BuildRunner_variables_are_set_even_if_there_is_no_pre_s
 	c.Assert(deploymentState.GetVersion("build"), Equals, "0.0.1")
 	c.Assert(deploymentState.GetCalculatedInputs("build"), HasLen, 1)
 }
+
+func (s *testSuite) Test_BuildRunner_has_access_to_previous_outputs(c *C) {
+	ctx := model.NewContext()
+	err := ctx.InitFromLocalEscapePlanAndState("testdata/default_outputs.json", "dev", "testdata/default_outputs_plan.yml")
+	c.Assert(err, IsNil)
+	runCtx, err := runners.NewRunnerContext(ctx)
+	c.Assert(err, IsNil)
+	deploymentState, err := runCtx.GetDeploymentStateForDepends()
+	c.Assert(err, IsNil)
+	deploymentState.UpdateOutputs("build", map[string]interface{}{
+		"variable": "not test",
+	})
+	c.Assert(deploymentState.GetCalculatedOutputs("build")["variable"], Equals, "not test")
+	err = NewBuildRunner().Run(runCtx)
+	c.Assert(err, IsNil)
+	c.Assert(deploymentState.GetCalculatedOutputs("build")["variable"], Equals, "test")
+}

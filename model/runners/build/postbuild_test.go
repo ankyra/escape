@@ -77,3 +77,20 @@ func (s *testSuite) Test_PostBuildRunner_failing_script(c *C) {
 	err = NewPostBuildRunner().Run(runCtx)
 	c.Assert(err, Not(IsNil))
 }
+
+func (s *testSuite) Test_PostBuildRunner_default_outputs_dont_calculate(c *C) {
+	ctx := model.NewContext()
+	err := ctx.InitFromLocalEscapePlanAndState("testdata/default_outputs.json", "dev", "testdata/default_outputs_plan.yml")
+	c.Assert(err, IsNil)
+	runCtx, err := runners.NewRunnerContext(ctx)
+	c.Assert(err, IsNil)
+	deploymentState, err := runCtx.GetDeploymentStateForDepends()
+	c.Assert(err, IsNil)
+	deploymentState.UpdateOutputs("build", map[string]interface{}{
+		"variable": "not test",
+	})
+	c.Assert(deploymentState.GetCalculatedOutputs("build")["variable"], Equals, "not test")
+	err = NewPostBuildRunner().Run(runCtx)
+	c.Assert(err, IsNil)
+	c.Assert(deploymentState.GetCalculatedOutputs("build")["variable"], Equals, "not test")
+}

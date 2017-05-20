@@ -62,6 +62,7 @@ func NewMainStepRunner(stage, field string) Runner {
 	return NewRunner(func(ctx RunnerContext) error {
 		step := NewScriptStep(ctx, stage, field, true)
 		step.Commit = mainCommit
+		step.LoadOutputs = false
 		step.ModifiesOutputVariables = true
 		return step.Run(ctx)
 	})
@@ -228,7 +229,7 @@ func (b *ScriptStep) readOutputVariables(ctx RunnerContext) error {
 		return err
 	}
 	outputs := ctx.GetBuildOutputs()
-	if outputs == nil {
+	if outputs == nil || !b.LoadOutputs {
 		outputs = map[string]interface{}{}
 	}
 	for key, val := range outputOverrides {
