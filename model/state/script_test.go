@@ -17,11 +17,38 @@ limitations under the License.
 package state
 
 import (
+	. "github.com/ankyra/escape-client/model/state/types"
 	"github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/script"
 	"github.com/ankyra/escape-core/variables"
 	. "gopkg.in/check.v1"
+	"testing"
 )
+
+type deplSuite struct{}
+
+var _ = Suite(&deplSuite{})
+
+func Test(t *testing.T) { TestingT(t) }
+
+var depl *DeploymentState
+var deplWithDeps *DeploymentState
+var fullDepl *DeploymentState
+
+func (s *deplSuite) SetUpTest(c *C) {
+	var err error
+	p, err := NewProjectStateFromFile("prj", "testdata/project.json")
+	c.Assert(err, IsNil)
+	env := p.GetEnvironmentStateOrMakeNew("dev")
+	depl, err = env.GetDeploymentState([]string{"archive-release"})
+	c.Assert(err, IsNil)
+
+	deplWithDeps, err = env.GetDeploymentState([]string{"archive-release-with-deps", "archive-release"})
+	c.Assert(err, IsNil)
+
+	fullDepl, err = env.GetDeploymentState([]string{"archive-full"})
+	c.Assert(err, IsNil)
+}
 
 func (s *deplSuite) Test_ToScript(c *C) {
 	metadata := core.NewReleaseMetadata("test", "1.0")

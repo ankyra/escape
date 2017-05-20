@@ -21,6 +21,7 @@ import (
 	"fmt"
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/paths"
+	state "github.com/ankyra/escape-client/model/state/types"
 	"github.com/ankyra/escape-client/util"
 	"io/ioutil"
 )
@@ -33,7 +34,7 @@ type ScriptStep struct {
 	Inputs                  func(ctx RunnerContext, stage string) (map[string]interface{}, error)
 	LoadOutputs             bool
 	ScriptPath              string
-	Commit                  func(ctx RunnerContext, state DeploymentState, stage string) error
+	Commit                  func(ctx RunnerContext, d *state.DeploymentState, stage string) error
 }
 
 func NewScriptStep(ctx RunnerContext, stage, step string, shouldBeDeployed bool) *ScriptStep {
@@ -94,7 +95,7 @@ func compileTemplates(ctx RunnerContext, stage string) error {
 	return nil
 }
 
-func preCommit(ctx RunnerContext, deploymentState DeploymentState, stage string) error {
+func preCommit(ctx RunnerContext, deploymentState *state.DeploymentState, stage string) error {
 	inputs := ctx.GetBuildInputs()
 	version := ctx.GetReleaseMetadata().GetVersion()
 	if err := deploymentState.SetVersion(stage, version); err != nil {
@@ -106,11 +107,11 @@ func preCommit(ctx RunnerContext, deploymentState DeploymentState, stage string)
 	return compileTemplates(ctx, stage)
 }
 
-func mainCommit(ctx RunnerContext, deploymentState DeploymentState, stage string) error {
+func mainCommit(ctx RunnerContext, deploymentState *state.DeploymentState, stage string) error {
 	return ctx.GetDeploymentState().UpdateOutputs(stage, ctx.GetBuildOutputs())
 }
 
-func postCommit(ctx RunnerContext, deploymentState DeploymentState, stage string) error {
+func postCommit(ctx RunnerContext, deploymentState *state.DeploymentState, stage string) error {
 	processedOutputs, err := NewEnvironmentBuilder().GetOutputs(ctx, stage)
 	if err != nil {
 		return err
@@ -156,7 +157,7 @@ func (b *ScriptStep) initScript(ctx RunnerContext) (string, error) {
 	return script, nil
 }
 
-func (b *ScriptStep) initDeploymentState(ctx RunnerContext) (DeploymentState, error) {
+func (b *ScriptStep) initDeploymentState(ctx RunnerContext) (*state.DeploymentState, error) {
 	deploymentState, err := ctx.GetEnvironmentState().GetDeploymentState(ctx.GetDepends())
 	if err != nil {
 		return nil, err

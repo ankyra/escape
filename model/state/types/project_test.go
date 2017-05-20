@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package state
+package types
 
 import (
 	. "gopkg.in/check.v1"
@@ -31,58 +31,58 @@ func Test(t *testing.T) { TestingT(t) }
 func (s *projectSuite) Test_FromJson(c *C) {
 	json := `
     {
-        "inputs": {
-            "zone": "my zone"
-        },
+        "name": "hello",
         "environments": {}
     }`
 	p, err := NewProjectStateFromJsonString(json)
 	c.Assert(err, IsNil)
-	c.Assert(p.getInputs(), HasLen, 1)
+	c.Assert(p.GetName(), Equals, "hello")
+}
+
+func (s *projectSuite) Test_FromJson_fails_if_name_is_missing(c *C) {
+	json := `
+    {
+        "environments": {}
+    }`
+	_, err := NewProjectStateFromJsonString(json)
+	c.Assert(err, Not(IsNil))
 }
 
 func (s *projectSuite) Test_From_File(c *C) {
-	p, err := NewProjectStateFromFile("testdata/project.json")
+	p, err := NewProjectStateFromFile("prj", "testdata/project.json")
 	c.Assert(err, IsNil)
 	c.Assert(p.GetName(), Equals, "project_name")
-	c.Assert(p.getInputs(), HasLen, 3)
-	c.Assert(p.getInputs()["project_level_variable"], DeepEquals, "project")
-	c.Assert(p.getInputs()["input_variable"], DeepEquals, "test")
-	c.Assert(p.getInputs()["list_input"], DeepEquals, []interface{}{"string"})
 	env := p.GetEnvironmentStateOrMakeNew("dev")
-	c.Assert(env.(*environmentState).getInputs()["input_variable"], DeepEquals, "env_override")
-
+	c.Assert(env.getInputs()["input_variable"], DeepEquals, "env_override")
 }
 
 func (s *projectSuite) Test_From_File_That_Doesnt_Exist_Returns_Empty_State(c *C) {
-	p, err := NewProjectStateFromFile("asodifjaowijefowaiejfoawijefoiasjdfoiasdf.state")
+	_, err := NewProjectStateFromFile("prj", "asodifjaowijefowaiejfoawijefoiasjdfoiasdf.state")
 	c.Assert(err, IsNil)
-	c.Assert(p.getInputs(), HasLen, 0)
 }
 
 func (s *projectSuite) Test_Save_Non_Existing_File(c *C) {
 	os.RemoveAll("testdata/doesnt_exist.state")
-	p, err := NewProjectStateFromFile("testdata/doesnt_exist.state")
+	p, err := NewProjectStateFromFile("prj", "testdata/doesnt_exist.state")
 	c.Assert(err, IsNil)
 	c.Assert(p.GetName(), Not(Equals), "overwrite")
-	c.Assert(p.getInputs(), HasLen, 0)
 	p.SetName("overwrite")
 	err = p.Save()
 	c.Assert(err, IsNil)
-	p, err = NewProjectStateFromFile("testdata/doesnt_exist.state")
+	p, err = NewProjectStateFromFile("prj", "testdata/doesnt_exist.state")
 	c.Assert(err, IsNil)
 	c.Assert(p.GetName(), Equals, "overwrite")
 	os.RemoveAll("testdata/doesnt_exist.state")
 }
 
 func (s *projectSuite) Test_From_File_With_Empty_File_Fails(c *C) {
-	p, err := NewProjectStateFromFile("")
+	p, err := NewProjectStateFromFile("prj", "")
 	c.Assert(p, IsNil)
 	c.Assert(err.Error(), Equals, "Configuration file path is required.")
 }
 
 func (s *projectSuite) Test_GetEnvironmentStateOrMakeNew(c *C) {
-	p, err := newProjectState()
+	p, err := newProjectState("prj")
 	c.Assert(err, IsNil)
 	state1 := p.GetEnvironmentStateOrMakeNew("test-env")
 	state2 := p.GetEnvironmentStateOrMakeNew("test-env")

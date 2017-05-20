@@ -18,8 +18,9 @@ package interfaces
 
 import (
 	plan "github.com/ankyra/escape-client/model/escape_plan"
+	state "github.com/ankyra/escape-client/model/state/types"
 	"github.com/ankyra/escape-client/util"
-	core "github.com/ankyra/escape-core"
+	"github.com/ankyra/escape-core"
 )
 
 type Context interface {
@@ -38,7 +39,7 @@ type Context interface {
 
 	GetEscapePlan() *plan.EscapePlan
 	GetReleaseMetadata() *core.ReleaseMetadata
-	GetEnvironmentState() EnvironmentState
+	GetEnvironmentState() *state.EnvironmentState
 	GetEscapeConfig() EscapeConfig
 	GetClient() Client
 	GetLogger() util.Logger

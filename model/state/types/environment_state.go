@@ -14,65 +14,58 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package state
+package types
 
 import (
 	"fmt"
-	. "github.com/ankyra/escape-client/model/interfaces"
 )
 
-type environmentState struct {
-	Name         string                      `json:"name"`
-	Inputs       map[string]interface{}      `json:"inputs"`
-	Deployments  map[string]*deploymentState `json:"deployments"`
-	projectState *projectState               `json:"-"`
+type EnvironmentState struct {
+	Name        string                      `json:"name"`
+	Inputs      map[string]interface{}      `json:"inputs"`
+	Deployments map[string]*DeploymentState `json:"deployments"`
+	ProjectName string                      `json:"-"`
 }
 
-func NewEnvironmentState(prj *projectState, envName string) EnvironmentState {
-	return &environmentState{
-		projectState: prj,
-		Name:         envName,
-		Inputs:       map[string]interface{}{},
-		Deployments:  map[string]*deploymentState{},
+func NewEnvironmentState(prjName, envName string) *EnvironmentState {
+	return &EnvironmentState{
+		ProjectName: prjName,
+		Name:        envName,
+		Inputs:      map[string]interface{}{},
+		Deployments: map[string]*DeploymentState{},
 	}
 }
 
-func (e *environmentState) GetDeployments() []DeploymentState {
-	result := []DeploymentState{}
+func (e *EnvironmentState) GetDeployments() []*DeploymentState {
+	result := []*DeploymentState{}
 	for _, d := range e.Deployments {
 		result = append(result, d)
 	}
 	return result
 }
 
-func (e *environmentState) getProjectState() *projectState {
-	return e.projectState
+func (e *EnvironmentState) GetProjectName() string {
+	return e.ProjectName
 }
-func (e *environmentState) GetProjectName() string {
-	return e.projectState.GetName()
-}
-func (e *environmentState) getInputs() map[string]interface{} {
+func (e *EnvironmentState) getInputs() map[string]interface{} {
 	return e.Inputs
 }
-func (e *environmentState) GetName() string {
+func (e *EnvironmentState) GetName() string {
 	return e.Name
 }
-func (e *environmentState) save() error {
-	return e.projectState.Save()
-}
 
-func (e *environmentState) validateAndFix(name string, p *projectState) error {
+func (e *EnvironmentState) ValidateAndFix(name, prjName string) error {
 	e.Name = name
-	e.projectState = p
+	e.ProjectName = prjName
 	if e.Deployments == nil {
-		e.Deployments = map[string]*deploymentState{}
+		e.Deployments = map[string]*DeploymentState{}
 	}
 	for deplName, depl := range e.Deployments {
 		if err := depl.validateAndFix(deplName, e); err != nil {
 			return err
 		}
 	}
-	if e.projectState == nil {
+	if e.ProjectName == "" {
 		return fmt.Errorf("EnvironmentState's ProjectState reference has not been set")
 	}
 	if e.Name == "" {
@@ -81,7 +74,7 @@ func (e *environmentState) validateAndFix(name string, p *projectState) error {
 	return nil
 }
 
-func (e *environmentState) LookupDeploymentState(deploymentName string) (DeploymentState, error) {
+func (e *EnvironmentState) LookupDeploymentState(deploymentName string) (*DeploymentState, error) {
 	val, ok := e.Deployments[deploymentName]
 	if !ok {
 		return nil, fmt.Errorf("Deployment '%s' does not exist", deploymentName)
@@ -89,7 +82,7 @@ func (e *environmentState) LookupDeploymentState(deploymentName string) (Deploym
 	return val, nil
 }
 
-func (e *environmentState) GetDeploymentState(deps []string) (DeploymentState, error) {
+func (e *EnvironmentState) GetDeploymentState(deps []string) (*DeploymentState, error) {
 	if deps == nil || len(deps) == 0 {
 		return nil, fmt.Errorf("Missing name to resolve deployment state. This is a bug in Escape.")
 	}
@@ -100,13 +93,13 @@ func (e *environmentState) GetDeploymentState(deps []string) (DeploymentState, e
 	}
 }
 
-func (e *environmentState) getDeploymentStateForDependency(deps []string) (DeploymentState, error) {
+func (e *EnvironmentState) getDeploymentStateForDependency(deps []string) (*DeploymentState, error) {
 	deploymentName := deps[0]
 	result := e.getOrCreateRootDeploymentState(deploymentName)
 	for _, dep := range deps[1:] {
 		depl, ok := result.Deployments[dep]
 		if !ok {
-			result = result.NewDependencyDeploymentState(dep).(*deploymentState)
+			result = result.NewDependencyDeploymentState(dep)
 		} else {
 			result = depl
 		}
@@ -114,10 +107,10 @@ func (e *environmentState) getDeploymentStateForDependency(deps []string) (Deplo
 	return result, nil
 }
 
-func (e *environmentState) getOrCreateRootDeploymentState(deploymentName string) *deploymentState {
+func (e *EnvironmentState) getOrCreateRootDeploymentState(deploymentName string) *DeploymentState {
 	depl, ok := e.Deployments[deploymentName]
 	if !ok {
-		depl = NewDeploymentState(e, deploymentName, deploymentName).(*deploymentState)
+		depl = NewDeploymentState(e, deploymentName, deploymentName)
 		e.Deployments[deploymentName] = depl
 	}
 	return depl

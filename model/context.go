@@ -24,6 +24,7 @@ import (
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/paths"
 	"github.com/ankyra/escape-client/model/state"
+	"github.com/ankyra/escape-client/model/state/types"
 	"github.com/ankyra/escape-client/util"
 	"github.com/ankyra/escape-core"
 )
@@ -32,7 +33,7 @@ type context struct {
 	EscapeConfig       EscapeConfig
 	EscapePlan         *escape_plan.EscapePlan
 	ReleaseMetadata    *core.ReleaseMetadata
-	EnvironmentState   EnvironmentState
+	EnvironmentState   *types.EnvironmentState
 	Logger             util.Logger
 	LogConsumers       []util.LogConsumer
 	DependencyMetadata map[string]*core.ReleaseMetadata
@@ -91,7 +92,7 @@ func (c *context) GetEscapePlan() *escape_plan.EscapePlan {
 func (c *context) GetReleaseMetadata() *core.ReleaseMetadata {
 	return c.ReleaseMetadata
 }
-func (c *context) GetEnvironmentState() EnvironmentState {
+func (c *context) GetEnvironmentState() *types.EnvironmentState {
 	return c.EnvironmentState
 }
 func (c *context) GetEscapeConfig() EscapeConfig {
@@ -151,13 +152,14 @@ func (c *context) LoadMetadata() error {
 }
 
 func (c *context) LoadLocalState(cfgFile, environment string) error {
-	p, err := state.NewProjectStateFromFile(cfgFile)
+	provider := state.NewLocalStateProvider(cfgFile)
+	envState, err := provider.Load("", environment)
 	if err != nil {
-		return err
+		return errors.New(err.Error())
 	}
-	c.EnvironmentState = p.GetEnvironmentStateOrMakeNew(environment)
-	if c.EnvironmentState == nil {
+	if envState == nil {
 		return errors.New("Empty environment state")
 	}
+	c.EnvironmentState = envState
 	return nil
 }

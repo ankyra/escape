@@ -14,108 +14,107 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package state
+package types
 
 import (
 	"encoding/json"
 	"fmt"
-	. "github.com/ankyra/escape-client/model/interfaces"
 )
 
-type deploymentState struct {
+type DeploymentState struct {
 	Name        string                      `json:"name"`
 	Release     string                      `json:"release"`
 	Stages      map[string]*stage           `json:"stages"`
 	Inputs      map[string]interface{}      `json:"inputs"`
-	Deployments map[string]*deploymentState `json:"deployments"`
+	Deployments map[string]*DeploymentState `json:"deployments"`
 	Providers   map[string]string           `json:"providers"`
-	environment *environmentState           `json:"-"`
-	parent      *deploymentState            `json:"-"`
+	environment *EnvironmentState           `json:"-"`
+	parent      *DeploymentState            `json:"-"`
 }
 
-func NewDeploymentState(env *environmentState, name, release string) DeploymentState {
-	return &deploymentState{
+func NewDeploymentState(env *EnvironmentState, name, release string) *DeploymentState {
+	return &DeploymentState{
 		Name:        name,
 		Release:     release,
 		Stages:      map[string]*stage{},
 		Inputs:      map[string]interface{}{},
 		Providers:   map[string]string{},
-		Deployments: map[string]*deploymentState{},
+		Deployments: map[string]*DeploymentState{},
 		environment: env,
 	}
 }
-func (d *deploymentState) NewDependencyDeploymentState(dep string) DeploymentState {
-	depl := NewDeploymentState(d.environment, dep, dep).(*deploymentState)
+func (d *DeploymentState) NewDependencyDeploymentState(dep string) *DeploymentState {
+	depl := NewDeploymentState(d.environment, dep, dep)
 	depl.parent = d
 	d.Deployments[dep] = depl
 	return depl
 }
 
-func (d *deploymentState) GetName() string {
+func (d *DeploymentState) GetName() string {
 	return d.Name
 }
 
-func (d *deploymentState) GetRelease() string {
+func (d *DeploymentState) GetRelease() string {
 	return d.Release
 }
 
-func (d *deploymentState) GetVersion(stage string) string {
+func (d *DeploymentState) GetVersion(stage string) string {
 	return d.getStage(stage).Version
 }
 
-func (d *deploymentState) GetEnvironmentState() EnvironmentState {
+func (d *DeploymentState) GetEnvironmentState() *EnvironmentState {
 	return d.environment
 }
 
-func (d *deploymentState) GetDeployments() []DeploymentState {
-	result := []DeploymentState{}
+func (d *DeploymentState) GetDeployments() []*DeploymentState {
+	result := []*DeploymentState{}
 	for _, val := range d.Deployments {
 		result = append(result, val)
 	}
 	return result
 }
 
-func (d *deploymentState) GetUserInputs(stage string) map[string]interface{} {
+func (d *DeploymentState) GetUserInputs(stage string) map[string]interface{} {
 	return d.getStage(stage).UserInputs
 }
 
-func (d *deploymentState) GetCalculatedInputs(stage string) map[string]interface{} {
+func (d *DeploymentState) GetCalculatedInputs(stage string) map[string]interface{} {
 	return d.getStage(stage).Inputs
 }
 
-func (d *deploymentState) GetCalculatedOutputs(stage string) map[string]interface{} {
+func (d *DeploymentState) GetCalculatedOutputs(stage string) map[string]interface{} {
 	return d.getStage(stage).Outputs
 }
 
-func (d *deploymentState) UpdateInputs(stage string, inputs map[string]interface{}) error {
+func (d *DeploymentState) UpdateInputs(stage string, inputs map[string]interface{}) error {
 	d.getStage(stage).setInputs(inputs)
 	return d.Save()
 }
 
-func (d *deploymentState) UpdateUserInputs(stage string, inputs map[string]interface{}) error {
+func (d *DeploymentState) UpdateUserInputs(stage string, inputs map[string]interface{}) error {
 	d.getStage(stage).setUserInputs(inputs)
 	return d.Save()
 }
 
-func (d *deploymentState) UpdateOutputs(stage string, outputs map[string]interface{}) error {
+func (d *DeploymentState) UpdateOutputs(stage string, outputs map[string]interface{}) error {
 	d.getStage(stage).setOutputs(outputs)
 	return d.Save()
 }
 
-func (d *deploymentState) SetVersion(stage, version string) error {
+func (d *DeploymentState) SetVersion(stage, version string) error {
 	d.getStage(stage).setVersion(version)
 	return nil
 }
 
-func (d *deploymentState) IsDeployed(stage, version string) bool {
+func (d *DeploymentState) IsDeployed(stage, version string) bool {
 	return d.getStage(stage).Version == version
 }
 
-func (d *deploymentState) Save() error {
-	return d.environment.save()
+func (d *DeploymentState) Save() error {
+	return nil
 }
 
-func (p *deploymentState) ToJson() string {
+func (p *DeploymentState) ToJson() string {
 	str, err := json.MarshalIndent(p, "", "   ")
 	if err != nil {
 		panic(err)
@@ -123,7 +122,7 @@ func (p *deploymentState) ToJson() string {
 	return string(str)
 }
 
-func (d *deploymentState) GetProviders() map[string]string {
+func (d *DeploymentState) GetProviders() map[string]string {
 	result := map[string]string{}
 	for key, val := range d.Providers {
 		result[key] = val
@@ -140,15 +139,12 @@ func (d *deploymentState) GetProviders() map[string]string {
 	return result
 }
 
-func (d *deploymentState) GetPreStepInputs(stage string) map[string]interface{} {
+func (d *DeploymentState) GetPreStepInputs(stage string) map[string]interface{} {
 	result := map[string]interface{}{}
-	for key, val := range d.environment.getProjectState().getInputs() {
-		result[key] = val
-	}
 	for key, val := range d.environment.getInputs() {
 		result[key] = val
 	}
-	deps := []*deploymentState{d}
+	deps := []*DeploymentState{d}
 	p := d.parent
 	for p != nil {
 		deps = append(deps, p)
@@ -172,7 +168,7 @@ func (d *deploymentState) GetPreStepInputs(stage string) map[string]interface{} 
 	return result
 }
 
-func (d *deploymentState) validateAndFix(name string, env *environmentState) error {
+func (d *DeploymentState) validateAndFix(name string, env *EnvironmentState) error {
 	d.Name = name
 	d.environment = env
 	if d.Name == "" {
@@ -188,7 +184,7 @@ func (d *deploymentState) validateAndFix(name string, env *environmentState) err
 		d.Providers = map[string]string{}
 	}
 	if d.Deployments == nil {
-		d.Deployments = map[string]*deploymentState{}
+		d.Deployments = map[string]*DeploymentState{}
 	}
 	for name, depl := range d.Deployments {
 		depl.Name = name
@@ -205,12 +201,12 @@ func (d *deploymentState) validateAndFix(name string, env *environmentState) err
 	return nil
 }
 
-func (d *deploymentState) validateAndFixSubDeployment(env *environmentState, parent *deploymentState) error {
+func (d *DeploymentState) validateAndFixSubDeployment(env *EnvironmentState, parent *DeploymentState) error {
 	d.parent = parent
 	return d.validateAndFix(d.Name, env)
 }
 
-func (d *deploymentState) getStage(stage string) *stage {
+func (d *DeploymentState) getStage(stage string) *stage {
 	st, ok := d.Stages[stage]
 	if !ok || st == nil {
 		st = newStage()

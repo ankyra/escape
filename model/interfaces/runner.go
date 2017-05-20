@@ -17,6 +17,7 @@ limitations under the License.
 package interfaces
 
 import (
+	state "github.com/ankyra/escape-client/model/state/types"
 	"github.com/ankyra/escape-client/util"
 	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/script"
@@ -27,9 +28,9 @@ type Runner interface {
 }
 
 type RunnerContext interface {
-	GetEnvironmentState() EnvironmentState
-	GetDeploymentState() DeploymentState
-	SetDeploymentState(DeploymentState)
+	GetEnvironmentState() *state.EnvironmentState
+	GetDeploymentState() *state.DeploymentState
+	SetDeploymentState(*state.DeploymentState)
 	GetReleaseMetadata() *core.ReleaseMetadata
 	SetReleaseMetadata(*core.ReleaseMetadata)
 	Logger() util.Logger

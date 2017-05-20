@@ -1,4 +1,5 @@
 {
+    "name": "waddup",
     "environments": {
         "dev": {
             "deployments": {

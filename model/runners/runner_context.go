@@ -21,14 +21,15 @@ import (
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/paths"
 	"github.com/ankyra/escape-client/model/state"
+	"github.com/ankyra/escape-client/model/state/types"
 	"github.com/ankyra/escape-client/util"
 	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/script"
 )
 
 type runnerContext struct {
-	environmentState EnvironmentState
-	deploymentState  DeploymentState
+	environmentState *types.EnvironmentState
+	deploymentState  *types.DeploymentState
 	releaseMetadata  *core.ReleaseMetadata
 	path             Paths
 	inputs           map[string]interface{}
@@ -56,10 +57,10 @@ func NewRunnerContext(context Context) (RunnerContext, error) {
 func (r *runnerContext) GetPath() Paths {
 	return r.path
 }
-func (r *runnerContext) GetEnvironmentState() EnvironmentState {
+func (r *runnerContext) GetEnvironmentState() *types.EnvironmentState {
 	return r.environmentState
 }
-func (r *runnerContext) GetDeploymentState() DeploymentState {
+func (r *runnerContext) GetDeploymentState() *types.DeploymentState {
 	return r.deploymentState
 }
 func (r *runnerContext) GetDepends() []string {
@@ -69,7 +70,7 @@ func (r *runnerContext) GetDepends() []string {
 	}
 	return deps
 }
-func (r *runnerContext) SetDeploymentState(d DeploymentState) {
+func (r *runnerContext) SetDeploymentState(d *types.DeploymentState) {
 	r.deploymentState = d
 }
 func (r *runnerContext) Logger() util.Logger {

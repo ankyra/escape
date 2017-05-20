@@ -18,12 +18,12 @@ package state
 
 import (
 	"fmt"
-	. "github.com/ankyra/escape-client/model/interfaces"
+	. "github.com/ankyra/escape-client/model/state/types"
 	"github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/script"
 )
 
-func ToScriptEnvironment(d DeploymentState, metadataMap map[string]*core.ReleaseMetadata, stage string) (*script.ScriptEnvironment, error) {
+func ToScriptEnvironment(d *DeploymentState, metadataMap map[string]*core.ReleaseMetadata, stage string) (*script.ScriptEnvironment, error) {
 	result := map[string]script.Script{}
 	result["this"] = toScript(d, metadataMap["this"], stage)
 	providers := d.GetProviders()
@@ -61,7 +61,7 @@ func ToScriptEnvironment(d DeploymentState, metadataMap map[string]*core.Release
 
 }
 
-func toScript(d DeploymentState, metadata *core.ReleaseMetadata, stage string) script.Script {
+func toScript(d *DeploymentState, metadata *core.ReleaseMetadata, stage string) script.Script {
 	result := map[string]script.Script{}
 	if metadata != nil {
 		result = metadata.ToScriptMap()

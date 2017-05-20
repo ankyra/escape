@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package state
+package types
 
 import (
 	. "gopkg.in/check.v1"
@@ -24,25 +24,23 @@ type deplSuite struct{}
 
 var _ = Suite(&deplSuite{})
 
-var depl *deploymentState
-var deplWithDeps *deploymentState
-var fullDepl *deploymentState
+var depl *DeploymentState
+var deplWithDeps *DeploymentState
+var fullDepl *DeploymentState
 
 func (s *deplSuite) SetUpTest(c *C) {
-	p, err := NewProjectStateFromFile("testdata/project.json")
+	var err error
+	p, err := NewProjectStateFromFile("prj", "testdata/project.json")
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
-	depl_, err := env.GetDeploymentState([]string{"archive-release"})
+	depl, err = env.GetDeploymentState([]string{"archive-release"})
 	c.Assert(err, IsNil)
-	depl = depl_.(*deploymentState)
 
-	deplWithDeps_, err := env.GetDeploymentState([]string{"archive-release-with-deps", "archive-release"})
+	deplWithDeps, err = env.GetDeploymentState([]string{"archive-release-with-deps", "archive-release"})
 	c.Assert(err, IsNil)
-	deplWithDeps = deplWithDeps_.(*deploymentState)
 
-	fullDepl_, err := env.GetDeploymentState([]string{"archive-full"})
+	fullDepl, err = env.GetDeploymentState([]string{"archive-full"})
 	c.Assert(err, IsNil)
-	fullDepl = fullDepl_.(*deploymentState)
 }
 
 func (s *deplSuite) Test_GetEnvironmentState(c *C) {
@@ -62,7 +60,6 @@ func (s *deplSuite) Test_GetBuildInputs(c *C) {
 	inputs := depl.GetPreStepInputs("deploy")
 	c.Assert(inputs["input_variable"], DeepEquals, "depl_override")
 	c.Assert(inputs["list_input"], DeepEquals, []interface{}{"depl_override"})
-	c.Assert(inputs["project_level_variable"], DeepEquals, "project")
 	c.Assert(inputs["env_level_variable"], DeepEquals, "env")
 	c.Assert(inputs["depl_level_variable"], DeepEquals, "depl")
 	c.Assert(inputs["user_level"], DeepEquals, "user")

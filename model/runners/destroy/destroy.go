@@ -19,6 +19,7 @@ package destroy
 import (
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/runners"
+	"github.com/ankyra/escape-client/model/state/types"
 )
 
 func NewDestroyRunner(stage string) Runner {
@@ -49,7 +50,7 @@ func NewPostDestroyRunner(stage string) Runner {
 	})
 }
 
-func deleteCommit(ctx RunnerContext, depl DeploymentState, stage string) error {
+func deleteCommit(ctx RunnerContext, depl *types.DeploymentState, stage string) error {
 	deferred := func() Runner { return NewDestroyRunner("deploy") }
 	err := runners.NewDependencyRunner("destroy", deferred).Run(ctx)
 	if err != nil {

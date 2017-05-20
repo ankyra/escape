@@ -14,47 +14,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package state
+package types
 
 import (
 	"encoding/json"
 	"fmt"
-	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/util"
 	"io/ioutil"
-	"os/user"
 	"path/filepath"
 )
 
-type projectState struct {
+type ProjectState struct {
 	Name         string                       `json:"name"`
-	Inputs       map[string]interface{}       `json:"inputs"`
-	Environments map[string]*environmentState `json:"environments"`
+	Environments map[string]*EnvironmentState `json:"environments"`
 	saveLocation string
 }
 
-func getDefaultName() (string, error) {
-	currentUser, err := user.Current()
-	if err != nil {
-		return "", err
-	}
-	return currentUser.Name, nil
-}
-
-func newProjectState() (*projectState, error) {
-	defaultName, err := getDefaultName()
-	if err != nil {
-		return nil, err
-	}
-	return &projectState{
-		Name:         defaultName,
-		Inputs:       map[string]interface{}{},
-		Environments: map[string]*environmentState{},
+func newProjectState(prjName string) (*ProjectState, error) {
+	return &ProjectState{
+		Name:         prjName,
+		Environments: map[string]*EnvironmentState{},
 	}, nil
 }
 
-func NewProjectStateFromJsonString(data string) (*projectState, error) {
-	prjState, err := newProjectState()
+func NewProjectStateFromJsonString(data string) (*ProjectState, error) {
+	prjState, err := newProjectState("")
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +51,7 @@ func NewProjectStateFromJsonString(data string) (*projectState, error) {
 	return prjState, nil
 }
 
-func NewProjectStateFromFile(cfgFile string) (*projectState, error) {
+func NewProjectStateFromFile(prjName, cfgFile string) (*ProjectState, error) {
 	if cfgFile == "" {
 		return nil, fmt.Errorf("Configuration file path is required.")
 	}
@@ -76,7 +60,7 @@ func NewProjectStateFromFile(cfgFile string) (*projectState, error) {
 		return nil, err
 	}
 	if !util.PathExists(cfgFile) {
-		p, err := newProjectState()
+		p, err := newProjectState(prjName)
 		if err != nil {
 			return nil, err
 		}
@@ -92,46 +76,45 @@ func NewProjectStateFromFile(cfgFile string) (*projectState, error) {
 		return nil, err
 	}
 	result.saveLocation = cfgFile
+	if result.Name == "" {
+		result.Name = prjName
+	}
 	return result, nil
 }
 
-func (p *projectState) getInputs() map[string]interface{} {
-	return p.Inputs
-}
-
-func (p *projectState) validateAndFix() error {
+func (p *ProjectState) validateAndFix() error {
 	if p.Name == "" {
-		defaultName, err := getDefaultName()
-		if err != nil {
-			return err
-		}
-		p.Name = defaultName
-	}
-	if p.Inputs == nil {
-		p.Inputs = map[string]interface{}{}
+		return fmt.Errorf("State is missing project name")
 	}
 	if p.Environments == nil {
-		p.Environments = map[string]*environmentState{}
+		p.Environments = map[string]*EnvironmentState{}
 	}
 	for name, env := range p.Environments {
-		if err := env.validateAndFix(name, p); err != nil {
+		if err := env.ValidateAndFix(name, p.Name); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (p *projectState) GetEnvironmentStateOrMakeNew(env string) EnvironmentState {
+func (p *ProjectState) GetName() string {
+	return p.Name
+}
+
+func (p *ProjectState) SetName(name string) {
+	p.Name = name
+}
+
+func (p *ProjectState) GetEnvironmentStateOrMakeNew(env string) *EnvironmentState {
 	e, ok := p.Environments[env]
-	if !ok {
-		e := NewEnvironmentState(p, env)
-		p.Environments[env] = e.(*environmentState)
-		return e
+	if !ok || e == nil {
+		p.Environments[env] = NewEnvironmentState(p.Name, env)
+		return p.Environments[env]
 	}
 	return e
 }
 
-func (p *projectState) Save() error {
+func (p *ProjectState) Save() error {
 	if p.saveLocation == "" {
 		return fmt.Errorf("Save location has not been set. Inexplicably")
 	}
@@ -139,18 +122,10 @@ func (p *projectState) Save() error {
 	return ioutil.WriteFile(p.saveLocation, contents, 0644)
 }
 
-func (p *projectState) ToJson() string {
+func (p *ProjectState) ToJson() string {
 	str, err := json.MarshalIndent(p, "", "   ")
 	if err != nil {
 		panic(err)
 	}
 	return string(str)
-}
-
-func (p *projectState) GetName() string {
-	return p.Name
-}
-
-func (p *projectState) SetName(name string) {
-	p.Name = name
 }

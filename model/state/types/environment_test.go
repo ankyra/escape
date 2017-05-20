@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package state
+package types
 
 import (
 	. "gopkg.in/check.v1"
@@ -25,18 +25,17 @@ type envSuite struct{}
 var _ = Suite(&envSuite{})
 
 func (s *envSuite) Test_Name_Field_Is_Set(c *C) {
-	p, err := NewProjectStateFromFile("testdata/project.json")
+	p, err := NewProjectStateFromFile("prj", "testdata/project.json")
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("incomplete_env")
 	c.Assert(env.GetName(), Equals, "incomplete_env")
 }
 
 func (s *envSuite) Test_LookupDeploymentState(c *C) {
-	p, err := NewProjectStateFromFile("testdata/project.json")
+	p, err := NewProjectStateFromFile("prj", "testdata/project.json")
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
-	depl_, err := env.(*environmentState).LookupDeploymentState("archive-release")
-	depl := depl_.(*deploymentState)
+	depl, err := env.LookupDeploymentState("archive-release")
 	c.Assert(err, IsNil)
 	c.Assert(depl.GetName(), Equals, "archive-release")
 	c.Assert(depl.Inputs["input_variable"], DeepEquals, "depl_override")
@@ -44,16 +43,16 @@ func (s *envSuite) Test_LookupDeploymentState(c *C) {
 }
 
 func (s *envSuite) Test_LookupDeploymentState_doesnt_exist(c *C) {
-	p, err := NewProjectStateFromFile("testdata/project.json")
+	p, err := NewProjectStateFromFile("prj", "testdata/project.json")
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
-	_, err = env.(*environmentState).LookupDeploymentState("doesnt-exist")
+	_, err = env.LookupDeploymentState("doesnt-exist")
 	c.Assert(err, Not(IsNil))
 	c.Assert(err.Error(), Equals, "Deployment 'doesnt-exist' does not exist")
 }
 
 func (s *envSuite) Test_GetDeploymentState_missing_args(c *C) {
-	p, err := NewProjectStateFromFile("testdata/project.json")
+	p, err := NewProjectStateFromFile("prj", "testdata/project.json")
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
 	_, err = env.GetDeploymentState([]string{})
@@ -66,11 +65,10 @@ func (s *envSuite) Test_GetDeploymentState_missing_args(c *C) {
 }
 
 func (s *envSuite) Test_GetDeploymentState_no_deps(c *C) {
-	p, err := NewProjectStateFromFile("testdata/project.json")
+	p, err := NewProjectStateFromFile("prj", "testdata/project.json")
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
-	depl_, err := env.GetDeploymentState([]string{"archive-release"})
-	depl := depl_.(*deploymentState)
+	depl, err := env.GetDeploymentState([]string{"archive-release"})
 	c.Assert(err, IsNil)
 	c.Assert(depl.GetName(), Equals, "archive-release")
 	c.Assert(depl.Inputs["input_variable"], DeepEquals, "depl_override")
@@ -78,22 +76,20 @@ func (s *envSuite) Test_GetDeploymentState_no_deps(c *C) {
 }
 
 func (s *envSuite) Test_GetDeploymentState_doesnt_exist_no_deps_returns_new(c *C) {
-	p, err := NewProjectStateFromFile("testdata/project.json")
+	p, err := NewProjectStateFromFile("prj", "testdata/project.json")
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
-	depl_, err := env.GetDeploymentState([]string{"doesnt-exist"})
-	depl := depl_.(*deploymentState)
+	depl, err := env.GetDeploymentState([]string{"doesnt-exist"})
 	c.Assert(err, IsNil)
 	c.Assert(depl.GetName(), Equals, "doesnt-exist")
 	c.Assert(depl.Inputs, HasLen, 0)
 }
 
 func (s *envSuite) Test_GetDeploymentState_with_deps(c *C) {
-	p, err := NewProjectStateFromFile("testdata/project.json")
+	p, err := NewProjectStateFromFile("prj", "testdata/project.json")
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
-	depl_, err := env.GetDeploymentState([]string{"archive-release-with-deps", "archive-release"})
-	depl := depl_.(*deploymentState)
+	depl, err := env.GetDeploymentState([]string{"archive-release-with-deps", "archive-release"})
 	c.Assert(err, IsNil)
 	c.Assert(depl.GetName(), Equals, "archive-release")
 	c.Assert(depl.Inputs["input_variable"], DeepEquals, "depl_override2")
@@ -101,22 +97,20 @@ func (s *envSuite) Test_GetDeploymentState_with_deps(c *C) {
 }
 
 func (s *envSuite) Test_GetDeploymentState_doesnt_exist_with_deps_returns_new(c *C) {
-	p, err := NewProjectStateFromFile("testdata/project.json")
+	p, err := NewProjectStateFromFile("prj", "testdata/project.json")
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
-	depl_, err := env.GetDeploymentState([]string{"archive-release-with-deps", "doesnt-exist"})
-	depl := depl_.(*deploymentState)
+	depl, err := env.GetDeploymentState([]string{"archive-release-with-deps", "doesnt-exist"})
 	c.Assert(err, IsNil)
 	c.Assert(depl.GetName(), Equals, "doesnt-exist")
 	c.Assert(depl.Inputs, HasLen, 0)
 }
 
 func (s *envSuite) Test_GetDeploymentState_doesnt_exist_with_non_existing_roots_returns_new(c *C) {
-	p, err := NewProjectStateFromFile("testdata/project.json")
+	p, err := NewProjectStateFromFile("prj", "testdata/project.json")
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
-	depl_, err := env.GetDeploymentState([]string{"doesnt-exist1", "doesnt-exist2"})
-	depl := depl_.(*deploymentState)
+	depl, err := env.GetDeploymentState([]string{"doesnt-exist1", "doesnt-exist2"})
 	c.Assert(err, IsNil)
 	c.Assert(depl.GetName(), Equals, "doesnt-exist2")
 	c.Assert(depl.Inputs, HasLen, 0)
