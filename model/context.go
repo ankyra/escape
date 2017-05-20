@@ -37,6 +37,7 @@ type context struct {
 	Logger             util.Logger
 	LogConsumers       []util.LogConsumer
 	DependencyMetadata map[string]*core.ReleaseMetadata
+	RootDeploymentName string
 }
 
 func NewContext() Context {
@@ -49,14 +50,14 @@ func NewContext() Context {
 	return ctx
 }
 
-func (c *context) InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation string) error {
+func (c *context) InitFromLocalEscapePlanAndState(state, environment, planPath string) error {
 	if environment == "" {
 		return errors.New("Missing 'environment'")
 	}
 	if err := c.LoadLocalState(state, environment); err != nil {
 		return err
 	}
-	if err := c.LoadEscapePlan(escapePlanLocation); err != nil {
+	if err := c.LoadEscapePlan(planPath); err != nil {
 		return err
 	}
 	if err := c.LoadMetadata(); err != nil {
@@ -97,6 +98,15 @@ func (c *context) GetEnvironmentState() *types.EnvironmentState {
 }
 func (c *context) GetEscapeConfig() EscapeConfig {
 	return c.EscapeConfig
+}
+func (c *context) GetRootDeploymentName() string {
+	if c.RootDeploymentName == "" {
+		return c.ReleaseMetadata.GetVersionlessReleaseId()
+	}
+	return c.RootDeploymentName
+}
+func (c *context) SetRootDeploymentName(name string) {
+	c.RootDeploymentName = name
 }
 
 func (c *context) GetDependencyMetadata(depReleaseId string) (*core.ReleaseMetadata, error) {

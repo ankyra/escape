@@ -42,4 +42,6 @@ type Context interface {
 	GetEscapeConfig() EscapeConfig
 	GetClient() Client
 	GetLogger() util.Logger
+	GetRootDeploymentName() string
+	SetRootDeploymentName(string)
 }

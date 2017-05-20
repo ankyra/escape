@@ -28,16 +28,15 @@ import (
 )
 
 type runnerContext struct {
-	environmentState   *types.EnvironmentState
-	deploymentState    *types.DeploymentState
-	releaseMetadata    *core.ReleaseMetadata
-	path               Paths
-	inputs             map[string]interface{}
-	outputs            map[string]interface{}
-	depends            []*core.ReleaseMetadata
-	logger             util.Logger
-	context            Context
-	rootDeploymentName string
+	environmentState *types.EnvironmentState
+	deploymentState  *types.DeploymentState
+	releaseMetadata  *core.ReleaseMetadata
+	path             Paths
+	inputs           map[string]interface{}
+	outputs          map[string]interface{}
+	depends          []*core.ReleaseMetadata
+	logger           util.Logger
+	context          Context
 }
 
 func NewRunnerContext(context Context) (RunnerContext, error) {
@@ -46,56 +45,67 @@ func NewRunnerContext(context Context) (RunnerContext, error) {
 		return nil, fmt.Errorf("Missing metadata in context. This is a bug in Escape.")
 	}
 	return &runnerContext{
-		path:               paths.NewPath(),
-		environmentState:   context.GetEnvironmentState(),
-		releaseMetadata:    context.GetReleaseMetadata(),
-		logger:             context.GetLogger(),
-		depends:            []*core.ReleaseMetadata{context.GetReleaseMetadata()},
-		context:            context,
-		rootDeploymentName: context.GetReleaseMetadata().GetVersionlessReleaseId(),
+		path:             paths.NewPath(),
+		environmentState: context.GetEnvironmentState(),
+		releaseMetadata:  context.GetReleaseMetadata(),
+		logger:           context.GetLogger(),
+		depends:          []*core.ReleaseMetadata{context.GetReleaseMetadata()},
+		context:          context,
 	}, nil
 }
 
 func (r *runnerContext) GetPath() Paths {
 	return r.path
 }
+
 func (r *runnerContext) GetEnvironmentState() *types.EnvironmentState {
 	return r.environmentState
 }
+
 func (r *runnerContext) GetDeploymentState() *types.DeploymentState {
 	return r.deploymentState
 }
+
 func (r *runnerContext) GetRootDeploymentName() string {
-	return r.rootDeploymentName
+	return r.context.GetRootDeploymentName()
 }
+
 func (r *runnerContext) GetDeploymentStateForDepends() (*types.DeploymentState, error) {
-	deps := []string{}
-	for _, d := range r.depends {
+	deps := []string{r.GetRootDeploymentName()}
+	for _, d := range r.depends[1:] {
 		deps = append(deps, d.GetVersionlessReleaseId())
 	}
 	return r.environmentState.GetDeploymentState(deps)
 }
+
 func (r *runnerContext) SetDeploymentState(d *types.DeploymentState) {
 	r.deploymentState = d
 }
+
 func (r *runnerContext) Logger() util.Logger {
 	return r.logger
 }
+
 func (r *runnerContext) GetReleaseMetadata() *core.ReleaseMetadata {
 	return r.releaseMetadata
 }
+
 func (r *runnerContext) SetReleaseMetadata(m *core.ReleaseMetadata) {
 	r.releaseMetadata = m
 }
+
 func (r *runnerContext) GetBuildInputs() map[string]interface{} {
 	return r.inputs
 }
+
 func (r *runnerContext) SetBuildInputs(inputs map[string]interface{}) {
 	r.inputs = inputs
 }
+
 func (r *runnerContext) GetBuildOutputs() map[string]interface{} {
 	return r.outputs
 }
+
 func (r *runnerContext) SetBuildOutputs(outputs map[string]interface{}) {
 	r.outputs = outputs
 }
@@ -131,15 +141,14 @@ func (r *runnerContext) GetScriptEnvironment(stage string) (*script.ScriptEnviro
 
 func (r *runnerContext) NewContextForDependency(metadata *core.ReleaseMetadata) RunnerContext {
 	return &runnerContext{
-		environmentState:   r.environmentState,
-		deploymentState:    r.deploymentState,
-		path:               r.path.NewPathForDependency(metadata),
-		depends:            append(r.depends, metadata),
-		releaseMetadata:    metadata,
-		logger:             r.logger,
-		inputs:             r.inputs,
-		outputs:            r.outputs,
-		context:            r.context,
-		rootDeploymentName: r.rootDeploymentName,
+		environmentState: r.environmentState,
+		deploymentState:  r.deploymentState,
+		path:             r.path.NewPathForDependency(metadata),
+		depends:          append(r.depends, metadata),
+		releaseMetadata:  metadata,
+		logger:           r.logger,
+		inputs:           r.inputs,
+		outputs:          r.outputs,
+		context:          r.context,
 	}
 }
