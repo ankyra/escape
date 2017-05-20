@@ -23,19 +23,56 @@ import (
 	"github.com/ankyra/escape-core/script"
 )
 
-func ToScriptEnv(d *DeploymentState, metadata *core.ReleaseMetadata, stage string) (*script.ScriptEnvironment, error) {
+type DeploymentResolver interface {
+	GetDependencyMetadata(depend string) (*core.ReleaseMetadata, error)
+}
+
+type deploymentResolver struct {
+	resolver func(string) (*core.ReleaseMetadata, error)
+}
+
+func (d *deploymentResolver) GetDependencyMetadata(depend string) (*core.ReleaseMetadata, error) {
+	return d.resolver(depend)
+}
+
+func newResolverFromMap(metaMap map[string]*core.ReleaseMetadata) DeploymentResolver {
+	return &deploymentResolver{
+		resolver: func(depend string) (*core.ReleaseMetadata, error) {
+			m, ok := metaMap[depend]
+			if !ok {
+				return nil, fmt.Errorf("Metadata for '%s' not found", depend)
+			}
+			return m, nil
+		},
+	}
+}
+
+func ToScriptEnvironment(d *DeploymentState, metadata *core.ReleaseMetadata, stage string, context DeploymentResolver) (*script.ScriptEnvironment, error) {
 	if d == nil {
 		return nil, fmt.Errorf("Missing deployment state. This is a bug in Escape.")
 	}
-	return nil, nil
+	result, err := ToScript(d, metadata, stage, context)
+	if err != nil {
+		return nil, err
+	}
+	return script.NewScriptEnvironmentWithGlobals(script.ExpectDictAtom(result)), nil
 }
 
-func ToScriptEnvironment(d *DeploymentState, metadataMap map[string]*core.ReleaseMetadata, stage string) (*script.ScriptEnvironment, error) {
+func ToScript(d *DeploymentState, metadata *core.ReleaseMetadata, stage string, context DeploymentResolver) (script.Script, error) {
 	result := map[string]script.Script{}
-	thisMetadata := metadataMap["this"]
-	result["this"] = toScript(d, thisMetadata, stage)
+	result["this"] = toScript(d, metadata, stage)
+
+	for _, depend := range metadata.GetDependencies() {
+		depMetadata, err := context.GetDependencyMetadata(depend)
+		if err != nil {
+			return nil, err
+		}
+		depState := d.GetDeployment(depMetadata.GetVersionlessReleaseId())
+		result[depend] = toScript(depState, depMetadata, "deploy")
+	}
+
 	providers := d.GetProviders()
-	for _, consumes := range thisMetadata.GetConsumes() {
+	for _, consumes := range metadata.GetConsumes() {
 		deplName, ok := providers[consumes]
 		if !ok {
 			return nil, fmt.Errorf("No provider of type '%s' was configured in the deployment state.", consumes)
@@ -44,37 +81,21 @@ func ToScriptEnvironment(d *DeploymentState, metadataMap map[string]*core.Releas
 		if err != nil {
 			return nil, err
 		}
-		releaseId := deplState.GetRelease()
-		if _, ok = metadataMap[releaseId]; !ok {
-			return nil, fmt.Errorf("Metadata for provider '%s' (%s, deployment %s) was not found.", consumes, releaseId, deplName)
+		depMetadata, err := context.GetDependencyMetadata(deplState.GetReleaseId("deploy"))
+		if err != nil {
+			return nil, err
 		}
-		result[consumes] = toScript(deplState, metadataMap[releaseId], "deploy")
+		result[consumes] = toScript(deplState, depMetadata, "deploy")
 	}
-	for _, deplState := range d.GetDeployments() {
-		found := false
-		for _, dep := range thisMetadata.GetDependencies() {
-			if dep == deplState.GetReleaseId("deploy") {
-				found = true
-				break
-			}
-		}
-		if !found {
+
+	for key, ref := range metadata.GetVariableContext() {
+		script, ok := result[ref]
+		if !ok {
 			continue
 		}
-		key := deplState.GetRelease()
-		if _, ok := metadataMap[key]; !ok {
-			return nil, fmt.Errorf("Couldn't find metadata for '%s'. This is a bug in Escape", key)
-		}
-		result[deplState.GetReleaseId("deploy")] = toScript(deplState, metadataMap[key], "deploy")
+		result[key] = script
 	}
-	for key, metadata := range metadataMap {
-		reference, exists := result[metadata.GetReleaseId()]
-		if exists {
-			result[key] = reference
-		}
-	}
-	return script.NewScriptEnvironmentWithGlobals(result), nil
-
+	return script.LiftDict(result), nil
 }
 
 func toScript(d *DeploymentState, metadata *core.ReleaseMetadata, stage string) script.Script {
@@ -82,7 +103,11 @@ func toScript(d *DeploymentState, metadata *core.ReleaseMetadata, stage string) 
 	if metadata != nil {
 		result = metadata.ToScriptMap()
 	}
+	if d == nil {
+		return script.LiftDict(result)
+	}
 	inputs := map[string]interface{}{}
+	outputs := map[string]interface{}{}
 	for key, val := range d.GetCalculatedInputs(stage) {
 		for _, defined := range metadata.GetInputs() {
 			if key == defined.GetId() {
@@ -90,7 +115,6 @@ func toScript(d *DeploymentState, metadata *core.ReleaseMetadata, stage string) 
 			}
 		}
 	}
-	outputs := map[string]interface{}{}
 	for key, val := range d.GetCalculatedOutputs(stage) {
 		for _, defined := range metadata.GetOutputs() {
 			if key == defined.GetId() {
@@ -98,25 +122,11 @@ func toScript(d *DeploymentState, metadata *core.ReleaseMetadata, stage string) 
 			}
 		}
 	}
-	result["inputs"] = script.LiftDict(liftScriptValues(inputs))
-	result["outputs"] = script.LiftDict(liftScriptValues(outputs))
+	result["inputs"] = script.ShouldLift(inputs)
+	result["outputs"] = script.ShouldLift(outputs)
 	env := d.GetEnvironmentState()
 	result["project"] = script.LiftString(env.GetProjectName())
 	result["environment"] = script.LiftString(env.GetName())
 	result["deployment"] = script.LiftString(d.GetName())
 	return script.LiftDict(result)
-}
-
-func liftScriptValues(values map[string]interface{}) map[string]script.Script {
-	result := map[string]script.Script{}
-	if values != nil {
-		for key, val := range values {
-			v, err := script.Lift(val)
-			if err != nil {
-				panic(err)
-			}
-			result[key] = v
-		}
-	}
-	return result
 }

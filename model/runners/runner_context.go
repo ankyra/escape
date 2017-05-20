@@ -111,32 +111,7 @@ func (r *runnerContext) SetBuildOutputs(outputs map[string]interface{}) {
 }
 
 func (r *runnerContext) GetScriptEnvironment(stage string) (*script.ScriptEnvironment, error) {
-	if r.GetDeploymentState() == nil {
-		return nil, fmt.Errorf("Missing deployment state in context. This is a bug in Escape.")
-	}
-	metadataCtx := map[string]*core.ReleaseMetadata{}
-	for _, depend := range r.GetReleaseMetadata().GetDependencies() {
-		metadata, err := r.context.GetDependencyMetadata(depend)
-		if err != nil {
-			return nil, err
-		}
-		metadataCtx[depend] = metadata
-	}
-	metadataCtx["this"] = r.GetReleaseMetadata()
-	for key, ref := range r.GetReleaseMetadata().GetVariableContext() {
-		metadata, err := r.context.GetDependencyMetadata(ref)
-		if err != nil {
-			return nil, err
-		}
-		previous, ok := metadataCtx[metadata.GetReleaseId()]
-		if !ok {
-			metadataCtx[key] = metadata
-		} else {
-			metadataCtx[key] = previous
-		}
-		metadataCtx[metadata.GetVersionlessReleaseId()] = metadataCtx[key]
-	}
-	return state.ToScriptEnvironment(r.GetDeploymentState(), metadataCtx, stage)
+	return state.ToScriptEnvironment(r.GetDeploymentState(), r.GetReleaseMetadata(), stage, r.context)
 }
 
 func (r *runnerContext) NewContextForDependency(metadata *core.ReleaseMetadata) RunnerContext {

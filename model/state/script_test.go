@@ -76,11 +76,13 @@ func (s *deplSuite) Test_ToScript_doesnt_include_variable_that_are_not_defined_i
 	test_helper_check_script_environment(c, unit, dicts, "archive-release")
 }
 
-func (s *deplSuite) Test_ToScriptEnvironment(c *C) {
-	metadataMap := map[string]*core.ReleaseMetadata{
-		"this": core.NewReleaseMetadata("test", "1.0"),
-	}
-	env, err := ToScriptEnvironment(depl, metadataMap, "build")
+func (s *deplSuite) Test_ToScriptEnvironment_adds_dependencies(c *C) {
+	resolver := newResolverFromMap(map[string]*core.ReleaseMetadata{
+		"test-v1.0": core.NewReleaseMetadata("test", "1.0"),
+	})
+	metadata := core.NewReleaseMetadata("test", "1.0")
+	metadata.Depends = []string{"test-v1.0"}
+	env, err := ToScriptEnvironment(fullDepl, metadata, "build", resolver)
 	c.Assert(err, IsNil)
 	c.Assert(script.IsDictAtom((*env)["$"]), Equals, true)
 	dict := script.ExpectDictAtom((*env)["$"])
@@ -89,53 +91,83 @@ func (s *deplSuite) Test_ToScriptEnvironment(c *C) {
 		"outputs":  []string{},
 		"metadata": []string{},
 	}
-	test_helper_check_script_environment(c, dict["this"], dicts, "archive-release")
+	test_helper_check_script_environment(c, dict["this"], dicts, "archive-full")
+	test_helper_check_script_environment(c, dict["test-v1.0"], dicts, "test")
 }
 
-func (s *deplSuite) Test_ToScriptEnvironment_fails_if_missing_provider_state(c *C) {
+func (s *deplSuite) Test_ToScriptEnvironment_honours_variable_context(c *C) {
+	resolver := newResolverFromMap(map[string]*core.ReleaseMetadata{
+		"test-v1.0": core.NewReleaseMetadata("test", "1.0"),
+	})
 	metadata := core.NewReleaseMetadata("test", "1.0")
-	metadata.SetConsumes([]string{"test"})
-	metadataMap := map[string]*core.ReleaseMetadata{
-		"this": metadata,
+	metadata.Depends = []string{"test-v1.0"}
+	metadata.SetVariableInContext("test", "test-v1.0")
+	env, err := ToScriptEnvironment(fullDepl, metadata, "build", resolver)
+	c.Assert(err, IsNil)
+	c.Assert(script.IsDictAtom((*env)["$"]), Equals, true)
+	dict := script.ExpectDictAtom((*env)["$"])
+	dicts := map[string][]string{
+		"inputs":   []string{},
+		"outputs":  []string{},
+		"metadata": []string{},
 	}
-	_, err := ToScriptEnvironment(depl, metadataMap, "build")
+	test_helper_check_script_environment(c, dict["this"], dicts, "archive-full")
+	test_helper_check_script_environment(c, dict["test-v1.0"], dicts, "test")
+	test_helper_check_script_environment(c, dict["test"], dicts, "test")
+}
+
+func (s *deplSuite) Test_ToScriptEnvironment_ignores_missing_variables_in_variable_context(c *C) {
+	resolver := newResolverFromMap(map[string]*core.ReleaseMetadata{
+		"test-v1.0": core.NewReleaseMetadata("test", "1.0"),
+	})
+	metadata := core.NewReleaseMetadata("test", "1.0")
+	metadata.Depends = []string{"test-v1.0"}
+	metadata.SetVariableInContext("test", "doesnt-exist-1.0")
+	env, err := ToScriptEnvironment(fullDepl, metadata, "build", resolver)
+	c.Assert(err, IsNil)
+	c.Assert(script.IsDictAtom((*env)["$"]), Equals, true)
+	dict := script.ExpectDictAtom((*env)["$"])
+	c.Assert(dict["test"], IsNil)
+}
+
+func (s *deplSuite) Test_ToScriptEnvironment_doesnt_add_dependencies_that_are_not_in_metadata(c *C) {
+	resolver := newResolverFromMap(map[string]*core.ReleaseMetadata{})
+	metadata := core.NewReleaseMetadata("test", "1.0")
+	env, err := ToScriptEnvironment(fullDepl, metadata, "build", resolver)
+	c.Assert(err, IsNil)
+	c.Assert(script.IsDictAtom((*env)["$"]), Equals, true)
+	dict := script.ExpectDictAtom((*env)["$"])
+	dicts := map[string][]string{
+		"inputs":   []string{},
+		"outputs":  []string{},
+		"metadata": []string{},
+	}
+	test_helper_check_script_environment(c, dict["this"], dicts, "archive-full")
+	c.Assert(dict["test-v1.0"], IsNil)
+}
+
+func (s *deplSuite) Test_ToScriptEnvironment_fails_if_deployment_state_is_missing(c *C) {
+	metadata := core.NewReleaseMetadata("test", "1.0")
+	_, err := ToScriptEnvironment(nil, metadata, "build", nil)
 	c.Assert(err, Not(IsNil))
 }
 
-func (s *deplSuite) Test_ToScriptEnvironment_fails_if_missing_provider_metadata(c *C) {
+func (s *deplSuite) Test_ToScriptEnvironment_fails_if_dependency_metadata_is_missing(c *C) {
+	resolver := newResolverFromMap(map[string]*core.ReleaseMetadata{})
 	metadata := core.NewReleaseMetadata("test", "1.0")
-	metadata.SetConsumes([]string{"test"})
-	metadataMap := map[string]*core.ReleaseMetadata{
-		"this": metadata,
-	}
-	depl.Providers["test"] = "archive-full"
-	_, err := ToScriptEnvironment(depl, metadataMap, "build")
-	c.Assert(err, Not(IsNil))
-}
-
-func (s *deplSuite) Test_ToScriptEnvironment_fails_if_missing_provider_state_in_environment(c *C) {
-	archiveMetadata := core.NewReleaseMetadata("test", "1.0")
-	metadata := core.NewReleaseMetadata("test", "1.0")
-	metadata.SetConsumes([]string{"test"})
-	metadataMap := map[string]*core.ReleaseMetadata{
-		"this":            metadata,
-		"archive-full-v1": archiveMetadata,
-	}
-	depl.Providers["test"] = "this-doesnt-exist"
-	_, err := ToScriptEnvironment(depl, metadataMap, "build")
+	metadata.Depends = []string{"archive-dep-v1.0"}
+	_, err := ToScriptEnvironment(fullDepl, metadata, "build", resolver)
 	c.Assert(err, Not(IsNil))
 }
 
 func (s *deplSuite) Test_ToScriptEnvironment_adds_consumers(c *C) {
-	archiveMetadata := core.NewReleaseMetadata("test", "1.0")
+	resolver := newResolverFromMap(map[string]*core.ReleaseMetadata{
+		"archive-full-v1.0": core.NewReleaseMetadata("test", "1.0"),
+	})
 	metadata := core.NewReleaseMetadata("test", "1.0")
 	metadata.SetConsumes([]string{"test"})
-	metadataMap := map[string]*core.ReleaseMetadata{
-		"this":         metadata,
-		"archive-full": archiveMetadata,
-	}
 	depl.Providers["test"] = "archive-full"
-	env, err := ToScriptEnvironment(depl, metadataMap, "build")
+	env, err := ToScriptEnvironment(depl, metadata, "build", resolver)
 	c.Assert(err, IsNil)
 	c.Assert(script.IsDictAtom((*env)["$"]), Equals, true)
 	dict := script.ExpectDictAtom((*env)["$"])
@@ -148,53 +180,32 @@ func (s *deplSuite) Test_ToScriptEnvironment_adds_consumers(c *C) {
 	test_helper_check_script_environment(c, dict["test"], dicts, "archive-full")
 }
 
-func (s *deplSuite) Test_ToScriptEnvironment_fails_if_dependency_metadata_is_missing(c *C) {
+func (s *deplSuite) Test_ToScriptEnvironment_fails_if_missing_provider_state(c *C) {
+	resolver := newResolverFromMap(map[string]*core.ReleaseMetadata{})
 	metadata := core.NewReleaseMetadata("test", "1.0")
-	metadata.Depends = []string{"archive-dep-v1.0"}
-	metadataMap := map[string]*core.ReleaseMetadata{
-		"this": metadata,
-	}
-	_, err := ToScriptEnvironment(fullDepl, metadataMap, "build")
+	metadata.SetConsumes([]string{"test"})
+	_, err := ToScriptEnvironment(depl, metadata, "build", resolver)
 	c.Assert(err, Not(IsNil))
 }
 
-func (s *deplSuite) Test_ToScriptEnvironment_doesnt_add_dependencies_that_are_not_in_metadata(c *C) {
+func (s *deplSuite) Test_ToScriptEnvironment_fails_if_missing_provider_metadata(c *C) {
+	resolver := newResolverFromMap(map[string]*core.ReleaseMetadata{})
 	metadata := core.NewReleaseMetadata("test", "1.0")
-	metadataMap := map[string]*core.ReleaseMetadata{
-		"this": metadata,
-	}
-	env, err := ToScriptEnvironment(fullDepl, metadataMap, "build")
-	c.Assert(err, IsNil)
-	c.Assert(script.IsDictAtom((*env)["$"]), Equals, true)
-	dict := script.ExpectDictAtom((*env)["$"])
-	dicts := map[string][]string{
-		"inputs":   []string{},
-		"outputs":  []string{},
-		"metadata": []string{},
-	}
-	test_helper_check_script_environment(c, dict["this"], dicts, "archive-full")
-	c.Assert(dict["archive-dep-v1.0"], IsNil)
+	metadata.SetConsumes([]string{"test"})
+	depl.Providers["test"] = "archive-full"
+	_, err := ToScriptEnvironment(depl, metadata, "build", resolver)
+	c.Assert(err, Not(IsNil))
 }
 
-func (s *deplSuite) Test_ToScriptEnvironment_adds_dependencies(c *C) {
-	depMetadata := core.NewReleaseMetadata("test", "1.0")
+func (s *deplSuite) Test_ToScriptEnvironment_fails_if_missing_provider_state_in_environment(c *C) {
+	resolver := newResolverFromMap(map[string]*core.ReleaseMetadata{
+		"archive-full-v1.0": core.NewReleaseMetadata("test", "1.0"),
+	})
 	metadata := core.NewReleaseMetadata("test", "1.0")
-	metadata.Depends = []string{"archive-dep-v1.0"}
-	metadataMap := map[string]*core.ReleaseMetadata{
-		"this":        metadata,
-		"archive-dep": depMetadata,
-	}
-	env, err := ToScriptEnvironment(fullDepl, metadataMap, "build")
-	c.Assert(err, IsNil)
-	c.Assert(script.IsDictAtom((*env)["$"]), Equals, true)
-	dict := script.ExpectDictAtom((*env)["$"])
-	dicts := map[string][]string{
-		"inputs":   []string{},
-		"outputs":  []string{},
-		"metadata": []string{},
-	}
-	test_helper_check_script_environment(c, dict["this"], dicts, "archive-full")
-	test_helper_check_script_environment(c, dict["archive-dep-v1.0"], dicts, "archive-dep")
+	metadata.SetConsumes([]string{"test"})
+	depl.Providers["test"] = "this-doesnt-exist"
+	_, err := ToScriptEnvironment(depl, metadata, "build", resolver)
+	c.Assert(err, Not(IsNil))
 }
 
 func test_helper_check_script_environment(c *C, unit script.Script, dicts map[string][]string, name string) {

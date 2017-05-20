@@ -77,6 +77,14 @@ func (d *DeploymentState) GetDeployments() []*DeploymentState {
 	}
 	return result
 }
+func (d *DeploymentState) GetDeployment(deploymentName string) *DeploymentState {
+	for _, val := range d.Deployments {
+		if val.GetName() == deploymentName {
+			return val
+		}
+	}
+	return nil
+}
 
 func (d *DeploymentState) GetUserInputs(stage string) map[string]interface{} {
 	return d.getStage(stage).UserInputs

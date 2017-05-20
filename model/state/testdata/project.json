@@ -28,7 +28,7 @@
                     },
                     "stages": {
                         "deploy": {
-                            "version": "1",
+                            "version": "1.0",
                             "inputs": {
                             },
                             "calculated_inputs": {
@@ -39,6 +39,13 @@
                     },
                     "deployments": {
                         "archive-dep": {
+                            "stages": {
+                                "deploy": {
+                                    "version": "1.0"
+                                }
+                            }
+                        },
+                        "test": {
                             "stages": {
                                 "deploy": {
                                     "version": "1.0"
