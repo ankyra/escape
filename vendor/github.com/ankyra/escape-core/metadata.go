@@ -115,6 +115,16 @@ func validate(m *ReleaseMetadata) error {
 	if err := parsers.ValidateVersion(m.Version); err != nil {
 		return err
 	}
+	for _, i := range m.Inputs {
+		if err := i.Validate(); err != nil {
+			return err
+		}
+	}
+	for _, i := range m.Outputs {
+		if err := i.Validate(); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 func (m *ReleaseMetadata) GetExtends() []string {

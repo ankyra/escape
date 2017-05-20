@@ -105,7 +105,10 @@ func NewErrandFromDict(name string, dict interface{}) (*Errand, error) {
 								inputs = append(inputs, v)
 							case string:
 								stringVar := inputDict.(string)
-								v := variables.NewVariableFromString(stringVar, "string")
+								v, err := variables.NewVariableFromString(stringVar, "string")
+								if err != nil {
+									return nil, errors.New("Not a valid errand variable : " + stringVar)
+								}
 								inputs = append(inputs, v)
 							default:
 								return nil, errors.New("Expecting dict type for input item in errand " + name)

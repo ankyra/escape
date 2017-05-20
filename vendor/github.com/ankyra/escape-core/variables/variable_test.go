@@ -27,8 +27,25 @@ var _ = Suite(&variableSuite{})
 
 func Test(t *testing.T) { TestingT(t) }
 
+func (s *variableSuite) Test_GetValue_fails_with_invalid_id(c *C) {
+	tbl := []string{"_test", "123123", "//", "", "#"}
+	for _, testCase := range tbl {
+		_, err := NewVariableFromString(testCase, "string")
+		c.Assert(err, Not(IsNil))
+	}
+}
+
+func (s *variableSuite) Test_GetValue_fails_with_id_starting_with_previous(c *C) {
+	tbl := []string{"previous_test", "PREVIOUS_test", "preVIOUS_test"}
+	for _, testCase := range tbl {
+		_, err := NewVariableFromString(testCase, "string")
+		c.Assert(err, Not(IsNil))
+	}
+}
+
 func (s *variableSuite) Test_GetValue_String_Variable(c *C) {
-	unit := NewVariableFromString("test", "string")
+	unit, err := NewVariableFromString("test", "string")
+	c.Assert(err, IsNil)
 	variableCtx := map[string]interface{}{
 		"test": "test value",
 	}
@@ -38,7 +55,8 @@ func (s *variableSuite) Test_GetValue_String_Variable(c *C) {
 }
 
 func (s *variableSuite) Test_GetValue_Uses_Default(c *C) {
-	unit := NewVariableFromString("test", "string")
+	unit, err := NewVariableFromString("test", "string")
+	c.Assert(err, IsNil)
 	defaultVal := "test value"
 	unit.SetDefault(&defaultVal)
 	val, err := unit.GetValue(nil, nil)
@@ -47,7 +65,8 @@ func (s *variableSuite) Test_GetValue_Uses_Default(c *C) {
 }
 
 func (s *variableSuite) Test_GetValue_OneOf_Variable(c *C) {
-	unit := NewVariableFromString("test", "string")
+	unit, err := NewVariableFromString("test", "string")
+	c.Assert(err, IsNil)
 	unit.SetOneOfItems([]interface{}{"valid", "also valid"})
 	variableCtx := map[string]interface{}{
 		"test": "valid",
@@ -58,7 +77,8 @@ func (s *variableSuite) Test_GetValue_OneOf_Variable(c *C) {
 }
 
 func (s *variableSuite) Test_GetValue_OneOf_Variable_Fails(c *C) {
-	unit := NewVariableFromString("test", "string")
+	unit, err := NewVariableFromString("test", "string")
+	c.Assert(err, IsNil)
 	unit.SetOneOfItems([]interface{}{"valid", "also valid"})
 	variableCtx := map[string]interface{}{
 		"test": "not valid",
@@ -69,7 +89,8 @@ func (s *variableSuite) Test_GetValue_OneOf_Variable_Fails(c *C) {
 }
 
 func (s *variableSuite) Test_String_Variable_Converts_To_String_Value(c *C) {
-	unit := NewVariableFromString("test", "string")
+	unit, err := NewVariableFromString("test", "string")
+	c.Assert(err, IsNil)
 	variableCtx := map[string]interface{}{
 		"test": 12,
 	}
@@ -79,7 +100,8 @@ func (s *variableSuite) Test_String_Variable_Converts_To_String_Value(c *C) {
 }
 
 func (s *variableSuite) Test_GetValue_Integer_Variable(c *C) {
-	unit := NewVariableFromString("test", "integer")
+	unit, err := NewVariableFromString("test", "integer")
+	c.Assert(err, IsNil)
 	variableCtx := map[string]interface{}{
 		"test": 12,
 	}
@@ -89,7 +111,8 @@ func (s *variableSuite) Test_GetValue_Integer_Variable(c *C) {
 }
 
 func (s *variableSuite) Test_Integer_Variable_Expects_Integer_Value(c *C) {
-	unit := NewVariableFromString("test", "integer")
+	unit, err := NewVariableFromString("test", "integer")
+	c.Assert(err, IsNil)
 	variableCtx := map[string]interface{}{
 		"test": "test",
 	}
@@ -99,7 +122,8 @@ func (s *variableSuite) Test_Integer_Variable_Expects_Integer_Value(c *C) {
 }
 
 func (s *variableSuite) Test_Integer_Variable_Expects_Integer_Value_Or_Convertable_String(c *C) {
-	unit := NewVariableFromString("test", "integer")
+	unit, err := NewVariableFromString("test", "integer")
+	c.Assert(err, IsNil)
 	variableCtx := map[string]interface{}{
 		"test": "12",
 	}
@@ -109,7 +133,8 @@ func (s *variableSuite) Test_Integer_Variable_Expects_Integer_Value_Or_Convertab
 }
 
 func (s *variableSuite) Test_GetValue_List_Variable(c *C) {
-	unit := NewVariableFromString("test", "list")
+	unit, err := NewVariableFromString("test", "list")
+	c.Assert(err, IsNil)
 	variableCtx := map[string]interface{}{
 		"test": []interface{}{"test value", "test value 2"},
 	}
@@ -119,7 +144,8 @@ func (s *variableSuite) Test_GetValue_List_Variable(c *C) {
 }
 
 func (s *variableSuite) Test_GetValue_List_Variable_Checks_String_Values(c *C) {
-	unit := NewVariableFromString("test", "list")
+	unit, err := NewVariableFromString("test", "list")
+	c.Assert(err, IsNil)
 	variableCtx := map[string]interface{}{
 		"test": []interface{}{12},
 	}

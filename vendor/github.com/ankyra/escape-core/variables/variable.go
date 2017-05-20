@@ -24,6 +24,7 @@ import (
 	"github.com/ankyra/escape-core/script"
 	"github.com/ankyra/escape-core/variables/variable_types"
 	"gopkg.in/yaml.v2"
+	"strings"
 )
 
 type Variable struct {
@@ -46,14 +47,14 @@ func NewVariable() *Variable {
 	}
 }
 
-func NewVariableFromString(id, typ string) *Variable {
+func NewVariableFromString(id, typ string) (*Variable, error) {
 	v := NewVariable()
 	v.Id = id
 	v.Type = typ
 	if variable_types.VariableIdIsReservedType(v.Id) {
 		v.Type = v.Id
 	}
-	return v
+	return v, v.Validate()
 }
 
 func NewVariableFromDict(input UntypedVariable) (*Variable, error) {
@@ -72,12 +73,21 @@ func NewVariableFromDict(input UntypedVariable) (*Variable, error) {
 	if err = result.parseType(); err != nil {
 		return nil, err
 	}
-	return result, nil
+	return result, result.Validate()
 }
 
 func (v *Variable) Validate() error {
 	if v.Id == "" {
 		return fmt.Errorf("Variable object is missing an 'id'")
+	}
+	_, rest := parsers.ParseIdent(v.Id)
+	if strings.TrimSpace(rest) != "" {
+		return fmt.Errorf("Invalid variable format '%s'", v.Id)
+	}
+	v.Id = strings.TrimSpace(v.Id)
+	if strings.HasPrefix(strings.ToUpper(v.Id), "PREVIOUS_") {
+		return fmt.Errorf("Invalid variable format '%s'. Variable is not allowed to start with '%s'",
+			v.Id, v.Id[:len("PREVIOUS_")])
 	}
 	return nil
 }

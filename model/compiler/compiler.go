@@ -480,7 +480,10 @@ func (c *Compiler) compileTemplates(templateList []interface{}) error {
 func (c *Compiler) compileVariable(v interface{}) (result *variables.Variable, err error) {
 	switch v.(type) {
 	case string:
-		result = variables.NewVariableFromString(v.(string), "string")
+		result, err = variables.NewVariableFromString(v.(string), "string")
+		if err != nil {
+			return nil, err
+		}
 	case map[interface{}]interface{}:
 		result, err = variables.NewVariableFromDict(v.(map[interface{}]interface{}))
 		if err != nil {

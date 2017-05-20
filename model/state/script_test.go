@@ -52,7 +52,8 @@ func (s *deplSuite) SetUpTest(c *C) {
 func (s *deplSuite) Test_ToScript(c *C) {
 	metadata := core.NewReleaseMetadata("test", "1.0")
 	metadata.Metadata["value"] = "yo"
-	input := variables.NewVariableFromString("user_level", "string")
+	input, err := variables.NewVariableFromString("user_level", "string")
+	c.Assert(err, IsNil)
 	metadata.AddInputVariable(input)
 	metadata.AddOutputVariable(input)
 	unit := toScript(depl, metadata, "deploy")

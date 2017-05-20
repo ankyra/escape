@@ -51,8 +51,8 @@ func (s *metadataSuite) Test_VariableContext(c *C) {
 }
 
 func (s *metadataSuite) Test_InputVariables(c *C) {
-	v1 := variables.NewVariableFromString("input_variable1", "string")
-	v2 := variables.NewVariableFromString("input_variable2", "string")
+	v1, _ := variables.NewVariableFromString("input_variable1", "string")
+	v2, _ := variables.NewVariableFromString("input_variable2", "string")
 	m := NewReleaseMetadata("test-release", "0.1")
 	m.AddInputVariable(v1)
 	m.AddInputVariable(v2)
@@ -63,8 +63,8 @@ func (s *metadataSuite) Test_InputVariables(c *C) {
 }
 
 func (s *metadataSuite) Test_OutputVariables(c *C) {
-	v1 := variables.NewVariableFromString("output_variable1", "string")
-	v2 := variables.NewVariableFromString("output_variable2", "string")
+	v1, _ := variables.NewVariableFromString("output_variable1", "string")
+	v2, _ := variables.NewVariableFromString("output_variable2", "string")
 	m := NewReleaseMetadata("test-release", "0.1")
 	m.AddOutputVariable(v1)
 	m.AddOutputVariable(v2)
