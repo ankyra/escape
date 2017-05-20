@@ -14,13 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package state
+package types
 
-import (
-	"github.com/ankyra/escape-client/model/state/local"
-	. "github.com/ankyra/escape-client/model/state/types"
-)
-
-func NewLocalStateProvider(file string) StateProvider {
-	return local.NewLocalStateProvider(file)
+type StateProvider interface {
+	Load(project, env string) (*EnvironmentState, error)
+	Save(d *DeploymentState) error
 }

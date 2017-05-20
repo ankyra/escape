@@ -25,14 +25,16 @@ type EnvironmentState struct {
 	Inputs      map[string]interface{}      `json:"inputs"`
 	Deployments map[string]*DeploymentState `json:"deployments"`
 	ProjectName string                      `json:"-"`
+	provider    StateProvider               `json:"-"`
 }
 
-func NewEnvironmentState(prjName, envName string) *EnvironmentState {
+func NewEnvironmentState(prjName, envName string, provider StateProvider) *EnvironmentState {
 	return &EnvironmentState{
 		ProjectName: prjName,
 		Name:        envName,
 		Inputs:      map[string]interface{}{},
 		Deployments: map[string]*DeploymentState{},
+		provider:    provider,
 	}
 }
 
@@ -53,9 +55,16 @@ func (e *EnvironmentState) getInputs() map[string]interface{} {
 func (e *EnvironmentState) GetName() string {
 	return e.Name
 }
+func (e *EnvironmentState) Save(d *DeploymentState) error {
+	if e.provider == nil {
+		return fmt.Errorf("No state provider configured. This is a bug in Escape.")
+	}
+	return e.provider.Save(d)
+}
 
-func (e *EnvironmentState) ValidateAndFix(name, prjName string) error {
+func (e *EnvironmentState) ValidateAndFix(name, prjName string, provider StateProvider) error {
 	e.Name = name
+	e.provider = provider
 	e.ProjectName = prjName
 	if e.Deployments == nil {
 		e.Deployments = map[string]*DeploymentState{}

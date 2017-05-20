@@ -37,9 +37,8 @@ var fullDepl *DeploymentState
 
 func (s *deplSuite) SetUpTest(c *C) {
 	var err error
-	p, err := NewProjectStateFromFile("prj", "testdata/project.json")
+	env, err := NewLocalStateProvider("testdata/project.json").Load("prj", "dev")
 	c.Assert(err, IsNil)
-	env := p.GetEnvironmentStateOrMakeNew("dev")
 	depl, err = env.GetDeploymentState([]string{"archive-release"})
 	c.Assert(err, IsNil)
 

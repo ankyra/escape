@@ -40,7 +40,7 @@ func (l *localStateProvider) Load(project, env string) (*EnvironmentState, error
 			return nil, err
 		}
 	}
-	prj, err := NewProjectStateFromFile(project, l.saveLocation)
+	prj, err := NewProjectStateFromFile(project, l.saveLocation, l)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (l *localStateProvider) Load(project, env string) (*EnvironmentState, error
 }
 
 func (l *localStateProvider) Save(depl *DeploymentState) error {
-	return nil
+	return l.state.Save()
 }
 
 func getDefaultName() (string, error) {

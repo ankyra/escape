@@ -111,7 +111,7 @@ func (d *DeploymentState) IsDeployed(stage, version string) bool {
 }
 
 func (d *DeploymentState) Save() error {
-	return nil
+	return d.GetEnvironmentState().Save(d)
 }
 
 func (p *DeploymentState) ToJson() string {

@@ -25,14 +25,14 @@ type envSuite struct{}
 var _ = Suite(&envSuite{})
 
 func (s *envSuite) Test_Name_Field_Is_Set(c *C) {
-	p, err := NewProjectStateFromFile("prj", "testdata/project.json")
+	p, err := NewProjectStateFromFile("prj", "testdata/project.json", nil)
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("incomplete_env")
 	c.Assert(env.GetName(), Equals, "incomplete_env")
 }
 
 func (s *envSuite) Test_LookupDeploymentState(c *C) {
-	p, err := NewProjectStateFromFile("prj", "testdata/project.json")
+	p, err := NewProjectStateFromFile("prj", "testdata/project.json", nil)
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
 	depl, err := env.LookupDeploymentState("archive-release")
@@ -43,7 +43,7 @@ func (s *envSuite) Test_LookupDeploymentState(c *C) {
 }
 
 func (s *envSuite) Test_LookupDeploymentState_doesnt_exist(c *C) {
-	p, err := NewProjectStateFromFile("prj", "testdata/project.json")
+	p, err := NewProjectStateFromFile("prj", "testdata/project.json", nil)
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
 	_, err = env.LookupDeploymentState("doesnt-exist")
@@ -52,7 +52,7 @@ func (s *envSuite) Test_LookupDeploymentState_doesnt_exist(c *C) {
 }
 
 func (s *envSuite) Test_GetDeploymentState_missing_args(c *C) {
-	p, err := NewProjectStateFromFile("prj", "testdata/project.json")
+	p, err := NewProjectStateFromFile("prj", "testdata/project.json", nil)
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
 	_, err = env.GetDeploymentState([]string{})
@@ -65,7 +65,7 @@ func (s *envSuite) Test_GetDeploymentState_missing_args(c *C) {
 }
 
 func (s *envSuite) Test_GetDeploymentState_no_deps(c *C) {
-	p, err := NewProjectStateFromFile("prj", "testdata/project.json")
+	p, err := NewProjectStateFromFile("prj", "testdata/project.json", nil)
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
 	depl, err := env.GetDeploymentState([]string{"archive-release"})
@@ -76,7 +76,7 @@ func (s *envSuite) Test_GetDeploymentState_no_deps(c *C) {
 }
 
 func (s *envSuite) Test_GetDeploymentState_doesnt_exist_no_deps_returns_new(c *C) {
-	p, err := NewProjectStateFromFile("prj", "testdata/project.json")
+	p, err := NewProjectStateFromFile("prj", "testdata/project.json", nil)
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
 	depl, err := env.GetDeploymentState([]string{"doesnt-exist"})
@@ -86,7 +86,7 @@ func (s *envSuite) Test_GetDeploymentState_doesnt_exist_no_deps_returns_new(c *C
 }
 
 func (s *envSuite) Test_GetDeploymentState_with_deps(c *C) {
-	p, err := NewProjectStateFromFile("prj", "testdata/project.json")
+	p, err := NewProjectStateFromFile("prj", "testdata/project.json", nil)
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
 	depl, err := env.GetDeploymentState([]string{"archive-release-with-deps", "archive-release"})
@@ -97,7 +97,7 @@ func (s *envSuite) Test_GetDeploymentState_with_deps(c *C) {
 }
 
 func (s *envSuite) Test_GetDeploymentState_doesnt_exist_with_deps_returns_new(c *C) {
-	p, err := NewProjectStateFromFile("prj", "testdata/project.json")
+	p, err := NewProjectStateFromFile("prj", "testdata/project.json", nil)
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
 	depl, err := env.GetDeploymentState([]string{"archive-release-with-deps", "doesnt-exist"})
@@ -107,7 +107,7 @@ func (s *envSuite) Test_GetDeploymentState_doesnt_exist_with_deps_returns_new(c 
 }
 
 func (s *envSuite) Test_GetDeploymentState_doesnt_exist_with_non_existing_roots_returns_new(c *C) {
-	p, err := NewProjectStateFromFile("prj", "testdata/project.json")
+	p, err := NewProjectStateFromFile("prj", "testdata/project.json", nil)
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
 	depl, err := env.GetDeploymentState([]string{"doesnt-exist1", "doesnt-exist2"})

@@ -67,7 +67,7 @@ func Execute() {
 }
 
 func init() {
-	RootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "~/.escape_config", "Global Escape configuration file (default is $HOME/.escape-config)")
+	RootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "~/.escape_config", "Global Escape configuration file")
 	RootCmd.PersistentFlags().StringVar(&cfgProfile, "profile", "default", "Configuration profile")
 	RootCmd.PersistentFlags().StringVarP(&cfgLogLevel, "level", "l", "info", "Log level: debug, info, warn, error")
 }

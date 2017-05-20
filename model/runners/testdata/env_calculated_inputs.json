@@ -1,6 +1,5 @@
 {
    "name": "1000",
-   "inputs": {},
    "environments": {
       "dev": {
          "name": "dev",

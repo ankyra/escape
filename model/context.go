@@ -162,10 +162,9 @@ func (c *context) LoadMetadata() error {
 }
 
 func (c *context) LoadLocalState(cfgFile, environment string) error {
-	provider := state.NewLocalStateProvider(cfgFile)
-	envState, err := provider.Load("", environment)
+	envState, err := state.NewLocalStateProvider(cfgFile).Load("", environment)
 	if err != nil {
-		return errors.New(err.Error())
+		return err
 	}
 	if envState == nil {
 		return errors.New("Empty environment state")

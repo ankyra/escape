@@ -27,7 +27,8 @@ import (
 type ProjectState struct {
 	Name         string                       `json:"name"`
 	Environments map[string]*EnvironmentState `json:"environments"`
-	saveLocation string
+	saveLocation string                       `json:"-"`
+	provider     StateProvider                `json:"-"`
 }
 
 func newProjectState(prjName string) (*ProjectState, error) {
@@ -37,7 +38,7 @@ func newProjectState(prjName string) (*ProjectState, error) {
 	}, nil
 }
 
-func NewProjectStateFromJsonString(data string) (*ProjectState, error) {
+func NewProjectStateFromJsonString(data string, provider StateProvider) (*ProjectState, error) {
 	prjState, err := newProjectState("")
 	if err != nil {
 		return nil, err
@@ -48,10 +49,11 @@ func NewProjectStateFromJsonString(data string) (*ProjectState, error) {
 	if err := prjState.validateAndFix(); err != nil {
 		return nil, err
 	}
+	prjState.provider = provider
 	return prjState, nil
 }
 
-func NewProjectStateFromFile(prjName, cfgFile string) (*ProjectState, error) {
+func NewProjectStateFromFile(prjName, cfgFile string, provider StateProvider) (*ProjectState, error) {
 	if cfgFile == "" {
 		return nil, fmt.Errorf("Configuration file path is required.")
 	}
@@ -65,13 +67,14 @@ func NewProjectStateFromFile(prjName, cfgFile string) (*ProjectState, error) {
 			return nil, err
 		}
 		p.saveLocation = cfgFile
+		p.provider = provider
 		return p, p.validateAndFix()
 	}
 	data, err := ioutil.ReadFile(cfgFile)
 	if err != nil {
 		return nil, err
 	}
-	result, err := NewProjectStateFromJsonString(string(data))
+	result, err := NewProjectStateFromJsonString(string(data), provider)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +93,7 @@ func (p *ProjectState) validateAndFix() error {
 		p.Environments = map[string]*EnvironmentState{}
 	}
 	for name, env := range p.Environments {
-		if err := env.ValidateAndFix(name, p.Name); err != nil {
+		if err := env.ValidateAndFix(name, p.Name, p.provider); err != nil {
 			return err
 		}
 	}
@@ -108,9 +111,10 @@ func (p *ProjectState) SetName(name string) {
 func (p *ProjectState) GetEnvironmentStateOrMakeNew(env string) *EnvironmentState {
 	e, ok := p.Environments[env]
 	if !ok || e == nil {
-		p.Environments[env] = NewEnvironmentState(p.Name, env)
+		p.Environments[env] = NewEnvironmentState(p.Name, env, p.provider)
 		return p.Environments[env]
 	}
+	e.provider = p.provider
 	return e
 }
 
