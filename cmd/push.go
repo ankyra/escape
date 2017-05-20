@@ -28,6 +28,7 @@ var pushCmd = &cobra.Command{
 		if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
 			return err
 		}
+		context.SetRootDeploymentName(deployment)
 		return controllers.PushController{}.Push(context, uber)
 	},
 }
@@ -38,5 +39,6 @@ func init() {
 	pushCmd.Flags().StringVarP(&state, "state", "s", "escape_state.json", "Location of the Escape state file")
 	pushCmd.Flags().StringVarP(&environment, "environment", "e", "dev", "The logical environment to target")
 	pushCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location onf the Escape plan.")
+	pushCmd.Flags().StringVarP(&deployment, "deployment", "d", "", "Deployment name (default \"<release name>\")")
 	pushCmd.Flags().BoolVarP(&uber, "uber", "u", false, "Build an uber package containing all dependencies")
 }

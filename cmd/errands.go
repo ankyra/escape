@@ -41,6 +41,7 @@ var errandsListCmd = &cobra.Command{
 		if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
 			return err
 		}
+		context.SetRootDeploymentName(deployment)
 		return controllers.ErrandsController{}.List(context)
 	},
 }
@@ -58,18 +59,10 @@ var errandsRunCmd = &cobra.Command{
 			return fmt.Errorf("Expecting one errand")
 		}
 		errand := args[0]
-		err := context.LoadLocalState(state, environment)
-		if err != nil {
+		if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
 			return err
 		}
-		err = context.LoadEscapePlan(escapePlanLocation)
-		if err != nil {
-			return err
-		}
-		err = context.LoadMetadata()
-		if err != nil {
-			return err
-		}
+		context.SetRootDeploymentName(deployment)
 		return controllers.ErrandsController{}.Run(context, errand)
 	},
 }
@@ -81,9 +74,11 @@ func init() {
 
 	errandsListCmd.Flags().StringVarP(&state, "state", "s", "escape_state.json", "Location of the Escape state file")
 	errandsListCmd.Flags().StringVarP(&environment, "environment", "e", "dev", "The logical environment to target")
-	errandsListCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location onf the Escape plan.")
+	errandsListCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location of the Escape plan.")
+	errandsListCmd.Flags().StringVarP(&deployment, "deployment", "d", "", "Deployment name (default \"<release name>\")")
 
 	errandsRunCmd.Flags().StringVarP(&state, "state", "s", "escape_state.json", "Location of the Escape state file")
 	errandsRunCmd.Flags().StringVarP(&environment, "environment", "e", "dev", "The logical environment to target")
-	errandsRunCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location onf the Escape plan.")
+	errandsRunCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location of the Escape plan.")
+	errandsRunCmd.Flags().StringVarP(&deployment, "deployment", "d", "", "Deployment name (default \"<release name>\")")
 }

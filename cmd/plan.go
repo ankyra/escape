@@ -81,6 +81,7 @@ var compileCmd = &cobra.Command{
 		if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
 			return err
 		}
+		context.SetRootDeploymentName(deployment)
 		controllers.PlanController{}.Compile(context)
 		return nil
 	},
@@ -97,10 +98,11 @@ func init() {
 	initCmd.Flags().StringVarP(&outputPath, "output", "o", "escape.yml", "The output location")
 	initCmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite output file if it exists")
 
-	compileCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location onf the Escape plan.")
+	compileCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location of the Escape plan.")
 	compileCmd.Flags().StringVarP(&state, "state", "s", "escape_state.json", "Location of the Escape state file")
 	compileCmd.Flags().StringVarP(&environment, "environment", "e", "dev", "The logical environment to target")
+	compileCmd.Flags().StringVarP(&deployment, "deployment", "d", "", "Deployment name (default \"<release name>\")")
 
-	fmtCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location onf the Escape plan.")
-	minifyCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location onf the Escape plan.")
+	fmtCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location of the Escape plan.")
+	minifyCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location of the Escape plan.")
 }

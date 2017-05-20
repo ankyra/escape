@@ -28,6 +28,7 @@ var deployCmd = &cobra.Command{
 		if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
 			return err
 		}
+		context.SetRootDeploymentName(deployment)
 		return controllers.DeployController{}.Deploy(context)
 	},
 }
@@ -36,5 +37,6 @@ func init() {
 	RootCmd.AddCommand(deployCmd)
 	deployCmd.Flags().StringVarP(&state, "state", "s", "escape_state.json", "Location of the Escape state file")
 	deployCmd.Flags().StringVarP(&environment, "environment", "e", "dev", "The logical environment to target")
-	deployCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location onf the Escape plan.")
+	deployCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location of the Escape plan.")
+	deployCmd.Flags().StringVarP(&deployment, "deployment", "d", "", "Deployment name (default \"<release name>\")")
 }

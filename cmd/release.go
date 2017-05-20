@@ -30,6 +30,7 @@ var releaseCmd = &cobra.Command{
 		if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
 			return err
 		}
+		context.SetRootDeploymentName(deployment)
 		return controllers.ReleaseController{}.Release(context, uber, skipTests, skipCache, skipPush, force)
 	},
 }
@@ -45,4 +46,5 @@ func init() {
 	releaseCmd.Flags().BoolVarP(&skipCache, "skip-cache", "", false, "Skip caching the release")
 	releaseCmd.Flags().BoolVarP(&skipPush, "skip-push", "", false, "Skip push")
 	releaseCmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite output file if it exists")
+	releaseCmd.Flags().StringVarP(&deployment, "deployment", "d", "", "Deployment name (default \"<release name>\")")
 }

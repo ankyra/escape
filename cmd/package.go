@@ -30,6 +30,7 @@ var packageCmd = &cobra.Command{
 		if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
 			return err
 		}
+		context.SetRootDeploymentName(deployment)
 		return controllers.PackageController{}.Package(context, force)
 	},
 }
@@ -37,7 +38,8 @@ var packageCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(packageCmd)
 
-	packageCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location onf the Escape plan.")
+	packageCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location of the Escape plan.")
 	packageCmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite output file if it exists")
 	packageCmd.Flags().BoolVarP(&uber, "uber", "u", false, "Build an uber package containing all dependencies")
+	packageCmd.Flags().StringVarP(&deployment, "deployment", "d", "", "Deployment name (default \"<release name>\")")
 }
