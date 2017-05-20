@@ -63,7 +63,7 @@ func (s *testSuite) Test_PostDeployRunner(c *C) {
 	c.Assert(err, IsNil)
 	runCtx, err := runners.NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
-	deploymentState, err := runCtx.GetEnvironmentState().GetDeploymentState(runCtx.GetDepends())
+	deploymentState, err := runCtx.GetDeploymentStateForDepends()
 	c.Assert(err, IsNil)
 	outputs := map[string]interface{}{"output_variable": "testinput"}
 	deploymentState.UpdateOutputs("deploy", outputs)

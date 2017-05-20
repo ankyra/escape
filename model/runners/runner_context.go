@@ -28,15 +28,16 @@ import (
 )
 
 type runnerContext struct {
-	environmentState *types.EnvironmentState
-	deploymentState  *types.DeploymentState
-	releaseMetadata  *core.ReleaseMetadata
-	path             Paths
-	inputs           map[string]interface{}
-	outputs          map[string]interface{}
-	depends          []*core.ReleaseMetadata
-	logger           util.Logger
-	context          Context
+	environmentState   *types.EnvironmentState
+	deploymentState    *types.DeploymentState
+	releaseMetadata    *core.ReleaseMetadata
+	path               Paths
+	inputs             map[string]interface{}
+	outputs            map[string]interface{}
+	depends            []*core.ReleaseMetadata
+	logger             util.Logger
+	context            Context
+	rootDeploymentName string
 }
 
 func NewRunnerContext(context Context) (RunnerContext, error) {
@@ -45,12 +46,13 @@ func NewRunnerContext(context Context) (RunnerContext, error) {
 		return nil, fmt.Errorf("Missing metadata in context. This is a bug in Escape.")
 	}
 	return &runnerContext{
-		path:             paths.NewPath(),
-		environmentState: context.GetEnvironmentState(),
-		releaseMetadata:  context.GetReleaseMetadata(),
-		logger:           context.GetLogger(),
-		depends:          []*core.ReleaseMetadata{context.GetReleaseMetadata()},
-		context:          context,
+		path:               paths.NewPath(),
+		environmentState:   context.GetEnvironmentState(),
+		releaseMetadata:    context.GetReleaseMetadata(),
+		logger:             context.GetLogger(),
+		depends:            []*core.ReleaseMetadata{context.GetReleaseMetadata()},
+		context:            context,
+		rootDeploymentName: context.GetReleaseMetadata().GetVersionlessReleaseId(),
 	}, nil
 }
 
@@ -63,12 +65,15 @@ func (r *runnerContext) GetEnvironmentState() *types.EnvironmentState {
 func (r *runnerContext) GetDeploymentState() *types.DeploymentState {
 	return r.deploymentState
 }
-func (r *runnerContext) GetDepends() []string {
+func (r *runnerContext) GetRootDeploymentName() string {
+	return r.rootDeploymentName
+}
+func (r *runnerContext) GetDeploymentStateForDepends() (*types.DeploymentState, error) {
 	deps := []string{}
 	for _, d := range r.depends {
 		deps = append(deps, d.GetVersionlessReleaseId())
 	}
-	return deps
+	return r.environmentState.GetDeploymentState(deps)
 }
 func (r *runnerContext) SetDeploymentState(d *types.DeploymentState) {
 	r.deploymentState = d
@@ -126,14 +131,15 @@ func (r *runnerContext) GetScriptEnvironment(stage string) (*script.ScriptEnviro
 
 func (r *runnerContext) NewContextForDependency(metadata *core.ReleaseMetadata) RunnerContext {
 	return &runnerContext{
-		environmentState: r.environmentState,
-		deploymentState:  r.deploymentState,
-		path:             r.path.NewPathForDependency(metadata),
-		depends:          append(r.depends, metadata),
-		releaseMetadata:  metadata,
-		logger:           r.logger,
-		inputs:           r.inputs,
-		outputs:          r.outputs,
-		context:          r.context,
+		environmentState:   r.environmentState,
+		deploymentState:    r.deploymentState,
+		path:               r.path.NewPathForDependency(metadata),
+		depends:            append(r.depends, metadata),
+		releaseMetadata:    metadata,
+		logger:             r.logger,
+		inputs:             r.inputs,
+		outputs:            r.outputs,
+		context:            r.context,
+		rootDeploymentName: r.rootDeploymentName,
 	}
 }

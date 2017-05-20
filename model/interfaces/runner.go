@@ -30,16 +30,17 @@ type Runner interface {
 type RunnerContext interface {
 	GetEnvironmentState() *state.EnvironmentState
 	GetDeploymentState() *state.DeploymentState
+	GetDeploymentStateForDepends() (*state.DeploymentState, error)
 	SetDeploymentState(*state.DeploymentState)
 	GetReleaseMetadata() *core.ReleaseMetadata
 	SetReleaseMetadata(*core.ReleaseMetadata)
 	Logger() util.Logger
 	GetPath() Paths
-	GetDepends() []string
 	GetBuildInputs() map[string]interface{}
 	SetBuildInputs(map[string]interface{})
 	GetBuildOutputs() map[string]interface{}
 	SetBuildOutputs(map[string]interface{})
 	NewContextForDependency(*core.ReleaseMetadata) RunnerContext
 	GetScriptEnvironment(stage string) (*script.ScriptEnvironment, error)
+	GetRootDeploymentName() string
 }

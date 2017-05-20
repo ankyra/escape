@@ -26,7 +26,6 @@ import (
 type Context interface {
 	InitFromLocalEscapePlanAndState(string, string, string) error
 	GetDependencyMetadata(string) (*core.ReleaseMetadata, error)
-	FetchDependencyAndReadMetadata(string) (*core.ReleaseMetadata, error)
 	LoadEscapeConfig(cfgFile string, cfgProfile string) error
 	LoadEscapePlan(string) error
 	LoadMetadata() error

@@ -80,7 +80,7 @@ func (s *testSuite) Test_PreBuildRunner_sets_version(c *C) {
 	c.Assert(err, IsNil)
 	runCtx, err := runners.NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
-	deploymentState, err := runCtx.GetEnvironmentState().GetDeploymentState(runCtx.GetDepends())
+	deploymentState, err := runCtx.GetDeploymentStateForDepends()
 	c.Assert(err, IsNil)
 	deploymentState.SetVersion("build", "")
 	err = NewPreBuildRunner().Run(runCtx)

@@ -46,7 +46,7 @@ func (s *testSuite) Test_NewRunnerContext(c *C) {
 	c.Assert(runCtx.GetEnvironmentState(), Equals, ctx.GetEnvironmentState())
 	c.Assert(runCtx.GetReleaseMetadata(), Equals, ctx.GetReleaseMetadata())
 	c.Assert(runCtx.Logger(), Equals, ctx.GetLogger())
-	c.Assert(runCtx.GetDepends(), DeepEquals, []string{"name"})
+	c.Assert(runCtx.GetRootDeploymentName(), Equals, "name")
 	c.Assert(runCtx.GetDeploymentState(), IsNil)
 }
 

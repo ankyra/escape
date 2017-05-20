@@ -54,7 +54,7 @@ func (s *testSuite) Test_BuildRunner(c *C) {
 	err = NewBuildRunner().Run(runCtx)
 	c.Assert(err, IsNil)
 
-	deploymentState, err := runCtx.GetEnvironmentState().GetDeploymentState(runCtx.GetDepends())
+	deploymentState, err := runCtx.GetDeploymentStateForDepends()
 	c.Assert(err, IsNil)
 	c.Assert(deploymentState.GetVersion("build"), Equals, "0.0.1")
 }
@@ -76,7 +76,7 @@ func (s *testSuite) Test_BuildRunner_variables_are_set_even_if_there_is_no_pre_s
 	c.Assert(err, IsNil)
 	runCtx, err := runners.NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
-	deploymentState, err := runCtx.GetEnvironmentState().GetDeploymentState(runCtx.GetDepends())
+	deploymentState, err := runCtx.GetDeploymentStateForDepends()
 	c.Assert(err, IsNil)
 	deploymentState.UpdateInputs("build", nil)
 	c.Assert(deploymentState.GetCalculatedInputs("build"), HasLen, 0)
