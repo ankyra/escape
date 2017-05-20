@@ -456,6 +456,21 @@ func (c *Compiler) compileTemplates(templateList []interface{}) error {
 		if template.File == "" {
 			return fmt.Errorf("Missing 'file' field in template")
 		}
+		mapping := template.Mapping
+		for _, i := range c.metadata.GetInputs() {
+			_, exists := mapping[i.GetId()]
+			if !exists {
+				mapping[i.GetId()] = "$this.inputs." + i.GetId()
+			}
+		}
+		extraVars := []string{"branch", "description", "logo", "name",
+			"revision", "id", "version"}
+		for _, v := range extraVars {
+			_, exists := mapping[v]
+			if !exists {
+				mapping[v] = "$this." + v
+			}
+		}
 		c.addFileDigest(template.File)
 		c.metadata.Templates = append(c.metadata.Templates, template)
 	}
