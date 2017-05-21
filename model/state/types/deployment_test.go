@@ -66,18 +66,18 @@ func (s *deplSuite) Test_GetBuildInputs(c *C) {
 }
 
 func (s *deplSuite) Test_GetProviders_nil_providers(c *C) {
-	depl.Providers = nil
-	providers := depl.GetProviders()
+	depl.getStage("deploy").Providers = nil
+	providers := depl.GetProviders("deploy")
 	c.Assert(providers, HasLen, 0)
 }
 
 func (s *deplSuite) Test_GetProviders_no_providers(c *C) {
-	providers := depl.GetProviders()
+	providers := depl.GetProviders("deploy")
 	c.Assert(providers, HasLen, 0)
 }
 
 func (s *deplSuite) Test_GetProviders_includes_parent_providers(c *C) {
-	providers := deplWithDeps.GetProviders()
+	providers := deplWithDeps.GetProviders("deploy")
 	c.Assert(providers, HasLen, 3)
 	c.Assert(providers["kubernetes"], Equals, "archive-release")
 	c.Assert(providers["gcp"], Equals, "archive-release")

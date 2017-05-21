@@ -21,6 +21,8 @@
                      "calculated_outputs": {
                         "variable": "testoutput output"
                      },
+                     "deployments": {},
+                     "providers": {},
                      "version": "0.0.1",
                      "step": ""
                   },
@@ -28,13 +30,13 @@
                      "inputs": {},
                      "calculated_inputs": {},
                      "calculated_outputs": {},
+                     "deployments": {},
+                     "providers": {},
                      "version": "",
                      "step": ""
                   }
                },
-               "inputs": {},
-               "deployments": {},
-               "providers": {}
+               "inputs": {}
             }
          }
       }

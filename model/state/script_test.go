@@ -166,7 +166,7 @@ func (s *deplSuite) Test_ToScriptEnvironment_adds_consumers(c *C) {
 	})
 	metadata := core.NewReleaseMetadata("test", "1.0")
 	metadata.SetConsumes([]string{"test"})
-	depl.Providers["test"] = "archive-full"
+	depl.SetProvider("build", "test", "archive-full")
 	env, err := ToScriptEnvironment(depl, metadata, "build", resolver)
 	c.Assert(err, IsNil)
 	c.Assert(script.IsDictAtom((*env)["$"]), Equals, true)
@@ -192,7 +192,7 @@ func (s *deplSuite) Test_ToScriptEnvironment_fails_if_missing_provider_metadata(
 	resolver := newResolverFromMap(map[string]*core.ReleaseMetadata{})
 	metadata := core.NewReleaseMetadata("test", "1.0")
 	metadata.SetConsumes([]string{"test"})
-	depl.Providers["test"] = "archive-full"
+	depl.SetProvider("build", "test", "archive-full")
 	_, err := ToScriptEnvironment(depl, metadata, "build", resolver)
 	c.Assert(err, Not(IsNil))
 }
@@ -203,7 +203,7 @@ func (s *deplSuite) Test_ToScriptEnvironment_fails_if_missing_provider_state_in_
 	})
 	metadata := core.NewReleaseMetadata("test", "1.0")
 	metadata.SetConsumes([]string{"test"})
-	depl.Providers["test"] = "this-doesnt-exist"
+	depl.SetProvider("build", "test", "this-doesnt-exist")
 	_, err := ToScriptEnvironment(depl, metadata, "build", resolver)
 	c.Assert(err, Not(IsNil))
 }

@@ -106,8 +106,8 @@ func (e *EnvironmentState) getDeploymentStateForDependency(deps []string) (*Depl
 	deploymentName := deps[0]
 	result := e.getOrCreateRootDeploymentState(deploymentName)
 	for _, dep := range deps[1:] {
-		depl, ok := result.Deployments[dep]
-		if !ok {
+		depl := result.GetDeployment("deploy", dep)
+		if depl == nil {
 			result = result.NewDependencyDeploymentState(dep)
 		} else {
 			result = depl

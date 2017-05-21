@@ -13,6 +13,8 @@
                      "inputs": {},
                      "calculated_inputs": {},
                      "calculated_outputs": {},
+                     "deployments": {},
+                     "providers": {},
                      "version": "",
                      "step": ""
                   },
@@ -26,34 +28,34 @@
                      "calculated_outputs": {
                         "output_variable": "dependency output"
                      },
+                     "deployments": {
+                        "dependency": {
+                           "name": "dependency",
+                           "release": "dependency",
+                           "stages": {
+                              "deploy": {
+                                 "inputs": {},
+                                 "calculated_inputs": {
+                                    "PREVIOUS_OUTPUT_output_variable": "dependency output"
+                                 },
+                                 "calculated_outputs": {
+                                    "output_variable": "dependency output"
+                                 },
+                                 "deployments": {},
+                                 "providers": {},
+                                 "version": "0.0.1",
+                                 "step": ""
+                              }
+                           },
+                           "inputs": {}
+                        }
+                     },
+                     "providers": {},
                      "version": "0.0.1",
                      "step": ""
                   }
                },
-               "inputs": {},
-               "deployments": {
-                  "dependency": {
-                     "name": "dependency",
-                     "release": "dependency",
-                     "stages": {
-                        "deploy": {
-                           "inputs": {},
-                           "calculated_inputs": {
-                              "PREVIOUS_OUTPUT_output_variable": "dependency output"
-                           },
-                           "calculated_outputs": {
-                              "output_variable": "dependency output"
-                           },
-                           "version": "0.0.1",
-                           "step": ""
-                        }
-                     },
-                     "inputs": {},
-                     "deployments": {},
-                     "providers": {}
-                  }
-               },
-               "providers": {}
+               "inputs": {}
             }
          }
       }

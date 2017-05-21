@@ -17,22 +17,26 @@ limitations under the License.
 package types
 
 type stage struct {
-	UserInputs map[string]interface{} `json:"inputs"`
-	Inputs     map[string]interface{} `json:"calculated_inputs"`
-	Outputs    map[string]interface{} `json:"calculated_outputs"`
-	Version    string                 `json:"version"`
-	Step       string                 `json:"step"`
+	UserInputs  map[string]interface{}      `json:"inputs"`
+	Inputs      map[string]interface{}      `json:"calculated_inputs"`
+	Outputs     map[string]interface{}      `json:"calculated_outputs"`
+	Deployments map[string]*DeploymentState `json:"deployments"`
+	Providers   map[string]string           `json:"providers"`
+	Version     string                      `json:"version"`
+	Step        string                      `json:"step"`
 }
 
 func newStage() *stage {
 	return &stage{
-		UserInputs: map[string]interface{}{},
-		Inputs:     map[string]interface{}{},
-		Outputs:    map[string]interface{}{},
+		UserInputs:  map[string]interface{}{},
+		Inputs:      map[string]interface{}{},
+		Outputs:     map[string]interface{}{},
+		Providers:   map[string]string{},
+		Deployments: map[string]*DeploymentState{},
 	}
 }
 
-func (st *stage) validateAndFix() error {
+func (st *stage) validateAndFix(envState *EnvironmentState, deplState *DeploymentState) error {
 	if st.UserInputs == nil {
 		st.UserInputs = map[string]interface{}{}
 	}
@@ -41,6 +45,18 @@ func (st *stage) validateAndFix() error {
 	}
 	if st.Outputs == nil {
 		st.Outputs = map[string]interface{}{}
+	}
+	if st.Providers == nil {
+		st.Providers = map[string]string{}
+	}
+	if st.Deployments == nil {
+		st.Deployments = map[string]*DeploymentState{}
+	}
+	for name, depl := range st.Deployments {
+		depl.Name = name
+		if err := depl.validateAndFixSubDeployment(envState, deplState); err != nil {
+			return err
+		}
 	}
 	return nil
 }

@@ -67,11 +67,11 @@ func ToScript(d *DeploymentState, metadata *core.ReleaseMetadata, stage string, 
 		if err != nil {
 			return nil, err
 		}
-		depState := d.GetDeployment(depMetadata.GetVersionlessReleaseId())
+		depState := d.GetDeployment(stage, depMetadata.GetVersionlessReleaseId())
 		result[depend] = toScript(depState, depMetadata, "deploy")
 	}
 
-	providers := d.GetProviders()
+	providers := d.GetProviders(stage)
 	for _, consumes := range metadata.GetConsumes() {
 		deplName, ok := providers[consumes]
 		if !ok {

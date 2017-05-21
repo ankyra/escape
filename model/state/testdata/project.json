@@ -27,6 +27,17 @@
                         ]
                     },
                     "stages": {
+                        "build": {
+                            "deployments": {
+                                "test": {
+                                    "stages": {
+                                        "deploy": {
+                                            "version": "1.0"
+                                        }
+                                    }
+                                }
+                            }
+                        },
                         "deploy": {
                             "version": "1.0",
                             "inputs": {
@@ -34,22 +45,6 @@
                             "calculated_inputs": {
                             },
                             "calculated_outputs": {
-                            }
-                        }
-                    },
-                    "deployments": {
-                        "archive-dep": {
-                            "stages": {
-                                "deploy": {
-                                    "version": "1.0"
-                                }
-                            }
-                        },
-                        "test": {
-                            "stages": {
-                                "deploy": {
-                                    "version": "1.0"
-                                }
                             }
                         }
                     },
@@ -80,16 +75,20 @@
                     }
                 },
                 "archive-release-with-deps": {
-                    "deployments": {
-                        "archive-release": {
-                            "providers": {
-                                "kubernetes": "archive-release"
-                            },
-                            "inputs": {
-                                "input_variable": "depl_override2",
-                                "list_input": [
-                                    "depl_override2"
-                                ]
+                    "stages": {
+                        "build": {
+                            "deployments": {
+                                "archive-release": {
+                                    "providers": {
+                                        "kubernetes": "archive-release"
+                                    },
+                                    "inputs": {
+                                        "input_variable": "depl_override2",
+                                        "list_input": [
+                                            "depl_override2"
+                                        ]
+                                    }
+                                }
                             }
                         }
                     },
