@@ -58,11 +58,13 @@ func (p StateController) ShowProviders(context Context) error {
 }
 
 func (p StateController) CreateState(context Context, stage string) error {
-	deplState := context.GetEnvironmentState().GetOrCreateDeploymentState(context.GetRootDeploymentName())
-	deplState.Release = context.GetReleaseMetadata().GetVersionlessReleaseId()
+	envState := context.GetEnvironmentState()
+	metadata := context.GetReleaseMetadata()
+	deplState := envState.GetOrCreateDeploymentState(context.GetRootDeploymentName())
+	deplState.Release = metadata.GetVersionlessReleaseId()
 	inputs := deplState.GetPreStepInputs(stage)
 	changed := false
-	for _, i := range context.GetReleaseMetadata().GetInputs() {
+	for _, i := range metadata.GetInputs() {
 		val, ok := inputs[i.GetId()]
 		if !ok {
 			val = i.AskUserInput()
@@ -75,7 +77,13 @@ func (p StateController) CreateState(context Context, stage string) error {
 	if changed {
 		deplState.UpdateUserInputs(stage, inputs)
 	}
-	// TODO check and set providers
+	providers := envState.GetProviders()
+	for _, c := range metadata.GetConsumes() {
+		implementations := providers[c]
+		if len(implementations) == 1 {
+			deplState.SetProvider(stage, c, implementations[0])
+		}
+	}
 	fmt.Println(deplState.ToJson())
 	return deplState.Save()
 }
