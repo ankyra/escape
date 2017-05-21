@@ -51,67 +51,21 @@ func (s *envSuite) Test_LookupDeploymentState_doesnt_exist(c *C) {
 	c.Assert(err.Error(), Equals, "Deployment 'doesnt-exist' does not exist")
 }
 
-func (s *envSuite) Test_GetDeploymentState_missing_args(c *C) {
+func (s *envSuite) Test_GetOrCreateDeploymentState_no_deps(c *C) {
 	p, err := NewProjectStateFromFile("prj", "testdata/project.json", nil)
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
-	_, err = env.GetDeploymentState([]string{})
-	c.Assert(err, Not(IsNil))
-	c.Assert(err.Error(), Equals, "Missing name to resolve deployment state. This is a bug in Escape.")
-
-	_, err = env.GetDeploymentState(nil)
-	c.Assert(err, Not(IsNil))
-	c.Assert(err.Error(), Equals, "Missing name to resolve deployment state. This is a bug in Escape.")
-}
-
-func (s *envSuite) Test_GetDeploymentState_no_deps(c *C) {
-	p, err := NewProjectStateFromFile("prj", "testdata/project.json", nil)
-	c.Assert(err, IsNil)
-	env := p.GetEnvironmentStateOrMakeNew("dev")
-	depl, err := env.GetDeploymentState([]string{"archive-release"})
-	c.Assert(err, IsNil)
+	depl := env.GetOrCreateDeploymentState("archive-release")
 	c.Assert(depl.GetName(), Equals, "archive-release")
 	c.Assert(depl.Inputs["input_variable"], DeepEquals, "depl_override")
 	c.Assert(depl.Inputs["list_input"], DeepEquals, []interface{}{"depl_override"})
 }
 
-func (s *envSuite) Test_GetDeploymentState_doesnt_exist_no_deps_returns_new(c *C) {
+func (s *envSuite) Test_GetOrCreateDeploymentState_doesnt_exist_no_deps_returns_new(c *C) {
 	p, err := NewProjectStateFromFile("prj", "testdata/project.json", nil)
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
-	depl, err := env.GetDeploymentState([]string{"doesnt-exist"})
-	c.Assert(err, IsNil)
+	depl := env.GetOrCreateDeploymentState("doesnt-exist")
 	c.Assert(depl.GetName(), Equals, "doesnt-exist")
-	c.Assert(depl.Inputs, HasLen, 0)
-}
-
-func (s *envSuite) Test_GetDeploymentState_with_deps(c *C) {
-	p, err := NewProjectStateFromFile("prj", "testdata/project.json", nil)
-	c.Assert(err, IsNil)
-	env := p.GetEnvironmentStateOrMakeNew("dev")
-	depl, err := env.GetDeploymentState([]string{"archive-release-with-deps", "archive-release"})
-	c.Assert(err, IsNil)
-	c.Assert(depl.GetName(), Equals, "archive-release")
-	c.Assert(depl.Inputs["input_variable"], DeepEquals, "depl_override2")
-	c.Assert(depl.Inputs["list_input"], DeepEquals, []interface{}{"depl_override2"})
-}
-
-func (s *envSuite) Test_GetDeploymentState_doesnt_exist_with_deps_returns_new(c *C) {
-	p, err := NewProjectStateFromFile("prj", "testdata/project.json", nil)
-	c.Assert(err, IsNil)
-	env := p.GetEnvironmentStateOrMakeNew("dev")
-	depl, err := env.GetDeploymentState([]string{"archive-release-with-deps", "doesnt-exist"})
-	c.Assert(err, IsNil)
-	c.Assert(depl.GetName(), Equals, "doesnt-exist")
-	c.Assert(depl.Inputs, HasLen, 0)
-}
-
-func (s *envSuite) Test_GetDeploymentState_doesnt_exist_with_non_existing_roots_returns_new(c *C) {
-	p, err := NewProjectStateFromFile("prj", "testdata/project.json", nil)
-	c.Assert(err, IsNil)
-	env := p.GetEnvironmentStateOrMakeNew("dev")
-	depl, err := env.GetDeploymentState([]string{"doesnt-exist1", "doesnt-exist2"})
-	c.Assert(err, IsNil)
-	c.Assert(depl.GetName(), Equals, "doesnt-exist2")
 	c.Assert(depl.Inputs, HasLen, 0)
 }

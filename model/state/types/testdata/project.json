@@ -12,13 +12,6 @@
             },
             "deployments": {
                 "archive-full": {
-                    "inputs": {
-                        "depl_level_variable": "depl",
-                        "input_variable": "depl_override",
-                        "list_input": [
-                            "depl_override"
-                        ]
-                    },
                     "stages": {
                         "build": {
                             "deployments": {
@@ -65,6 +58,24 @@
                         "list_input": [
                             "depl_override"
                         ]
+                    }
+                },
+                "archive-release-deployed-deps": {
+                    "stages": {
+                        "build": {
+                            "inputs": {
+                                "variable": "build_variable"
+                            },
+                            "deployments": {
+                                "archive-release": {
+                                    "stages": {
+                                        "deploy": {
+
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "archive-release-with-deps": {

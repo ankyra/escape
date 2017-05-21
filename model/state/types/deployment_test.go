@@ -27,20 +27,45 @@ var _ = Suite(&deplSuite{})
 var depl *DeploymentState
 var deplWithDeps *DeploymentState
 var fullDepl *DeploymentState
+var deployedDepsDepl *DeploymentState
 
 func (s *deplSuite) SetUpTest(c *C) {
 	var err error
 	p, err := NewProjectStateFromFile("prj", "testdata/project.json", nil)
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
-	depl, err = env.GetDeploymentState([]string{"archive-release"})
-	c.Assert(err, IsNil)
+	depl = env.GetOrCreateDeploymentState("archive-release")
+	fullDepl = env.GetOrCreateDeploymentState("archive-full")
+	dep := env.GetOrCreateDeploymentState("archive-release-with-deps")
+	deplWithDeps = dep.GetDeployment("deploy", "archive-release")
 
-	deplWithDeps, err = env.GetDeploymentState([]string{"archive-release-with-deps", "archive-release"})
-	c.Assert(err, IsNil)
+	dep = env.GetOrCreateDeploymentState("archive-release-deployed-deps")
+	deployedDepsDepl = dep.GetDeployment("build", "archive-release")
+}
 
-	fullDepl, err = env.GetDeploymentState([]string{"archive-full"})
-	c.Assert(err, IsNil)
+func (s *deplSuite) Test_GetDeployment(c *C) {
+	depDepl := deployedDepsDepl
+	c.Assert(depDepl.GetName(), Equals, "archive-release")
+	c.Assert(depDepl.parentStage.Name, Equals, "build")
+
+	depDepl2 := depDepl.GetDeployment("deploy", "deploy-dep-name")
+	c.Assert(depDepl2.GetName(), Equals, "deploy-dep-name")
+	c.Assert(depDepl2.parentStage.Name, Equals, "deploy")
+
+	depDepl3 := depDepl2.GetDeployment("deploy", "deploy-dep-name")
+	c.Assert(depDepl3.GetName(), Equals, "deploy-dep-name")
+	c.Assert(depDepl3.parentStage.Name, Equals, "deploy")
+}
+
+func (s *deplSuite) Test_GetPreStepInputs_for_dependency_uses_parent_build_stage(c *C) {
+	inputs := deployedDepsDepl.GetPreStepInputs("deploy")
+	c.Assert(inputs["variable"], Equals, "build_variable")
+}
+
+func (s *deplSuite) Test_GetPreStepInputs_for_nested_dependency_uses_parent_build_stage(c *C) {
+	nestedDepl := deployedDepsDepl.GetDeployment("deploy", "nested1").GetDeployment("deploy", "nested2")
+	inputs := nestedDepl.GetPreStepInputs("deploy")
+	c.Assert(inputs["variable"], Equals, "build_variable")
 }
 
 func (s *deplSuite) Test_GetEnvironmentState(c *C) {

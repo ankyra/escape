@@ -28,7 +28,7 @@ func (SmokeController) Smoke(context Context) error {
 	context.PushLogRelease(context.GetReleaseMetadata().GetReleaseId())
 	context.PushLogSection("Smoke tests")
 	context.Log("smoke.start", nil)
-	runnerContext, err := runners.NewRunnerContext(context)
+	runnerContext, err := runners.NewRunnerContext(context, "build")
 	if err != nil {
 		return err
 	}

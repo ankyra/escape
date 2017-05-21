@@ -28,16 +28,20 @@ func (DestroyController) Destroy(context Context, destroyBuild, destroyDeploymen
 	context.PushLogRelease(context.GetReleaseMetadata().GetReleaseId())
 	context.PushLogSection("Destroy")
 	context.Log("destroy.start", nil)
-	runnerContext, err := runners.NewRunnerContext(context)
-	if err != nil {
-		return err
-	}
 	if destroyBuild {
+		runnerContext, err := runners.NewRunnerContext(context, "build")
+		if err != nil {
+			return err
+		}
 		if err := destroy.NewDestroyRunner("build").Run(runnerContext); err != nil {
 			return err
 		}
 	}
 	if destroyDeployment {
+		runnerContext, err := runners.NewRunnerContext(context, "deploy")
+		if err != nil {
+			return err
+		}
 		if err := destroy.NewDestroyRunner("deploy").Run(runnerContext); err != nil {
 			return err
 		}

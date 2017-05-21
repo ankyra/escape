@@ -24,27 +24,21 @@ import (
 type DeploymentState struct {
 	Name        string                 `json:"name"`
 	Release     string                 `json:"release"`
-	Stages      map[string]*stage      `json:"stages"`
+	Stages      map[string]*StageState `json:"stages"`
 	Inputs      map[string]interface{} `json:"inputs"`
 	environment *EnvironmentState      `json:"-"`
 	parent      *DeploymentState       `json:"-"`
+	parentStage *StageState            `json:"-"`
 }
 
 func NewDeploymentState(env *EnvironmentState, name, release string) *DeploymentState {
 	return &DeploymentState{
 		Name:        name,
 		Release:     release,
-		Stages:      map[string]*stage{},
+		Stages:      map[string]*StageState{},
 		Inputs:      map[string]interface{}{},
 		environment: env,
 	}
-}
-func (d *DeploymentState) NewDependencyDeploymentState(dep string) *DeploymentState {
-	depl := NewDeploymentState(d.environment, dep, dep)
-	depl.parent = d
-	st := d.getStage("deploy")
-	st.Deployments[dep] = depl
-	return depl
 }
 
 func (d *DeploymentState) GetName() string {
@@ -68,12 +62,18 @@ func (d *DeploymentState) GetEnvironmentState() *EnvironmentState {
 }
 
 func (d *DeploymentState) GetDeployment(stage, deploymentName string) *DeploymentState {
-	for _, val := range d.getStage(stage).Deployments {
+	st := d.getStage(stage)
+	for _, val := range st.Deployments {
 		if val.GetName() == deploymentName {
+			val.parentStage = st
 			return val
 		}
 	}
-	return nil
+	newDepl := NewDeploymentState(d.environment, deploymentName, deploymentName)
+	newDepl.parent = d
+	newDepl.parentStage = st
+	st.Deployments[deploymentName] = newDepl
+	return newDepl
 }
 
 func (d *DeploymentState) GetUserInputs(stage string) map[string]interface{} {
@@ -150,12 +150,19 @@ func (d *DeploymentState) GetPreStepInputs(stage string) map[string]interface{} 
 	for key, val := range d.environment.getInputs() {
 		result[key] = val
 	}
+	// deps = { this, dep1, dep2, ...., root }
 	deps := []*DeploymentState{d}
+	stages := []*StageState{d.getStage(stage)}
+	prev := d
 	p := d.parent
 	for p != nil {
 		deps = append(deps, p)
+		stages = append(stages, prev.parentStage)
+		fmt.Println(stages)
+		prev = p
 		p = p.parent
 	}
+	// add dep inputs in reverse
 	for i := len(deps) - 1; i >= 0; i-- {
 		p = deps[i]
 		if p.Inputs != nil {
@@ -163,13 +170,12 @@ func (d *DeploymentState) GetPreStepInputs(stage string) map[string]interface{} 
 				result[key] = val
 			}
 		}
-		st := p.getStage(stage)
+		st := p.getStage(stages[i].Name)
 		if st.UserInputs != nil {
 			for key, val := range st.UserInputs {
 				result[key] = val
 			}
 		}
-		p = p.parent
 	}
 	return result
 }
@@ -187,25 +193,26 @@ func (d *DeploymentState) validateAndFix(name string, env *EnvironmentState) err
 		d.Inputs = map[string]interface{}{}
 	}
 	if d.Stages == nil {
-		d.Stages = map[string]*stage{}
+		d.Stages = map[string]*StageState{}
 	}
-	for _, st := range d.Stages {
-		st.validateAndFix(env, d)
+	for name, st := range d.Stages {
+		st.validateAndFix(name, env, d)
 	}
 	return nil
 }
 
-func (d *DeploymentState) validateAndFixSubDeployment(env *EnvironmentState, parent *DeploymentState) error {
+func (d *DeploymentState) validateAndFixSubDeployment(stage *StageState, env *EnvironmentState, parent *DeploymentState) error {
 	d.parent = parent
+	d.parentStage = stage
 	return d.validateAndFix(d.Name, env)
 }
 
-func (d *DeploymentState) getStage(stage string) *stage {
+func (d *DeploymentState) getStage(stage string) *StageState {
 	st, ok := d.Stages[stage]
 	if !ok || st == nil {
 		st = newStage()
 		d.Stages[stage] = st
 	}
-	st.validateAndFix(d.environment, d)
+	st.validateAndFix(stage, d.environment, d)
 	return st
 }

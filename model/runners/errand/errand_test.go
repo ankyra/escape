@@ -35,7 +35,7 @@ func (s *testSuite) Test_ErrandRunner_no_script_defined(c *C) {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/errand_state.json", "dev", "testdata/errand_plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx)
+	runCtx, err := runners.NewRunnerContext(ctx, "deploy")
 	c.Assert(err, IsNil)
 	errand := ctx.GetReleaseMetadata().GetErrands()["my-errand"]
 	errand.SetScript("")
@@ -47,7 +47,7 @@ func (s *testSuite) Test_ErrandRunner_missing_test_file(c *C) {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/errand_state.json", "dev", "testdata/errand_plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx)
+	runCtx, err := runners.NewRunnerContext(ctx, "deploy")
 	c.Assert(err, IsNil)
 	errand := ctx.GetReleaseMetadata().GetErrands()["my-errand"]
 	errand.SetScript("testdata/doesnt_exist.sh")
@@ -60,7 +60,7 @@ func (s *testSuite) Test_ErrandRunner_missing_deployment_state(c *C) {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/escape_state", "dev", "testdata/errand_plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx)
+	runCtx, err := runners.NewRunnerContext(ctx, "deploy")
 	c.Assert(err, IsNil)
 	errand := ctx.GetReleaseMetadata().GetErrands()["my-errand"]
 	err = NewErrandRunner(errand).Run(runCtx)
@@ -72,7 +72,7 @@ func (s *testSuite) Test_ErrandRunner(c *C) {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/errand_state.json", "dev", "testdata/errand_plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx)
+	runCtx, err := runners.NewRunnerContext(ctx, "deploy")
 	c.Assert(err, IsNil)
 	errand := ctx.GetReleaseMetadata().GetErrands()["my-errand"]
 	err = NewErrandRunner(errand).Run(runCtx)
@@ -83,7 +83,7 @@ func (s *testSuite) Test_ErrandRunner_failing_script(c *C) {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/errand_state.json", "dev", "testdata/errand_plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx)
+	runCtx, err := runners.NewRunnerContext(ctx, "deploy")
 	c.Assert(err, IsNil)
 	errand := ctx.GetReleaseMetadata().GetErrands()["my-errand"]
 	errand.SetScript("testdata/failing_test.sh")

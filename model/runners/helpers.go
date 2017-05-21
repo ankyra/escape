@@ -159,10 +159,7 @@ func (b *ScriptStep) initScript(ctx RunnerContext) (string, error) {
 }
 
 func (b *ScriptStep) initDeploymentState(ctx RunnerContext) (*state.DeploymentState, error) {
-	deploymentState, err := ctx.GetDeploymentStateForDepends()
-	if err != nil {
-		return nil, err
-	}
+	deploymentState := ctx.GetDeploymentState()
 	version := ctx.GetReleaseMetadata().GetVersion()
 	if b.ShouldBeDeployed && !deploymentState.IsDeployed(b.Stage, version) {
 		stageName := "Build"

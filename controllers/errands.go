@@ -51,7 +51,7 @@ func (ErrandsController) Run(context Context, errandStr string) error {
 		return fmt.Errorf("The errand '%s' does not exist", errandStr)
 	}
 	runner := errand.NewErrandRunner(errandObj)
-	runnerContext, err := runners.NewRunnerContext(context)
+	runnerContext, err := runners.NewRunnerContext(context, "deploy")
 	if err != nil {
 		return err
 	}

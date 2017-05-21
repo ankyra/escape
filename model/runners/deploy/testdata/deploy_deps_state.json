@@ -9,6 +9,15 @@
                "name": "name",
                "release": "name",
                "stages": {
+                  "": {
+                     "inputs": {},
+                     "calculated_inputs": {},
+                     "calculated_outputs": {},
+                     "deployments": {},
+                     "providers": {},
+                     "version": "",
+                     "step": ""
+                  },
                   "build": {
                      "inputs": {},
                      "calculated_inputs": {},
@@ -33,6 +42,15 @@
                            "name": "dependency",
                            "release": "dependency",
                            "stages": {
+                              "": {
+                                 "inputs": {},
+                                 "calculated_inputs": {},
+                                 "calculated_outputs": {},
+                                 "deployments": {},
+                                 "providers": {},
+                                 "version": "",
+                                 "step": ""
+                              },
                               "deploy": {
                                  "inputs": {},
                                  "calculated_inputs": {

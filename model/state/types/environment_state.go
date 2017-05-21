@@ -91,32 +91,7 @@ func (e *EnvironmentState) LookupDeploymentState(deploymentName string) (*Deploy
 	return val, nil
 }
 
-func (e *EnvironmentState) GetDeploymentState(deps []string) (*DeploymentState, error) {
-	if deps == nil || len(deps) == 0 {
-		return nil, fmt.Errorf("Missing name to resolve deployment state. This is a bug in Escape.")
-	}
-	if len(deps) == 1 {
-		return e.getOrCreateRootDeploymentState(deps[0]), nil
-	} else {
-		return e.getDeploymentStateForDependency(deps)
-	}
-}
-
-func (e *EnvironmentState) getDeploymentStateForDependency(deps []string) (*DeploymentState, error) {
-	deploymentName := deps[0]
-	result := e.getOrCreateRootDeploymentState(deploymentName)
-	for _, dep := range deps[1:] {
-		depl := result.GetDeployment("deploy", dep)
-		if depl == nil {
-			result = result.NewDependencyDeploymentState(dep)
-		} else {
-			result = depl
-		}
-	}
-	return result, nil
-}
-
-func (e *EnvironmentState) getOrCreateRootDeploymentState(deploymentName string) *DeploymentState {
+func (e *EnvironmentState) GetOrCreateDeploymentState(deploymentName string) *DeploymentState {
 	depl, ok := e.Deployments[deploymentName]
 	if !ok {
 		depl = NewDeploymentState(e, deploymentName, deploymentName)

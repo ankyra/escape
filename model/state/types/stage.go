@@ -16,7 +16,7 @@ limitations under the License.
 
 package types
 
-type stage struct {
+type StageState struct {
 	UserInputs  map[string]interface{}      `json:"inputs"`
 	Inputs      map[string]interface{}      `json:"calculated_inputs"`
 	Outputs     map[string]interface{}      `json:"calculated_outputs"`
@@ -24,10 +24,11 @@ type stage struct {
 	Providers   map[string]string           `json:"providers"`
 	Version     string                      `json:"version"`
 	Step        string                      `json:"step"`
+	Name        string                      `json:"-"`
 }
 
-func newStage() *stage {
-	return &stage{
+func newStage() *StageState {
+	return &StageState{
 		UserInputs:  map[string]interface{}{},
 		Inputs:      map[string]interface{}{},
 		Outputs:     map[string]interface{}{},
@@ -36,7 +37,8 @@ func newStage() *stage {
 	}
 }
 
-func (st *stage) validateAndFix(envState *EnvironmentState, deplState *DeploymentState) error {
+func (st *StageState) validateAndFix(name string, envState *EnvironmentState, deplState *DeploymentState) error {
+	st.Name = name
 	if st.UserInputs == nil {
 		st.UserInputs = map[string]interface{}{}
 	}
@@ -54,34 +56,34 @@ func (st *stage) validateAndFix(envState *EnvironmentState, deplState *Deploymen
 	}
 	for name, depl := range st.Deployments {
 		depl.Name = name
-		if err := depl.validateAndFixSubDeployment(envState, deplState); err != nil {
+		if err := depl.validateAndFixSubDeployment(st, envState, deplState); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (st *stage) setVersion(v string) *stage {
+func (st *StageState) setVersion(v string) *StageState {
 	st.Version = v
 	return st
 }
 
-func (st *stage) setInputs(v map[string]interface{}) *stage {
+func (st *StageState) setInputs(v map[string]interface{}) *StageState {
 	st.Inputs = st.initIfNil(v)
 	return st
 }
 
-func (st *stage) setUserInputs(v map[string]interface{}) *stage {
+func (st *StageState) setUserInputs(v map[string]interface{}) *StageState {
 	st.UserInputs = st.initIfNil(v)
 	return st
 }
 
-func (st *stage) setOutputs(v map[string]interface{}) *stage {
+func (st *StageState) setOutputs(v map[string]interface{}) *StageState {
 	st.Outputs = st.initIfNil(v)
 	return st
 }
 
-func (st *stage) initIfNil(v map[string]interface{}) map[string]interface{} {
+func (st *StageState) initIfNil(v map[string]interface{}) map[string]interface{} {
 	if v == nil {
 		v = map[string]interface{}{}
 	}

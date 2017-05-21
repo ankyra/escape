@@ -30,7 +30,6 @@ type Runner interface {
 type RunnerContext interface {
 	GetEnvironmentState() *state.EnvironmentState
 	GetDeploymentState() *state.DeploymentState
-	GetDeploymentStateForDepends() (*state.DeploymentState, error)
 	SetDeploymentState(*state.DeploymentState)
 	GetReleaseMetadata() *core.ReleaseMetadata
 	SetReleaseMetadata(*core.ReleaseMetadata)

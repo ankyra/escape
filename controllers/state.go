@@ -48,28 +48,30 @@ func (p StateController) ShowDeployment(context Context, dep string) error {
 }
 
 func (p StateController) CreateDeployment(context Context) error {
+	return nil
+	/*
 
-	str := []string{context.GetReleaseMetadata().GetVersionlessReleaseId()}
-	deplState, err := context.GetEnvironmentState().GetDeploymentState(str)
-	if err != nil {
-		return err
-	}
-	inputs := deplState.GetPreStepInputs("deploy")
-	changed := false
-	for _, i := range context.GetReleaseMetadata().GetInputs() {
-		val, ok := inputs[i.GetId()]
-		if !ok {
-			val = i.AskUserInput()
-			if val != nil {
-				changed = true
-				inputs[i.GetId()] = val
+		str := []string{context.GetReleaseMetadata().GetVersionlessReleaseId()}
+		deplState, err := context.GetEnvironmentState().GetDeploymentState(str)
+		if err != nil {
+			return err
+		}
+		inputs := deplState.GetPreStepInputs("deploy")
+		changed := false
+		for _, i := range context.GetReleaseMetadata().GetInputs() {
+			val, ok := inputs[i.GetId()]
+			if !ok {
+				val = i.AskUserInput()
+				if val != nil {
+					changed = true
+					inputs[i.GetId()] = val
+				}
 			}
 		}
-	}
-	if changed {
-		deplState.UpdateUserInputs("deploy", inputs)
-	}
-	// TODO check and set providers
-	fmt.Println(deplState.ToJson())
-	return deplState.Save()
+		if changed {
+			deplState.UpdateUserInputs("deploy", inputs)
+		}
+		// TODO check and set providers
+		fmt.Println(deplState.ToJson())
+		return deplState.Save()*/
 }

@@ -37,20 +37,24 @@ type runnerContext struct {
 	depends          []*core.ReleaseMetadata
 	logger           util.Logger
 	context          Context
+	stage            string
 }
 
-func NewRunnerContext(context Context) (RunnerContext, error) {
+func NewRunnerContext(context Context, rootStage string) (RunnerContext, error) {
 	metadata := context.GetReleaseMetadata()
 	if metadata == nil {
 		return nil, fmt.Errorf("Missing metadata in context. This is a bug in Escape.")
 	}
+	deplState := context.GetEnvironmentState().GetOrCreateDeploymentState(context.GetRootDeploymentName())
 	return &runnerContext{
 		path:             paths.NewPath(),
 		environmentState: context.GetEnvironmentState(),
+		deploymentState:  deplState,
 		releaseMetadata:  context.GetReleaseMetadata(),
 		logger:           context.GetLogger(),
 		depends:          []*core.ReleaseMetadata{context.GetReleaseMetadata()},
 		context:          context,
+		stage:            rootStage,
 	}, nil
 }
 
@@ -68,14 +72,6 @@ func (r *runnerContext) GetDeploymentState() *types.DeploymentState {
 
 func (r *runnerContext) GetRootDeploymentName() string {
 	return r.context.GetRootDeploymentName()
-}
-
-func (r *runnerContext) GetDeploymentStateForDepends() (*types.DeploymentState, error) {
-	deps := []string{r.GetRootDeploymentName()}
-	for _, d := range r.depends[1:] {
-		deps = append(deps, d.GetVersionlessReleaseId())
-	}
-	return r.environmentState.GetDeploymentState(deps)
 }
 
 func (r *runnerContext) SetDeploymentState(d *types.DeploymentState) {
@@ -117,7 +113,7 @@ func (r *runnerContext) GetScriptEnvironment(stage string) (*script.ScriptEnviro
 func (r *runnerContext) NewContextForDependency(metadata *core.ReleaseMetadata) RunnerContext {
 	return &runnerContext{
 		environmentState: r.environmentState,
-		deploymentState:  r.deploymentState,
+		deploymentState:  r.deploymentState.GetDeployment(r.stage, metadata.GetVersionlessReleaseId()),
 		path:             r.path.NewPathForDependency(metadata),
 		depends:          append(r.depends, metadata),
 		releaseMetadata:  metadata,
@@ -125,5 +121,6 @@ func (r *runnerContext) NewContextForDependency(metadata *core.ReleaseMetadata) 
 		inputs:           r.inputs,
 		outputs:          r.outputs,
 		context:          r.context,
+		stage:            "deploy",
 	}
 }

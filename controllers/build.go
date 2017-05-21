@@ -28,7 +28,7 @@ func (BuildController) Build(context Context, buildFatPackage bool) error {
 	context.PushLogRelease(context.GetReleaseMetadata().GetReleaseId())
 	context.PushLogSection("Build")
 	context.Log("build.start", nil)
-	runnerContext, err := runners.NewRunnerContext(context)
+	runnerContext, err := runners.NewRunnerContext(context, "build")
 	if err != nil {
 		return err
 	}

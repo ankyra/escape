@@ -39,14 +39,10 @@ func (s *deplSuite) SetUpTest(c *C) {
 	var err error
 	env, err := NewLocalStateProvider("testdata/project.json").Load("prj", "dev")
 	c.Assert(err, IsNil)
-	depl, err = env.GetDeploymentState([]string{"archive-release"})
-	c.Assert(err, IsNil)
-
-	deplWithDeps, err = env.GetDeploymentState([]string{"archive-release-with-deps", "archive-release"})
-	c.Assert(err, IsNil)
-
-	fullDepl, err = env.GetDeploymentState([]string{"archive-full"})
-	c.Assert(err, IsNil)
+	depl = env.GetOrCreateDeploymentState("archive-release")
+	fullDepl = env.GetOrCreateDeploymentState("archive-full")
+	dep := env.GetOrCreateDeploymentState("archive-release-with-deps")
+	deplWithDeps = dep.GetDeployment("deploy", "archive-release")
 }
 
 func (s *deplSuite) Test_ToScript(c *C) {

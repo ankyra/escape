@@ -28,7 +28,7 @@ func (d DeployController) Deploy(context Context) error {
 	context.PushLogRelease(context.GetReleaseMetadata().GetReleaseId())
 	context.PushLogSection("Deploy")
 	context.Log("deploy.start", nil)
-	runnerContext, err := runners.NewRunnerContext(context)
+	runnerContext, err := runners.NewRunnerContext(context, "deploy")
 	if err != nil {
 		return err
 	}

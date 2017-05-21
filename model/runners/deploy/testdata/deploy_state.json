@@ -9,6 +9,15 @@
                "name": "name",
                "release": "name",
                "stages": {
+                  "": {
+                     "inputs": {},
+                     "calculated_inputs": {},
+                     "calculated_outputs": {},
+                     "deployments": {},
+                     "providers": {},
+                     "version": "",
+                     "step": ""
+                  },
                   "build": {
                      "inputs": {},
                      "calculated_inputs": {},

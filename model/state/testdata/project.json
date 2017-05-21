@@ -47,9 +47,6 @@
                             "calculated_outputs": {
                             }
                         }
-                    },
-                    "providers": {
-                        "gcp": "archive-release"
                     }
                 },
                 "archive-release": {

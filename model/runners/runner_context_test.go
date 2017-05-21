@@ -31,7 +31,7 @@ var _ = Suite(&testSuite{})
 
 func (s *testSuite) Test_NewRunnerContext_fails_if_metadata_is_missing(c *C) {
 	ctx := model.NewContext()
-	_, err := NewRunnerContext(ctx)
+	_, err := NewRunnerContext(ctx, "deploy")
 	c.Assert(err, Not(IsNil))
 	c.Assert(err.Error(), Equals, "Missing metadata in context. This is a bug in Escape.")
 }
@@ -41,25 +41,13 @@ func (s *testSuite) Test_NewRunnerContext(c *C) {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/escape_state", "dev", "testdata/plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx)
+	runCtx, err := NewRunnerContext(ctx, "deploy")
 	c.Assert(runCtx, Not(IsNil))
 	c.Assert(runCtx.GetEnvironmentState(), Equals, ctx.GetEnvironmentState())
 	c.Assert(runCtx.GetReleaseMetadata(), Equals, ctx.GetReleaseMetadata())
 	c.Assert(runCtx.Logger(), Equals, ctx.GetLogger())
 	c.Assert(runCtx.GetRootDeploymentName(), Equals, "name")
-	c.Assert(runCtx.GetDeploymentState(), IsNil)
-}
-
-func (s *testSuite) Test_GetScriptEnvironment_fails_if_deployment_state_is_missing(c *C) {
-	os.RemoveAll("testdata/escape_state")
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/escape_state", "dev", "testdata/plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx)
-	c.Assert(runCtx, Not(IsNil))
-	_, err = runCtx.GetScriptEnvironment("deploy")
-	c.Assert(err, Not(IsNil))
-	c.Assert(err.Error(), Equals, "Missing deployment state. This is a bug in Escape.")
+	c.Assert(runCtx.GetDeploymentState().GetName(), Equals, "name")
 }
 
 func (s *testSuite) Test_GetScriptEnvironment_no_depends(c *C) {
@@ -67,11 +55,8 @@ func (s *testSuite) Test_GetScriptEnvironment_no_depends(c *C) {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/escape_state", "dev", "testdata/plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx)
+	runCtx, err := NewRunnerContext(ctx, "deploy")
 	c.Assert(runCtx, Not(IsNil))
-	depl, err := ctx.GetEnvironmentState().GetDeploymentState([]string{"name"})
-	c.Assert(err, IsNil)
-	runCtx.SetDeploymentState(depl)
 	scriptEnv, err := runCtx.GetScriptEnvironment("deploy")
 	c.Assert(err, IsNil)
 	c.Assert(scriptEnv, Not(IsNil))
