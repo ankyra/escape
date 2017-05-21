@@ -62,8 +62,12 @@ var errandsRunCmd = &cobra.Command{
 		if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
 			return err
 		}
+		parsedExtraVars, err := ParseExtraVars(extraVars)
+		if err != nil {
+			return err
+		}
 		context.SetRootDeploymentName(deployment)
-		return controllers.ErrandsController{}.Run(context, errand)
+		return controllers.ErrandsController{}.Run(context, errand, parsedExtraVars)
 	},
 }
 
@@ -72,5 +76,7 @@ func init() {
 	errandsCmd.AddCommand(errandsListCmd)
 	errandsCmd.AddCommand(errandsRunCmd)
 	setLocalPlanAndStateFlags(errandsListCmd)
+
 	setLocalPlanAndStateFlags(errandsRunCmd)
+	errandsRunCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
 }

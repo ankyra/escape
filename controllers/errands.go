@@ -40,7 +40,7 @@ func (ErrandsController) List(context Context) error {
 	return nil
 }
 
-func (ErrandsController) Run(context Context, errandStr string) error {
+func (ErrandsController) Run(context Context, errandStr string, extraVars map[string]string) error {
 	//        applog("errand.start", errand=errand, release=escape_plan.get_versionless_build_id())
 	metadata := context.GetReleaseMetadata()
 	if metadata.GetErrands() == nil {
@@ -50,7 +50,7 @@ func (ErrandsController) Run(context Context, errandStr string) error {
 	if !ok {
 		return fmt.Errorf("The errand '%s' does not exist", errandStr)
 	}
-	runner := errand.NewErrandRunner(errandObj)
+	runner := errand.NewErrandRunner(errandObj, extraVars)
 	runnerContext, err := runners.NewRunnerContext(context, "deploy")
 	if err != nil {
 		return err

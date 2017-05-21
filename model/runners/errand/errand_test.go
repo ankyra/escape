@@ -39,7 +39,7 @@ func (s *testSuite) Test_ErrandRunner_no_script_defined(c *C) {
 	c.Assert(err, IsNil)
 	errand := ctx.GetReleaseMetadata().GetErrands()["my-errand"]
 	errand.SetScript("")
-	err = NewErrandRunner(errand).Run(runCtx)
+	err = NewErrandRunner(errand, nil).Run(runCtx)
 	c.Assert(err, IsNil)
 }
 
@@ -51,7 +51,7 @@ func (s *testSuite) Test_ErrandRunner_missing_test_file(c *C) {
 	c.Assert(err, IsNil)
 	errand := ctx.GetReleaseMetadata().GetErrands()["my-errand"]
 	errand.SetScript("testdata/doesnt_exist.sh")
-	err = NewErrandRunner(errand).Run(runCtx)
+	err = NewErrandRunner(errand, nil).Run(runCtx)
 	c.Assert(err, Not(IsNil))
 }
 
@@ -63,7 +63,7 @@ func (s *testSuite) Test_ErrandRunner_missing_deployment_state(c *C) {
 	runCtx, err := runners.NewRunnerContext(ctx, "deploy")
 	c.Assert(err, IsNil)
 	errand := ctx.GetReleaseMetadata().GetErrands()["my-errand"]
-	err = NewErrandRunner(errand).Run(runCtx)
+	err = NewErrandRunner(errand, nil).Run(runCtx)
 	c.Assert(err, Not(IsNil))
 	c.Assert(err.Error(), Equals, "Deployment state 'name' for release 'name-v0.0.1' could not be found")
 }
@@ -75,7 +75,7 @@ func (s *testSuite) Test_ErrandRunner(c *C) {
 	runCtx, err := runners.NewRunnerContext(ctx, "deploy")
 	c.Assert(err, IsNil)
 	errand := ctx.GetReleaseMetadata().GetErrands()["my-errand"]
-	err = NewErrandRunner(errand).Run(runCtx)
+	err = NewErrandRunner(errand, nil).Run(runCtx)
 	c.Assert(err, IsNil)
 }
 
@@ -87,6 +87,6 @@ func (s *testSuite) Test_ErrandRunner_failing_script(c *C) {
 	c.Assert(err, IsNil)
 	errand := ctx.GetReleaseMetadata().GetErrands()["my-errand"]
 	errand.SetScript("testdata/failing_test.sh")
-	err = NewErrandRunner(errand).Run(runCtx)
+	err = NewErrandRunner(errand, nil).Run(runCtx)
 	c.Assert(err, Not(IsNil))
 }
