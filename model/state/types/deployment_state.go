@@ -45,12 +45,8 @@ func (d *DeploymentState) GetName() string {
 	return d.Name
 }
 
-func (d *DeploymentState) GetRelease() string {
-	return d.Release
-}
-
 func (d *DeploymentState) GetReleaseId(stage string) string {
-	return d.GetRelease() + "-v" + d.GetVersion(stage)
+	return d.Release + "-v" + d.GetVersion(stage)
 }
 
 func (d *DeploymentState) GetVersion(stage string) string {
@@ -63,17 +59,14 @@ func (d *DeploymentState) GetEnvironmentState() *EnvironmentState {
 
 func (d *DeploymentState) GetDeployment(stage, deploymentName string) *DeploymentState {
 	st := d.getStage(stage)
-	for _, val := range st.Deployments {
-		if val.GetName() == deploymentName {
-			val.parentStage = st
-			return val
-		}
+	depl, ok := st.Deployments[deploymentName]
+	if !ok {
+		depl = NewDeploymentState(d.environment, deploymentName, deploymentName)
+		depl.parent = d
 	}
-	newDepl := NewDeploymentState(d.environment, deploymentName, deploymentName)
-	newDepl.parent = d
-	newDepl.parentStage = st
-	st.Deployments[deploymentName] = newDepl
-	return newDepl
+	depl.parentStage = st
+	st.Deployments[deploymentName] = depl
+	return depl
 }
 
 func (d *DeploymentState) GetUserInputs(stage string) map[string]interface{} {
@@ -113,7 +106,7 @@ func (d *DeploymentState) IsDeployed(stage, version string) bool {
 }
 
 func (d *DeploymentState) Save() error {
-	return d.GetEnvironmentState().Save(d)
+	return d.environment.Save(d)
 }
 
 func (p *DeploymentState) ToJson() string {
