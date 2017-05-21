@@ -71,14 +71,6 @@ func init() {
 	RootCmd.AddCommand(errandsCmd)
 	errandsCmd.AddCommand(errandsListCmd)
 	errandsCmd.AddCommand(errandsRunCmd)
-
-	errandsListCmd.Flags().StringVarP(&state, "state", "s", "escape_state.json", "Location of the Escape state file")
-	errandsListCmd.Flags().StringVarP(&environment, "environment", "e", "dev", "The logical environment to target")
-	errandsListCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location of the Escape plan.")
-	errandsListCmd.Flags().StringVarP(&deployment, "deployment", "d", "", "Deployment name (default \"<release name>\")")
-
-	errandsRunCmd.Flags().StringVarP(&state, "state", "s", "escape_state.json", "Location of the Escape state file")
-	errandsRunCmd.Flags().StringVarP(&environment, "environment", "e", "dev", "The logical environment to target")
-	errandsRunCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location of the Escape plan.")
-	errandsRunCmd.Flags().StringVarP(&deployment, "deployment", "d", "", "Deployment name (default \"<release name>\")")
+	setLocalPlanAndStateFlags(errandsListCmd)
+	setLocalPlanAndStateFlags(errandsRunCmd)
 }

@@ -21,8 +21,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var state, environment, deployment, escapePlanLocation string
-
 var buildCmd = &cobra.Command{
 	Use:   "build",
 	Short: "Build the Escape plan using a local state file.",
@@ -37,8 +35,5 @@ var buildCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(buildCmd)
-	buildCmd.Flags().StringVarP(&state, "state", "s", "escape_state.json", "Location of the Escape state file")
-	buildCmd.Flags().StringVarP(&environment, "environment", "e", "dev", "The logical environment to target")
-	buildCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location of the Escape plan.")
-	buildCmd.Flags().StringVarP(&deployment, "deployment", "d", "", "Deployment name (default \"<release name>\")")
+	setLocalPlanAndStateFlags(buildCmd)
 }

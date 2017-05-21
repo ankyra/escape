@@ -57,13 +57,17 @@ func (p StateController) ShowProviders(context Context) error {
 	return nil
 }
 
-func (p StateController) CreateState(context Context, stage string) error {
+func (p StateController) CreateState(context Context, stage string, extraVars map[string]string) error {
 	envState := context.GetEnvironmentState()
 	metadata := context.GetReleaseMetadata()
 	deplState := envState.GetOrCreateDeploymentState(context.GetRootDeploymentName())
 	deplState.Release = metadata.GetVersionlessReleaseId()
-	inputs := deplState.GetPreStepInputs(stage)
+	inputs := deplState.GetUserInputs(stage)
 	changed := false
+	for key, val := range extraVars {
+		inputs[key] = val
+		changed = true
+	}
 	for _, i := range metadata.GetInputs() {
 		val, ok := inputs[i.GetId()]
 		if !ok {

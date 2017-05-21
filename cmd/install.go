@@ -35,5 +35,5 @@ var installCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(installCmd)
-	installCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location onf the Escape plan.")
+	setEscapePlanLocationFlag(installCmd)
 }

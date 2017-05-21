@@ -37,14 +37,11 @@ var releaseCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(releaseCmd)
+	setLocalPlanAndStateFlags(releaseCmd)
 
-	releaseCmd.Flags().StringVarP(&state, "state", "s", "escape_state.json", "Location of the Escape state file")
-	releaseCmd.Flags().StringVarP(&environment, "environment", "e", "dev", "The logical environment to target")
-	releaseCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location of the Escape plan.")
 	releaseCmd.Flags().BoolVarP(&uber, "uber", "u", false, "Build an uber package containing all dependencies")
 	releaseCmd.Flags().BoolVarP(&skipTests, "skip-tests", "", false, "Skip tests")
 	releaseCmd.Flags().BoolVarP(&skipCache, "skip-cache", "", false, "Skip caching the release")
 	releaseCmd.Flags().BoolVarP(&skipPush, "skip-push", "", false, "Skip push")
 	releaseCmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite output file if it exists")
-	releaseCmd.Flags().StringVarP(&deployment, "deployment", "d", "", "Deployment name (default \"<release name>\")")
 }

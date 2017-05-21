@@ -35,9 +35,5 @@ var smokeCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(smokeCmd)
-
-	smokeCmd.Flags().StringVarP(&state, "state", "s", "escape_state.json", "Location of the Escape state file")
-	smokeCmd.Flags().StringVarP(&environment, "environment", "e", "dev", "The logical environment to target")
-	smokeCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location onf the Escape plan.")
-	smokeCmd.Flags().StringVarP(&deployment, "deployment", "d", "", "Deployment name (default \"<release name>\")")
+	setLocalPlanAndStateFlags(smokeCmd)
 }

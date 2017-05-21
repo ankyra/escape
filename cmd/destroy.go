@@ -37,10 +37,7 @@ var destroyCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(destroyCmd)
-	destroyCmd.Flags().StringVarP(&state, "state", "s", "escape_state.json", "Location of the Escape state file")
-	destroyCmd.Flags().StringVarP(&environment, "environment", "e", "dev", "The logical environment to target")
-	destroyCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location of the Escape plan.")
+	setLocalPlanAndStateFlags(destroyCmd)
 	destroyCmd.Flags().BoolVarP(&skipDeployment, "skip-deployment", "", false, "Don't destroy the deployment.")
 	destroyCmd.Flags().BoolVarP(&skipBuild, "skip-build", "", false, "Don't destroy the build")
-	destroyCmd.Flags().StringVarP(&deployment, "deployment", "d", "", "Deployment name (default \"<release name>\")")
 }
