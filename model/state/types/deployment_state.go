@@ -130,18 +130,11 @@ func (d *DeploymentState) SetProvider(stage, name, deplName string) {
 
 func (d *DeploymentState) GetProviders(stage string) map[string]string {
 	result := map[string]string{}
-	for key, val := range d.getStage(stage).Providers {
-		result[key] = val
-	}
-	current := d
-	for current.parent != nil {
-		current = current.parent
-		for key, val := range current.getStage(stage).Providers {
-			if _, alreadySet := result[key]; !alreadySet {
-				result[key] = val
-			}
+	d.walkStatesAndStages(stage, func(p *DeploymentState, st *StageState) {
+		for key, val := range st.Providers {
+			result[key] = val
 		}
-	}
+	})
 	return result
 }
 
@@ -150,34 +143,49 @@ func (d *DeploymentState) GetPreStepInputs(stage string) map[string]interface{} 
 	for key, val := range d.environment.getInputs() {
 		result[key] = val
 	}
-	// deps = { this, dep1, dep2, ...., root }
-	deps := []*DeploymentState{d}
-	stages := []*StageState{d.getStage(stage)}
-	prev := d
-	p := d.parent
-	for p != nil {
-		deps = append(deps, p)
-		stages = append(stages, prev.parentStage)
-		fmt.Println(stages)
-		prev = p
-		p = p.parent
-	}
-	// add dep inputs in reverse
-	for i := len(deps) - 1; i >= 0; i-- {
-		p = deps[i]
+	d.walkStatesAndStages(stage, func(p *DeploymentState, st *StageState) {
 		if p.Inputs != nil {
 			for key, val := range p.Inputs {
 				result[key] = val
 			}
 		}
-		st := p.getStage(stages[i].Name)
 		if st.UserInputs != nil {
 			for key, val := range st.UserInputs {
 				result[key] = val
 			}
 		}
-	}
+	})
 	return result
+}
+
+func (d *DeploymentState) walkStatesAndStages(startStage string, cb func(*DeploymentState, *StageState)) {
+	deps := d.getDependencyStates()
+	stages := d.getDependencyStages(startStage)
+	for i := len(deps) - 1; i >= 0; i-- {
+		p := deps[i]
+		stage := stages[i]
+		cb(p, stage)
+	}
+}
+
+func (d *DeploymentState) getDependencyStates() []*DeploymentState {
+	deps := []*DeploymentState{}
+	p := d
+	for p != nil {
+		deps = append(deps, p)
+		p = p.parent
+	}
+	return deps
+}
+
+func (d *DeploymentState) getDependencyStages(startStage string) []*StageState {
+	stages := []*StageState{d.getStage(startStage)}
+	p := d
+	for p != nil {
+		stages = append(stages, p.parentStage)
+		p = p.parent
+	}
+	return stages
 }
 
 func (d *DeploymentState) validateAndFix(name string, env *EnvironmentState) error {

@@ -80,6 +80,23 @@
                 },
                 "archive-release-with-deps": {
                     "stages": {
+                        "build": {
+                            "providers": {
+                                "gcp": "archive-release-build",
+                                "doesnt-exist": "doesnt-exist-build"
+                            },
+                            "deployments": {
+                                "archive-release": {
+                                    "stages": {
+                                        "deploy": {
+                                            "providers": {
+                                                "kubernetes": "archive-release"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
                         "deploy": {
                             "deployments": {
                                 "archive-release": {

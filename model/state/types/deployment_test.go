@@ -108,3 +108,16 @@ func (s *deplSuite) Test_GetProviders_includes_parent_providers(c *C) {
 	c.Assert(providers["gcp"], Equals, "archive-release")
 	c.Assert(providers["doesnt-exist"], Equals, "doesnt-exist")
 }
+
+func (s *deplSuite) Test_GetProviders_includes_parent_build_providers_for_dep(c *C) {
+	p, err := NewProjectStateFromFile("prj", "testdata/project.json", nil)
+	c.Assert(err, IsNil)
+	env := p.GetEnvironmentStateOrMakeNew("dev")
+	dep := env.GetOrCreateDeploymentState("archive-release-with-deps")
+	deplWithDeps = dep.GetDeployment("build", "archive-release")
+	providers := deplWithDeps.GetProviders("deploy")
+	c.Assert(providers, HasLen, 3)
+	c.Assert(providers["kubernetes"], Equals, "archive-release")
+	c.Assert(providers["gcp"], Equals, "archive-release-build")
+	c.Assert(providers["doesnt-exist"], Equals, "doesnt-exist-build")
+}
