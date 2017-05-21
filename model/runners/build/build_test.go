@@ -79,7 +79,7 @@ func (s *testSuite) Test_BuildRunner_variables_are_set_even_if_there_is_no_pre_s
 	deploymentState.UpdateInputs("build", nil)
 	c.Assert(deploymentState.GetCalculatedInputs("build"), HasLen, 0)
 	c.Assert(deploymentState.GetUserInputs("build"), HasLen, 1)
-	deploymentState.SetVersion("build", "")
+	deploymentState.CommitVersion("build", ctx.GetReleaseMetadata())
 	err = NewBuildRunner().Run(runCtx)
 	c.Assert(err, IsNil)
 	c.Assert(deploymentState.GetVersion("build"), Equals, "0.0.1")

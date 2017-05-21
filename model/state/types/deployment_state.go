@@ -19,6 +19,7 @@ package types
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/ankyra/escape-core"
 )
 
 type DeploymentState struct {
@@ -96,13 +97,14 @@ func (d *DeploymentState) UpdateOutputs(stage string, outputs map[string]interfa
 	return d.Save()
 }
 
-func (d *DeploymentState) SetVersion(stage, version string) error {
-	d.getStage(stage).setVersion(version)
+func (d *DeploymentState) CommitVersion(stage string, metadata *core.ReleaseMetadata) error {
+	d.getStage(stage).setVersion(metadata.GetVersion())
+	d.getStage(stage).Provides = metadata.GetProvides()
 	return nil
 }
 
-func (d *DeploymentState) IsDeployed(stage, version string) bool {
-	return d.getStage(stage).Version == version
+func (d *DeploymentState) IsDeployed(stage string, metadata *core.ReleaseMetadata) bool {
+	return d.getStage(stage).Version == metadata.GetVersion()
 }
 
 func (d *DeploymentState) Save() error {

@@ -22,6 +22,7 @@ type StageState struct {
 	Outputs     map[string]interface{}      `json:"calculated_outputs"`
 	Deployments map[string]*DeploymentState `json:"deployments"`
 	Providers   map[string]string           `json:"providers"`
+	Provides    []string                    `json:"provides"`
 	Version     string                      `json:"version"`
 	Step        string                      `json:"step"`
 	Name        string                      `json:"-"`
@@ -33,6 +34,7 @@ func newStage() *StageState {
 		Inputs:      map[string]interface{}{},
 		Outputs:     map[string]interface{}{},
 		Providers:   map[string]string{},
+		Provides:    []string{},
 		Deployments: map[string]*DeploymentState{},
 	}
 }
@@ -41,6 +43,9 @@ func (st *StageState) validateAndFix(name string, envState *EnvironmentState, de
 	st.Name = name
 	if st.UserInputs == nil {
 		st.UserInputs = map[string]interface{}{}
+	}
+	if st.Provides == nil {
+		st.Provides = []string{}
 	}
 	if st.Inputs == nil {
 		st.Inputs = map[string]interface{}{}

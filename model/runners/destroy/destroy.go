@@ -56,7 +56,7 @@ func deleteCommit(ctx RunnerContext, depl *types.DeploymentState, stage string) 
 	if err != nil {
 		return err
 	}
-	if err := depl.SetVersion(stage, ""); err != nil {
+	if err := depl.CommitVersion(stage, ctx.GetReleaseMetadata()); err != nil {
 		return err
 	}
 	if err := depl.UpdateInputs(stage, nil); err != nil {

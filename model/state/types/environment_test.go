@@ -17,6 +17,7 @@ limitations under the License.
 package types
 
 import (
+	"github.com/ankyra/escape-core"
 	. "gopkg.in/check.v1"
 )
 
@@ -68,4 +69,33 @@ func (s *envSuite) Test_GetOrCreateDeploymentState_doesnt_exist_no_deps_returns_
 	depl := env.GetOrCreateDeploymentState("doesnt-exist")
 	c.Assert(depl.GetName(), Equals, "doesnt-exist")
 	c.Assert(depl.Inputs, HasLen, 0)
+}
+
+func (s *envSuite) Test_GetProviders(c *C) {
+	p, err := NewProjectStateFromFile("prj", "testdata/project.json", nil)
+	c.Assert(err, IsNil)
+	env := p.GetEnvironmentStateOrMakeNew("dev")
+	depl := env.GetOrCreateDeploymentState("provider")
+	metadata := core.NewReleaseMetadata("test", "1")
+	metadata.Provides = []string{"test-provider"}
+	depl.CommitVersion("deploy", metadata)
+	providers := env.GetProviders()
+	c.Assert(providers, HasLen, 1)
+	c.Assert(providers["test-provider"], DeepEquals, []string{"provider"})
+}
+
+func (s *envSuite) Test_GetProvidersOfType(c *C) {
+	p, err := NewProjectStateFromFile("prj", "testdata/project.json", nil)
+	c.Assert(err, IsNil)
+	env := p.GetEnvironmentStateOrMakeNew("dev")
+	depl := env.GetOrCreateDeploymentState("provider")
+	metadata := core.NewReleaseMetadata("test", "1")
+	metadata.Provides = []string{"test-provider"}
+	depl.CommitVersion("deploy", metadata)
+	providers := env.GetProvidersOfType("test-provider")
+	c.Assert(providers, HasLen, 1)
+	c.Assert(providers, DeepEquals, []string{"provider"})
+
+	providers = env.GetProvidersOfType("no-test-provider")
+	c.Assert(providers, HasLen, 0)
 }

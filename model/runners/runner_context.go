@@ -23,7 +23,7 @@ import (
 	"github.com/ankyra/escape-client/model/state"
 	"github.com/ankyra/escape-client/model/state/types"
 	"github.com/ankyra/escape-client/util"
-	core "github.com/ankyra/escape-core"
+	"github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/script"
 )
 

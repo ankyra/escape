@@ -54,7 +54,7 @@ func (s *testSuite) Test_TestRunner_missing_deployment_state(c *C) {
 	c.Assert(err, IsNil)
 	err = NewTestRunner().Run(runCtx)
 	c.Assert(err, Not(IsNil))
-	c.Assert(err.Error(), Equals, "Build state 'name' (version 0.0.1) could not be found")
+	c.Assert(err.Error(), Equals, "Build state 'name' for release 'name-v0.0.1' could not be found")
 }
 
 func (s *testSuite) Test_TestRunner(c *C) {

@@ -17,6 +17,7 @@ limitations under the License.
 package types
 
 import (
+	"github.com/ankyra/escape-core"
 	. "gopkg.in/check.v1"
 )
 
@@ -72,13 +73,20 @@ func (s *deplSuite) Test_GetEnvironmentState(c *C) {
 	env := depl.GetEnvironmentState()
 	c.Assert(env.GetName(), Equals, "dev")
 }
-func (s *deplSuite) Test_SetVersion(c *C) {
+func (s *deplSuite) Test_CommitVersion(c *C) {
 	c.Assert(depl.GetVersion("build"), Equals, "")
 	c.Assert(depl.GetVersion("deploy"), Equals, "")
-	depl.SetVersion("build", "1")
-	depl.SetVersion("deploy", "10")
+	depl.CommitVersion("build", core.NewReleaseMetadata("test", "1"))
+	depl.CommitVersion("deploy", core.NewReleaseMetadata("test", "10"))
 	c.Assert(depl.GetVersion("build"), Equals, "1")
 	c.Assert(depl.GetVersion("deploy"), Equals, "10")
+}
+
+func (s *deplSuite) Test_CommitVersion_sets_provides_field(c *C) {
+	metadata := core.NewReleaseMetadata("test", "1")
+	metadata.Provides = []string{"test-provider"}
+	depl.CommitVersion("deploy", metadata)
+	c.Assert(depl.getStage("deploy").Provides, DeepEquals, []string{"test-provider"})
 }
 
 func (s *deplSuite) Test_GetBuildInputs(c *C) {

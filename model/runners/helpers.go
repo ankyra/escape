@@ -98,8 +98,8 @@ func compileTemplates(ctx RunnerContext, stage string) error {
 
 func preCommit(ctx RunnerContext, deploymentState *state.DeploymentState, stage string) error {
 	inputs := ctx.GetBuildInputs()
-	version := ctx.GetReleaseMetadata().GetVersion()
-	if err := deploymentState.SetVersion(stage, version); err != nil {
+	metadata := ctx.GetReleaseMetadata()
+	if err := deploymentState.CommitVersion(stage, metadata); err != nil {
 		return err
 	}
 	if err := deploymentState.UpdateInputs(stage, inputs); err != nil {
@@ -160,15 +160,15 @@ func (b *ScriptStep) initScript(ctx RunnerContext) (string, error) {
 
 func (b *ScriptStep) initDeploymentState(ctx RunnerContext) (*state.DeploymentState, error) {
 	deploymentState := ctx.GetDeploymentState()
-	version := ctx.GetReleaseMetadata().GetVersion()
-	if b.ShouldBeDeployed && !deploymentState.IsDeployed(b.Stage, version) {
+	metadata := ctx.GetReleaseMetadata()
+	if b.ShouldBeDeployed && !deploymentState.IsDeployed(b.Stage, metadata) {
 		stageName := "Build"
 		if b.Stage == "deploy" {
 			stageName = "Deployment"
 		}
-		return nil, fmt.Errorf("%s state '%s' (version %s) could not be found", stageName, ctx.GetRootDeploymentName(), version)
+		return nil, fmt.Errorf("%s state '%s' for release '%s' could not be found",
+			stageName, ctx.GetRootDeploymentName(), metadata.GetReleaseId())
 	}
-	ctx.SetDeploymentState(deploymentState)
 	if b.Inputs != nil {
 		inputs, err := b.Inputs(ctx, b.Stage)
 		if err != nil {

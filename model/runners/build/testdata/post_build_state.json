@@ -17,6 +17,7 @@
                      "calculated_outputs": {},
                      "deployments": {},
                      "providers": {},
+                     "provides": [],
                      "version": "0.0.1",
                      "step": ""
                   },
@@ -26,6 +27,7 @@
                      "calculated_outputs": {},
                      "deployments": {},
                      "providers": {},
+                     "provides": [],
                      "version": "",
                      "step": ""
                   }

@@ -99,3 +99,27 @@ func (e *EnvironmentState) GetOrCreateDeploymentState(deploymentName string) *De
 	}
 	return depl
 }
+
+func (e *EnvironmentState) GetProviders() map[string][]string {
+	result := map[string][]string{}
+	for deplName, depl := range e.Deployments {
+		st := depl.getStage("deploy")
+		for _, provides := range st.Provides {
+			result[provides] = append(result[provides], deplName)
+		}
+	}
+	return result
+}
+
+func (e *EnvironmentState) GetProvidersOfType(typ string) []string {
+	result := []string{}
+	for deplName, depl := range e.Deployments {
+		st := depl.getStage("deploy")
+		for _, provides := range st.Provides {
+			if provides == typ {
+				result = append(result, deplName)
+			}
+		}
+	}
+	return result
+}

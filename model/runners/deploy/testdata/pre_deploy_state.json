@@ -23,6 +23,7 @@
                      },
                      "deployments": {},
                      "providers": {},
+                     "provides": [],
                      "version": "0.0.1",
                      "step": ""
                   }

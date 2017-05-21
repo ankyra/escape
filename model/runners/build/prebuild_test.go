@@ -81,7 +81,7 @@ func (s *testSuite) Test_PreBuildRunner_sets_version(c *C) {
 	runCtx, err := runners.NewRunnerContext(ctx, "build")
 	c.Assert(err, IsNil)
 	deploymentState := runCtx.GetDeploymentState()
-	deploymentState.SetVersion("build", "")
+	deploymentState.CommitVersion("build", ctx.GetReleaseMetadata())
 	err = NewPreBuildRunner().Run(runCtx)
 	c.Assert(err, IsNil)
 	c.Assert(deploymentState.GetVersion("build"), Equals, "0.0.1")
