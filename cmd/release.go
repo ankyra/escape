@@ -40,7 +40,7 @@ func init() {
 
 	releaseCmd.Flags().StringVarP(&state, "state", "s", "escape_state.json", "Location of the Escape state file")
 	releaseCmd.Flags().StringVarP(&environment, "environment", "e", "dev", "The logical environment to target")
-	releaseCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location onf the Escape plan.")
+	releaseCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location of the Escape plan.")
 	releaseCmd.Flags().BoolVarP(&uber, "uber", "u", false, "Build an uber package containing all dependencies")
 	releaseCmd.Flags().BoolVarP(&skipTests, "skip-tests", "", false, "Skip tests")
 	releaseCmd.Flags().BoolVarP(&skipCache, "skip-cache", "", false, "Skip caching the release")

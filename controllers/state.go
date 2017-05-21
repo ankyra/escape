@@ -23,11 +23,6 @@ import (
 
 type StateController struct{}
 
-func (p StateController) Show(context Context) error {
-	//fmt.Println(context.GetProjectState().ToJson())
-	return nil
-}
-
 func (p StateController) ShowDeployments(context Context) error {
 	envState := context.GetEnvironmentState()
 	for _, depl := range envState.GetDeployments() {
@@ -47,31 +42,25 @@ func (p StateController) ShowDeployment(context Context, dep string) error {
 	return fmt.Errorf("Deployment '%s' not found", dep)
 }
 
-func (p StateController) CreateDeployment(context Context) error {
-	return nil
-	/*
-
-		str := []string{context.GetReleaseMetadata().GetVersionlessReleaseId()}
-		deplState, err := context.GetEnvironmentState().GetDeploymentState(str)
-		if err != nil {
-			return err
-		}
-		inputs := deplState.GetPreStepInputs("deploy")
-		changed := false
-		for _, i := range context.GetReleaseMetadata().GetInputs() {
-			val, ok := inputs[i.GetId()]
-			if !ok {
-				val = i.AskUserInput()
-				if val != nil {
-					changed = true
-					inputs[i.GetId()] = val
-				}
+func (p StateController) CreateState(context Context, stage string) error {
+	deplState := context.GetEnvironmentState().GetOrCreateDeploymentState(context.GetRootDeploymentName())
+	deplState.Release = context.GetReleaseMetadata().GetVersionlessReleaseId()
+	inputs := deplState.GetPreStepInputs(stage)
+	changed := false
+	for _, i := range context.GetReleaseMetadata().GetInputs() {
+		val, ok := inputs[i.GetId()]
+		if !ok {
+			val = i.AskUserInput()
+			if val != nil {
+				changed = true
+				inputs[i.GetId()] = val
 			}
 		}
-		if changed {
-			deplState.UpdateUserInputs("deploy", inputs)
-		}
-		// TODO check and set providers
-		fmt.Println(deplState.ToJson())
-		return deplState.Save()*/
+	}
+	if changed {
+		deplState.UpdateUserInputs(stage, inputs)
+	}
+	// TODO check and set providers
+	fmt.Println(deplState.ToJson())
+	return deplState.Save()
 }

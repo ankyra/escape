@@ -23,6 +23,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var deployStage bool
+
 var stateCmd = &cobra.Command{
 	Use:   "state",
 	Short: "Manage the Escape state file",
@@ -35,18 +37,6 @@ var stateCmd = &cobra.Command{
 	},
 }
 
-var showStateCmd = &cobra.Command{
-	Use:   "show",
-	Short: "Show the Escape state file",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := context.LoadLocalState(state, environment); err != nil {
-			return err
-		}
-		//return controllers.StateController{}.Show(context)
-		return nil
-	},
-}
-
 var showStateDeploymentsCmd = &cobra.Command{
 	Use:   "show-deployments",
 	Short: "Show the deployments",
@@ -54,51 +44,79 @@ var showStateDeploymentsCmd = &cobra.Command{
 		if err := context.LoadLocalState(state, environment); err != nil {
 			return err
 		}
+		if deployment != "" {
+			return controllers.StateController{}.ShowDeployment(context, deployment)
+		}
 		return controllers.StateController{}.ShowDeployments(context)
 	},
 }
 
-var showStateDeploymentCmd = &cobra.Command{
+var showDeploymentCmd = &cobra.Command{
 	Use:   "show-deployment",
 	Short: "Show a deployment",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 1 {
+		if deployment == "" {
 			return fmt.Errorf("Missing deployment name")
 		}
 		if err := context.LoadLocalState(state, environment); err != nil {
 			return err
 		}
-		return controllers.StateController{}.ShowDeployment(context, args[0])
+		context.SetRootDeploymentName(deployment)
+		return controllers.StateController{}.ShowDeployment(context, deployment)
 	},
 }
 
-var createDeploymentCmd = &cobra.Command{
-	Use:   "create-deployment",
-	Short: "Create a deployment for a given escape plan",
+var createStateCmd = &cobra.Command{
+	Use:   "create",
+	Short: "Create state for the given escape plan",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
 			return err
 		}
-		return controllers.StateController{}.CreateDeployment(context)
+		context.SetRootDeploymentName(deployment)
+		stage := "build"
+		if deployStage {
+			stage = "deploy"
+		}
+		return controllers.StateController{}.CreateState(context, stage)
+	},
+}
+
+var showStateCmd = &cobra.Command{
+	Use:   "show",
+	Short: "Show a deployment",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
+			return err
+		}
+		context.SetRootDeploymentName(deployment)
+		return controllers.StateController{}.ShowDeployment(context, context.GetRootDeploymentName())
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(stateCmd)
-	stateCmd.AddCommand(showStateCmd)
 	stateCmd.AddCommand(showStateDeploymentsCmd)
-	stateCmd.AddCommand(showStateDeploymentCmd)
-	stateCmd.AddCommand(createDeploymentCmd)
-
-	showStateCmd.Flags().StringVarP(&state, "state", "s", "escape_state.json", "Location of the Escape state file")
+	stateCmd.AddCommand(showDeploymentCmd)
+	stateCmd.AddCommand(createStateCmd)
+	stateCmd.AddCommand(showStateCmd)
 
 	showStateDeploymentsCmd.Flags().StringVarP(&state, "state", "s", "escape_state.json", "Location of the Escape state file")
 	showStateDeploymentsCmd.Flags().StringVarP(&environment, "environment", "e", "dev", "The logical environment to target")
+	showStateDeploymentsCmd.Flags().StringVarP(&deployment, "deployment", "d", "", "Deployment name (default \"<release name>\")")
 
-	showStateDeploymentCmd.Flags().StringVarP(&state, "state", "s", "escape_state.json", "Location of the Escape state file")
-	showStateDeploymentCmd.Flags().StringVarP(&environment, "environment", "e", "dev", "The logical environment to target")
+	showDeploymentCmd.Flags().StringVarP(&state, "state", "s", "escape_state.json", "Location of the Escape state file")
+	showDeploymentCmd.Flags().StringVarP(&environment, "environment", "e", "dev", "The logical environment to target")
+	showDeploymentCmd.Flags().StringVarP(&deployment, "deployment", "d", "", "Deployment name (default \"<release name>\")")
 
-	createDeploymentCmd.Flags().StringVarP(&state, "state", "s", "escape_state.json", "Location of the Escape state file")
-	createDeploymentCmd.Flags().StringVarP(&environment, "environment", "e", "dev", "The logical environment to target")
-	createDeploymentCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location onf the Escape plan.")
+	createStateCmd.Flags().StringVarP(&state, "state", "s", "escape_state.json", "Location of the Escape state file")
+	createStateCmd.Flags().StringVarP(&environment, "environment", "e", "dev", "The logical environment to target")
+	createStateCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location of the Escape plan.")
+	createStateCmd.Flags().StringVarP(&deployment, "deployment", "d", "", "Deployment name (default \"<release name>\")")
+	createStateCmd.Flags().BoolVarP(&deployStage, "deploy", "", false, "Use deployment instead of build stage")
+
+	showStateCmd.Flags().StringVarP(&state, "state", "s", "escape_state.json", "Location of the Escape state file")
+	showStateCmd.Flags().StringVarP(&environment, "environment", "e", "dev", "The logical environment to target")
+	showStateCmd.Flags().StringVarP(&escapePlanLocation, "input", "i", "escape.yml", "The location of the Escape plan.")
+	showStateCmd.Flags().StringVarP(&deployment, "deployment", "d", "", "Deployment name (default \"<release name>\")")
 }
