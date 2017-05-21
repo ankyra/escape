@@ -19,6 +19,7 @@ package controllers
 import (
 	"fmt"
 	. "github.com/ankyra/escape-client/model/interfaces"
+	"strings"
 )
 
 type StateController struct{}
@@ -40,6 +41,20 @@ func (p StateController) ShowDeployment(context Context, dep string) error {
 		}
 	}
 	return fmt.Errorf("Deployment '%s' not found", dep)
+}
+
+func (p StateController) ShowProviders(context Context) error {
+	envState := context.GetEnvironmentState()
+	exists := false
+	for provider, implementations := range envState.GetProviders() {
+		exists = true
+		fmt.Printf("%s:\n", provider)
+		fmt.Printf("\t%s\n", strings.Join(implementations, ", "))
+	}
+	if !exists {
+		fmt.Println("No providers found in the environment state. Try deploying one.")
+	}
+	return nil
 }
 
 func (p StateController) CreateState(context Context, stage string) error {

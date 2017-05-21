@@ -66,6 +66,17 @@ var showDeploymentCmd = &cobra.Command{
 	},
 }
 
+var showProvidersCmd = &cobra.Command{
+	Use:   "show-providers",
+	Short: "Show the providers available in the environment",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if err := context.LoadLocalState(state, environment); err != nil {
+			return err
+		}
+		return controllers.StateController{}.ShowProviders(context)
+	},
+}
+
 var createStateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create state for the given escape plan",
@@ -98,6 +109,7 @@ func init() {
 	RootCmd.AddCommand(stateCmd)
 	stateCmd.AddCommand(showStateDeploymentsCmd)
 	stateCmd.AddCommand(showDeploymentCmd)
+	stateCmd.AddCommand(showProvidersCmd)
 	stateCmd.AddCommand(createStateCmd)
 	stateCmd.AddCommand(showStateCmd)
 
@@ -108,6 +120,9 @@ func init() {
 	showDeploymentCmd.Flags().StringVarP(&state, "state", "s", "escape_state.json", "Location of the Escape state file")
 	showDeploymentCmd.Flags().StringVarP(&environment, "environment", "e", "dev", "The logical environment to target")
 	showDeploymentCmd.Flags().StringVarP(&deployment, "deployment", "d", "", "Deployment name (default \"<release name>\")")
+
+	showProvidersCmd.Flags().StringVarP(&state, "state", "s", "escape_state.json", "Location of the Escape state file")
+	showProvidersCmd.Flags().StringVarP(&environment, "environment", "e", "dev", "The logical environment to target")
 
 	createStateCmd.Flags().StringVarP(&state, "state", "s", "escape_state.json", "Location of the Escape state file")
 	createStateCmd.Flags().StringVarP(&environment, "environment", "e", "dev", "The logical environment to target")
