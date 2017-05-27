@@ -26,6 +26,7 @@ type EscapeTargetConfig interface {
 	GetAuthToken() string
 	GetStorageBackend() string
 	GetGcsBucketUrl() string
+	GetProject() string
 
 	SetApiServer(string)
 	SetUsername(string)

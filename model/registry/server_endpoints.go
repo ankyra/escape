@@ -25,11 +25,11 @@ import (
 
 type ServerEndpoints interface {
 	ApiServer() string
-	ReleaseQuery(releaseQuery string) string
-	NextReleaseVersion(releaseId, prefix string) string
-	RegisterPackage() string
-	UploadRelease(releaseId string) string
-	DownloadRelease(releaseId string) string
+	ReleaseQuery(project, releaseQuery string) string
+	RegisterPackage(project string) string
+	NextReleaseVersion(project, name, prefix string) string
+	UploadRelease(project, name, version string) string
+	DownloadRelease(project, name, version string) string
 }
 
 type serverEndpoints struct {
@@ -51,23 +51,31 @@ func (s *serverEndpoints) ApiServer() string {
 	}
 	return apiServer + "/"
 }
-func (s *serverEndpoints) ReleaseQuery(releaseQuery string) string {
-	return s.ApiServer() + "r/" + releaseQuery + "/"
+func (s *serverEndpoints) ReleaseQuery(project, releaseQuery string) string {
+	return s.ApiServer() + "a/" + project + "/" + releaseQuery + "/"
 }
 
-func (s *serverEndpoints) NextReleaseVersion(releaseId, prefix string) string {
+func (s *serverEndpoints) NextReleaseVersion(project, name, prefix string) string {
 	v := url.Values{}
 	v.Set("prefix", prefix)
-	return s.ReleaseQuery(releaseId) + "next-version?" + v.Encode()
+	return s.ProjectNameQuery(project, name) + "next-version?" + v.Encode()
 }
 
-func (s *serverEndpoints) RegisterPackage() string {
-	return s.ApiServer() + "r/"
+func (s *serverEndpoints) ProjectQuery(project string) string {
+	return s.ApiServer() + "a/" + project + "/"
 }
-
-func (s *serverEndpoints) UploadRelease(releaseId string) string {
-	return s.ReleaseQuery(releaseId) + "upload"
+func (s *serverEndpoints) ProjectNameQuery(project, name string) string {
+	return s.ProjectQuery(project) + name + "/"
 }
-func (s *serverEndpoints) DownloadRelease(releaseId string) string {
-	return s.ReleaseQuery(releaseId) + "download"
+func (s *serverEndpoints) ProjectReleaseQuery(project, name, version string) string {
+	return s.ProjectNameQuery(project, name) + "v" + version + "/"
+}
+func (s *serverEndpoints) RegisterPackage(project string) string {
+	return s.ProjectQuery(project) + "register"
+}
+func (s *serverEndpoints) UploadRelease(project, name, version string) string {
+	return s.ProjectReleaseQuery(project, name, version) + "upload"
+}
+func (s *serverEndpoints) DownloadRelease(project, name, version string) string {
+	return s.ProjectReleaseQuery(project, name, version) + "download"
 }

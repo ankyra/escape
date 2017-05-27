@@ -207,7 +207,8 @@ func (c *Compiler) ResolveVersion(d *core.Dependency, context Context) error {
 	}
 	backend := context.GetEscapeConfig().GetCurrentTarget().GetStorageBackend()
 	if backend == "escape" {
-		metadata, err := context.GetClient().ReleaseQuery(d.GetReleaseId())
+		project := c.context.GetEscapeConfig().GetCurrentTarget().GetProject()
+		metadata, err := context.GetClient().ReleaseQuery(project, d.GetReleaseId())
 		if err != nil {
 			return err
 		}
@@ -287,7 +288,8 @@ func (c *Compiler) compileVersion(version string) error {
 		prefix := version[:len(version)-1]
 		backend := c.context.GetEscapeConfig().GetCurrentTarget().GetStorageBackend()
 		if backend == "escape" {
-			nextVersion, err := client.NextVersionQuery(plan.GetReleaseId(), prefix)
+			project := c.context.GetEscapeConfig().GetCurrentTarget().GetProject()
+			nextVersion, err := client.NextVersionQuery(project, plan.GetName(), prefix)
 			if err != nil {
 				return err
 			}

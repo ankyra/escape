@@ -39,6 +39,7 @@ type escapeConfig struct {
 }
 
 type escapeTargetConfig struct {
+	Project        string  `json:"project"`
 	ApiServer      string  `json:"api_server"`
 	Username       string  `json:"username"`
 	Password       string  `json:"password"`
@@ -63,6 +64,7 @@ func NewEscapeConfig(context Context) EscapeConfig {
 func newEscapeTargetConfig(context Context) *escapeTargetConfig {
 	target := &escapeTargetConfig{
 		Context:        context,
+		Project:        os.Getenv("ESCAPE_PROJECT"),
 		ApiServer:      os.Getenv("ESCAPE_API_SERVER"),
 		Username:       os.Getenv("ESCAPE_USERNAME"),
 		Password:       os.Getenv("ESCAPE_PASSWORD"),
@@ -166,6 +168,12 @@ func (t *escapeTargetConfig) GetStorageBackend() string {
 }
 func (t *escapeTargetConfig) GetGcsBucketUrl() string {
 	return t.GcsBucketUrl
+}
+func (t *escapeTargetConfig) GetProject() string {
+	if t.Project == "" {
+		return "_"
+	}
+	return t.Project
 }
 
 func (t *escapeTargetConfig) SetApiServer(v string) {

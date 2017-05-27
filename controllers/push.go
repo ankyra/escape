@@ -53,7 +53,8 @@ func (p PushController) register(context Context) error {
 	}
 	if backend == "" || backend == "local" {
 	} else if backend == "escape" {
-		if err := context.GetClient().Register(context.GetReleaseMetadata()); err != nil {
+		project := context.GetEscapeConfig().GetCurrentTarget().GetProject()
+		if err := context.GetClient().Register(project, context.GetReleaseMetadata()); err != nil {
 			return err
 		}
 	} else {
@@ -77,8 +78,9 @@ func (p PushController) upload(context Context) error {
 }
 
 func (p PushController) uploadToEscapeServer(context Context, releasePath string) error {
-	releaseId := context.GetReleaseMetadata().GetReleaseId()
-	err := context.GetClient().UploadRelease(releaseId, releasePath)
+	metadata := context.GetReleaseMetadata()
+	project := context.GetEscapeConfig().GetCurrentTarget().GetProject()
+	err := context.GetClient().UploadRelease(project, metadata.GetName(), metadata.GetVersion(), releasePath)
 	if err != nil {
 		return err
 	}

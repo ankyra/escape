@@ -149,10 +149,10 @@ func (c *client) Login(url, username, password string, storeCredentials bool) er
 	return nil
 }
 
-func (c *client) ReleaseQuery(releaseQuery string) (*core.ReleaseMetadata, error) {
+func (c *client) ReleaseQuery(project, releaseQuery string) (*core.ReleaseMetadata, error) {
 
 	//        applog("client.release_query", release=release_id_string)
-	url := c.endpoints.ReleaseQuery(releaseQuery)
+	url := c.endpoints.ReleaseQuery(project, releaseQuery)
 	resp, err := c.authGet(url)
 	if err != nil {
 		return nil, err
@@ -169,9 +169,9 @@ func (c *client) ReleaseQuery(releaseQuery string) (*core.ReleaseMetadata, error
 	return result, nil
 }
 
-func (c *client) DownloadRelease(releaseId, targetFile string) error {
+func (c *client) DownloadRelease(project, name, version, targetFile string) error {
 	//        applog("client.download_release", release=release_id_string)
-	url := c.endpoints.DownloadRelease(releaseId)
+	url := c.endpoints.DownloadRelease(project, name, version)
 	resp, err := c.authGet(url)
 	if err != nil {
 		return err
@@ -179,6 +179,10 @@ func (c *client) DownloadRelease(releaseId, targetFile string) error {
 	if resp.StatusCode == 401 {
 		return errors.New("Unauthorized")
 	} else if resp.StatusCode != 200 {
+		releaseId := project + "/" + name + "-v" + version
+		if project == "_" {
+			releaseId = name + "-v" + version
+		}
 		return errors.New("Couldn't download release " + releaseId + ": " + resp.Status)
 	}
 	fmt.Println("Writing: " + targetFile)
@@ -193,17 +197,15 @@ func (c *client) DownloadRelease(releaseId, targetFile string) error {
 	return nil
 }
 
-func (c *client) NextVersionQuery(releaseId, prefix string) (string, error) {
+func (c *client) NextVersionQuery(project, name, prefix string) (string, error) {
 	//        applog("client.next_version", release=release_id_string)
-	url := c.endpoints.NextReleaseVersion(releaseId, prefix)
+	url := c.endpoints.NextReleaseVersion(project, name, prefix)
 	resp, err := c.authGet(url)
 	if err != nil {
 		return "", err
 	}
 	if resp.StatusCode == 401 {
 		return "", errors.New("Unauthorized")
-	} else if resp.StatusCode == 404 {
-		return prefix + "1", nil // Default value
 	} else if resp.StatusCode == 400 {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
@@ -211,7 +213,11 @@ func (c *client) NextVersionQuery(releaseId, prefix string) (string, error) {
 		}
 		return "", fmt.Errorf("There was a problem with the query: %s", body)
 	} else if resp.StatusCode != 200 {
-		return "", errors.New("Could not query release version.")
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return "", errors.New("Could not query release version.")
+		}
+		return "", fmt.Errorf("Could not query release version: %s", body)
 	}
 	result, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -220,9 +226,9 @@ func (c *client) NextVersionQuery(releaseId, prefix string) (string, error) {
 	return string(result), nil
 }
 
-func (c *client) Register(metadata *core.ReleaseMetadata) error {
+func (c *client) Register(project string, metadata *core.ReleaseMetadata) error {
 	//        applog("client.register", release="%s-%s-v%s" % (release_metadata['type'], release_metadata['name'], release_metadata['version']))
-	url := c.endpoints.RegisterPackage()
+	url := c.endpoints.RegisterPackage(project)
 	resp, err := c.authPostJson(url, metadata)
 	if err != nil {
 		return err
@@ -239,9 +245,9 @@ func (c *client) Register(metadata *core.ReleaseMetadata) error {
 	return nil
 }
 
-func (c *client) UploadRelease(releaseId, releasePath string) error {
+func (c *client) UploadRelease(project, name, version, releasePath string) error {
 	//        applog("client.upload_release", release=release_id_string)
-	url := c.endpoints.UploadRelease(releaseId)
+	url := c.endpoints.UploadRelease(project, name, version)
 	resp, err := c.authPostFile(url, releasePath)
 	if err != nil {
 		return err
@@ -249,7 +255,11 @@ func (c *client) UploadRelease(releaseId, releasePath string) error {
 	if resp.StatusCode == 401 {
 		return errors.New("Unauthorized")
 	} else if resp.StatusCode != 200 {
-		return errors.New("Couldn't upload package: " + resp.Status)
+		result, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return fmt.Errorf("Couldn't upload package (%s)", resp.Status)
+		}
+		return fmt.Errorf("Couldn't upload package (%s): %s", resp.Status, result)
 	}
 	return nil
 }
