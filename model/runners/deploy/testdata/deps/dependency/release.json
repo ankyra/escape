@@ -1,17 +1,18 @@
 {
-   "api_version": "1",
+   "api_version": 1,
    "branch": "",
+   "description": "",
+   "files": {},
+   "logo": "",
+   "name": "dependency",
+   "git_revision": "",
+   "metadata": {},
+   "version": "0.0.1",
    "consumes": [],
    "depends": [],
-   "extends": [],
-   "description": "",
    "errands": {},
-   "files": {},
-   "git_revision": "",
+   "extends": [],
    "inputs": [],
-   "logo": "",
-   "metadata": {},
-   "name": "dependency",
    "outputs": [
       {
          "id": "output_variable",
@@ -21,15 +22,8 @@
          "items": null
       }
    ],
-   "path": "",
    "provides": [],
+   "stages": {},
    "templates": [],
-   "test": "",
-   "variable_context": {},
-   "version": "0.0.1",
-   "stages": {
-      "test": {
-         "script": ""
-      }
-   }
+   "variable_context": {}
 }

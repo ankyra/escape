@@ -158,9 +158,9 @@ func (c *client) ReleaseQuery(project, name, version string) (*core.ReleaseMetad
 	if resp.StatusCode == 401 {
 		return nil, errors.New("Unauthorized")
 	} else if resp.StatusCode != 200 {
-		releaseQuery := project + "/" + name + version
+		releaseQuery := project + "/" + name + "-" + version
 		if project == "_" {
-			releaseQuery = name + version
+			releaseQuery = name + "-" + version
 		}
 		return nil, errors.New("Couldn't query release " + releaseQuery + ": " + resp.Status)
 	}
