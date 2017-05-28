@@ -149,10 +149,8 @@ func (c *client) Login(url, username, password string, storeCredentials bool) er
 	return nil
 }
 
-func (c *client) ReleaseQuery(project, releaseQuery string) (*core.ReleaseMetadata, error) {
-
-	//        applog("client.release_query", release=release_id_string)
-	url := c.endpoints.ReleaseQuery(project, releaseQuery)
+func (c *client) ReleaseQuery(project, name, version string) (*core.ReleaseMetadata, error) {
+	url := c.endpoints.ReleaseQuery(project, name, version)
 	resp, err := c.authGet(url)
 	if err != nil {
 		return nil, err
@@ -160,6 +158,10 @@ func (c *client) ReleaseQuery(project, releaseQuery string) (*core.ReleaseMetada
 	if resp.StatusCode == 401 {
 		return nil, errors.New("Unauthorized")
 	} else if resp.StatusCode != 200 {
+		releaseQuery := project + "/" + name + version
+		if project == "_" {
+			releaseQuery = name + version
+		}
 		return nil, errors.New("Couldn't query release " + releaseQuery + ": " + resp.Status)
 	}
 	result := core.NewEmptyReleaseMetadata()
@@ -170,7 +172,6 @@ func (c *client) ReleaseQuery(project, releaseQuery string) (*core.ReleaseMetada
 }
 
 func (c *client) DownloadRelease(project, name, version, targetFile string) error {
-	//        applog("client.download_release", release=release_id_string)
 	url := c.endpoints.DownloadRelease(project, name, version)
 	resp, err := c.authGet(url)
 	if err != nil {
@@ -198,7 +199,6 @@ func (c *client) DownloadRelease(project, name, version, targetFile string) erro
 }
 
 func (c *client) NextVersionQuery(project, name, prefix string) (string, error) {
-	//        applog("client.next_version", release=release_id_string)
 	url := c.endpoints.NextReleaseVersion(project, name, prefix)
 	resp, err := c.authGet(url)
 	if err != nil {
@@ -227,7 +227,6 @@ func (c *client) NextVersionQuery(project, name, prefix string) (string, error) 
 }
 
 func (c *client) Register(project string, metadata *core.ReleaseMetadata) error {
-	//        applog("client.register", release="%s-%s-v%s" % (release_metadata['type'], release_metadata['name'], release_metadata['version']))
 	url := c.endpoints.RegisterPackage(project)
 	resp, err := c.authPostJson(url, metadata)
 	if err != nil {
@@ -246,7 +245,6 @@ func (c *client) Register(project string, metadata *core.ReleaseMetadata) error 
 }
 
 func (c *client) UploadRelease(project, name, version, releasePath string) error {
-	//        applog("client.upload_release", release=release_id_string)
 	url := c.endpoints.UploadRelease(project, name, version)
 	resp, err := c.authPostFile(url, releasePath)
 	if err != nil {

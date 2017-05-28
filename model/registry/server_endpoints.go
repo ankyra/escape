@@ -25,7 +25,7 @@ import (
 
 type ServerEndpoints interface {
 	ApiServer() string
-	ReleaseQuery(project, releaseQuery string) string
+	ReleaseQuery(project, name, version string) string
 	RegisterPackage(project string) string
 	NextReleaseVersion(project, name, prefix string) string
 	UploadRelease(project, name, version string) string
@@ -51,8 +51,8 @@ func (s *serverEndpoints) ApiServer() string {
 	}
 	return apiServer + "/"
 }
-func (s *serverEndpoints) ReleaseQuery(project, releaseQuery string) string {
-	return s.ApiServer() + "a/" + project + "/" + releaseQuery + "/"
+func (s *serverEndpoints) ReleaseQuery(project, name, version string) string {
+	return s.ApiServer() + "a/" + project + "/" + name + "/" + version + "/"
 }
 
 func (s *serverEndpoints) NextReleaseVersion(project, name, prefix string) string {

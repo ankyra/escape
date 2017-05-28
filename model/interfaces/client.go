@@ -22,7 +22,7 @@ import (
 
 type Client interface {
 	Login(url, username, password string, storeCredentials bool) error
-	ReleaseQuery(project, releaseQuery string) (*core.ReleaseMetadata, error)
+	ReleaseQuery(project, name, version string) (*core.ReleaseMetadata, error)
 	NextVersionQuery(project, name, prefix string) (string, error)
 	Register(project string, metadata *core.ReleaseMetadata) error
 	UploadRelease(project, name, version, releasePath string) error

@@ -208,7 +208,11 @@ func (c *Compiler) ResolveVersion(d *core.Dependency, context Context) error {
 	backend := context.GetEscapeConfig().GetCurrentTarget().GetStorageBackend()
 	if backend == "escape" {
 		project := c.context.GetEscapeConfig().GetCurrentTarget().GetProject()
-		metadata, err := context.GetClient().ReleaseQuery(project, d.GetReleaseId())
+		versionQuery := d.GetVersion()
+		if versionQuery != "latest" {
+			versionQuery = "v" + versionQuery
+		}
+		metadata, err := context.GetClient().ReleaseQuery(project, d.GetBuild(), versionQuery)
 		if err != nil {
 			return err
 		}
