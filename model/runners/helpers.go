@@ -245,6 +245,9 @@ func (b *ScriptStep) readOutputVariables(ctx RunnerContext) error {
 func writeOutputsToFile(outputs map[string]interface{}) error {
 	path := paths.NewPath()
 	path.EnsureEscapeDirectoryExists()
+	if outputs == nil {
+		outputs = map[string]interface{}{}
+	}
 	contents, err := json.Marshal(outputs)
 	if err != nil {
 		return err
