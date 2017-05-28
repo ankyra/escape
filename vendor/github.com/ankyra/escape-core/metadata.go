@@ -30,52 +30,54 @@ import (
 	"strings"
 )
 
+const CurrentApiVersion = 1
+
 type ExecStage struct {
 	Script string `json:"script"`
 }
 
 type ConsumerConfig struct {
-    Name string `json:"name"`
+	Name string `json:"name"`
 }
 
 func NewConsumerConfig(name string) *ConsumerConfig {
-    return &ConsumerConfig{name}
+	return &ConsumerConfig{name}
 }
 
 type ProviderConfig struct {
-    Name string `json:"name"`
+	Name string `json:"name"`
 }
 
 func NewProviderConfig(name string) *ProviderConfig {
-    return &ProviderConfig{name}
+	return &ProviderConfig{name}
 }
 
 type DependencyConfig struct {
-    ReleaseId string `json:"release_id"`
+	ReleaseId string `json:"release_id"`
 }
 
 func NewDependencyConfig(releaseId string) *DependencyConfig {
-    return &DependencyConfig{releaseId}
+	return &DependencyConfig{releaseId}
 }
 
 type ExtensionConfig struct {
-    ReleaseId string `json:"release_id"`
+	ReleaseId string `json:"release_id"`
 }
 
 func NewExtensionConfig(releaseId string) *ExtensionConfig {
-    return &ExtensionConfig{releaseId}
+	return &ExtensionConfig{releaseId}
 }
 
 type ReleaseMetadata struct {
-	ApiVersion  string                `json:"api_version"`
-	Branch      string                `json:"branch"`
-	Description string                `json:"description"`
-	Files       map[string]string     `json:"files", {}`
-	Logo        string                `json:"logo"`
-	Name        string                `json:"name"`
-	Revision    string                `json:"git_revision"`
-	Metadata    map[string]string     `json:"metadata"`
-	Version     string                `json:"version"`
+	ApiVersion  int               `json:"api_version"`
+	Branch      string            `json:"branch"`
+	Description string            `json:"description"`
+	Files       map[string]string `json:"files", {}`
+	Logo        string            `json:"logo"`
+	Name        string            `json:"name"`
+	Revision    string            `json:"git_revision"`
+	Metadata    map[string]string `json:"metadata"`
+	Version     string            `json:"version"`
 
 	Consumes    []*ConsumerConfig     `json:"consumes"`
 	Depends     []*DependencyConfig   `json:"depends"`
@@ -83,7 +85,7 @@ type ReleaseMetadata struct {
 	Extends     []*ExtensionConfig    `json:"extends"`
 	Inputs      []*variables.Variable `json:"inputs"`
 	Outputs     []*variables.Variable `json:"outputs"`
-	Provides    []*ProviderConfig           `json:"provides"`
+	Provides    []*ProviderConfig     `json:"provides"`
 	Stages      map[string]*ExecStage `json:"stages"`
 	Templates   []*templates.Template `json:"templates"`
 	VariableCtx map[string]string     `json:"variable_context"`
@@ -91,9 +93,9 @@ type ReleaseMetadata struct {
 
 func NewEmptyReleaseMetadata() *ReleaseMetadata {
 	return &ReleaseMetadata{
-		ApiVersion:  "3",
-		Files:       map[string]string{},
-		Metadata:    map[string]string{},
+		ApiVersion: CurrentApiVersion,
+		Files:      map[string]string{},
+		Metadata:   map[string]string{},
 
 		Consumes:    []*ConsumerConfig{},
 		Depends:     []*DependencyConfig{},
@@ -144,6 +146,9 @@ func validate(m *ReleaseMetadata) error {
 	if m.Version == "" {
 		return fmt.Errorf("Missing version field in release metadata")
 	}
+	if m.ApiVersion <= 0 || m.ApiVersion > CurrentApiVersion {
+		return fmt.Errorf("The release metadata is compiled with a version of Escape targetting API version v%s, but this build supports up to v%s", m.ApiVersion, CurrentApiVersion)
+	}
 	if err := parsers.ValidateVersion(m.Version); err != nil {
 		return err
 	}
@@ -170,11 +175,11 @@ func (m *ReleaseMetadata) AddExtension(releaseId string) {
 }
 
 func (m *ReleaseMetadata) GetExtensions() []string {
-    result := []string{}
-    for _, ext := range m.Extends {
-        result = append(result, ext.ReleaseId)
-    }
-    return result
+	result := []string{}
+	for _, ext := range m.Extends {
+		result = append(result, ext.ReleaseId)
+	}
+	return result
 }
 
 func (m *ReleaseMetadata) GetStage(stage string) *ExecStage {
@@ -198,26 +203,26 @@ func (m *ReleaseMetadata) GetScript(stage string) string {
 	return m.GetStage(stage).Script
 }
 
-func (m *ReleaseMetadata) AddConsumes( c string) {
-    for _, consumer := range m.Consumes {
-        if consumer.Name == c {
-            return
-        }
-    }
-    m.Consumes = append(m.Consumes, NewConsumerConfig(c))
+func (m *ReleaseMetadata) AddConsumes(c string) {
+	for _, consumer := range m.Consumes {
+		if consumer.Name == c {
+			return
+		}
+	}
+	m.Consumes = append(m.Consumes, NewConsumerConfig(c))
 }
 
 func (m *ReleaseMetadata) SetConsumes(c []string) {
-    for _, consumer := range c {
-        m.AddConsumes(consumer)
-    }
+	for _, consumer := range c {
+		m.AddConsumes(consumer)
+	}
 }
 
 func (m *ReleaseMetadata) GetConsumes() []string {
-    result := []string{}
-    for _, c := range m.Consumes {
-        result = append(result, c.Name)
-    }
+	result := []string{}
+	for _, c := range m.Consumes {
+		result = append(result, c.Name)
+	}
 	return result
 }
 
@@ -246,41 +251,41 @@ func (m *ReleaseMetadata) GetOutputs() []*variables.Variable {
 }
 
 func (m *ReleaseMetadata) AddProvides(p string) {
-    for _, provider := range m.Provides {
-        if provider.Name == p {
-            return
-        }
-    }
-    m.Provides = append(m.Provides, NewProviderConfig(p))
+	for _, provider := range m.Provides {
+		if provider.Name == p {
+			return
+		}
+	}
+	m.Provides = append(m.Provides, NewProviderConfig(p))
 }
 
 func (m *ReleaseMetadata) GetProvides() []string {
-    result := []string{}
-    for _, c := range m.Provides {
-        result = append(result, c.Name)
-    }
+	result := []string{}
+	for _, c := range m.Provides {
+		result = append(result, c.Name)
+	}
 	return result
 }
 
 func (m *ReleaseMetadata) SetProvides(p []string) {
-    for _, provider := range p {
-        m.AddProvides(provider)
-    }
+	for _, provider := range p {
+		m.AddProvides(provider)
+	}
 }
 
 func (m *ReleaseMetadata) GetDependencies() []string {
-    result := []string{}
-    for _, c := range m.Depends {
-        result = append(result, c.ReleaseId)
-    }
+	result := []string{}
+	for _, c := range m.Depends {
+		result = append(result, c.ReleaseId)
+	}
 	return result
 }
 
 func (m *ReleaseMetadata) SetDependencies(deps []string) {
-    result := []*DependencyConfig{}
-    for _, d := range deps {
-        result = append(result, NewDependencyConfig(d))
-    }
+	result := []*DependencyConfig{}
+	for _, d := range deps {
+		result = append(result, NewDependencyConfig(d))
+	}
 	m.Depends = result
 }
 
