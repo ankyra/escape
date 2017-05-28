@@ -77,7 +77,7 @@ func (s *envSuite) Test_GetProviders(c *C) {
 	env := p.GetEnvironmentStateOrMakeNew("dev")
 	depl := env.GetOrCreateDeploymentState("provider")
 	metadata := core.NewReleaseMetadata("test", "1")
-	metadata.Provides = []string{"test-provider"}
+	metadata.SetProvides([]string{"test-provider"})
 	depl.CommitVersion("deploy", metadata)
 	providers := env.GetProviders()
 	c.Assert(providers, HasLen, 1)
@@ -90,7 +90,7 @@ func (s *envSuite) Test_GetProvidersOfType(c *C) {
 	env := p.GetEnvironmentStateOrMakeNew("dev")
 	depl := env.GetOrCreateDeploymentState("provider")
 	metadata := core.NewReleaseMetadata("test", "1")
-	metadata.Provides = []string{"test-provider"}
+	metadata.SetProvides([]string{"test-provider"})
 	depl.CommitVersion("deploy", metadata)
 	providers := env.GetProvidersOfType("test-provider")
 	c.Assert(providers, HasLen, 1)

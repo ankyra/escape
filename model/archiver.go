@@ -50,7 +50,7 @@ func (a *Archiver) Archive(metadata *core.ReleaseMetadata, forceOverwrite bool) 
 		scratchDir := filepath.Join(scratchSpace, dir)
 		util.MkdirRecursively(scratchDir)
 	}
-	if err := copyFiles(scratchSpace, metadata.GetFiles()); err != nil {
+	if err := copyFiles(scratchSpace, metadata.Files); err != nil {
 		return err
 	}
 	return a.buildTarArchive(metadata, forceOverwrite)

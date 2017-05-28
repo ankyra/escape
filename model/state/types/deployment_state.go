@@ -98,13 +98,13 @@ func (d *DeploymentState) UpdateOutputs(stage string, outputs map[string]interfa
 }
 
 func (d *DeploymentState) CommitVersion(stage string, metadata *core.ReleaseMetadata) error {
-	d.getStage(stage).setVersion(metadata.GetVersion())
+	d.getStage(stage).setVersion(metadata.Version)
 	d.getStage(stage).Provides = metadata.GetProvides()
 	return nil
 }
 
 func (d *DeploymentState) IsDeployed(stage string, metadata *core.ReleaseMetadata) bool {
-	return d.getStage(stage).Version == metadata.GetVersion()
+	return d.getStage(stage).Version == metadata.Version
 }
 
 func (d *DeploymentState) Save() error {

@@ -77,7 +77,7 @@ func (s *deplSuite) Test_ToScriptEnvironment_adds_dependencies(c *C) {
 		"test-v1.0": core.NewReleaseMetadata("test", "1.0"),
 	})
 	metadata := core.NewReleaseMetadata("test", "1.0")
-	metadata.Depends = []string{"test-v1.0"}
+	metadata.SetDependencies([]string{"test-v1.0"})
 	env, err := ToScriptEnvironment(fullDepl, metadata, "build", resolver)
 	c.Assert(err, IsNil)
 	c.Assert(script.IsDictAtom((*env)["$"]), Equals, true)
@@ -96,7 +96,7 @@ func (s *deplSuite) Test_ToScriptEnvironment_honours_variable_context(c *C) {
 		"test-v1.0": core.NewReleaseMetadata("test", "1.0"),
 	})
 	metadata := core.NewReleaseMetadata("test", "1.0")
-	metadata.Depends = []string{"test-v1.0"}
+	metadata.SetDependencies([]string{"test-v1.0"})
 	metadata.SetVariableInContext("test", "test-v1.0")
 	env, err := ToScriptEnvironment(fullDepl, metadata, "build", resolver)
 	c.Assert(err, IsNil)
@@ -117,7 +117,7 @@ func (s *deplSuite) Test_ToScriptEnvironment_ignores_missing_variables_in_variab
 		"test-v1.0": core.NewReleaseMetadata("test", "1.0"),
 	})
 	metadata := core.NewReleaseMetadata("test", "1.0")
-	metadata.Depends = []string{"test-v1.0"}
+	metadata.SetDependencies([]string{"test-v1.0"})
 	metadata.SetVariableInContext("test", "doesnt-exist-1.0")
 	env, err := ToScriptEnvironment(fullDepl, metadata, "build", resolver)
 	c.Assert(err, IsNil)
@@ -151,7 +151,7 @@ func (s *deplSuite) Test_ToScriptEnvironment_fails_if_deployment_state_is_missin
 func (s *deplSuite) Test_ToScriptEnvironment_fails_if_dependency_metadata_is_missing(c *C) {
 	resolver := newResolverFromMap(map[string]*core.ReleaseMetadata{})
 	metadata := core.NewReleaseMetadata("test", "1.0")
-	metadata.Depends = []string{"archive-dep-v1.0"}
+	metadata.SetDependencies([]string{"archive-dep-v1.0"})
 	_, err := ToScriptEnvironment(fullDepl, metadata, "build", resolver)
 	c.Assert(err, Not(IsNil))
 }

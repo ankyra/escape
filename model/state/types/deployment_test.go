@@ -84,7 +84,7 @@ func (s *deplSuite) Test_CommitVersion(c *C) {
 
 func (s *deplSuite) Test_CommitVersion_sets_provides_field(c *C) {
 	metadata := core.NewReleaseMetadata("test", "1")
-	metadata.Provides = []string{"test-provider"}
+	metadata.SetProvides([]string{"test-provider"})
 	depl.CommitVersion("deploy", metadata)
 	c.Assert(depl.getStage("deploy").Provides, DeepEquals, []string{"test-provider"})
 }

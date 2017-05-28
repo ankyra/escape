@@ -28,8 +28,8 @@ type Dependency struct {
 
 func NewDependencyFromMetadata(metadata *ReleaseMetadata) *Dependency {
 	return &Dependency{
-		Name:    metadata.GetName(),
-		Version: metadata.GetVersion(),
+		Name:    metadata.Name,
+		Version: metadata.Version,
 	}
 }
 

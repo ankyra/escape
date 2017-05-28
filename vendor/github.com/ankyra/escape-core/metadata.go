@@ -34,43 +34,75 @@ type ExecStage struct {
 	Script string `json:"script"`
 }
 
+type ConsumerConfig struct {
+    Name string `json:"name"`
+}
+
+func NewConsumerConfig(name string) *ConsumerConfig {
+    return &ConsumerConfig{name}
+}
+
+type ProviderConfig struct {
+    Name string `json:"name"`
+}
+
+func NewProviderConfig(name string) *ProviderConfig {
+    return &ProviderConfig{name}
+}
+
+type DependencyConfig struct {
+    ReleaseId string `json:"release_id"`
+}
+
+func NewDependencyConfig(releaseId string) *DependencyConfig {
+    return &DependencyConfig{releaseId}
+}
+
+type ExtensionConfig struct {
+    ReleaseId string `json:"release_id"`
+}
+
+func NewExtensionConfig(releaseId string) *ExtensionConfig {
+    return &ExtensionConfig{releaseId}
+}
+
 type ReleaseMetadata struct {
 	ApiVersion  string                `json:"api_version"`
 	Branch      string                `json:"branch"`
-	Consumes    []string              `json:"consumes"`
-	Depends     []string              `json:"depends"`
-	Extends     []string              `json:"extends"`
 	Description string                `json:"description"`
-	Errands     map[string]*Errand    `json:"errands"`
 	Files       map[string]string     `json:"files", {}`
-	Revision    string                `json:"git_revision"`
-	Inputs      []*variables.Variable `json:"inputs"`
 	Logo        string                `json:"logo"`
-	Metadata    map[string]string     `json:"metadata"`
 	Name        string                `json:"name"`
-	Outputs     []*variables.Variable `json:"outputs"`
-	Path        string                `json:"path"`
-	Provides    []string              `json:"provides"`
-	Templates   []*templates.Template `json:"templates"`
-	Test        string                `json:"test"`
-	VariableCtx map[string]string     `json:"variable_context"`
+	Revision    string                `json:"git_revision"`
+	Metadata    map[string]string     `json:"metadata"`
 	Version     string                `json:"version"`
+
+	Consumes    []*ConsumerConfig     `json:"consumes"`
+	Depends     []*DependencyConfig   `json:"depends"`
+	Errands     map[string]*Errand    `json:"errands"`
+	Extends     []*ExtensionConfig    `json:"extends"`
+	Inputs      []*variables.Variable `json:"inputs"`
+	Outputs     []*variables.Variable `json:"outputs"`
+	Provides    []*ProviderConfig           `json:"provides"`
 	Stages      map[string]*ExecStage `json:"stages"`
+	Templates   []*templates.Template `json:"templates"`
+	VariableCtx map[string]string     `json:"variable_context"`
 }
 
 func NewEmptyReleaseMetadata() *ReleaseMetadata {
 	return &ReleaseMetadata{
-		ApiVersion:  "2",
-		Consumes:    []string{},
-		Provides:    []string{},
-		Depends:     []string{},
-		Extends:     []string{},
+		ApiVersion:  "3",
 		Files:       map[string]string{},
 		Metadata:    map[string]string{},
+
+		Consumes:    []*ConsumerConfig{},
+		Depends:     []*DependencyConfig{},
 		Errands:     map[string]*Errand{},
-		Stages:      map[string]*ExecStage{},
+		Extends:     []*ExtensionConfig{},
 		Inputs:      []*variables.Variable{},
 		Outputs:     []*variables.Variable{},
+		Provides:    []*ProviderConfig{},
+		Stages:      map[string]*ExecStage{},
 		Templates:   []*templates.Template{},
 		VariableCtx: map[string]string{},
 	}
@@ -127,20 +159,24 @@ func validate(m *ReleaseMetadata) error {
 	}
 	return nil
 }
-func (m *ReleaseMetadata) GetExtends() []string {
-	return m.Extends
-}
+
 func (m *ReleaseMetadata) AddExtension(releaseId string) {
 	for _, e := range m.Extends {
-		if e == releaseId {
+		if e.ReleaseId == releaseId {
 			return
 		}
 	}
-	m.Extends = append(m.Extends, releaseId)
+	m.Extends = append(m.Extends, NewExtensionConfig(releaseId))
 }
-func (m *ReleaseMetadata) GetStages() map[string]*ExecStage {
-	return m.Stages
+
+func (m *ReleaseMetadata) GetExtensions() []string {
+    result := []string{}
+    for _, ext := range m.Extends {
+        result = append(result, ext.ReleaseId)
+    }
+    return result
 }
+
 func (m *ReleaseMetadata) GetStage(stage string) *ExecStage {
 	result, ok := m.Stages[stage]
 	if !ok {
@@ -157,24 +193,34 @@ func (m *ReleaseMetadata) SetStage(stage, script string) {
 	st := m.GetStage(stage)
 	st.Script = script
 }
+
 func (m *ReleaseMetadata) GetScript(stage string) string {
 	return m.GetStage(stage).Script
 }
-func (m *ReleaseMetadata) GetApiVersion() string {
-	return m.ApiVersion
+
+func (m *ReleaseMetadata) AddConsumes( c string) {
+    for _, consumer := range m.Consumes {
+        if consumer.Name == c {
+            return
+        }
+    }
+    m.Consumes = append(m.Consumes, NewConsumerConfig(c))
 }
-func (m *ReleaseMetadata) GetBranch() string {
-	return m.Branch
-}
+
 func (m *ReleaseMetadata) SetConsumes(c []string) {
-	m.Consumes = c
+    for _, consumer := range c {
+        m.AddConsumes(consumer)
+    }
 }
+
 func (m *ReleaseMetadata) GetConsumes() []string {
-	return m.Consumes
+    result := []string{}
+    for _, c := range m.Consumes {
+        result = append(result, c.Name)
+    }
+	return result
 }
-func (m *ReleaseMetadata) GetDescription() string {
-	return m.Description
-}
+
 func (m *ReleaseMetadata) GetErrands() map[string]*Errand {
 	result := map[string]*Errand{}
 	for key, val := range m.Errands {
@@ -182,9 +228,7 @@ func (m *ReleaseMetadata) GetErrands() map[string]*Errand {
 	}
 	return result
 }
-func (m *ReleaseMetadata) GetFiles() map[string]string {
-	return m.Files
-}
+
 func (m *ReleaseMetadata) GetInputs() []*variables.Variable {
 	result := []*variables.Variable{}
 	for _, i := range m.Inputs {
@@ -192,21 +236,7 @@ func (m *ReleaseMetadata) GetInputs() []*variables.Variable {
 	}
 	return result
 }
-func (m *ReleaseMetadata) GetTemplates() []*templates.Template {
-	return m.Templates
-}
-func (m *ReleaseMetadata) GetRevision() string {
-	return m.Revision
-}
-func (m *ReleaseMetadata) GetLogo() string {
-	return m.Logo
-}
-func (m *ReleaseMetadata) GetMetadata() map[string]string {
-	return m.Metadata
-}
-func (m *ReleaseMetadata) GetName() string {
-	return m.Name
-}
+
 func (m *ReleaseMetadata) GetOutputs() []*variables.Variable {
 	result := []*variables.Variable{}
 	for _, i := range m.Outputs {
@@ -214,29 +244,59 @@ func (m *ReleaseMetadata) GetOutputs() []*variables.Variable {
 	}
 	return result
 }
-func (m *ReleaseMetadata) GetPath() string {
-	return m.Path
+
+func (m *ReleaseMetadata) AddProvides(p string) {
+    for _, provider := range m.Provides {
+        if provider.Name == p {
+            return
+        }
+    }
+    m.Provides = append(m.Provides, NewProviderConfig(p))
 }
+
 func (m *ReleaseMetadata) GetProvides() []string {
-	return m.Provides
+    result := []string{}
+    for _, c := range m.Provides {
+        result = append(result, c.Name)
+    }
+	return result
 }
-func (m *ReleaseMetadata) GetVersion() string {
-	return m.Version
+
+func (m *ReleaseMetadata) SetProvides(p []string) {
+    for _, provider := range p {
+        m.AddProvides(provider)
+    }
 }
+
 func (m *ReleaseMetadata) GetDependencies() []string {
-	return m.Depends
+    result := []string{}
+    for _, c := range m.Depends {
+        result = append(result, c.ReleaseId)
+    }
+	return result
 }
+
+func (m *ReleaseMetadata) SetDependencies(deps []string) {
+    result := []*DependencyConfig{}
+    for _, d := range deps {
+        result = append(result, NewDependencyConfig(d))
+    }
+	m.Depends = result
+}
+
 func (m *ReleaseMetadata) GetVariableContext() map[string]string {
 	if m.VariableCtx == nil {
 		return map[string]string{}
 	}
 	return m.VariableCtx
 }
+
 func (m *ReleaseMetadata) SetVariableInContext(v string, ref string) {
 	ctx := m.GetVariableContext()
 	ctx[v] = ref
 	m.VariableCtx = ctx
 }
+
 func (m *ReleaseMetadata) GetReleaseId() string {
 	return m.Name + "-v" + m.Version
 }
@@ -254,6 +314,7 @@ func (m *ReleaseMetadata) AddInputVariable(input *variables.Variable) {
 	}
 	m.Inputs = append(m.Inputs, input)
 }
+
 func (m *ReleaseMetadata) AddOutputVariable(output *variables.Variable) {
 	for _, i := range m.Outputs {
 		if i.GetId() == output.GetId() {
@@ -321,18 +382,18 @@ func (m *ReleaseMetadata) ToScript() script.Script {
 
 func (m *ReleaseMetadata) ToScriptMap() map[string]script.Script {
 	metadataDict := map[string]script.Script{}
-	for key, val := range m.GetMetadata() {
+	for key, val := range m.Metadata {
 		metadataDict[key] = script.LiftString(val)
 	}
 	return map[string]script.Script{
 		"metadata": script.LiftDict(metadataDict),
 
-		"branch":      script.LiftString(m.GetBranch()),
-		"description": script.LiftString(m.GetDescription()),
-		"logo":        script.LiftString(m.GetLogo()),
-		"name":        script.LiftString(m.GetName()),
-		"revision":    script.LiftString(m.GetRevision()),
+		"branch":      script.LiftString(m.Branch),
+		"description": script.LiftString(m.Description),
+		"logo":        script.LiftString(m.Logo),
+		"name":        script.LiftString(m.Name),
+		"revision":    script.LiftString(m.Revision),
+		"version":     script.LiftString(m.Version),
 		"id":          script.LiftString(m.GetReleaseId()),
-		"version":     script.LiftString(m.GetVersion()),
 	}
 }

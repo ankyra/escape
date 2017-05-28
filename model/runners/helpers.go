@@ -87,7 +87,7 @@ func compileTemplates(ctx RunnerContext, stage string) error {
 	if err != nil {
 		return err
 	}
-	templates := ctx.GetReleaseMetadata().GetTemplates()
+	templates := ctx.GetReleaseMetadata().Templates
 	for _, tpl := range templates {
 		if err := tpl.Render(stage, env); err != nil {
 			return err

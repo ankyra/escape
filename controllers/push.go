@@ -80,7 +80,7 @@ func (p PushController) upload(context Context) error {
 func (p PushController) uploadToEscapeServer(context Context, releasePath string) error {
 	metadata := context.GetReleaseMetadata()
 	project := context.GetEscapeConfig().GetCurrentTarget().GetProject()
-	err := context.GetClient().UploadRelease(project, metadata.GetName(), metadata.GetVersion(), releasePath)
+	err := context.GetClient().UploadRelease(project, metadata.Name, metadata.Version, releasePath)
 	if err != nil {
 		return err
 	}

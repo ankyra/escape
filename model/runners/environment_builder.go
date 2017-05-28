@@ -155,7 +155,7 @@ func prepInputs(ctx RunnerContext, stage string, inputs *map[string]interface{})
 	metadata := ctx.GetReleaseMetadata()
 	deplState := ctx.GetDeploymentState()
 	result := map[string]interface{}{}
-	for key, val := range metadata.GetMetadata() {
+	for key, val := range metadata.Metadata {
 		result["METADATA_"+key] = val
 	}
 	calcInputs := deplState.GetCalculatedInputs(stage)

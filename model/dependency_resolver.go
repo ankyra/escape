@@ -65,7 +65,7 @@ func (resolver DependencyResolver) resolve(cfg EscapeConfig, path Paths, dep str
 			return err
 		}
 	}
-	for _, extension := range metadata.GetExtends() {
+	for _, extension := range metadata.GetExtensions() {
 		depPath := path.NewPathForDependency(metadata)
 		if err := resolver.resolve(cfg, depPath, extension); err != nil {
 			return err

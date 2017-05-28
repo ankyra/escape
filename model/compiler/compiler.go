@@ -67,8 +67,8 @@ func (c *Compiler) Compile(context Context) (*core.ReleaseMetadata, error) {
 	c.metadata.Name = plan.GetName()
 	c.metadata.Description = plan.GetDescription()
 	c.metadata.Logo = plan.GetLogo()
-	c.metadata.Provides = plan.GetProvides()
-	c.metadata.Consumes = plan.GetConsumes()
+	c.metadata.SetProvides(plan.GetProvides())
+	c.metadata.SetConsumes(plan.GetConsumes())
 
 	if err := c.compileExtensions(plan); err != nil {
 		return nil, err
@@ -79,7 +79,7 @@ func (c *Compiler) Compile(context Context) (*core.ReleaseMetadata, error) {
 	if err := c.compileVersion(plan.GetVersion()); err != nil {
 		return nil, err
 	}
-	if err := c.compileMetadata(plan.GetMetadata()); err != nil {
+	if err := c.compileMetadata(plan.Metadata); err != nil {
 		return nil, err
 	}
 	if err := c.compileEscapePlanScriptDigests(plan); err != nil {
@@ -109,14 +109,6 @@ func (c *Compiler) Compile(context Context) (*core.ReleaseMetadata, error) {
 }
 
 func (c *Compiler) compileExtensions(plan *escape_plan.EscapePlan) error {
-	consumes := map[string]bool{}
-	provides := map[string]bool{}
-	for _, c := range c.metadata.Consumes {
-		consumes[c] = true
-	}
-	for _, c := range c.metadata.Provides {
-		provides[c] = true
-	}
 	for _, extend := range plan.GetExtends() {
 		dep, err := core.NewDependencyFromString(extend)
 		if err != nil {
@@ -132,16 +124,10 @@ func (c *Compiler) compileExtensions(plan *escape_plan.EscapePlan) error {
 			return err
 		}
 		for _, consume := range metadata.GetConsumes() {
-			if !consumes[consume] {
-				consumes[consume] = true
-				c.metadata.Consumes = append(c.metadata.Consumes, consume)
-			}
+			c.metadata.AddConsumes(consume)
 		}
 		for _, provide := range metadata.GetProvides() {
-			if !provides[provide] {
-				provides[provide] = true
-				c.metadata.Provides = append(c.metadata.Provides, provide)
-			}
+			c.metadata.AddProvides(provide)
 		}
 		for _, input := range metadata.GetInputs() {
 			c.metadata.AddInputVariable(input)
@@ -157,15 +143,15 @@ func (c *Compiler) compileExtensions(plan *escape_plan.EscapePlan) error {
 			newErrand.Script = c.extensionPath(metadata, newErrand.GetScript())
 			c.metadata.Errands[name] = newErrand
 		}
-		for key, val := range metadata.GetMetadata() {
+		for key, val := range metadata.Metadata {
 			c.metadata.Metadata[key] = val
 		}
-		for _, tpl := range metadata.GetTemplates() {
+		for _, tpl := range metadata.Templates {
 			tpl.File = c.extensionPath(metadata, tpl.File)
 			tpl.Target = c.extensionPath(metadata, tpl.Target)
 			c.metadata.Templates = append(c.metadata.Templates, tpl)
 		}
-		for name, stage := range metadata.GetStages() {
+		for name, stage := range metadata.Stages {
 			c.metadata.SetStage(name, c.extensionPath(metadata, stage.Script))
 		}
 		for _, d := range metadata.GetDependencies() {
@@ -216,7 +202,7 @@ func (c *Compiler) ResolveVersion(d *core.Dependency, context Context) error {
 		if err != nil {
 			return err
 		}
-		d.Version = metadata.GetVersion()
+		d.Version = metadata.Version
 	} else if backend == "" || backend == "local" {
 		return errors.New("Backend not implemented: " + backend)
 	} else {
@@ -227,10 +213,6 @@ func (c *Compiler) ResolveVersion(d *core.Dependency, context Context) error {
 
 func (c *Compiler) compileDependencies(depends []string) error {
 
-	consumes := map[string]bool{}
-	for _, c := range c.metadata.Consumes {
-		consumes[c] = true
-	}
 	result := []string{}
 	for _, depend := range depends {
 		dep, err := core.NewDependencyFromString(depend)
@@ -247,10 +229,7 @@ func (c *Compiler) compileDependencies(depends []string) error {
 			return err
 		}
 		for _, consume := range metadata.GetConsumes() {
-			if !consumes[consume] {
-				consumes[consume] = true
-				c.metadata.Consumes = append(c.metadata.Consumes, consume)
-			}
+			c.metadata.AddConsumes(consume)
 		}
 		for _, input := range metadata.GetInputs() {
 			if !input.HasDefault() {
@@ -265,7 +244,7 @@ func (c *Compiler) compileDependencies(depends []string) error {
 		}
 		result = append(result, resolvedDep)
 	}
-	c.metadata.Depends = result
+	c.metadata.SetDependencies(result)
 	return nil
 }
 
@@ -313,14 +292,13 @@ func (c *Compiler) compileEscapePlanScriptDigests(plan *escape_plan.EscapePlan) 
 		plan.GetBuild(), plan.GetDeploy(), plan.GetDestroy(),
 		plan.GetPreBuild(), plan.GetPreDeploy(), plan.GetPreDestroy(),
 		plan.GetPostBuild(), plan.GetPostDeploy(), plan.GetPostDestroy(),
-		plan.GetTest(), plan.GetPath(),
+		plan.GetTest(), plan.GetSmoke(),
 	}
 	for _, path := range paths {
 		if err := c.compileEscapePlanScriptDigest(path); err != nil {
 			return err
 		}
 	}
-	c.metadata.Path = plan.GetPath()
 	c.metadata.SetStage("build", plan.GetBuild())
 	c.metadata.SetStage("deploy", plan.GetDeploy())
 	c.metadata.SetStage("destroy", plan.GetDestroy())
