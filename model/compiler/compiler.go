@@ -17,19 +17,11 @@ limitations under the License.
 package compiler
 
 import (
-	"crypto/md5"
-	"errors"
 	"fmt"
 	. "github.com/ankyra/escape-client/model/interfaces"
-	"github.com/ankyra/escape-client/util"
 	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/script"
-	"io"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 	"strconv"
-	"strings"
 )
 
 type CompilerFunc func(*CompilerContext) error
@@ -57,7 +49,7 @@ func (c *Compiler) Compile(context Context) (*core.ReleaseMetadata, error) {
 	plan := context.GetEscapePlan()
 	c.context = context
 	c.metadata = core.NewEmptyReleaseMetadata()
-	c.CompilerContext = NewCompilerContext(c.metadata, context.GetEscapePlan())
+	c.CompilerContext = NewCompilerContext(c.metadata, context.GetEscapePlan(), context.GetRegistry())
 
 	if plan.GetName() == "" {
 		return nil, fmt.Errorf("Missing build name. Add a 'name' field to your Escape plan")
@@ -68,13 +60,13 @@ func (c *Compiler) Compile(context Context) (*core.ReleaseMetadata, error) {
 	c.metadata.SetProvides(plan.GetProvides())
 	c.metadata.SetConsumes(plan.GetConsumes())
 
-	if err := c.compileExtensions(plan); err != nil {
+	if err := compileExtensions(c.CompilerContext); err != nil {
 		return nil, err
 	}
-	if err := c.compileDependencies(plan.GetDepends()); err != nil {
+	if err := compileDependencies(c.CompilerContext); err != nil {
 		return nil, err
 	}
-	if err := c.compileVersion(plan.GetVersion()); err != nil {
+	if err := compileVersion(c.CompilerContext); err != nil {
 		return nil, err
 	}
 	if err := compileMetadata(c.CompilerContext); err != nil {
@@ -105,68 +97,6 @@ func (c *Compiler) Compile(context Context) (*core.ReleaseMetadata, error) {
 	//    self._add_dependencies(escape_config, escape_plan)
 	context.PopLogSection()
 	return c.metadata, nil
-
-}
-
-func (c *Compiler) ResolveVersion(d *core.Dependency, context Context) error {
-	if d.Version != "latest" && !strings.HasSuffix(d.Version, "@") {
-		return nil
-	}
-	project := c.context.GetEscapeConfig().GetCurrentTarget().GetProject()
-	versionQuery := d.GetVersion()
-	if versionQuery != "latest" {
-		versionQuery = "v" + versionQuery
-	}
-	metadata, err := context.GetRegistry().QueryReleaseMetadata(project, d.GetName(), versionQuery)
-	if err != nil {
-		return err
-	}
-	d.Version = metadata.Version
-	return nil
-}
-
-func (c *Compiler) addFileDigest(path string) error {
-	if path == "" {
-		return nil
-	}
-	if !util.PathExists(path) {
-		return errors.New("File " + path + " was referenced in the escape plan, but it doesn't exist")
-	}
-	if util.IsDir(path) {
-		return c.addDirectoryFileDigests(path)
-	}
-	f, err := os.Open(path)
-	if err != nil {
-		return errors.New("Couldn't open " + path + ": " + err.Error())
-	}
-	defer f.Close()
-
-	h := md5.New()
-	if _, err := io.Copy(h, f); err != nil {
-		return err
-	}
-	hexDigest := fmt.Sprintf("%x", h.Sum(nil))
-	c.metadata.AddFileWithDigest(path, hexDigest)
-	return nil
-}
-
-func (c *Compiler) addDirectoryFileDigests(path string) error {
-	if !util.IsDir(path) {
-		return errors.New("Not a directory: " + path)
-	}
-	fileInfos, err := ioutil.ReadDir(path)
-	if err != nil {
-		return errors.New("Could not read directory " + path + ": " + err.Error())
-	}
-	for _, fileInfo := range fileInfos {
-		target := filepath.Join(path, fileInfo.Name())
-		if fileInfo.IsDir() {
-			c.addDirectoryFileDigests(target)
-		} else {
-			c.addFileDigest(target)
-		}
-	}
-	return nil
 }
 
 func RunScriptForCompileStep(scriptStr string, variableCtx map[string]*core.ReleaseMetadata) (string, error) {

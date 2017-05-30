@@ -20,41 +20,50 @@ import (
 	"github.com/ankyra/escape-core"
 )
 
-func (c *Compiler) compileDependencies(depends []string) error {
-
+func compileDependencies(ctx *CompilerContext) error {
 	result := []string{}
-	for _, depend := range depends {
+	for _, depend := range ctx.Plan.GetDepends() {
 		dep, err := core.NewDependencyFromString(depend)
 		if err != nil {
 			return err
 		}
-		if err := c.ResolveVersion(dep, c.context); err != nil {
+		metadata, err := resolveVersion(ctx, dep)
+		if err != nil {
 			return err
 		}
 		resolvedDep := dep.GetReleaseId()
 		versionlessDep := dep.GetVersionlessReleaseId()
-		metadata, err := c.context.GetDependencyMetadata(resolvedDep)
-		if err != nil {
-			return err
-		}
 		for _, consume := range metadata.GetConsumes() {
-			c.metadata.AddConsumes(consume)
+			ctx.Metadata.AddConsumes(consume)
 		}
 		for _, input := range metadata.GetInputs() {
 			if !input.HasDefault() {
-				c.metadata.AddInputVariable(input)
+				ctx.Metadata.AddInputVariable(input)
 			}
 		}
-		c.VariableCtx[versionlessDep] = metadata
-		c.metadata.SetVariableInContext(versionlessDep, metadata.GetReleaseId())
+		ctx.VariableCtx[versionlessDep] = metadata
+		ctx.Metadata.SetVariableInContext(versionlessDep, metadata.GetReleaseId())
 
 		if dep.GetVariableName() != "" {
-			c.VariableCtx[dep.GetVariableName()] = metadata
-			c.metadata.SetVariableInContext(dep.GetVariableName(), metadata.GetReleaseId())
+			ctx.VariableCtx[dep.GetVariableName()] = metadata
+			ctx.Metadata.SetVariableInContext(dep.GetVariableName(), metadata.GetReleaseId())
 		}
 
 		result = append(result, resolvedDep)
 	}
-	c.metadata.SetDependencies(result)
+	ctx.Metadata.SetDependencies(result)
 	return nil
+}
+
+func resolveVersion(ctx *CompilerContext, d *core.Dependency) (*core.ReleaseMetadata, error) {
+	versionQuery := d.GetVersion()
+	if versionQuery != "latest" {
+		versionQuery = "v" + versionQuery
+	}
+	metadata, err := ctx.Registry.QueryReleaseMetadata(d.Project, d.GetName(), versionQuery)
+	if err != nil {
+		return nil, err
+	}
+	d.Version = metadata.Version
+	return metadata, nil
 }

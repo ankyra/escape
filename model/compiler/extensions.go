@@ -17,84 +17,84 @@ limitations under the License.
 package compiler
 
 import (
-	"github.com/ankyra/escape-client/model/escape_plan"
 	"github.com/ankyra/escape-client/model/paths"
 	"github.com/ankyra/escape-core"
+	"github.com/ankyra/escape-core/parsers"
 )
 
-func (c *Compiler) compileExtensions(plan *escape_plan.EscapePlan) error {
-	for _, extend := range plan.GetExtends() {
+func compileExtensions(ctx *CompilerContext) error {
+	for _, extend := range ctx.Plan.GetExtends() {
 		dep, err := core.NewDependencyFromString(extend)
 		if err != nil {
 			return err
 		}
-		if err := c.ResolveVersion(dep, c.context); err != nil {
-			return err
-		}
-		resolvedDep := dep.GetReleaseId()
-		versionlessDep := dep.GetVersionlessReleaseId()
-		metadata, err := c.context.GetDependencyMetadata(resolvedDep)
+		metadata, err := resolveVersion(ctx, dep)
 		if err != nil {
 			return err
 		}
+		versionlessDep := dep.GetVersionlessReleaseId()
 		for _, consume := range metadata.GetConsumes() {
-			c.metadata.AddConsumes(consume)
+			ctx.Metadata.AddConsumes(consume)
 		}
 		for _, provide := range metadata.GetProvides() {
-			c.metadata.AddProvides(provide)
+			ctx.Metadata.AddProvides(provide)
 		}
 		for _, input := range metadata.GetInputs() {
-			c.metadata.AddInputVariable(input)
+			ctx.Metadata.AddInputVariable(input)
 		}
 		for _, output := range metadata.GetOutputs() {
-			c.metadata.AddOutputVariable(output)
+			ctx.Metadata.AddOutputVariable(output)
 		}
 		for name, newErrand := range metadata.GetErrands() {
-			_, exists := c.metadata.Errands[name]
+			_, exists := ctx.Metadata.Errands[name]
 			if exists {
 				continue
 			}
-			newErrand.Script = c.extensionPath(metadata, newErrand.GetScript())
-			c.metadata.Errands[name] = newErrand
+			newErrand.Script = extensionPath(metadata, newErrand.GetScript())
+			ctx.Metadata.Errands[name] = newErrand
 		}
 		for key, val := range metadata.Metadata {
-			c.metadata.Metadata[key] = val
+			ctx.Metadata.Metadata[key] = val
 		}
 		for _, tpl := range metadata.Templates {
-			tpl.File = c.extensionPath(metadata, tpl.File)
-			tpl.Target = c.extensionPath(metadata, tpl.Target)
-			c.metadata.Templates = append(c.metadata.Templates, tpl)
+			tpl.File = extensionPath(metadata, tpl.File)
+			tpl.Target = extensionPath(metadata, tpl.Target)
+			ctx.Metadata.Templates = append(ctx.Metadata.Templates, tpl)
 		}
 		for name, stage := range metadata.Stages {
-			c.metadata.SetStage(name, c.extensionPath(metadata, stage.Script))
+			ctx.Metadata.SetStage(name, extensionPath(metadata, stage.Script))
 		}
 		for _, d := range metadata.GetDependencies() {
 			found := false
-			for _, existing := range plan.Depends {
+			for _, existing := range ctx.Plan.Depends {
 				if existing == d {
 					found = true
 				}
 			}
 			if !found {
-				plan.Depends = append(plan.Depends, d)
+				ctx.Plan.Depends = append(ctx.Plan.Depends, d)
 			}
 		}
 		for key, val := range metadata.GetVariableContext() {
-			metadata, err := c.context.GetDependencyMetadata(val)
+			dep, err := parsers.ParseQualifiedReleaseId(val)
 			if err != nil {
 				return err
 			}
-			c.VariableCtx[key] = metadata
-			c.metadata.SetVariableInContext(key, metadata.GetReleaseId())
+			metadata, err := ctx.Registry.QueryReleaseMetadata(dep.Project, dep.Name, dep.Version)
+			if err != nil {
+				return err
+			}
+			ctx.VariableCtx[key] = metadata
+			ctx.Metadata.SetVariableInContext(key, metadata.GetReleaseId())
 		}
-		c.VariableCtx[versionlessDep] = metadata
-		c.metadata.SetVariableInContext(versionlessDep, metadata.GetReleaseId())
-		c.metadata.AddExtension(metadata.GetReleaseId())
+		ctx.VariableCtx[versionlessDep] = metadata
+		ctx.Metadata.SetVariableInContext(versionlessDep, metadata.GetReleaseId())
+		ctx.Metadata.AddExtension(metadata.GetReleaseId())
 	}
 	return nil
 }
 
-func (c *Compiler) extensionPath(extension *core.ReleaseMetadata, path string) string {
+func extensionPath(extension *core.ReleaseMetadata, path string) string {
 	if path == "" {
 		return ""
 	}

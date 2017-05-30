@@ -23,12 +23,13 @@ import (
 	"strings"
 )
 
-func (c *Compiler) compileVersion(version string) error {
+func compileVersion(ctx *CompilerContext) error {
+	version := ctx.Plan.GetVersion()
 	_, err := script.ParseScript(version)
 	if err != nil {
 		return fmt.Errorf("Couldn't parse expression '%s' in version field: %s", version, err.Error())
 	}
-	str, err := RunScriptForCompileStep(version, c.VariableCtx)
+	str, err := RunScriptForCompileStep(version, ctx.VariableCtx)
 	if err != nil {
 		return fmt.Errorf("Couldn't evaluate expression '%s' in version field: %s", version, err.Error())
 	}
@@ -39,18 +40,15 @@ func (c *Compiler) compileVersion(version string) error {
 	if err := parsers.ValidateVersion(version); err != nil {
 		return err
 	}
-	registry := c.context.GetRegistry()
-	plan := c.context.GetEscapePlan()
-	plan.SetVersion(version)
+	ctx.Plan.SetVersion(version)
 	if strings.HasSuffix(version, "@") {
 		prefix := version[:len(version)-1]
-		project := c.context.GetEscapeConfig().GetCurrentTarget().GetProject()
-		nextVersion, err := registry.QueryNextVersion(project, plan.GetName(), prefix)
+		nextVersion, err := ctx.Registry.QueryNextVersion(ctx.Project, ctx.Plan.GetName(), prefix)
 		if err != nil {
 			return err
 		}
 		version = nextVersion
 	}
-	c.metadata.Version = version
+	ctx.Metadata.Version = version
 	return nil
 }

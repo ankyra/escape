@@ -20,6 +20,7 @@ import (
 	"crypto/md5"
 	"fmt"
 	"github.com/ankyra/escape-client/model/escape_plan"
+	"github.com/ankyra/escape-client/model/registry"
 	"github.com/ankyra/escape-client/util"
 	"github.com/ankyra/escape-core"
 	"io"
@@ -32,13 +33,16 @@ type CompilerContext struct {
 	Metadata    *core.ReleaseMetadata
 	Plan        *escape_plan.EscapePlan
 	VariableCtx map[string]*core.ReleaseMetadata
+	Registry    registry.Registry
+	Project     string
 }
 
-func NewCompilerContext(metadata *core.ReleaseMetadata, plan *escape_plan.EscapePlan) *CompilerContext {
+func NewCompilerContext(metadata *core.ReleaseMetadata, plan *escape_plan.EscapePlan, registry registry.Registry) *CompilerContext {
 	return &CompilerContext{
 		Metadata:    metadata,
 		Plan:        plan,
 		VariableCtx: map[string]*core.ReleaseMetadata{},
+		Registry:    registry,
 	}
 }
 
