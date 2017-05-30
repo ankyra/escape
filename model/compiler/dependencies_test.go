@@ -32,6 +32,27 @@ func (s *suite) Test_Compile_Dependencies(c *C) {
 		"dependency-v1.0 as dep",
 	}
 	reg := registry.NewMockRegistry()
+	reg.ReleaseMetadata = func(project, name, version string) (*core.ReleaseMetadata, error) {
+		if project == "_" && name == "dependency" && version == "v1.0" {
+			m := core.NewReleaseMetadata(name, "1.0")
+			m.Project = "_"
+			return m, nil
+		}
+		return nil, fmt.Errorf("Resolve error")
+	}
+	ctx := NewCompilerContext(plan, reg)
+	c.Assert(compileDependencies(ctx), IsNil)
+	c.Assert(ctx.Metadata.GetDependencies(), DeepEquals, []string{"_/dependency-v1.0"})
+	c.Assert(ctx.VariableCtx["dep"].GetQualifiedReleaseId(), Equals, "_/dependency-v1.0")
+}
+
+func (s *suite) Test_Compile_Dependencies_adds_inputs_without_defaults(c *C) {
+	plan := escape_plan.NewEscapePlan()
+	plan.Depends = nil
+	plan.Depends = []string{
+		"dependency-v1.0 as dep",
+	}
+	reg := registry.NewMockRegistry()
 	v1, _ := variables.NewVariableFromString("no-default", "string")
 	v2, _ := variables.NewVariableFromString("with-default", "string")
 	v2.Default = "test"
@@ -39,9 +60,6 @@ func (s *suite) Test_Compile_Dependencies(c *C) {
 		if project == "_" && name == "dependency" && version == "v1.0" {
 			m := core.NewReleaseMetadata(name, "1.0")
 			m.Project = "_"
-			m.AddConsumes("test-consumer-1")
-			m.AddConsumes("test-consumer-1")
-			m.AddConsumes("test-consumer-2")
 			m.AddInputVariable(v1)
 			m.AddInputVariable(v2)
 			return m, nil
@@ -50,13 +68,32 @@ func (s *suite) Test_Compile_Dependencies(c *C) {
 	}
 	ctx := NewCompilerContext(plan, reg)
 	c.Assert(compileDependencies(ctx), IsNil)
-	c.Assert(ctx.Metadata.GetDependencies(), DeepEquals, []string{"_/dependency-v1.0"})
-	c.Assert(ctx.Metadata.GetConsumes(), DeepEquals, []string{"test-consumer-1", "test-consumer-2"})
-	c.Assert(ctx.VariableCtx["dep"].GetQualifiedReleaseId(), Equals, "_/dependency-v1.0")
-
 	inputs := ctx.Metadata.GetInputs()
 	c.Assert(inputs, HasLen, 1)
 	c.Assert(inputs[0], DeepEquals, v1)
+}
+
+func (s *suite) Test_Compile_Dependencies_adds_consumers(c *C) {
+	plan := escape_plan.NewEscapePlan()
+	plan.Depends = nil
+	plan.Depends = []string{
+		"dependency-v1.0 as dep",
+	}
+	reg := registry.NewMockRegistry()
+	reg.ReleaseMetadata = func(project, name, version string) (*core.ReleaseMetadata, error) {
+		if project == "_" && name == "dependency" && version == "v1.0" {
+			m := core.NewReleaseMetadata(name, "1.0")
+			m.Project = "_"
+			m.AddConsumes("test-consumer-1")
+			m.AddConsumes("test-consumer-1")
+			m.AddConsumes("test-consumer-2")
+			return m, nil
+		}
+		return nil, fmt.Errorf("Resolve error")
+	}
+	ctx := NewCompilerContext(plan, reg)
+	c.Assert(compileDependencies(ctx), IsNil)
+	c.Assert(ctx.Metadata.GetConsumes(), DeepEquals, []string{"test-consumer-1", "test-consumer-2"})
 }
 
 func (s *suite) Test_Compile_Dependencies_nil(c *C) {

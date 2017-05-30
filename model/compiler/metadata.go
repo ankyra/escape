@@ -25,7 +25,7 @@ func compileMetadata(ctx *CompilerContext) error {
 	for key, val := range ctx.Plan.Metadata {
 		str, err := ctx.RunScriptForCompileStep(val)
 		if err != nil {
-			return fmt.Errorf("%s in metadata field.", err.Error())
+			return fmt.Errorf("%s in metadata field '%s'.", err.Error(), key)
 		}
 		result[key] = str
 	}
