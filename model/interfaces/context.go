@@ -40,7 +40,7 @@ type Context interface {
 	GetReleaseMetadata() *core.ReleaseMetadata
 	GetEnvironmentState() *state.EnvironmentState
 	GetEscapeConfig() EscapeConfig
-	GetClient() Client
+	GetRegistry() Registry
 	GetLogger() util.Logger
 	GetRootDeploymentName() string
 	SetRootDeploymentName(string)

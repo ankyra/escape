@@ -38,5 +38,6 @@ func (LoginController) Login(context Context, url, username, password string, st
 	if password == "" {
 		return fmt.Errorf("Missing password")
 	}
-	return context.GetClient().Login(url, username, password, storeCredentials)
+	//return context.GetRegistry().Login(url, username, password, storeCredentials)
+	return fmt.Errorf("Not implemented")
 }

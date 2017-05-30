@@ -22,13 +22,6 @@ import (
 	core "github.com/ankyra/escape-core"
 )
 
-type Registry interface {
-	QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error)
-	QueryNextVersion(project, name, versionPrefix string) (string, error)
-	DownloadRelease(project, name, version, targetFile string) error
-	UploadRelease(project, releasePath string, metadata *core.ReleaseMetadata) error
-}
-
 var GlobalRegistry Registry
 
 func LoadRegistryFromConfig(cfg EscapeConfig) Registry {

@@ -84,8 +84,8 @@ func (c *context) PopLogSection() {
 func (c *context) PopLogRelease() {
 	c.Logger.PopRelease()
 }
-func (c *context) GetClient() Client {
-	return c.EscapeConfig.GetClient()
+func (c *context) GetRegistry() Registry {
+	return c.EscapeConfig.GetRegistry()
 }
 func (c *context) GetEscapePlan() *escape_plan.EscapePlan {
 	return c.EscapePlan

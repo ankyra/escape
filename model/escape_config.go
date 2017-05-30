@@ -35,7 +35,7 @@ type escapeConfig struct {
 	Targets      map[string]*escapeTargetConfig `json:"targets"`
 	Context      Context                        `json:"-"`
 	saveLocation string                         `json:"-"`
-	Client       Client                         `json:"-"`
+	Registry     Registry                       `json:"-"`
 }
 
 type escapeTargetConfig struct {
@@ -57,7 +57,7 @@ func NewEscapeConfig(context Context) EscapeConfig {
 		},
 		ActiveTarget: "default",
 	}
-	cfg.Client = registry.NewClient(cfg)
+	cfg.Registry = registry.LoadRegistryFromConfig(cfg)
 	return cfg
 }
 
@@ -75,8 +75,8 @@ func newEscapeTargetConfig(context Context) *escapeTargetConfig {
 	return target
 }
 
-func (c *escapeConfig) GetClient() Client {
-	return c.Client
+func (c *escapeConfig) GetRegistry() Registry {
+	return c.Registry
 }
 
 func (e *escapeConfig) GetCurrentTarget() EscapeTargetConfig {

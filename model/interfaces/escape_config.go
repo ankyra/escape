@@ -16,6 +16,17 @@ limitations under the License.
 
 package interfaces
 
+import (
+	core "github.com/ankyra/escape-core"
+)
+
+type Registry interface {
+	QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error)
+	QueryNextVersion(project, name, versionPrefix string) (string, error)
+	DownloadRelease(project, name, version, targetFile string) error
+	UploadRelease(project, releasePath string, metadata *core.ReleaseMetadata) error
+}
+
 type EscapeTargetConfig interface {
 	ToJson() string
 	Save() error
@@ -40,5 +51,5 @@ type EscapeConfig interface {
 	LoadConfig(cfgFile string, cfgProfile string) error
 	Save() error
 	GetCurrentTarget() EscapeTargetConfig
-	GetClient() Client
+	GetRegistry() Registry
 }

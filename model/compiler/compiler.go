@@ -191,23 +191,16 @@ func (c *Compiler) ResolveVersion(d *core.Dependency, context Context) error {
 	if d.Version != "latest" && !strings.HasSuffix(d.Version, "@") {
 		return nil
 	}
-	backend := context.GetEscapeConfig().GetCurrentTarget().GetStorageBackend()
-	if backend == "escape" {
-		project := c.context.GetEscapeConfig().GetCurrentTarget().GetProject()
-		versionQuery := d.GetVersion()
-		if versionQuery != "latest" {
-			versionQuery = "v" + versionQuery
-		}
-		metadata, err := context.GetClient().ReleaseQuery(project, d.GetBuild(), versionQuery)
-		if err != nil {
-			return err
-		}
-		d.Version = metadata.Version
-	} else if backend == "" || backend == "local" {
-		return errors.New("Backend not implemented: " + backend)
-	} else {
-		return errors.New("Unsupported Escape storage backend: " + backend)
+	project := c.context.GetEscapeConfig().GetCurrentTarget().GetProject()
+	versionQuery := d.GetVersion()
+	if versionQuery != "latest" {
+		versionQuery = "v" + versionQuery
 	}
+	metadata, err := context.GetRegistry().QueryReleaseMetadata(project, d.GetBuild(), versionQuery)
+	if err != nil {
+		return err
+	}
+	d.Version = metadata.Version
 	return nil
 }
 
@@ -264,24 +257,17 @@ func (c *Compiler) compileVersion(version string) error {
 	if err := parsers.ValidateVersion(version); err != nil {
 		return err
 	}
-	client := c.context.GetClient()
+	registry := c.context.GetRegistry()
 	plan := c.context.GetEscapePlan()
 	plan.SetVersion(version)
 	if strings.HasSuffix(version, "@") {
 		prefix := version[:len(version)-1]
-		backend := c.context.GetEscapeConfig().GetCurrentTarget().GetStorageBackend()
-		if backend == "escape" {
-			project := c.context.GetEscapeConfig().GetCurrentTarget().GetProject()
-			nextVersion, err := client.NextVersionQuery(project, plan.GetName(), prefix)
-			if err != nil {
-				return err
-			}
-			version = nextVersion
-		} else if backend == "" || backend == "local" {
-			return fmt.Errorf("Auto versioning backend %s not implemented. The storage backend can be configured in the escape config (see `escape config show`)", backend)
-		} else {
-			return fmt.Errorf("Unknown storage backend: " + backend)
+		project := c.context.GetEscapeConfig().GetCurrentTarget().GetProject()
+		nextVersion, err := registry.QueryNextVersion(project, plan.GetName(), prefix)
+		if err != nil {
+			return err
 		}
+		version = nextVersion
 	}
 	c.metadata.Version = version
 	return nil

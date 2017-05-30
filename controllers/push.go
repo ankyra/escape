@@ -17,8 +17,6 @@ limitations under the License.
 package controllers
 
 import (
-	"fmt"
-
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/paths"
 )
@@ -28,7 +26,7 @@ type PushController struct{}
 func (p PushController) Push(context Context, buildFatPackage bool) error {
 	context.PushLogRelease(context.GetReleaseMetadata().GetReleaseId())
 	context.PushLogSection("Push")
-	if err := p.register(context); err != nil {
+	if err := p.saveLocally(context); err != nil {
 		return err
 	}
 	if err := p.upload(context); err != nil {
@@ -40,9 +38,7 @@ func (p PushController) Push(context Context, buildFatPackage bool) error {
 	return nil
 }
 
-func (p PushController) register(context Context) error {
-	context.Log("register.start", nil)
-	backend := context.GetEscapeConfig().GetCurrentTarget().GetStorageBackend()
+func (p PushController) saveLocally(context Context) error {
 	path := paths.NewPath()
 	if err := path.EnsureDependencyCacheDirectoryExists(); err != nil {
 		return err
@@ -51,37 +47,15 @@ func (p PushController) register(context Context) error {
 	if err := context.GetReleaseMetadata().WriteJsonFile(localRegister); err != nil {
 		return err
 	}
-	if backend == "" || backend == "local" {
-	} else if backend == "escape" {
-		project := context.GetEscapeConfig().GetCurrentTarget().GetProject()
-		if err := context.GetClient().Register(project, context.GetReleaseMetadata()); err != nil {
-			return err
-		}
-	} else {
-		return fmt.Errorf("Unsupported Escape storage backend: '%s'", backend)
-	}
-	context.Log("register.finished", nil)
 	return nil
 }
 
 func (p PushController) upload(context Context) error {
 	context.Log("upload.start", nil)
-	backend := context.GetEscapeConfig().GetCurrentTarget().GetStorageBackend()
 	releasePath := paths.NewPath().ReleaseLocation(context.GetReleaseMetadata())
-	if backend == "" || backend == "local" {
-		context.Log("upload.finished", nil)
-		return nil
-	} else if backend == "escape" {
-		return p.uploadToEscapeServer(context, releasePath)
-	}
-	return fmt.Errorf("Unknown storage backend: '%s'", backend)
-}
-
-func (p PushController) uploadToEscapeServer(context Context, releasePath string) error {
 	metadata := context.GetReleaseMetadata()
 	project := context.GetEscapeConfig().GetCurrentTarget().GetProject()
-	err := context.GetClient().UploadRelease(project, metadata.Name, metadata.Version, releasePath)
-	if err != nil {
+	if err := context.GetRegistry().UploadRelease(project, releasePath, metadata); err != nil {
 		return err
 	}
 	context.Log("upload.finished", nil)
