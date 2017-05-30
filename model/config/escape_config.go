@@ -33,7 +33,6 @@ type EscapeConfig struct {
 	ActiveTarget string                         `json:"current_target"`
 	Targets      map[string]*EscapeTargetConfig `json:"targets"`
 	saveLocation string                         `json:"-"`
-	Registry     registry.Registry              `json:"-"`
 }
 
 type EscapeTargetConfig struct {
@@ -53,7 +52,6 @@ func NewEscapeConfig() *EscapeConfig {
 		"default": newEscapeTargetConfig(cfg),
 	}
 	cfg.ActiveTarget = "default"
-	cfg.Registry = registry.NewLocalRegistry()
 	return cfg
 }
 
@@ -72,7 +70,7 @@ func newEscapeTargetConfig(cfg *EscapeConfig) *EscapeTargetConfig {
 }
 
 func (c *EscapeConfig) GetRegistry() registry.Registry {
-	return c.Registry
+	return c.GetCurrentTarget().GetRegistry()
 }
 
 func (e *EscapeConfig) GetCurrentTarget() *EscapeTargetConfig {
@@ -142,6 +140,13 @@ func (t *EscapeTargetConfig) ToJson() string {
 		panic(err)
 	}
 	return string(str)
+}
+
+func (t *EscapeTargetConfig) GetRegistry() registry.Registry {
+	if t.StorageBackend == "escape" {
+		return registry.NewRemoteRegistry(t.ApiServer, t.AuthToken)
+	}
+	return registry.NewLocalRegistry()
 }
 
 func (t *EscapeTargetConfig) Save() error {
