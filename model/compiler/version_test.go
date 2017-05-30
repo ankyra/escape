@@ -30,16 +30,23 @@ func (s *suite) Test_Compile_Version_resolve_version(c *C) {
 		"1.0.@": "1.0.0",
 		"auto":  "0",
 	}
+	var capturedProject, capturedName *string
 	reg := registry.NewMockRegistry()
 	reg.NextVersion = func(project, name, versionPrefix string) (string, error) {
+		capturedProject = &project
+		capturedName = &name
 		return versionPrefix + "0", nil
 	}
 	for version, expected := range versions {
 		plan := escape_plan.NewEscapePlan()
+		plan.Name = "my-build"
 		plan.Version = version
 		ctx := NewCompilerContext(plan, reg)
+		ctx.Project = "cheeky-project"
 		c.Assert(compileVersion(ctx), IsNil)
 		c.Assert(ctx.Metadata.Version, Equals, expected)
+		c.Assert(*capturedProject, Equals, "cheeky-project")
+		c.Assert(*capturedName, Equals, "my-build")
 	}
 }
 

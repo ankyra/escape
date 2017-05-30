@@ -31,7 +31,7 @@ func compileDependencies(ctx *CompilerContext) error {
 		if err != nil {
 			return err
 		}
-		resolvedDep := dep.GetReleaseId()
+		resolvedDep := dep.GetQualifiedReleaseId()
 		versionlessDep := dep.GetVersionlessReleaseId()
 		for _, consume := range metadata.GetConsumes() {
 			ctx.Metadata.AddConsumes(consume)
