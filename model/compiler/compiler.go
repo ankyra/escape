@@ -38,6 +38,8 @@ import (
 	"strings"
 )
 
+type CompilerFunc func(*CompilerContext) error
+
 type Compiler struct {
 	metadata *core.ReleaseMetadata
 	context  Context
@@ -46,7 +48,8 @@ type Compiler struct {
 	//
 	// => VariableCtx["base"] = "archive-test-v1"
 	//
-	VariableCtx map[string]*core.ReleaseMetadata
+	VariableCtx     map[string]*core.ReleaseMetadata
+	CompilerContext *CompilerContext
 }
 
 func NewCompiler() *Compiler {
@@ -60,6 +63,7 @@ func (c *Compiler) Compile(context Context) (*core.ReleaseMetadata, error) {
 	plan := context.GetEscapePlan()
 	c.context = context
 	c.metadata = core.NewEmptyReleaseMetadata()
+	c.CompilerContext = NewCompilerContext(c.metadata, context.GetEscapePlan())
 
 	if plan.GetName() == "" {
 		return nil, fmt.Errorf("Missing build name. Add a 'name' field to your Escape plan")
@@ -82,7 +86,7 @@ func (c *Compiler) Compile(context Context) (*core.ReleaseMetadata, error) {
 	if err := c.compileMetadata(plan.Metadata); err != nil {
 		return nil, err
 	}
-	if err := c.compileEscapePlanScriptDigests(plan); err != nil {
+	if err := compileScripts(c.CompilerContext); err != nil {
 		return nil, err
 	}
 	if err := c.compileInputs(plan.GetInputs()); err != nil {
@@ -273,39 +277,6 @@ func (c *Compiler) compileVersion(version string) error {
 	return nil
 }
 
-func (c *Compiler) compileEscapePlanScriptDigests(plan *escape_plan.EscapePlan) error {
-	paths := []string{
-		plan.GetBuild(), plan.GetDeploy(), plan.GetDestroy(),
-		plan.GetPreBuild(), plan.GetPreDeploy(), plan.GetPreDestroy(),
-		plan.GetPostBuild(), plan.GetPostDeploy(), plan.GetPostDestroy(),
-		plan.GetTest(), plan.GetSmoke(),
-	}
-	for _, path := range paths {
-		if err := c.compileEscapePlanScriptDigest(path); err != nil {
-			return err
-		}
-	}
-	c.metadata.SetStage("build", plan.GetBuild())
-	c.metadata.SetStage("deploy", plan.GetDeploy())
-	c.metadata.SetStage("destroy", plan.GetDestroy())
-	c.metadata.SetStage("pre_build", plan.GetPreBuild())
-	c.metadata.SetStage("pre_deploy", plan.GetPreDeploy())
-	c.metadata.SetStage("pre_destroy", plan.GetPreDestroy())
-	c.metadata.SetStage("post_build", plan.GetPostBuild())
-	c.metadata.SetStage("post_deploy", plan.GetPostDeploy())
-	c.metadata.SetStage("post_destroy", plan.GetPostDestroy())
-	c.metadata.SetStage("test", plan.GetTest())
-	c.metadata.SetStage("smoke", plan.GetSmoke())
-	return nil
-}
-
-func (c *Compiler) compileEscapePlanScriptDigest(path string) error {
-	if path != "" {
-		return c.addFileDigest(path)
-	}
-	return nil
-}
-
 func (c *Compiler) compileIncludes(includes []string) {
 	for _, globPattern := range includes {
 		paths, err := filepath.Glob(globPattern)
@@ -326,6 +297,9 @@ func (c *Compiler) compileIncludes(includes []string) {
 }
 
 func (c *Compiler) addFileDigest(path string) error {
+	if path == "" {
+		return nil
+	}
 	if !util.PathExists(path) {
 		return errors.New("File " + path + " was referenced in the escape plan, but it doesn't exist")
 	}
@@ -409,7 +383,7 @@ func (c *Compiler) compileErrands(errands map[string]interface{}) error {
 		if err != nil {
 			return err
 		}
-		if err := c.compileEscapePlanScriptDigest(newErrand.GetScript()); err != nil {
+		if err := c.addFileDigest(newErrand.GetScript()); err != nil {
 			return err
 		}
 		c.metadata.Errands[name] = newErrand
