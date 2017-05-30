@@ -16,10 +16,6 @@ limitations under the License.
 
 package compiler
 
-import (
-	"github.com/ankyra/escape-client/model/escape_plan"
-)
-
 func compileScripts(ctx *CompilerContext) error {
 	plan := ctx.Plan
 	metadata := ctx.Metadata
