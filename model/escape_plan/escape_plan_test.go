@@ -54,8 +54,8 @@ func (s *planSuite) Test_LoadConfig_fails_if_invalid_yaml(c *C) {
 func (s *planSuite) Test_Init(c *C) {
 	unit := NewEscapePlan()
 	unit.Init("test")
-	c.Assert(unit.GetName(), Equals, "test")
-	c.Assert(unit.GetVersion(), Equals, "@")
+	c.Assert(unit.Name, Equals, "test")
+	c.Assert(unit.Version, Equals, "@")
 }
 
 func (s *planSuite) Test_GetReleaseId(c *C) {

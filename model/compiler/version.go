@@ -24,7 +24,7 @@ import (
 )
 
 func compileVersion(ctx *CompilerContext) error {
-	version := ctx.Plan.GetVersion()
+	version := ctx.Plan.Version
 	_, err := script.ParseScript(version)
 	if err != nil {
 		return fmt.Errorf("Couldn't parse expression '%s' in version field: %s", version, err.Error())
@@ -40,10 +40,9 @@ func compileVersion(ctx *CompilerContext) error {
 	if err := parsers.ValidateVersion(version); err != nil {
 		return err
 	}
-	ctx.Plan.SetVersion(version)
 	if strings.HasSuffix(version, "@") {
 		prefix := version[:len(version)-1]
-		nextVersion, err := ctx.Registry.QueryNextVersion(ctx.Project, ctx.Plan.GetName(), prefix)
+		nextVersion, err := ctx.Registry.QueryNextVersion(ctx.Project, ctx.Plan.Name, prefix)
 		if err != nil {
 			return err
 		}

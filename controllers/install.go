@@ -27,10 +27,10 @@ func (InstallController) Install(context Context) error {
 	context.PushLogRelease(context.GetEscapePlan().GetReleaseId())
 	context.PushLogSection("Build")
 	context.Log("install.start", nil)
-	if len(context.GetEscapePlan().GetDepends()) == 0 {
+	if len(context.GetEscapePlan().Depends) == 0 {
 		return nil
 	}
-	depends := context.GetEscapePlan().GetDepends()
+	depends := context.GetEscapePlan().Depends
 	err := model.DependencyResolver{}.Resolve(context.GetEscapeConfig(), depends)
 	if err != nil {
 		return err

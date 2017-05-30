@@ -22,7 +22,7 @@ import (
 )
 
 func compileTemplates(ctx *CompilerContext) error {
-	for _, tpl := range ctx.Plan.GetTemplates() {
+	for _, tpl := range ctx.Plan.Templates {
 		template, err := templates.NewTemplateFromInterface(tpl)
 		if err != nil {
 			return err

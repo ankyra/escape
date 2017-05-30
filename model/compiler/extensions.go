@@ -23,7 +23,7 @@ import (
 )
 
 func compileExtensions(ctx *CompilerContext) error {
-	for _, extend := range ctx.Plan.GetExtends() {
+	for _, extend := range ctx.Plan.Extends {
 		dep, err := core.NewDependencyFromString(extend)
 		if err != nil {
 			return err

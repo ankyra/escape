@@ -21,7 +21,7 @@ import (
 )
 
 func compileErrands(ctx *CompilerContext) error {
-	for name, errandDict := range ctx.Plan.GetErrands() {
+	for name, errandDict := range ctx.Plan.Errands {
 		newErrand, err := core.NewErrandFromDict(name, errandDict)
 		if err != nil {
 			return err

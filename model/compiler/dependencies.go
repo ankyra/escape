@@ -22,7 +22,7 @@ import (
 
 func compileDependencies(ctx *CompilerContext) error {
 	result := []string{}
-	for _, depend := range ctx.Plan.GetDepends() {
+	for _, depend := range ctx.Plan.Depends {
 		dep, err := core.NewDependencyFromString(depend)
 		if err != nil {
 			return err
@@ -60,7 +60,7 @@ func resolveVersion(ctx *CompilerContext, d *core.Dependency) (*core.ReleaseMeta
 	if versionQuery != "latest" {
 		versionQuery = "v" + versionQuery
 	}
-	metadata, err := ctx.Registry.QueryReleaseMetadata(d.Project, d.GetName(), versionQuery)
+	metadata, err := ctx.Registry.QueryReleaseMetadata(d.Project, d.Name, versionQuery)
 	if err != nil {
 		return nil, err
 	}

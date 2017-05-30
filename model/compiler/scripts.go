@@ -20,26 +20,26 @@ func compileScripts(ctx *CompilerContext) error {
 	plan := ctx.Plan
 	metadata := ctx.Metadata
 	paths := []string{
-		plan.GetBuild(), plan.GetDeploy(), plan.GetDestroy(),
-		plan.GetPreBuild(), plan.GetPreDeploy(), plan.GetPreDestroy(),
-		plan.GetPostBuild(), plan.GetPostDeploy(), plan.GetPostDestroy(),
-		plan.GetTest(), plan.GetSmoke(),
+		plan.Build, plan.Deploy, plan.Destroy,
+		plan.PreBuild, plan.PreDeploy, plan.PreDestroy,
+		plan.PostBuild, plan.PostDeploy, plan.PostDestroy,
+		plan.Test, plan.Smoke,
 	}
 	for _, path := range paths {
 		if err := ctx.AddFileDigest(path); err != nil {
 			return err
 		}
 	}
-	metadata.SetStage("build", plan.GetBuild())
-	metadata.SetStage("deploy", plan.GetDeploy())
-	metadata.SetStage("destroy", plan.GetDestroy())
-	metadata.SetStage("pre_build", plan.GetPreBuild())
-	metadata.SetStage("pre_deploy", plan.GetPreDeploy())
-	metadata.SetStage("pre_destroy", plan.GetPreDestroy())
-	metadata.SetStage("post_build", plan.GetPostBuild())
-	metadata.SetStage("post_deploy", plan.GetPostDeploy())
-	metadata.SetStage("post_destroy", plan.GetPostDestroy())
-	metadata.SetStage("test", plan.GetTest())
-	metadata.SetStage("smoke", plan.GetSmoke())
+	metadata.SetStage("build", plan.Build)
+	metadata.SetStage("deploy", plan.Deploy)
+	metadata.SetStage("destroy", plan.Destroy)
+	metadata.SetStage("pre_build", plan.PreBuild)
+	metadata.SetStage("pre_deploy", plan.PreDeploy)
+	metadata.SetStage("pre_destroy", plan.PreDestroy)
+	metadata.SetStage("post_build", plan.PostBuild)
+	metadata.SetStage("post_deploy", plan.PostDeploy)
+	metadata.SetStage("post_destroy", plan.PostDestroy)
+	metadata.SetStage("test", plan.Test)
+	metadata.SetStage("smoke", plan.Smoke)
 	return nil
 }

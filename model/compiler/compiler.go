@@ -26,14 +26,14 @@ import (
 type CompilerFunc func(*CompilerContext) error
 
 func compileBasicFields(ctx *CompilerContext) error {
-	if ctx.Plan.GetName() == "" {
+	if ctx.Plan.Name == "" {
 		return fmt.Errorf("Missing build name. Add a 'name' field to your Escape plan")
 	}
-	ctx.Metadata.Name = ctx.Plan.GetName()
-	ctx.Metadata.Description = ctx.Plan.GetDescription()
-	ctx.Metadata.Logo = ctx.Plan.GetLogo()
-	ctx.Metadata.SetProvides(ctx.Plan.GetProvides())
-	ctx.Metadata.SetConsumes(ctx.Plan.GetConsumes())
+	ctx.Metadata.Name = ctx.Plan.Name
+	ctx.Metadata.Description = ctx.Plan.Description
+	ctx.Metadata.Logo = ctx.Plan.Logo
+	ctx.Metadata.SetProvides(ctx.Plan.Provides)
+	ctx.Metadata.SetConsumes(ctx.Plan.Consumes)
 	return nil
 }
 

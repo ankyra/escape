@@ -24,7 +24,7 @@ import (
 )
 
 func compileLogo(ctx *CompilerContext) error {
-	logo := ctx.Plan.GetLogo()
+	logo := ctx.Plan.Logo
 	if logo == "" {
 		return nil
 	}

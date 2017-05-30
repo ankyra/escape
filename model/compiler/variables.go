@@ -23,7 +23,7 @@ import (
 )
 
 func compileInputs(ctx *CompilerContext) error {
-	for _, input := range ctx.Plan.GetInputs() {
+	for _, input := range ctx.Plan.Inputs {
 		v, err := compileVariable(ctx, input)
 		if err != nil {
 			return fmt.Errorf("Error compiling input variable: %s", err.Error())
@@ -34,7 +34,7 @@ func compileInputs(ctx *CompilerContext) error {
 }
 
 func compileOutputs(ctx *CompilerContext) error {
-	for _, output := range ctx.Plan.GetOutputs() {
+	for _, output := range ctx.Plan.Outputs {
 		v, err := compileVariable(ctx, output)
 		if err != nil {
 			return fmt.Errorf("Error compiling output variable: %s", err.Error())

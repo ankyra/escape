@@ -22,7 +22,7 @@ import (
 )
 
 func compileIncludes(ctx *CompilerContext) error {
-	for _, globPattern := range ctx.Plan.GetIncludes() {
+	for _, globPattern := range ctx.Plan.Includes {
 		paths, err := filepath.Glob(globPattern)
 		if err != nil {
 			fmt.Println("Warning: ignoring pattern error: " + err.Error())
