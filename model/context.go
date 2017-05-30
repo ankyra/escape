@@ -22,7 +22,6 @@ import (
 	"github.com/ankyra/escape-client/model/compiler"
 	"github.com/ankyra/escape-client/model/config"
 	"github.com/ankyra/escape-client/model/escape_plan"
-	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/paths"
 	"github.com/ankyra/escape-client/model/registry"
 	"github.com/ankyra/escape-client/model/state"
@@ -31,7 +30,7 @@ import (
 	"github.com/ankyra/escape-core"
 )
 
-type context struct {
+type Context struct {
 	EscapeConfig       *config.EscapeConfig
 	EscapePlan         *escape_plan.EscapePlan
 	ReleaseMetadata    *core.ReleaseMetadata
@@ -42,8 +41,8 @@ type context struct {
 	RootDeploymentName string
 }
 
-func NewContext() Context {
-	ctx := &context{}
+func NewContext() *Context {
+	ctx := &Context{}
 	ctx.EscapeConfig = config.NewEscapeConfig()
 	ctx.Logger = util.NewLogger([]util.LogConsumer{
 		util.NewFancyTerminalOutputLogConsumer(),
@@ -52,7 +51,7 @@ func NewContext() Context {
 	return ctx
 }
 
-func (c *context) InitFromLocalEscapePlanAndState(state, environment, planPath string) error {
+func (c *Context) InitFromLocalEscapePlanAndState(state, environment, planPath string) error {
 	if environment == "" {
 		return errors.New("Missing 'environment'")
 	}
@@ -68,50 +67,50 @@ func (c *context) InitFromLocalEscapePlanAndState(state, environment, planPath s
 	return nil
 }
 
-func (c *context) GetLogger() util.Logger {
+func (c *Context) GetLogger() util.Logger {
 	return c.Logger
 }
-func (c *context) Log(key string, values map[string]string) {
+func (c *Context) Log(key string, values map[string]string) {
 	c.Logger.Log(key, values)
 }
-func (c *context) PushLogSection(section string) {
+func (c *Context) PushLogSection(section string) {
 	c.Logger.PushSection(section)
 }
-func (c *context) PushLogRelease(release string) {
+func (c *Context) PushLogRelease(release string) {
 	c.Logger.PushRelease(release)
 }
-func (c *context) PopLogSection() {
+func (c *Context) PopLogSection() {
 	c.Logger.PopSection()
 }
-func (c *context) PopLogRelease() {
+func (c *Context) PopLogRelease() {
 	c.Logger.PopRelease()
 }
-func (c *context) GetRegistry() registry.Registry {
+func (c *Context) GetRegistry() registry.Registry {
 	return c.EscapeConfig.GetRegistry()
 }
-func (c *context) GetEscapePlan() *escape_plan.EscapePlan {
+func (c *Context) GetEscapePlan() *escape_plan.EscapePlan {
 	return c.EscapePlan
 }
-func (c *context) GetReleaseMetadata() *core.ReleaseMetadata {
+func (c *Context) GetReleaseMetadata() *core.ReleaseMetadata {
 	return c.ReleaseMetadata
 }
-func (c *context) GetEnvironmentState() *types.EnvironmentState {
+func (c *Context) GetEnvironmentState() *types.EnvironmentState {
 	return c.EnvironmentState
 }
-func (c *context) GetEscapeConfig() *config.EscapeConfig {
+func (c *Context) GetEscapeConfig() *config.EscapeConfig {
 	return c.EscapeConfig
 }
-func (c *context) GetRootDeploymentName() string {
+func (c *Context) GetRootDeploymentName() string {
 	if c.RootDeploymentName == "" {
 		return c.ReleaseMetadata.GetVersionlessReleaseId()
 	}
 	return c.RootDeploymentName
 }
-func (c *context) SetRootDeploymentName(name string) {
+func (c *Context) SetRootDeploymentName(name string) {
 	c.RootDeploymentName = name
 }
 
-func (c *context) GetDependencyMetadata(depReleaseId string) (*core.ReleaseMetadata, error) {
+func (c *Context) GetDependencyMetadata(depReleaseId string) (*core.ReleaseMetadata, error) {
 	metadata, ok := c.DependencyMetadata[depReleaseId]
 	if ok {
 		return metadata, nil
@@ -126,7 +125,7 @@ func (c *context) GetDependencyMetadata(depReleaseId string) (*core.ReleaseMetad
 
 }
 
-func (c *context) fetchDependencyAndReadMetadata(depReleaseId string) (*core.ReleaseMetadata, error) {
+func (c *Context) fetchDependencyAndReadMetadata(depReleaseId string) (*core.ReleaseMetadata, error) {
 	c.Log("fetch.start", map[string]string{"dependency": depReleaseId})
 	err := DependencyResolver{}.Resolve(c.EscapeConfig, []string{depReleaseId})
 	if err != nil {
@@ -141,11 +140,11 @@ func (c *context) fetchDependencyAndReadMetadata(depReleaseId string) (*core.Rel
 	return core.NewReleaseMetadataFromFile(unpacked)
 }
 
-func (c *context) LoadEscapeConfig(cfgFile, cfgProfile string) error {
+func (c *Context) LoadEscapeConfig(cfgFile, cfgProfile string) error {
 	return c.EscapeConfig.LoadConfig(cfgFile, cfgProfile)
 }
 
-func (c *context) LoadEscapePlan(cfgFile string) error {
+func (c *Context) LoadEscapePlan(cfgFile string) error {
 	plan := escape_plan.NewEscapePlan()
 	if err := plan.LoadConfig(cfgFile); err != nil {
 		return err
@@ -154,7 +153,7 @@ func (c *context) LoadEscapePlan(cfgFile string) error {
 	return nil
 }
 
-func (c *context) LoadMetadata() error {
+func (c *Context) LoadMetadata() error {
 	metadata, err := compiler.NewCompiler().Compile(c)
 	if err != nil {
 		return err
@@ -163,7 +162,7 @@ func (c *context) LoadMetadata() error {
 	return nil
 }
 
-func (c *context) LoadLocalState(cfgFile, environment string) error {
+func (c *Context) LoadLocalState(cfgFile, environment string) error {
 	envState, err := state.NewLocalStateProvider(cfgFile).Load("", environment)
 	if err != nil {
 		return err
