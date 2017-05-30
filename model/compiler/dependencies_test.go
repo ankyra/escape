@@ -43,6 +43,9 @@ func (s *suite) Test_Compile_Dependencies(c *C) {
 	ctx := NewCompilerContext(plan, reg)
 	c.Assert(compileDependencies(ctx), IsNil)
 	c.Assert(ctx.Metadata.GetDependencies(), DeepEquals, []string{"_/dependency-v1.0"})
+	c.Assert(ctx.Metadata.VariableCtx["dependency"], Equals, "_/dependency-v1.0")
+	c.Assert(ctx.Metadata.VariableCtx["dep"], Equals, "_/dependency-v1.0")
+	c.Assert(ctx.VariableCtx["dependency"].GetQualifiedReleaseId(), Equals, "_/dependency-v1.0")
 	c.Assert(ctx.VariableCtx["dep"].GetQualifiedReleaseId(), Equals, "_/dependency-v1.0")
 }
 

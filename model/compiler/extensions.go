@@ -32,7 +32,6 @@ func compileExtensions(ctx *CompilerContext) error {
 		if err != nil {
 			return err
 		}
-		versionlessDep := dep.GetVersionlessReleaseId()
 		for _, consume := range metadata.GetConsumes() {
 			ctx.Metadata.AddConsumes(consume)
 		}
@@ -80,16 +79,16 @@ func compileExtensions(ctx *CompilerContext) error {
 			if err != nil {
 				return err
 			}
-			metadata, err := ctx.Registry.QueryReleaseMetadata(dep.Project, dep.Name, dep.Version)
+			metadata, err := ctx.Registry.QueryReleaseMetadata(dep.Project, dep.Name, "v"+dep.Version)
 			if err != nil {
 				return err
 			}
 			ctx.VariableCtx[key] = metadata
-			ctx.Metadata.SetVariableInContext(key, metadata.GetReleaseId())
+			ctx.Metadata.SetVariableInContext(key, metadata.GetQualifiedReleaseId())
 		}
-		ctx.VariableCtx[versionlessDep] = metadata
-		ctx.Metadata.SetVariableInContext(versionlessDep, metadata.GetReleaseId())
-		ctx.Metadata.AddExtension(metadata.GetReleaseId())
+		ctx.VariableCtx[dep.Name] = metadata
+		ctx.Metadata.SetVariableInContext(dep.Name, metadata.GetQualifiedReleaseId())
+		ctx.Metadata.AddExtension(metadata.GetQualifiedReleaseId())
 	}
 	return nil
 }

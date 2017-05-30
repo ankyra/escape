@@ -31,8 +31,6 @@ func compileDependencies(ctx *CompilerContext) error {
 		if err != nil {
 			return err
 		}
-		resolvedDep := dep.GetQualifiedReleaseId()
-		versionlessDep := dep.GetVersionlessReleaseId()
 		for _, consume := range metadata.GetConsumes() {
 			ctx.Metadata.AddConsumes(consume)
 		}
@@ -41,15 +39,15 @@ func compileDependencies(ctx *CompilerContext) error {
 				ctx.Metadata.AddInputVariable(input)
 			}
 		}
-		ctx.VariableCtx[versionlessDep] = metadata
-		ctx.Metadata.SetVariableInContext(versionlessDep, metadata.GetReleaseId())
+		ctx.VariableCtx[dep.Name] = metadata
+		ctx.Metadata.SetVariableInContext(dep.Name, metadata.GetQualifiedReleaseId())
 
 		if dep.GetVariableName() != "" {
 			ctx.VariableCtx[dep.GetVariableName()] = metadata
-			ctx.Metadata.SetVariableInContext(dep.GetVariableName(), metadata.GetReleaseId())
+			ctx.Metadata.SetVariableInContext(dep.GetVariableName(), metadata.GetQualifiedReleaseId())
 		}
 
-		result = append(result, resolvedDep)
+		result = append(result, dep.GetQualifiedReleaseId())
 	}
 	ctx.Metadata.SetDependencies(result)
 	return nil
