@@ -168,13 +168,13 @@ func escapeServerReleaseFetcherStrategy(cfg *config.EscapeConfig, path *paths.Pa
 	if backend != "escape" {
 		return false, nil
 	}
-	if err := path.EnsureDependencyCacheDirectoryExists(); err != nil {
+	project := cfg.GetCurrentTarget().GetProject()
+	if err := path.EnsureDependencyCacheDirectoryExists(project); err != nil {
 		return false, err
 	}
 	targetFile := path.DependencyDownloadTarget(dep)
 	registry := cfg.GetRegistry()
 
-	project := cfg.GetCurrentTarget().GetProject()
 	if err := registry.DownloadRelease(project, dep.GetName(), dep.GetVersion(), targetFile); err != nil {
 		return false, err
 	}

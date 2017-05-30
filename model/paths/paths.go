@@ -50,12 +50,12 @@ func NewPathWithBaseDir(baseDir string) *Path {
 	return p
 }
 
-func (p *Path) GetBaseDir() string {
-	return p.baseDir
+func (p *Path) NewPathForDependency(metadata *core.ReleaseMetadata) *Path {
+	return NewPathWithBaseDir(filepath.Join(p.baseDir, "deps", metadata.Project, metadata.Name))
 }
 
-func (p *Path) NewPathForDependency(metadata *core.ReleaseMetadata) *Path {
-	return NewPathWithBaseDir(filepath.Join(p.baseDir, "deps", metadata.Name))
+func (p *Path) GetBaseDir() string {
+	return p.baseDir
 }
 
 func (p *Path) GetAppConfigDir() string {
@@ -100,8 +100,8 @@ func (p *Path) ReleaseLocation(metadata *core.ReleaseMetadata) string {
 	return filepath.Join(p.ReleaseTargetDirectory(), pkgName+".tgz")
 }
 
-func (p *Path) DependencyCacheDirectory() string {
-	return filepath.Join(p.GetAppConfigDir(), "deps")
+func (p *Path) DependencyCacheDirectory(project string) string {
+	return filepath.Join(p.GetAppConfigDir(), project)
 }
 
 func (p *Path) DependencyReleaseArchive(dependency *core.Dependency) string {
@@ -109,26 +109,25 @@ func (p *Path) DependencyReleaseArchive(dependency *core.Dependency) string {
 }
 
 func (p *Path) DependencyDownloadTarget(dependency *core.Dependency) string {
-	return filepath.Join(p.DependencyCacheDirectory(), dependency.GetReleaseId()+".tgz")
+	return filepath.Join(p.DependencyCacheDirectory(dependency.Project), dependency.GetReleaseId()+".tgz")
 }
 
 func (p *Path) LocalReleaseMetadata(metadata *core.ReleaseMetadata) string {
-	return filepath.Join(p.DependencyCacheDirectory(), metadata.GetReleaseId()+".json")
-}
-
-func (p *Path) ExtensionPath(extension *core.ReleaseMetadata, path string) string {
-	return filepath.Join("deps", extension.Name, path)
+	return filepath.Join(p.DependencyCacheDirectory(metadata.Project), metadata.GetReleaseId()+".json")
 }
 
 func (p *Path) DepTypeDirectory(dependency *core.Dependency) string {
-	return filepath.Join(p.baseDir, "deps")
+	return filepath.Join(p.baseDir, "deps", dependency.Project)
 }
 func (p *Path) UnpackedDepDirectory(dependency *core.Dependency) string {
 	return filepath.Join(p.DepTypeDirectory(dependency), dependency.GetName())
 }
-
 func (p *Path) UnpackedDepDirectoryReleaseMetadata(dependency *core.Dependency) string {
 	return filepath.Join(p.UnpackedDepDirectory(dependency), "release.json")
+}
+
+func (p *Path) ExtensionPath(extension *core.ReleaseMetadata, path string) string {
+	return filepath.Join("deps", extension.Project, extension.Name, path)
 }
 
 func (p *Path) OutputsFile() string {
@@ -143,8 +142,8 @@ func (p *Path) EnsureEscapeDirectoryExists() error {
 	return util.MkdirRecursively(p.EscapeDirectory())
 }
 
-func (p *Path) EnsureDependencyCacheDirectoryExists() error {
-	return util.MkdirRecursively(p.DependencyCacheDirectory())
+func (p *Path) EnsureDependencyCacheDirectoryExists(project string) error {
+	return util.MkdirRecursively(p.DependencyCacheDirectory(project))
 }
 
 func (p *Path) EnsureDependencyTypeDirectoryExists(dep *core.Dependency) error {

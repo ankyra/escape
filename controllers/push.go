@@ -40,11 +40,12 @@ func (p PushController) Push(context Context, buildFatPackage bool) error {
 
 func (p PushController) saveLocally(context Context) error {
 	path := paths.NewPath()
-	if err := path.EnsureDependencyCacheDirectoryExists(); err != nil {
+	metadata := context.GetReleaseMetadata()
+	if err := path.EnsureDependencyCacheDirectoryExists(metadata.Project); err != nil {
 		return err
 	}
-	localRegister := path.LocalReleaseMetadata(context.GetReleaseMetadata())
-	if err := context.GetReleaseMetadata().WriteJsonFile(localRegister); err != nil {
+	localRegister := path.LocalReleaseMetadata(metadata)
+	if err := metadata.WriteJsonFile(localRegister); err != nil {
 		return err
 	}
 	return nil

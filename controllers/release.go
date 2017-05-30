@@ -61,7 +61,7 @@ func (r ReleaseController) cacheRelease(context Context, forceOverwrite bool) er
 	path := paths.NewPath()
 	metadata := context.GetReleaseMetadata()
 	packagePath := path.ReleaseLocation(metadata)
-	if err := path.EnsureDependencyCacheDirectoryExists(); err != nil {
+	if err := path.EnsureDependencyCacheDirectoryExists(metadata.Project); err != nil {
 		return err
 	}
 	userPackageCachePath := path.DependencyDownloadTarget(metadata.ToDependency())
