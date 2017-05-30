@@ -23,7 +23,7 @@ import (
 func compileMetadata(ctx *CompilerContext) error {
 	result := map[string]string{}
 	for key, val := range ctx.Plan.Metadata {
-		str, err := RunScriptForCompileStep(val, ctx.VariableCtx)
+		str, err := ctx.RunScriptForCompileStep(val)
 		if err != nil {
 			return fmt.Errorf("%s in metadata field.", err.Error())
 		}

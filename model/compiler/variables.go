@@ -75,7 +75,7 @@ func compileDefault(ctx *CompilerContext, v *variables.Variable) (*variables.Var
 		if err != nil {
 			return nil, fmt.Errorf("Couldn't parse expression '%s' in default field: %s", defaultValue, err.Error())
 		}
-		str, err := RunScriptForCompileStep(defaultValue, ctx.VariableCtx)
+		str, err := ctx.RunScriptForCompileStep(defaultValue)
 		if err == nil {
 			v.Default = &str
 		}
@@ -89,7 +89,7 @@ func compileDefault(ctx *CompilerContext, v *variables.Variable) (*variables.Var
 				if err != nil {
 					return nil, fmt.Errorf("Couldn't parse expression '%s' in default field: %s", k.(string), err.Error())
 				}
-				str, err := RunScriptForCompileStep(k.(string), ctx.VariableCtx)
+				str, err := ctx.RunScriptForCompileStep(k.(string))
 				if err == nil {
 					values = append(values, str)
 				} else {

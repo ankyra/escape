@@ -18,113 +18,45 @@ package compiler
 
 import (
 	"fmt"
-	. "github.com/ankyra/escape-client/model/interfaces"
+	"github.com/ankyra/escape-client/model/escape_plan"
+	"github.com/ankyra/escape-client/model/registry"
 	core "github.com/ankyra/escape-core"
-	"github.com/ankyra/escape-core/script"
-	"strconv"
 )
 
 type CompilerFunc func(*CompilerContext) error
 
-type Compiler struct {
-	metadata *core.ReleaseMetadata
-	context  Context
-	// depends:
-	// - archive-test-latest as base
-	//
-	// => VariableCtx["base"] = "archive-test-v1"
-	//
-	VariableCtx     map[string]*core.ReleaseMetadata
-	CompilerContext *CompilerContext
+func compileBasicFields(ctx *CompilerContext) error {
+	if ctx.Plan.GetName() == "" {
+		return fmt.Errorf("Missing build name. Add a 'name' field to your Escape plan")
+	}
+	ctx.Metadata.Name = ctx.Plan.GetName()
+	ctx.Metadata.Description = ctx.Plan.GetDescription()
+	ctx.Metadata.Logo = ctx.Plan.GetLogo()
+	ctx.Metadata.SetProvides(ctx.Plan.GetProvides())
+	ctx.Metadata.SetConsumes(ctx.Plan.GetConsumes())
+	return nil
 }
 
-func NewCompiler() *Compiler {
-	return &Compiler{
-		VariableCtx: map[string]*core.ReleaseMetadata{},
+func Compile(plan *escape_plan.EscapePlan, reg registry.Registry) (*core.ReleaseMetadata, error) {
+	ctx := NewCompilerContext(plan, reg)
+	compilerSteps := []CompilerFunc{
+		compileBasicFields,
+		compileExtensions,
+		compileDependencies,
+		compileVersion,
+		compileMetadata,
+		compileScripts,
+		compileInputs,
+		compileOutputs,
+		compileErrands,
+		compileTemplates,
+		compileIncludes,
+		compileLogo,
 	}
-}
-
-func (c *Compiler) Compile(context Context) (*core.ReleaseMetadata, error) {
-	context.PushLogSection("Compile")
-	plan := context.GetEscapePlan()
-	c.context = context
-	c.metadata = core.NewEmptyReleaseMetadata()
-	c.CompilerContext = NewCompilerContext(c.metadata, context.GetEscapePlan(), context.GetRegistry())
-
-	if plan.GetName() == "" {
-		return nil, fmt.Errorf("Missing build name. Add a 'name' field to your Escape plan")
-	}
-	c.metadata.Name = plan.GetName()
-	c.metadata.Description = plan.GetDescription()
-	c.metadata.Logo = plan.GetLogo()
-	c.metadata.SetProvides(plan.GetProvides())
-	c.metadata.SetConsumes(plan.GetConsumes())
-
-	if err := compileExtensions(c.CompilerContext); err != nil {
-		return nil, err
-	}
-	if err := compileDependencies(c.CompilerContext); err != nil {
-		return nil, err
-	}
-	if err := compileVersion(c.CompilerContext); err != nil {
-		return nil, err
-	}
-	if err := compileMetadata(c.CompilerContext); err != nil {
-		return nil, err
-	}
-	if err := compileScripts(c.CompilerContext); err != nil {
-		return nil, err
-	}
-	if err := compileInputs(c.CompilerContext); err != nil {
-		return nil, err
-	}
-	if err := compileOutputs(c.CompilerContext); err != nil {
-		return nil, err
-	}
-	if err := compileErrands(c.CompilerContext); err != nil {
-		return nil, err
-	}
-	if err := compileTemplates(c.CompilerContext); err != nil {
-		return nil, err
-	}
-	if err := compileIncludes(c.CompilerContext); err != nil {
-		return nil, err
-	}
-	if err := compileLogo(c.CompilerContext); err != nil {
-		return nil, err
-	}
-	//if build_fat_package:
-	//    self._add_dependencies(escape_config, escape_plan)
-	context.PopLogSection()
-	return c.metadata, nil
-}
-
-func RunScriptForCompileStep(scriptStr string, variableCtx map[string]*core.ReleaseMetadata) (string, error) {
-	parsedScript, err := script.ParseScript(scriptStr)
-	if err != nil {
-		return "", err
-	}
-	env := map[string]script.Script{}
-	for key, metadata := range variableCtx {
-		env[key] = metadata.ToScript()
-	}
-	val, err := parsedScript.Eval(script.NewScriptEnvironmentWithGlobals(env))
-	if err != nil {
-		return "", err
-	}
-	if val.Type().IsString() {
-		v, err := val.Value()
-		if err != nil {
-			return "", err
+	for _, step := range compilerSteps {
+		if err := step(ctx); err != nil {
+			return nil, err
 		}
-		return v.(string), nil
 	}
-	if val.Type().IsInteger() {
-		v, err := val.Value()
-		if err != nil {
-			return "", err
-		}
-		return strconv.Itoa(v.(int)), nil
-	}
-	return "", fmt.Errorf("Expression '%s' did not return a string value", scriptStr)
+	return ctx.Metadata, nil
 }

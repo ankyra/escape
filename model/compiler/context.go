@@ -23,10 +23,12 @@ import (
 	"github.com/ankyra/escape-client/model/registry"
 	"github.com/ankyra/escape-client/util"
 	"github.com/ankyra/escape-core"
+	"github.com/ankyra/escape-core/script"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 type CompilerContext struct {
@@ -37,9 +39,9 @@ type CompilerContext struct {
 	Project     string
 }
 
-func NewCompilerContext(metadata *core.ReleaseMetadata, plan *escape_plan.EscapePlan, registry registry.Registry) *CompilerContext {
+func NewCompilerContext(plan *escape_plan.EscapePlan, registry registry.Registry) *CompilerContext {
 	return &CompilerContext{
-		Metadata:    metadata,
+		Metadata:    core.NewEmptyReleaseMetadata(),
 		Plan:        plan,
 		VariableCtx: map[string]*core.ReleaseMetadata{},
 		Registry:    registry,
@@ -88,4 +90,34 @@ func (c *CompilerContext) addDirectoryFileDigests(path string) error {
 		}
 	}
 	return nil
+}
+
+func (c *CompilerContext) RunScriptForCompileStep(scriptStr string) (string, error) {
+	parsedScript, err := script.ParseScript(scriptStr)
+	if err != nil {
+		return "", err
+	}
+	env := map[string]script.Script{}
+	for key, metadata := range c.VariableCtx {
+		env[key] = metadata.ToScript()
+	}
+	val, err := parsedScript.Eval(script.NewScriptEnvironmentWithGlobals(env))
+	if err != nil {
+		return "", err
+	}
+	if val.Type().IsString() {
+		v, err := val.Value()
+		if err != nil {
+			return "", err
+		}
+		return v.(string), nil
+	}
+	if val.Type().IsInteger() {
+		v, err := val.Value()
+		if err != nil {
+			return "", err
+		}
+		return strconv.Itoa(v.(int)), nil
+	}
+	return "", fmt.Errorf("Expression '%s' did not return a string value", scriptStr)
 }

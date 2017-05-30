@@ -29,7 +29,7 @@ func compileVersion(ctx *CompilerContext) error {
 	if err != nil {
 		return fmt.Errorf("Couldn't parse expression '%s' in version field: %s", version, err.Error())
 	}
-	str, err := RunScriptForCompileStep(version, ctx.VariableCtx)
+	str, err := ctx.RunScriptForCompileStep(version)
 	if err != nil {
 		return fmt.Errorf("Couldn't evaluate expression '%s' in version field: %s", version, err.Error())
 	}

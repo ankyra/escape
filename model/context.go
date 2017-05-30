@@ -154,11 +154,13 @@ func (c *Context) LoadEscapePlan(cfgFile string) error {
 }
 
 func (c *Context) LoadMetadata() error {
-	metadata, err := compiler.NewCompiler().Compile(c)
+	c.PushLogSection("Compile")
+	metadata, err := compiler.Compile(c.EscapePlan, c.GetRegistry())
 	if err != nil {
 		return err
 	}
 	c.ReleaseMetadata = metadata
+	c.PopLogSection()
 	return nil
 }
 
