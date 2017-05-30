@@ -23,7 +23,6 @@ import (
 
 	"os/user"
 
-	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/util"
 	core "github.com/ankyra/escape-core"
 )
@@ -34,7 +33,7 @@ type Path struct {
 	baseDir       string
 }
 
-func NewPath() Paths {
+func NewPath() *Path {
 	currentUser, _ := user.Current()
 	currentDir, _ := os.Getwd()
 
@@ -45,9 +44,9 @@ func NewPath() Paths {
 	}
 }
 
-func NewPathWithBaseDir(baseDir string) Paths {
+func NewPathWithBaseDir(baseDir string) *Path {
 	p := NewPath()
-	p.(*Path).baseDir = baseDir
+	p.baseDir = baseDir
 	return p
 }
 
@@ -55,7 +54,7 @@ func (p *Path) GetBaseDir() string {
 	return p.baseDir
 }
 
-func (p *Path) NewPathForDependency(metadata *core.ReleaseMetadata) Paths {
+func (p *Path) NewPathForDependency(metadata *core.ReleaseMetadata) *Path {
 	return NewPathWithBaseDir(filepath.Join(p.baseDir, "deps", metadata.Name))
 }
 

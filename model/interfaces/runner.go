@@ -17,6 +17,7 @@ limitations under the License.
 package interfaces
 
 import (
+	"github.com/ankyra/escape-client/model/paths"
 	state "github.com/ankyra/escape-client/model/state/types"
 	"github.com/ankyra/escape-client/util"
 	core "github.com/ankyra/escape-core"
@@ -34,7 +35,7 @@ type RunnerContext interface {
 	GetReleaseMetadata() *core.ReleaseMetadata
 	SetReleaseMetadata(*core.ReleaseMetadata)
 	Logger() util.Logger
-	GetPath() Paths
+	GetPath() *paths.Path
 	GetBuildInputs() map[string]interface{}
 	SetBuildInputs(map[string]interface{})
 	GetBuildOutputs() map[string]interface{}

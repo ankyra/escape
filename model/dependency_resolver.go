@@ -44,7 +44,7 @@ func (resolver DependencyResolver) Resolve(cfg EscapeConfig, resolveDependencies
 	return nil
 }
 
-func (resolver DependencyResolver) resolve(cfg EscapeConfig, path Paths, dep string) error {
+func (resolver DependencyResolver) resolve(cfg EscapeConfig, path *paths.Path, dep string) error {
 	fetcher := ReleaseFetcher{}
 	d, err := core.NewDependencyFromString(dep)
 	if err != nil {
@@ -74,8 +74,8 @@ func (resolver DependencyResolver) resolve(cfg EscapeConfig, path Paths, dep str
 	return nil
 }
 
-func (ReleaseFetcher) Fetch(cfg EscapeConfig, path Paths, dep *core.Dependency) error {
-	fetchers := []func(EscapeConfig, Paths, *core.Dependency) (bool, error){
+func (ReleaseFetcher) Fetch(cfg EscapeConfig, path *paths.Path, dep *core.Dependency) error {
+	fetchers := []func(EscapeConfig, *paths.Path, *core.Dependency) (bool, error){
 		localFileReleaseFetcherStrategy,
 		archiveReleaseFetcherStrategy,
 		escapeServerReleaseFetcherStrategy,
@@ -92,7 +92,7 @@ func (ReleaseFetcher) Fetch(cfg EscapeConfig, path Paths, dep *core.Dependency) 
 	return errors.New("Could not resolve dependency: " + dep.GetReleaseId())
 }
 
-func localFileReleaseFetcherStrategy(cfg EscapeConfig, path Paths, dep *core.Dependency) (bool, error) {
+func localFileReleaseFetcherStrategy(cfg EscapeConfig, path *paths.Path, dep *core.Dependency) (bool, error) {
 	releaseJson := path.UnpackedDepDirectoryReleaseMetadata(dep)
 	if util.PathExists(releaseJson) {
 		contents, err := ioutil.ReadFile(releaseJson)
@@ -118,7 +118,7 @@ func localFileReleaseFetcherStrategy(cfg EscapeConfig, path Paths, dep *core.Dep
 	return false, nil
 }
 
-func archiveReleaseFetcherStrategy(cfg EscapeConfig, path Paths, dep *core.Dependency) (bool, error) {
+func archiveReleaseFetcherStrategy(cfg EscapeConfig, path *paths.Path, dep *core.Dependency) (bool, error) {
 	localArchive := path.DependencyReleaseArchive(dep)
 	buildDirArchive := path.DependencyDownloadTarget(dep)
 	if !util.PathExists(localArchive) && !util.PathExists(buildDirArchive) {
@@ -163,7 +163,7 @@ func archiveReleaseFetcherStrategy(cfg EscapeConfig, path Paths, dep *core.Depen
 	return localFileReleaseFetcherStrategy(cfg, path, dep)
 }
 
-func escapeServerReleaseFetcherStrategy(cfg EscapeConfig, path Paths, dep *core.Dependency) (bool, error) {
+func escapeServerReleaseFetcherStrategy(cfg EscapeConfig, path *paths.Path, dep *core.Dependency) (bool, error) {
 	backend := cfg.GetCurrentTarget().GetStorageBackend()
 	if backend != "escape" {
 		return false, nil

@@ -31,7 +31,7 @@ type runnerContext struct {
 	environmentState *types.EnvironmentState
 	deploymentState  *types.DeploymentState
 	releaseMetadata  *core.ReleaseMetadata
-	path             Paths
+	path             *paths.Path
 	inputs           map[string]interface{}
 	outputs          map[string]interface{}
 	depends          []*core.ReleaseMetadata
@@ -58,7 +58,7 @@ func NewRunnerContext(context Context, rootStage string) (RunnerContext, error) 
 	}, nil
 }
 
-func (r *runnerContext) GetPath() Paths {
+func (r *runnerContext) GetPath() *paths.Path {
 	return r.path
 }
 
