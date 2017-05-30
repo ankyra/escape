@@ -19,7 +19,6 @@ package runners
 import (
 	"encoding/json"
 	"fmt"
-	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/paths"
 	state "github.com/ankyra/escape-client/model/state/types"
 	"github.com/ankyra/escape-client/util"

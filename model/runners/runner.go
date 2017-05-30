@@ -1,11 +1,14 @@
 package runners
 
 import (
-	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/paths"
 	core "github.com/ankyra/escape-core"
 	"os"
 )
+
+type Runner interface {
+	Run(RunnerContext) error
+}
 
 type runner struct {
 	run func(ctx RunnerContext) error

@@ -27,6 +27,23 @@ import (
 	"github.com/ankyra/escape-core/script"
 )
 
+type RunnerContext interface {
+	GetEnvironmentState() *types.EnvironmentState
+	GetDeploymentState() *types.DeploymentState
+	SetDeploymentState(*types.DeploymentState)
+	GetReleaseMetadata() *core.ReleaseMetadata
+	SetReleaseMetadata(*core.ReleaseMetadata)
+	Logger() util.Logger
+	GetPath() *paths.Path
+	GetBuildInputs() map[string]interface{}
+	SetBuildInputs(map[string]interface{})
+	GetBuildOutputs() map[string]interface{}
+	SetBuildOutputs(map[string]interface{})
+	NewContextForDependency(*core.ReleaseMetadata) RunnerContext
+	GetScriptEnvironment(stage string) (*script.ScriptEnvironment, error)
+	GetRootDeploymentName() string
+}
+
 type runnerContext struct {
 	environmentState *types.EnvironmentState
 	deploymentState  *types.DeploymentState

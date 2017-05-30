@@ -17,14 +17,13 @@ limitations under the License.
 package errand
 
 import (
-	. "github.com/ankyra/escape-client/model/interfaces"
-	"github.com/ankyra/escape-client/model/runners"
+	. "github.com/ankyra/escape-client/model/runners"
 	core "github.com/ankyra/escape-core"
 )
 
 func NewErrandRunner(errand *core.Errand, extraVars map[string]string) Runner {
-	return runners.NewRunner(func(ctx RunnerContext) error {
-		step := runners.NewScriptStep(ctx, "deploy", errand.GetName(), true)
+	return NewRunner(func(ctx RunnerContext) error {
+		step := NewScriptStep(ctx, "deploy", errand.GetName(), true)
 		step.Inputs = func(ctx RunnerContext, stage string) (map[string]interface{}, error) {
 			inputs := ctx.GetDeploymentState().GetCalculatedInputs(stage)
 			result := map[string]interface{}{}

@@ -17,27 +17,26 @@ limitations under the License.
 package build
 
 import (
-	. "github.com/ankyra/escape-client/model/interfaces"
-	"github.com/ankyra/escape-client/model/runners"
+	. "github.com/ankyra/escape-client/model/runners"
 	"github.com/ankyra/escape-client/model/runners/deploy"
 )
 
 func NewPreBuildRunner() Runner {
-	return runners.NewPreScriptStepRunner("build", "pre_build")
+	return NewPreScriptStepRunner("build", "pre_build")
 }
 func NewMainBuildRunner() Runner {
-	return runners.NewMainStepRunner("build", "build")
+	return NewMainStepRunner("build", "build")
 }
 func NewPostBuildRunner() Runner {
-	return runners.NewPostScriptStepRunner("build", "post_build")
+	return NewPostScriptStepRunner("build", "post_build")
 }
 func NewTestRunner() Runner {
-	return runners.NewScriptRunner("build", "test")
+	return NewScriptRunner("build", "test")
 }
 
 func NewBuildRunner() Runner {
-	return runners.NewCompoundRunner(
-		runners.NewDependencyRunner("deploy", deploy.NewDeployRunner),
+	return NewCompoundRunner(
+		NewDependencyRunner("deploy", deploy.NewDeployRunner),
 		NewPreBuildRunner(),
 		NewMainBuildRunner(),
 		NewPostBuildRunner(),

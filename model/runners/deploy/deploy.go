@@ -17,28 +17,27 @@ limitations under the License.
 package deploy
 
 import (
-	. "github.com/ankyra/escape-client/model/interfaces"
-	"github.com/ankyra/escape-client/model/runners"
+	. "github.com/ankyra/escape-client/model/runners"
 )
 
 func NewPreDeployRunner() Runner {
-	return runners.NewPreScriptStepRunner("deploy", "pre_deploy")
+	return NewPreScriptStepRunner("deploy", "pre_deploy")
 }
 func NewMainDeployRunner() Runner {
-	return runners.NewMainStepRunner("deploy", "deploy")
+	return NewMainStepRunner("deploy", "deploy")
 }
 
 func NewPostDeployRunner() Runner {
-	return runners.NewPostScriptStepRunner("deploy", "post_deploy")
+	return NewPostScriptStepRunner("deploy", "post_deploy")
 }
 
 func NewSmokeRunner() Runner {
-	return runners.NewScriptRunner("deploy", "smoke")
+	return NewScriptRunner("deploy", "smoke")
 }
 
 func NewDeployRunner() Runner {
-	return runners.NewCompoundRunner(
-		runners.NewDependencyRunner("deploy", NewDeployRunner),
+	return NewCompoundRunner(
+		NewDependencyRunner("deploy", NewDeployRunner),
 		NewPreDeployRunner(),
 		NewMainDeployRunner(),
 		NewPostDeployRunner(),

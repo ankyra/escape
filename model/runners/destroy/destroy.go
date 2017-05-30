@@ -17,13 +17,12 @@ limitations under the License.
 package destroy
 
 import (
-	. "github.com/ankyra/escape-client/model/interfaces"
-	"github.com/ankyra/escape-client/model/runners"
+	. "github.com/ankyra/escape-client/model/runners"
 	"github.com/ankyra/escape-client/model/state/types"
 )
 
 func NewDestroyRunner(stage string) Runner {
-	return runners.NewCompoundRunner(
+	return NewCompoundRunner(
 		NewPreDestroyRunner(stage),
 		NewMainDestroyRunner(stage),
 		NewPostDestroyRunner(stage),
@@ -31,20 +30,20 @@ func NewDestroyRunner(stage string) Runner {
 }
 
 func NewPreDestroyRunner(stage string) Runner {
-	return runners.NewScriptRunner(stage, "pre_destroy")
+	return NewScriptRunner(stage, "pre_destroy")
 }
 
 func NewMainDestroyRunner(stage string) Runner {
-	return runners.NewRunner(func(ctx RunnerContext) error {
-		step := runners.NewScriptStep(ctx, stage, "destroy", true)
+	return NewRunner(func(ctx RunnerContext) error {
+		step := NewScriptStep(ctx, stage, "destroy", true)
 		step.ModifiesOutputVariables = true
 		return step.Run(ctx)
 	})
 }
 
 func NewPostDestroyRunner(stage string) Runner {
-	return runners.NewRunner(func(ctx RunnerContext) error {
-		step := runners.NewScriptStep(ctx, stage, "post_destroy", true)
+	return NewRunner(func(ctx RunnerContext) error {
+		step := NewScriptStep(ctx, stage, "post_destroy", true)
 		step.Commit = deleteCommit
 		return step.Run(ctx)
 	})
@@ -52,7 +51,7 @@ func NewPostDestroyRunner(stage string) Runner {
 
 func deleteCommit(ctx RunnerContext, depl *types.DeploymentState, stage string) error {
 	deferred := func() Runner { return NewDestroyRunner("deploy") }
-	err := runners.NewDependencyRunner("destroy", deferred).Run(ctx)
+	err := NewDependencyRunner("destroy", deferred).Run(ctx)
 	if err != nil {
 		return err
 	}

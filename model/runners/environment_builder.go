@@ -21,7 +21,6 @@ import (
 	"os"
 	"strings"
 
-	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/util"
 	core "github.com/ankyra/escape-core"
 )
