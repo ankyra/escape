@@ -20,9 +20,11 @@ import (
 	"errors"
 
 	"github.com/ankyra/escape-client/model/compiler"
+	"github.com/ankyra/escape-client/model/config"
 	"github.com/ankyra/escape-client/model/escape_plan"
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/paths"
+	"github.com/ankyra/escape-client/model/registry"
 	"github.com/ankyra/escape-client/model/state"
 	"github.com/ankyra/escape-client/model/state/types"
 	"github.com/ankyra/escape-client/util"
@@ -30,7 +32,7 @@ import (
 )
 
 type context struct {
-	EscapeConfig       EscapeConfig
+	EscapeConfig       *config.EscapeConfig
 	EscapePlan         *escape_plan.EscapePlan
 	ReleaseMetadata    *core.ReleaseMetadata
 	EnvironmentState   *types.EnvironmentState
@@ -42,7 +44,7 @@ type context struct {
 
 func NewContext() Context {
 	ctx := &context{}
-	ctx.EscapeConfig = NewEscapeConfig(ctx)
+	ctx.EscapeConfig = config.NewEscapeConfig()
 	ctx.Logger = util.NewLogger([]util.LogConsumer{
 		util.NewFancyTerminalOutputLogConsumer(),
 	})
@@ -84,7 +86,7 @@ func (c *context) PopLogSection() {
 func (c *context) PopLogRelease() {
 	c.Logger.PopRelease()
 }
-func (c *context) GetRegistry() Registry {
+func (c *context) GetRegistry() registry.Registry {
 	return c.EscapeConfig.GetRegistry()
 }
 func (c *context) GetEscapePlan() *escape_plan.EscapePlan {
@@ -96,7 +98,7 @@ func (c *context) GetReleaseMetadata() *core.ReleaseMetadata {
 func (c *context) GetEnvironmentState() *types.EnvironmentState {
 	return c.EnvironmentState
 }
-func (c *context) GetEscapeConfig() EscapeConfig {
+func (c *context) GetEscapeConfig() *config.EscapeConfig {
 	return c.EscapeConfig
 }
 func (c *context) GetRootDeploymentName() string {

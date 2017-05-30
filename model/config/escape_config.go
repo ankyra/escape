@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package model
+package config
 
 import (
 	"encoding/json"
@@ -25,45 +25,40 @@ import (
 	"path/filepath"
 	"strings"
 
-	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/registry"
 	"github.com/ankyra/escape-client/util"
 )
 
-type escapeConfig struct {
+type EscapeConfig struct {
 	ActiveTarget string                         `json:"current_target"`
-	Targets      map[string]*escapeTargetConfig `json:"targets"`
-	Context      Context                        `json:"-"`
+	Targets      map[string]*EscapeTargetConfig `json:"targets"`
 	saveLocation string                         `json:"-"`
-	Registry     Registry                       `json:"-"`
+	Registry     registry.Registry              `json:"-"`
 }
 
-type escapeTargetConfig struct {
-	Project        string  `json:"project"`
-	ApiServer      string  `json:"api_server"`
-	Username       string  `json:"username"`
-	Password       string  `json:"password"`
-	AuthToken      string  `json:"escape_auth_token"`
-	StorageBackend string  `json:"storage_backend"`
-	GcsBucketUrl   string  `json:"bucket_url"`
-	Context        Context `json:"-"`
+type EscapeTargetConfig struct {
+	Project        string        `json:"project"`
+	ApiServer      string        `json:"api_server"`
+	Username       string        `json:"username"`
+	Password       string        `json:"password"`
+	AuthToken      string        `json:"escape_auth_token"`
+	StorageBackend string        `json:"storage_backend"`
+	GcsBucketUrl   string        `json:"bucket_url"`
+	parent         *EscapeConfig `json:"-"`
 }
 
-func NewEscapeConfig(context Context) EscapeConfig {
-	cfg := &escapeConfig{
-		Context: context,
-		Targets: map[string]*escapeTargetConfig{
-			"default": newEscapeTargetConfig(context),
-		},
-		ActiveTarget: "default",
+func NewEscapeConfig() *EscapeConfig {
+	cfg := &EscapeConfig{}
+	cfg.Targets = map[string]*EscapeTargetConfig{
+		"default": newEscapeTargetConfig(cfg),
 	}
-	cfg.Registry = registry.LoadRegistryFromConfig(cfg)
+	cfg.ActiveTarget = "default"
+	cfg.Registry = registry.NewLocalRegistry()
 	return cfg
 }
 
-func newEscapeTargetConfig(context Context) *escapeTargetConfig {
-	target := &escapeTargetConfig{
-		Context:        context,
+func newEscapeTargetConfig(cfg *EscapeConfig) *EscapeTargetConfig {
+	target := &EscapeTargetConfig{
 		Project:        os.Getenv("ESCAPE_PROJECT"),
 		ApiServer:      os.Getenv("ESCAPE_API_SERVER"),
 		Username:       os.Getenv("ESCAPE_USERNAME"),
@@ -71,19 +66,20 @@ func newEscapeTargetConfig(context Context) *escapeTargetConfig {
 		AuthToken:      os.Getenv("ESCAPE_AUTH_TOKEN"),
 		StorageBackend: os.Getenv("ESCAPE_STORAGE_BACKEND"),
 		GcsBucketUrl:   os.Getenv("ESCAPE_BUCKET_URL"),
+		parent:         cfg,
 	}
 	return target
 }
 
-func (c *escapeConfig) GetRegistry() Registry {
+func (c *EscapeConfig) GetRegistry() registry.Registry {
 	return c.Registry
 }
 
-func (e *escapeConfig) GetCurrentTarget() EscapeTargetConfig {
+func (e *EscapeConfig) GetCurrentTarget() *EscapeTargetConfig {
 	return e.Targets[e.ActiveTarget]
 }
 
-func (e *escapeConfig) LoadConfig(cfgFile, cfgProfile string) error {
+func (e *EscapeConfig) LoadConfig(cfgFile, cfgProfile string) error {
 	if len(cfgFile) > 2 && cfgFile[:2] == "~/" {
 		usr, _ := user.Current()
 		dir := usr.HomeDir
@@ -107,12 +103,12 @@ func (e *escapeConfig) LoadConfig(cfgFile, cfgProfile string) error {
 		return fmt.Errorf("Referenced target '%s' was not found in the Escape configuration file.", e.ActiveTarget)
 	}
 	for _, t := range e.Targets {
-		t.Context = e.Context
+		t.parent = e
 	}
 	return nil
 }
 
-func (e *escapeConfig) FromJson(cfgFile string) error {
+func (e *EscapeConfig) FromJson(cfgFile string) error {
 	data, err := ioutil.ReadFile(cfgFile)
 	if err != nil {
 		return err
@@ -120,7 +116,7 @@ func (e *escapeConfig) FromJson(cfgFile string) error {
 	return json.Unmarshal(data, e)
 }
 
-func (e *escapeConfig) Save() error {
+func (e *EscapeConfig) Save() error {
 	if e.saveLocation == "" {
 		return fmt.Errorf("Save location has not been set")
 	}
@@ -140,7 +136,7 @@ func (e *escapeConfig) Save() error {
 	return ioutil.WriteFile(e.saveLocation, str, mode)
 }
 
-func (t *escapeTargetConfig) ToJson() string {
+func (t *EscapeTargetConfig) ToJson() string {
 	str, err := json.MarshalIndent(t, "", "   ")
 	if err != nil {
 		panic(err)
@@ -148,49 +144,49 @@ func (t *escapeTargetConfig) ToJson() string {
 	return string(str)
 }
 
-func (t *escapeTargetConfig) Save() error {
-	return t.Context.GetEscapeConfig().Save()
+func (t *EscapeTargetConfig) Save() error {
+	return t.parent.Save()
 }
-func (t *escapeTargetConfig) GetApiServer() string {
+func (t *EscapeTargetConfig) GetApiServer() string {
 	return t.ApiServer
 }
-func (t *escapeTargetConfig) GetUsername() string {
+func (t *EscapeTargetConfig) GetUsername() string {
 	return t.Username
 }
-func (t *escapeTargetConfig) GetPassword() string {
+func (t *EscapeTargetConfig) GetPassword() string {
 	return t.Password
 }
-func (t *escapeTargetConfig) GetAuthToken() string {
+func (t *EscapeTargetConfig) GetAuthToken() string {
 	return t.AuthToken
 }
-func (t *escapeTargetConfig) GetStorageBackend() string {
+func (t *EscapeTargetConfig) GetStorageBackend() string {
 	return t.StorageBackend
 }
-func (t *escapeTargetConfig) GetGcsBucketUrl() string {
+func (t *EscapeTargetConfig) GetGcsBucketUrl() string {
 	return t.GcsBucketUrl
 }
-func (t *escapeTargetConfig) GetProject() string {
+func (t *EscapeTargetConfig) GetProject() string {
 	if t.Project == "" {
 		return "_"
 	}
 	return t.Project
 }
 
-func (t *escapeTargetConfig) SetApiServer(v string) {
+func (t *EscapeTargetConfig) SetApiServer(v string) {
 	t.ApiServer = v
 }
-func (t *escapeTargetConfig) SetUsername(v string) {
+func (t *EscapeTargetConfig) SetUsername(v string) {
 	t.Username = v
 }
-func (t *escapeTargetConfig) SetPassword(v string) {
+func (t *EscapeTargetConfig) SetPassword(v string) {
 	t.Password = v
 }
-func (t *escapeTargetConfig) SetAuthToken(v string) {
+func (t *EscapeTargetConfig) SetAuthToken(v string) {
 	t.AuthToken = v
 }
-func (t *escapeTargetConfig) SetStorageBackend(v string) {
+func (t *EscapeTargetConfig) SetStorageBackend(v string) {
 	t.StorageBackend = v
 }
-func (t *escapeTargetConfig) SetGcsBucketUrl(v string) {
+func (t *EscapeTargetConfig) SetGcsBucketUrl(v string) {
 	t.GcsBucketUrl = v
 }

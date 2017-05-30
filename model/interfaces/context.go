@@ -17,7 +17,9 @@ limitations under the License.
 package interfaces
 
 import (
+	"github.com/ankyra/escape-client/model/config"
 	plan "github.com/ankyra/escape-client/model/escape_plan"
+	"github.com/ankyra/escape-client/model/registry"
 	state "github.com/ankyra/escape-client/model/state/types"
 	"github.com/ankyra/escape-client/util"
 	"github.com/ankyra/escape-core"
@@ -39,8 +41,8 @@ type Context interface {
 	GetEscapePlan() *plan.EscapePlan
 	GetReleaseMetadata() *core.ReleaseMetadata
 	GetEnvironmentState() *state.EnvironmentState
-	GetEscapeConfig() EscapeConfig
-	GetRegistry() Registry
+	GetEscapeConfig() *config.EscapeConfig
+	GetRegistry() registry.Registry
 	GetLogger() util.Logger
 	GetRootDeploymentName() string
 	SetRootDeploymentName(string)
