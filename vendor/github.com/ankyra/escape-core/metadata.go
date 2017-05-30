@@ -85,6 +85,7 @@ type ReleaseMetadata struct {
 	Extends     []*ExtensionConfig    `json:"extends"`
 	Inputs      []*variables.Variable `json:"inputs"`
 	Outputs     []*variables.Variable `json:"outputs"`
+	Project     string                `json:"project"`
 	Provides    []*ProviderConfig     `json:"provides"`
 	Stages      map[string]*ExecStage `json:"stages"`
 	Templates   []*templates.Template `json:"templates"`
@@ -304,6 +305,17 @@ func (m *ReleaseMetadata) SetVariableInContext(v string, ref string) {
 
 func (m *ReleaseMetadata) GetReleaseId() string {
 	return m.Name + "-v" + m.Version
+}
+
+func (m *ReleaseMetadata) GetQualifiedReleaseId() string {
+	return m.GetProject() + "/" + m.Name + "-v" + m.Version
+}
+
+func (m *ReleaseMetadata) GetProject() string {
+	if m.Project == "" {
+		return "_"
+	}
+	return m.Project
 }
 
 func (m *ReleaseMetadata) GetVersionlessReleaseId() string {
