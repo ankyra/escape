@@ -20,16 +20,16 @@ import (
 	"github.com/ankyra/escape-core"
 )
 
-func (c *Compiler) compileErrands(errands map[string]interface{}) error {
-	for name, errandDict := range errands {
+func compileErrands(ctx *CompilerContext) error {
+	for name, errandDict := range ctx.Plan.GetErrands() {
 		newErrand, err := core.NewErrandFromDict(name, errandDict)
 		if err != nil {
 			return err
 		}
-		if err := c.addFileDigest(newErrand.GetScript()); err != nil {
+		if err := ctx.AddFileDigest(newErrand.GetScript()); err != nil {
 			return err
 		}
-		c.metadata.Errands[name] = newErrand
+		ctx.Metadata.Errands[name] = newErrand
 	}
 	return nil
 }

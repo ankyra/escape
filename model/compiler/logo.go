@@ -23,7 +23,8 @@ import (
 	"io/ioutil"
 )
 
-func (c *Compiler) compileLogo(logo string) error {
+func compileLogo(ctx *CompilerContext) error {
+	logo := ctx.Plan.GetLogo()
 	if logo == "" {
 		return nil
 	}
@@ -34,6 +35,6 @@ func (c *Compiler) compileLogo(logo string) error {
 	if err != nil {
 		return fmt.Errorf("Couldn't read logo '%s': %s", logo, err.Error())
 	}
-	c.metadata.Logo = base64.StdEncoding.EncodeToString(data)
+	ctx.Metadata.Logo = base64.StdEncoding.EncodeToString(data)
 	return nil
 }

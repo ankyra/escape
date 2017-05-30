@@ -21,8 +21,8 @@ import (
 	"path/filepath"
 )
 
-func (c *Compiler) compileIncludes(includes []string) {
-	for _, globPattern := range includes {
+func compileIncludes(ctx *CompilerContext) error {
+	for _, globPattern := range ctx.Plan.GetIncludes() {
 		paths, err := filepath.Glob(globPattern)
 		if err != nil {
 			fmt.Println("Warning: ignoring pattern error: " + err.Error())
@@ -32,10 +32,11 @@ func (c *Compiler) compileIncludes(includes []string) {
 			continue
 		}
 		for _, path := range paths {
-			err = c.addFileDigest(path)
+			err = ctx.AddFileDigest(path)
 			if err != nil {
 				fmt.Println("Ignoring problem with path " + path + ": " + err.Error())
 			}
 		}
 	}
+	return nil
 }

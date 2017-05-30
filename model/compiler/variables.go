@@ -22,29 +22,29 @@ import (
 	"github.com/ankyra/escape-core/variables"
 )
 
-func (c *Compiler) compileInputs(inputs []interface{}) error {
-	for _, input := range inputs {
-		v, err := c.compileVariable(input)
+func compileInputs(ctx *CompilerContext) error {
+	for _, input := range ctx.Plan.GetInputs() {
+		v, err := compileVariable(ctx, input)
 		if err != nil {
 			return fmt.Errorf("Error compiling input variable: %s", err.Error())
 		}
-		c.metadata.AddInputVariable(v)
+		ctx.Metadata.AddInputVariable(v)
 	}
 	return nil
 }
 
-func (c *Compiler) compileOutputs(outputs []interface{}) error {
-	for _, output := range outputs {
-		v, err := c.compileVariable(output)
+func compileOutputs(ctx *CompilerContext) error {
+	for _, output := range ctx.Plan.GetOutputs() {
+		v, err := compileVariable(ctx, output)
 		if err != nil {
 			return fmt.Errorf("Error compiling output variable: %s", err.Error())
 		}
-		c.metadata.AddOutputVariable(v)
+		ctx.Metadata.AddOutputVariable(v)
 	}
 	return nil
 }
 
-func (c *Compiler) compileVariable(v interface{}) (result *variables.Variable, err error) {
+func compileVariable(ctx *CompilerContext, v interface{}) (result *variables.Variable, err error) {
 	switch v.(type) {
 	case string:
 		result, err = variables.NewVariableFromString(v.(string), "string")
@@ -60,12 +60,12 @@ func (c *Compiler) compileVariable(v interface{}) (result *variables.Variable, e
 		fmt.Errorf("Unexpected type")
 	}
 	if result.Default != nil {
-		return c.compileDefault(result)
+		return compileDefault(ctx, result)
 	}
 	return result, nil
 }
 
-func (c *Compiler) compileDefault(v *variables.Variable) (*variables.Variable, error) {
+func compileDefault(ctx *CompilerContext, v *variables.Variable) (*variables.Variable, error) {
 	switch v.Default.(type) {
 	case int, float64, bool:
 		return v, nil
@@ -75,7 +75,7 @@ func (c *Compiler) compileDefault(v *variables.Variable) (*variables.Variable, e
 		if err != nil {
 			return nil, fmt.Errorf("Couldn't parse expression '%s' in default field: %s", defaultValue, err.Error())
 		}
-		str, err := RunScriptForCompileStep(defaultValue, c.VariableCtx)
+		str, err := RunScriptForCompileStep(defaultValue, ctx.VariableCtx)
 		if err == nil {
 			v.Default = &str
 		}
@@ -89,7 +89,7 @@ func (c *Compiler) compileDefault(v *variables.Variable) (*variables.Variable, e
 				if err != nil {
 					return nil, fmt.Errorf("Couldn't parse expression '%s' in default field: %s", k.(string), err.Error())
 				}
-				str, err := RunScriptForCompileStep(k.(string), c.VariableCtx)
+				str, err := RunScriptForCompileStep(k.(string), ctx.VariableCtx)
 				if err == nil {
 					values = append(values, str)
 				} else {

@@ -21,6 +21,7 @@ import (
 )
 
 type Dependency struct {
+	Project      string
 	Name         string
 	Version      string
 	VariableName string
@@ -40,12 +41,13 @@ func NewDependencyFromString(str string) (*Dependency, error) {
 	}
 	return &Dependency{
 		Name:         parsed.Name,
+		Project:      parsed.Project,
 		Version:      parsed.Version,
 		VariableName: parsed.VariableName,
 	}, nil
 }
 
-func (d *Dependency) GetBuild() string {
+func (d *Dependency) GetName() string {
 	return d.Name
 }
 func (d *Dependency) GetVariableName() string {
@@ -62,6 +64,10 @@ func (d *Dependency) GetReleaseId() string {
 	}
 	return d.Name + "-" + version
 }
+func (d *Dependency) GetQualifiedReleaseId() string {
+	return d.Project + "/" + d.GetReleaseId()
+}
+
 func (d *Dependency) GetVersionlessReleaseId() string {
-	return d.Name
+	return d.Project + "/" + d.Name
 }

@@ -21,8 +21,8 @@ import (
 	"github.com/ankyra/escape-core/templates"
 )
 
-func (c *Compiler) compileTemplates(templateList []interface{}) error {
-	for _, tpl := range templateList {
+func compileTemplates(ctx *CompilerContext) error {
+	for _, tpl := range ctx.Plan.GetTemplates() {
 		template, err := templates.NewTemplateFromInterface(tpl)
 		if err != nil {
 			return err
@@ -31,7 +31,7 @@ func (c *Compiler) compileTemplates(templateList []interface{}) error {
 			return fmt.Errorf("Missing 'file' field in template")
 		}
 		mapping := template.Mapping
-		for _, i := range c.metadata.GetInputs() {
+		for _, i := range ctx.Metadata.GetInputs() {
 			_, exists := mapping[i.GetId()]
 			if !exists {
 				mapping[i.GetId()] = "$this.inputs." + i.GetId()
@@ -45,8 +45,8 @@ func (c *Compiler) compileTemplates(templateList []interface{}) error {
 				mapping[v] = "$this." + v
 			}
 		}
-		c.addFileDigest(template.File)
-		c.metadata.Templates = append(c.metadata.Templates, template)
+		ctx.AddFileDigest(template.File)
+		ctx.Metadata.Templates = append(ctx.Metadata.Templates, template)
 	}
 	return nil
 }

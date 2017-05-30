@@ -77,26 +77,28 @@ func (c *Compiler) Compile(context Context) (*core.ReleaseMetadata, error) {
 	if err := c.compileVersion(plan.GetVersion()); err != nil {
 		return nil, err
 	}
-	if err := c.compileMetadata(plan.Metadata); err != nil {
+	if err := compileMetadata(c.CompilerContext); err != nil {
 		return nil, err
 	}
 	if err := compileScripts(c.CompilerContext); err != nil {
 		return nil, err
 	}
-	if err := c.compileInputs(plan.GetInputs()); err != nil {
+	if err := compileInputs(c.CompilerContext); err != nil {
 		return nil, err
 	}
-	if err := c.compileOutputs(plan.GetOutputs()); err != nil {
+	if err := compileOutputs(c.CompilerContext); err != nil {
 		return nil, err
 	}
-	if err := c.compileErrands(plan.GetErrands()); err != nil {
+	if err := compileErrands(c.CompilerContext); err != nil {
 		return nil, err
 	}
-	if err := c.compileTemplates(plan.GetTemplates()); err != nil {
+	if err := compileTemplates(c.CompilerContext); err != nil {
 		return nil, err
 	}
-	c.compileIncludes(plan.GetIncludes())
-	if err := c.compileLogo(plan.GetLogo()); err != nil {
+	if err := compileIncludes(c.CompilerContext); err != nil {
+		return nil, err
+	}
+	if err := compileLogo(c.CompilerContext); err != nil {
 		return nil, err
 	}
 	//if build_fat_package:
@@ -115,7 +117,7 @@ func (c *Compiler) ResolveVersion(d *core.Dependency, context Context) error {
 	if versionQuery != "latest" {
 		versionQuery = "v" + versionQuery
 	}
-	metadata, err := context.GetRegistry().QueryReleaseMetadata(project, d.GetBuild(), versionQuery)
+	metadata, err := context.GetRegistry().QueryReleaseMetadata(project, d.GetName(), versionQuery)
 	if err != nil {
 		return err
 	}

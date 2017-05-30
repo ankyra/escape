@@ -124,7 +124,7 @@ func (p *Path) DepTypeDirectory(dependency *core.Dependency) string {
 	return filepath.Join(p.baseDir, "deps")
 }
 func (p *Path) UnpackedDepDirectory(dependency *core.Dependency) string {
-	return filepath.Join(p.DepTypeDirectory(dependency), dependency.GetBuild())
+	return filepath.Join(p.DepTypeDirectory(dependency), dependency.GetName())
 }
 
 func (p *Path) UnpackedDepDirectoryReleaseMetadata(dependency *core.Dependency) string {

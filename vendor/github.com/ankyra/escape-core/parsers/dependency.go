@@ -22,7 +22,7 @@ import (
 )
 
 type ParsedDependency struct {
-	ReleaseId
+	QualifiedReleaseId
 	VariableName string
 }
 
@@ -38,7 +38,7 @@ func ParseDependency(str string) (*ParsedDependency, error) {
 	if len(parts) != 1 && len(parts) != 3 {
 		return nil, fmt.Errorf("Malformed dependency string '%s'", str)
 	}
-	releaseId, err := ParseReleaseId(parts[0])
+	releaseId, err := ParseQualifiedReleaseId(parts[0])
 	if err != nil {
 		return nil, err
 	}
@@ -48,6 +48,6 @@ func ParseDependency(str string) (*ParsedDependency, error) {
 		}
 		result.VariableName = parts[2]
 	}
-	result.ReleaseId = *releaseId
+	result.QualifiedReleaseId = *releaseId
 	return result, nil
 }

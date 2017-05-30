@@ -29,14 +29,16 @@ import (
 )
 
 type CompilerContext struct {
-	Metadata *core.ReleaseMetadata
-	Plan     *escape_plan.EscapePlan
+	Metadata    *core.ReleaseMetadata
+	Plan        *escape_plan.EscapePlan
+	VariableCtx map[string]*core.ReleaseMetadata
 }
 
 func NewCompilerContext(metadata *core.ReleaseMetadata, plan *escape_plan.EscapePlan) *CompilerContext {
 	return &CompilerContext{
-		Metadata: metadata,
-		Plan:     plan,
+		Metadata:    metadata,
+		Plan:        plan,
+		VariableCtx: map[string]*core.ReleaseMetadata{},
 	}
 }
 

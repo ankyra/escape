@@ -47,10 +47,12 @@ func (c *Compiler) compileDependencies(depends []string) error {
 		}
 		c.VariableCtx[versionlessDep] = metadata
 		c.metadata.SetVariableInContext(versionlessDep, metadata.GetReleaseId())
+
 		if dep.GetVariableName() != "" {
 			c.VariableCtx[dep.GetVariableName()] = metadata
 			c.metadata.SetVariableInContext(dep.GetVariableName(), metadata.GetReleaseId())
 		}
+
 		result = append(result, resolvedDep)
 	}
 	c.metadata.SetDependencies(result)

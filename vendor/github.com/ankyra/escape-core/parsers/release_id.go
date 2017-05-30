@@ -27,6 +27,11 @@ type ReleaseId struct {
 	Version string
 }
 
+type QualifiedReleaseId struct {
+	*ReleaseId
+	Project string
+}
+
 func ParseReleaseId(releaseId string) (*ReleaseId, error) {
 	split := strings.Split(releaseId, "-")
 	if len(split) < 2 { // build-version
@@ -48,6 +53,31 @@ func ParseReleaseId(releaseId string) (*ReleaseId, error) {
 		return nil, fmt.Errorf("Invalid release ID '%s': %s", releaseId, err.Error())
 	}
 	return result, nil
+}
+
+func ParseQualifiedReleaseId(releaseId string) (*QualifiedReleaseId, error) {
+	if releaseId == "" {
+		return nil, fmt.Errorf("Invalid release format: ''")
+	}
+	parts := strings.Split(releaseId, "/")
+	releaseId = parts[0]
+	project := "_"
+	if len(parts) > 1 {
+		project = parts[0]
+		releaseId = strings.Join(parts[1:], "/")
+	}
+	release, err := ParseReleaseId(releaseId)
+	if err != nil {
+		return nil, err
+	}
+	return &QualifiedReleaseId{
+		release,
+		project,
+	}, nil
+}
+
+func (r *QualifiedReleaseId) ToString() string {
+	return r.Project + "/" + r.ReleaseId.ToString()
 }
 
 func (r *ReleaseId) Validate() error {

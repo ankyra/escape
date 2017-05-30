@@ -20,15 +20,15 @@ import (
 	"fmt"
 )
 
-func (c *Compiler) compileMetadata(metadata map[string]string) error {
+func compileMetadata(ctx *CompilerContext) error {
 	result := map[string]string{}
-	for key, val := range metadata {
-		str, err := RunScriptForCompileStep(val, c.VariableCtx)
+	for key, val := range ctx.Plan.Metadata {
+		str, err := RunScriptForCompileStep(val, ctx.VariableCtx)
 		if err != nil {
 			return fmt.Errorf("%s in metadata field.", err.Error())
 		}
 		result[key] = str
 	}
-	c.metadata.Metadata = result
+	ctx.Metadata.Metadata = result
 	return nil
 }
