@@ -17,11 +17,9 @@ limitations under the License.
 package paths
 
 import (
-	"testing"
-
-	"os"
-
 	. "gopkg.in/check.v1"
+	"os"
+	"testing"
 )
 
 func Test(t *testing.T) { TestingT(t) }
