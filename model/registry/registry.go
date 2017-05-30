@@ -17,6 +17,8 @@ limitations under the License.
 package registry
 
 import (
+	. "github.com/ankyra/escape-client/model/interfaces"
+	"github.com/ankyra/escape-client/model/registry/remote"
 	core "github.com/ankyra/escape-core"
 )
 
@@ -25,4 +27,30 @@ type Registry interface {
 	QueryNextVersion(project, name, versionPrefix string) (string, error)
 	DownloadRelease(project, name, version, targetFile string) error
 	UploadRelease(project, releasePath string, metadata *core.ReleaseMetadata) error
+}
+
+var GlobalRegistry Registry
+
+func LoadRegistryFromConfig(cfg EscapeConfig) Registry {
+	GlobalRegistry = remote.NewRemoteRegistry(
+		cfg.GetCurrentTarget().GetApiServer(),
+		cfg.GetCurrentTarget().GetAuthToken(),
+	)
+	return GlobalRegistry
+}
+
+func QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
+	return GlobalRegistry.QueryReleaseMetadata(project, name, version)
+}
+
+func QueryNextVersion(project, name, versionPrefix string) (string, error) {
+	return GlobalRegistry.QueryNextVersion(project, name, versionPrefix)
+}
+
+func DownloadRelease(project, name, version, targetFile string) error {
+	return GlobalRegistry.DownloadRelease(project, name, version, targetFile)
+}
+
+func UploadRelease(project, releasePath string, metadata *core.ReleaseMetadata) error {
+	return GlobalRegistry.UploadRelease(project, releasePath, metadata)
 }
