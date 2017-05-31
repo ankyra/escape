@@ -34,11 +34,16 @@ func compileBasicFields(ctx *CompilerContext) error {
 	ctx.Metadata.Logo = ctx.Plan.Logo
 	ctx.Metadata.SetProvides(ctx.Plan.Provides)
 	ctx.Metadata.SetConsumes(ctx.Plan.Consumes)
+	project := ctx.Project
+	if project == "" {
+		project = "_"
+	}
+	ctx.Metadata.Project = project
 	return nil
 }
 
-func Compile(plan *escape_plan.EscapePlan, reg registry.Registry) (*core.ReleaseMetadata, error) {
-	ctx := NewCompilerContext(plan, reg)
+func Compile(plan *escape_plan.EscapePlan, reg registry.Registry, project string) (*core.ReleaseMetadata, error) {
+	ctx := NewCompilerContext(plan, reg, project)
 	compilerSteps := []CompilerFunc{
 		compileBasicFields,
 		compileExtensions,

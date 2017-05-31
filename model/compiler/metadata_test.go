@@ -29,7 +29,7 @@ func (s *suite) Test_Compile_Metadata(c *C) {
 		"test2": "$$escaped field",
 		"test3": "$dep.version",
 	}
-	ctx := NewCompilerContext(plan, nil)
+	ctx := NewCompilerContext(plan, nil, "_")
 	ctx.VariableCtx = map[string]*core.ReleaseMetadata{
 		"dep": core.NewReleaseMetadata("test", "1.0"),
 	}
@@ -42,7 +42,7 @@ func (s *suite) Test_Compile_Metadata(c *C) {
 func (s *suite) Test_Compile_Metadata_nil(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Metadata = nil
-	ctx := NewCompilerContext(plan, nil)
+	ctx := NewCompilerContext(plan, nil, "_")
 	c.Assert(compileMetadata(ctx), IsNil)
 	c.Assert(ctx.Metadata.Metadata, DeepEquals, map[string]string{})
 }
@@ -52,7 +52,7 @@ func (s *suite) Test_Compile_Metadata_fails_if_field_cant_be_evaluated(c *C) {
 	plan.Metadata = map[string]string{
 		"test": "$.$.$.$uhoh",
 	}
-	ctx := NewCompilerContext(plan, nil)
+	ctx := NewCompilerContext(plan, nil, "_")
 	c.Assert(compileMetadata(ctx), Not(IsNil))
 	c.Assert(ctx.Metadata.Metadata["test"], Equals, "")
 }

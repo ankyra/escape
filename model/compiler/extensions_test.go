@@ -38,7 +38,7 @@ func (s *suite) Test_Compile_Extensions(c *C) {
 		return nil, fmt.Errorf("Resolve error")
 	}
 
-	ctx := NewCompilerContext(plan, reg)
+	ctx := NewCompilerContext(plan, reg, "_")
 	c.Assert(compileExtensions(ctx), IsNil)
 	c.Assert(ctx.VariableCtx["dependency"].GetQualifiedReleaseId(), Equals, "_/dependency-v1.0")
 	c.Assert(ctx.Metadata.VariableCtx["dependency"], Equals, "_/dependency-v1.0")
@@ -60,7 +60,7 @@ func (s *suite) Test_Compile_Extensions_adds_dependencies_to_plan(c *C) {
 		return nil, fmt.Errorf("Resolve error")
 	}
 
-	ctx := NewCompilerContext(plan, reg)
+	ctx := NewCompilerContext(plan, reg, "_")
 	c.Assert(compileExtensions(ctx), IsNil)
 	c.Assert(ctx.Plan.Depends, DeepEquals, []string{"recursive-dep-latest as dep", "another-dep-v1.0"})
 }
@@ -87,7 +87,7 @@ func (s *suite) Test_Compile_Extensions_adds_variable_context(c *C) {
 		return nil, fmt.Errorf("Resolve error %s/%s-%s", project, name, version)
 	}
 
-	ctx := NewCompilerContext(plan, reg)
+	ctx := NewCompilerContext(plan, reg, "_")
 	c.Assert(compileExtensions(ctx), IsNil)
 	c.Assert(ctx.VariableCtx["dependency"].GetQualifiedReleaseId(), Equals, "_/dependency-v1.0")
 	c.Assert(ctx.VariableCtx["oh"].GetQualifiedReleaseId(), Equals, "project/recursive-dependency-v1.0")
@@ -99,7 +99,7 @@ func (s *suite) Test_Compile_Extensions_adds_variable_context(c *C) {
 func (s *suite) Test_Compile_Extensions_nil(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Extends = nil
-	ctx := NewCompilerContext(plan, nil)
+	ctx := NewCompilerContext(plan, nil, "_")
 	c.Assert(compileExtensions(ctx), IsNil)
 	c.Assert(ctx.Metadata.GetExtensions(), DeepEquals, []string{})
 }
@@ -115,7 +115,7 @@ func (s *suite) Test_Compile_Extensions_fails_if_invalid_format(c *C) {
 	for _, test := range cases {
 		plan := escape_plan.NewEscapePlan()
 		plan.Extends = []string{test}
-		ctx := NewCompilerContext(plan, nil)
+		ctx := NewCompilerContext(plan, nil, "_")
 		c.Assert(compileExtensions(ctx), Not(IsNil))
 	}
 }
@@ -127,7 +127,7 @@ func (s *suite) Test_Compile_Extensions_fails_if_version_cant_be_resolved(c *C) 
 	reg.ReleaseMetadata = func(project, name, version string) (*core.ReleaseMetadata, error) {
 		return nil, fmt.Errorf("Resolve error")
 	}
-	ctx := NewCompilerContext(plan, reg)
+	ctx := NewCompilerContext(plan, reg, "_")
 	c.Assert(compileExtensions(ctx), Not(IsNil))
 }
 
@@ -148,7 +148,7 @@ func (s *suite) Test_Compile_Extensions_fails_if_variable_context_cant_be_parsed
 		return nil, fmt.Errorf("Resolve error")
 	}
 
-	ctx := NewCompilerContext(plan, reg)
+	ctx := NewCompilerContext(plan, reg, "_")
 	c.Assert(compileExtensions(ctx), Not(IsNil))
 }
 
@@ -169,6 +169,6 @@ func (s *suite) Test_Compile_Extensions_fails_if_variable_context_cant_be_resolv
 		return nil, fmt.Errorf("Resolve error")
 	}
 
-	ctx := NewCompilerContext(plan, reg)
+	ctx := NewCompilerContext(plan, reg, "_")
 	c.Assert(compileExtensions(ctx), Not(IsNil))
 }

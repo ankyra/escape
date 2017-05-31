@@ -5,28 +5,9 @@
          "name": "dev",
          "inputs": null,
          "deployments": {
-            "-name": {
-               "name": "-name",
-               "release": "-name",
-               "stages": {
-                  "deploy": {
-                     "inputs": {},
-                     "calculated_inputs": {},
-                     "calculated_outputs": {
-                        "output_variable": "testinput"
-                     },
-                     "deployments": {},
-                     "providers": {},
-                     "provides": [],
-                     "version": "",
-                     "step": ""
-                  }
-               },
-               "inputs": {}
-            },
-            "name": {
-               "name": "name",
-               "release": "name",
+            "_/name": {
+               "name": "_/name",
+               "release": "_/name",
                "stages": {
                   "deploy": {
                      "inputs": {},

@@ -3,7 +3,7 @@
     "environments": {
         "dev": {
             "deployments": {
-                "name": {
+                "_/name": {
                     "stages": {
                         "deploy": {
                             "inputs": {

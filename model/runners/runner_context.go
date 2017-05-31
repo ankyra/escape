@@ -51,7 +51,6 @@ type runnerContext struct {
 	path             *paths.Path
 	inputs           map[string]interface{}
 	outputs          map[string]interface{}
-	depends          []*core.ReleaseMetadata
 	logger           util.Logger
 	context          Context
 	stage            string
@@ -63,13 +62,13 @@ func NewRunnerContext(context Context, rootStage string) (RunnerContext, error) 
 		return nil, fmt.Errorf("Missing metadata in context. This is a bug in Escape.")
 	}
 	deplState := context.GetEnvironmentState().GetOrCreateDeploymentState(context.GetRootDeploymentName())
+	deplState.Release = metadata.GetVersionlessReleaseId()
 	return &runnerContext{
 		path:             paths.NewPath(),
 		environmentState: context.GetEnvironmentState(),
 		deploymentState:  deplState,
-		releaseMetadata:  context.GetReleaseMetadata(),
+		releaseMetadata:  metadata,
 		logger:           context.GetLogger(),
-		depends:          []*core.ReleaseMetadata{context.GetReleaseMetadata()},
 		context:          context,
 		stage:            rootStage,
 	}, nil
@@ -132,7 +131,6 @@ func (r *runnerContext) NewContextForDependency(metadata *core.ReleaseMetadata) 
 		environmentState: r.environmentState,
 		deploymentState:  r.deploymentState.GetDeployment(r.stage, metadata.GetVersionlessReleaseId()),
 		path:             r.path.NewPathForDependency(metadata),
-		depends:          append(r.depends, metadata),
 		releaseMetadata:  metadata,
 		logger:           r.logger,
 		inputs:           r.inputs,

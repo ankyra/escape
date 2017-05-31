@@ -40,7 +40,7 @@ func (s *suite) Test_Compile_Dependencies(c *C) {
 		}
 		return nil, fmt.Errorf("Resolve error")
 	}
-	ctx := NewCompilerContext(plan, reg)
+	ctx := NewCompilerContext(plan, reg, "_")
 	c.Assert(compileDependencies(ctx), IsNil)
 	c.Assert(ctx.Metadata.GetDependencies(), DeepEquals, []string{"_/dependency-v1.0"})
 	c.Assert(ctx.Metadata.VariableCtx["dependency"], Equals, "_/dependency-v1.0")
@@ -69,7 +69,7 @@ func (s *suite) Test_Compile_Dependencies_adds_inputs_without_defaults(c *C) {
 		}
 		return nil, fmt.Errorf("Resolve error")
 	}
-	ctx := NewCompilerContext(plan, reg)
+	ctx := NewCompilerContext(plan, reg, "_")
 	c.Assert(compileDependencies(ctx), IsNil)
 	inputs := ctx.Metadata.GetInputs()
 	c.Assert(inputs, HasLen, 1)
@@ -94,7 +94,7 @@ func (s *suite) Test_Compile_Dependencies_adds_consumers(c *C) {
 		}
 		return nil, fmt.Errorf("Resolve error")
 	}
-	ctx := NewCompilerContext(plan, reg)
+	ctx := NewCompilerContext(plan, reg, "_")
 	c.Assert(compileDependencies(ctx), IsNil)
 	c.Assert(ctx.Metadata.GetConsumes(), DeepEquals, []string{"test-consumer-1", "test-consumer-2"})
 }
@@ -102,7 +102,7 @@ func (s *suite) Test_Compile_Dependencies_adds_consumers(c *C) {
 func (s *suite) Test_Compile_Dependencies_nil(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Depends = nil
-	ctx := NewCompilerContext(plan, nil)
+	ctx := NewCompilerContext(plan, nil, "_")
 	c.Assert(compileDependencies(ctx), IsNil)
 	c.Assert(ctx.Metadata.GetDependencies(), DeepEquals, []string{})
 }
@@ -112,7 +112,7 @@ func (s *suite) Test_Compile_Dependencies_fails_if_invalid_format(c *C) {
 	plan.Depends = []string{
 		"$invalid_dependency$",
 	}
-	ctx := NewCompilerContext(plan, nil)
+	ctx := NewCompilerContext(plan, nil, "_")
 	c.Assert(compileDependencies(ctx).Error(), Equals, "Invalid release format: $invalid_dependency$")
 }
 
@@ -125,6 +125,6 @@ func (s *suite) Test_Compile_Dependencies_fails_if_resolve_version_fails(c *C) {
 	reg.ReleaseMetadata = func(project, name, version string) (*core.ReleaseMetadata, error) {
 		return nil, fmt.Errorf("Resolve error")
 	}
-	ctx := NewCompilerContext(plan, reg)
+	ctx := NewCompilerContext(plan, reg, "_")
 	c.Assert(compileDependencies(ctx).Error(), Equals, "Resolve error")
 }

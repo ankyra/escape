@@ -323,7 +323,7 @@ func (m *ReleaseMetadata) GetProject() string {
 }
 
 func (m *ReleaseMetadata) GetVersionlessReleaseId() string {
-	return m.Name
+	return m.GetProject() + "/" + m.Name
 }
 
 func (m *ReleaseMetadata) AddInputVariable(input *variables.Variable) {

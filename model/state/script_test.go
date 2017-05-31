@@ -88,7 +88,7 @@ func (s *deplSuite) Test_ToScriptEnvironment_adds_dependencies(c *C) {
 		"metadata": []string{},
 	}
 	test_helper_check_script_environment(c, dict["this"], dicts, "archive-full")
-	test_helper_check_script_environment(c, dict["test-v1.0"], dicts, "test")
+	test_helper_check_script_environment(c, dict["test-v1.0"], dicts, "_/test")
 }
 
 func (s *deplSuite) Test_ToScriptEnvironment_honours_variable_context(c *C) {
@@ -108,8 +108,8 @@ func (s *deplSuite) Test_ToScriptEnvironment_honours_variable_context(c *C) {
 		"metadata": []string{},
 	}
 	test_helper_check_script_environment(c, dict["this"], dicts, "archive-full")
-	test_helper_check_script_environment(c, dict["test-v1.0"], dicts, "test")
-	test_helper_check_script_environment(c, dict["test"], dicts, "test")
+	test_helper_check_script_environment(c, dict["test-v1.0"], dicts, "_/test")
+	test_helper_check_script_environment(c, dict["test"], dicts, "_/test")
 }
 
 func (s *deplSuite) Test_ToScriptEnvironment_ignores_missing_variables_in_variable_context(c *C) {
@@ -221,7 +221,7 @@ func test_helper_check_script_environment(c *C, unit script.Script, dicts map[st
 	}
 	for key, val := range strings {
 		c.Assert(script.IsStringAtom(dict[key]), Equals, true, Commentf("Expecting %s to be of type string, but was %T", key, dict[key]))
-		c.Assert(script.ExpectStringAtom(dict[key]), Equals, val)
+		c.Assert(script.ExpectStringAtom(dict[key]), Equals, val, Commentf("Expecting '%s' to be '%s'. Got '%s'", key, val, script.ExpectStringAtom(dict[key])))
 	}
 	for key, keys := range dicts {
 		c.Assert(script.IsDictAtom(dict[key]), Equals, true, Commentf("Expecting %s to be of type dict, but was %T", key, dict[key]))

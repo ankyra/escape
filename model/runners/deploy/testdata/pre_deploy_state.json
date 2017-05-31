@@ -5,9 +5,9 @@
          "name": "dev",
          "inputs": null,
          "deployments": {
-            "name": {
-               "name": "name",
-               "release": "name",
+            "_/name": {
+               "name": "_/name",
+               "release": "_/name",
                "stages": {
                   "deploy": {
                      "inputs": {

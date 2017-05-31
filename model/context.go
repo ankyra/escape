@@ -155,7 +155,7 @@ func (c *Context) LoadEscapePlan(cfgFile string) error {
 
 func (c *Context) LoadMetadata() error {
 	c.PushLogSection("Compile")
-	metadata, err := compiler.Compile(c.EscapePlan, c.GetRegistry())
+	metadata, err := compiler.Compile(c.EscapePlan, c.GetRegistry(), c.GetEscapeConfig().GetCurrentTarget().GetProject())
 	if err != nil {
 		return err
 	}

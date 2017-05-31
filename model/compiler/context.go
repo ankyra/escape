@@ -39,12 +39,13 @@ type CompilerContext struct {
 	Project     string
 }
 
-func NewCompilerContext(plan *escape_plan.EscapePlan, registry registry.Registry) *CompilerContext {
+func NewCompilerContext(plan *escape_plan.EscapePlan, registry registry.Registry, project string) *CompilerContext {
 	return &CompilerContext{
 		Metadata:    core.NewEmptyReleaseMetadata(),
 		Plan:        plan,
 		VariableCtx: map[string]*core.ReleaseMetadata{},
 		Registry:    registry,
+		Project:     project,
 	}
 }
 

@@ -40,14 +40,16 @@ func (s *testSuite) Test_NewRunnerContext(c *C) {
 	os.RemoveAll("testdata/escape_state")
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/escape_state", "dev", "testdata/plan.yml")
+	ctx.RootDeploymentName = "test-name"
 	c.Assert(err, IsNil)
 	runCtx, err := NewRunnerContext(ctx, "deploy")
 	c.Assert(runCtx, Not(IsNil))
 	c.Assert(runCtx.GetEnvironmentState(), Equals, ctx.GetEnvironmentState())
 	c.Assert(runCtx.GetReleaseMetadata(), Equals, ctx.GetReleaseMetadata())
 	c.Assert(runCtx.Logger(), Equals, ctx.GetLogger())
-	c.Assert(runCtx.GetRootDeploymentName(), Equals, "name")
-	c.Assert(runCtx.GetDeploymentState().GetName(), Equals, "name")
+	c.Assert(runCtx.GetRootDeploymentName(), Equals, "test-name")
+	c.Assert(runCtx.GetDeploymentState().GetName(), Equals, "test-name")
+	c.Assert(runCtx.GetDeploymentState().GetReleaseId("deploy"), Equals, "_/name-v")
 }
 
 func (s *testSuite) Test_GetScriptEnvironment_no_depends(c *C) {

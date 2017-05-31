@@ -34,7 +34,7 @@ var _ = Suite(&suite{})
 func (s *suite) Test_Compile_Logo(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Logo = "testdata/logo.png"
-	ctx := NewCompilerContext(plan, nil)
+	ctx := NewCompilerContext(plan, nil, "_")
 	c.Assert(compileLogo(ctx), IsNil)
 	data, err := ioutil.ReadFile(plan.Logo)
 	c.Assert(err, IsNil)
@@ -44,14 +44,14 @@ func (s *suite) Test_Compile_Logo(c *C) {
 
 func (s *suite) Test_Compile_Logo_does_nothing_if_no_logo_is_set(c *C) {
 	plan := escape_plan.NewEscapePlan()
-	ctx := NewCompilerContext(plan, nil)
+	ctx := NewCompilerContext(plan, nil, "_")
 	c.Assert(compileLogo(ctx), IsNil)
 }
 
 func (s *suite) Test_Compile_Logo_fails_if_path_doesnt_exist(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Logo = "testdata/doesnt_exist.png"
-	ctx := NewCompilerContext(plan, nil)
+	ctx := NewCompilerContext(plan, nil, "_")
 	c.Assert(compileLogo(ctx).Error(), Equals, "Referenced logo 'testdata/doesnt_exist.png' does not exist")
 }
 
@@ -60,7 +60,7 @@ func (s *suite) Test_Compile_Logo_fails_if_cant_read_path(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Logo = path
 	c.Assert(os.Chmod(path, 0), IsNil)
-	ctx := NewCompilerContext(plan, nil)
+	ctx := NewCompilerContext(plan, nil, "_")
 	c.Assert(compileLogo(ctx).Error(), Equals, "Couldn't read logo 'testdata/unreadable.png': open testdata/unreadable.png: permission denied")
 	c.Assert(os.Chmod(path, 0644), IsNil)
 }
