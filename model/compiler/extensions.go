@@ -17,9 +17,9 @@ limitations under the License.
 package compiler
 
 import (
+	"fmt"
 	"github.com/ankyra/escape-client/model/paths"
 	"github.com/ankyra/escape-core"
-	"github.com/ankyra/escape-core/parsers"
 )
 
 func compileExtensions(ctx *CompilerContext) error {
@@ -75,11 +75,10 @@ func compileExtensions(ctx *CompilerContext) error {
 			}
 		}
 		for key, val := range metadata.GetVariableContext() {
-			dep, err := parsers.ParseQualifiedReleaseId(val)
-			if err != nil {
-				return err
+			if ctx.DependencyFetcher == nil {
+				return fmt.Errorf("Missing dependency fetcher")
 			}
-			metadata, err := ctx.Registry.QueryReleaseMetadata(dep.Project, dep.Name, "v"+dep.Version)
+			metadata, err := ctx.DependencyFetcher(val)
 			if err != nil {
 				return err
 			}

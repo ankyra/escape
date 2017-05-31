@@ -32,11 +32,12 @@ import (
 )
 
 type CompilerContext struct {
-	Metadata    *core.ReleaseMetadata
-	Plan        *escape_plan.EscapePlan
-	VariableCtx map[string]*core.ReleaseMetadata
-	Registry    registry.Registry
-	Project     string
+	Metadata          *core.ReleaseMetadata
+	Plan              *escape_plan.EscapePlan
+	VariableCtx       map[string]*core.ReleaseMetadata
+	DependencyFetcher func(string) (*core.ReleaseMetadata, error)
+	Registry          registry.Registry
+	Project           string
 }
 
 func NewCompilerContext(plan *escape_plan.EscapePlan, registry registry.Registry, project string) *CompilerContext {

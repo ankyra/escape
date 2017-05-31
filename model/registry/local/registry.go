@@ -19,6 +19,7 @@ package local
 import (
 	"fmt"
 	core "github.com/ankyra/escape-core"
+	"strings"
 )
 
 type LocalRegistry struct {
@@ -29,6 +30,9 @@ func NewLocalRegistry() *LocalRegistry {
 }
 
 func (r *LocalRegistry) QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
+	if version == "latest" || strings.HasSuffix(version, ".@") {
+		return nil, fmt.Errorf("Dynamic version release querying not implemented in local registry. The registry can be configured in the Global Escape configuration (see `escape config`)")
+	}
 	return nil, fmt.Errorf("Not implemented")
 }
 
@@ -37,7 +41,7 @@ func (r *LocalRegistry) QueryNextVersion(project, name, versionPrefix string) (s
 }
 
 func (r *LocalRegistry) DownloadRelease(project, name, version, targetFile string) error {
-	return fmt.Errorf("Not implemented")
+	return fmt.Errorf("Release download not implemented in local registry. The registry can be configured in the Global Escape configuration (see `escape config`)")
 }
 
 func (r *LocalRegistry) UploadRelease(project, releasePath string, metadata *core.ReleaseMetadata) error {

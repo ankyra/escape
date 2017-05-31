@@ -17,7 +17,6 @@ limitations under the License.
 package compiler
 
 import (
-	"fmt"
 	"github.com/ankyra/escape-client/model/escape_plan"
 	"github.com/ankyra/escape-client/model/registry"
 	core "github.com/ankyra/escape-core"
@@ -25,25 +24,13 @@ import (
 
 type CompilerFunc func(*CompilerContext) error
 
-func compileBasicFields(ctx *CompilerContext) error {
-	if ctx.Plan.Name == "" {
-		return fmt.Errorf("Missing build name. Add a 'name' field to your Escape plan")
-	}
-	ctx.Metadata.Name = ctx.Plan.Name
-	ctx.Metadata.Description = ctx.Plan.Description
-	ctx.Metadata.Logo = ctx.Plan.Logo
-	ctx.Metadata.SetProvides(ctx.Plan.Provides)
-	ctx.Metadata.SetConsumes(ctx.Plan.Consumes)
-	project := ctx.Project
-	if project == "" {
-		project = "_"
-	}
-	ctx.Metadata.Project = project
-	return nil
-}
+func Compile(plan *escape_plan.EscapePlan,
+	reg registry.Registry,
+	project string,
+	depFetcher func(string) (*core.ReleaseMetadata, error)) (*core.ReleaseMetadata, error) {
 
-func Compile(plan *escape_plan.EscapePlan, reg registry.Registry, project string) (*core.ReleaseMetadata, error) {
 	ctx := NewCompilerContext(plan, reg, project)
+	ctx.DependencyFetcher = depFetcher
 	compilerSteps := []CompilerFunc{
 		compileBasicFields,
 		compileExtensions,

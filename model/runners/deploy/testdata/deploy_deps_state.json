@@ -40,6 +40,27 @@
                         "output_variable": "dependency output"
                      },
                      "deployments": {
+                        "_/dependency": {
+                           "name": "_/dependency",
+                           "release": "_/dependency",
+                           "stages": {
+                              "deploy": {
+                                 "inputs": {},
+                                 "calculated_inputs": {
+                                    "PREVIOUS_OUTPUT_output_variable": "dependency output"
+                                 },
+                                 "calculated_outputs": {
+                                    "output_variable": "dependency output"
+                                 },
+                                 "deployments": {},
+                                 "providers": {},
+                                 "provides": [],
+                                 "version": "0.0.1",
+                                 "step": ""
+                              }
+                           },
+                           "inputs": {}
+                        },
                         "dependency": {
                            "name": "dependency",
                            "release": "dependency",

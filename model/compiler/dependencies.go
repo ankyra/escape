@@ -17,6 +17,7 @@ limitations under the License.
 package compiler
 
 import (
+	"fmt"
 	"github.com/ankyra/escape-core"
 )
 
@@ -58,7 +59,10 @@ func resolveVersion(ctx *CompilerContext, d *core.Dependency) (*core.ReleaseMeta
 	if versionQuery != "latest" {
 		versionQuery = "v" + versionQuery
 	}
-	metadata, err := ctx.Registry.QueryReleaseMetadata(d.Project, d.Name, versionQuery)
+	if ctx.DependencyFetcher == nil {
+		return nil, fmt.Errorf("Missing dependency fetcher")
+	}
+	metadata, err := ctx.DependencyFetcher(d.GetQualifiedReleaseId())
 	if err != nil {
 		return nil, err
 	}

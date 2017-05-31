@@ -19,7 +19,6 @@ package compiler
 import (
 	"fmt"
 	"github.com/ankyra/escape-client/model/escape_plan"
-	"github.com/ankyra/escape-client/model/registry"
 	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/variables"
 	. "gopkg.in/check.v1"
@@ -31,16 +30,14 @@ func (s *suite) Test_Compile_Dependencies(c *C) {
 	plan.Depends = []string{
 		"dependency-v1.0 as dep",
 	}
-	reg := registry.NewMockRegistry()
-	reg.ReleaseMetadata = func(project, name, version string) (*core.ReleaseMetadata, error) {
-		if project == "_" && name == "dependency" && version == "v1.0" {
-			m := core.NewReleaseMetadata(name, "1.0")
-			m.Project = "_"
+	ctx := NewCompilerContext(plan, nil, "_")
+	ctx.DependencyFetcher = func(releaseId string) (*core.ReleaseMetadata, error) {
+		if releaseId == "_/dependency-v1.0" {
+			m := core.NewReleaseMetadata("dependency", "1.0")
 			return m, nil
 		}
 		return nil, fmt.Errorf("Resolve error")
 	}
-	ctx := NewCompilerContext(plan, reg, "_")
 	c.Assert(compileDependencies(ctx), IsNil)
 	c.Assert(ctx.Metadata.GetDependencies(), DeepEquals, []string{"_/dependency-v1.0"})
 	c.Assert(ctx.Metadata.VariableCtx["dependency"], Equals, "_/dependency-v1.0")
@@ -53,23 +50,21 @@ func (s *suite) Test_Compile_Dependencies_adds_inputs_without_defaults(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Depends = nil
 	plan.Depends = []string{
-		"dependency-v1.0 as dep",
+		"dependency-v1.0",
 	}
-	reg := registry.NewMockRegistry()
 	v1, _ := variables.NewVariableFromString("no-default", "string")
 	v2, _ := variables.NewVariableFromString("with-default", "string")
 	v2.Default = "test"
-	reg.ReleaseMetadata = func(project, name, version string) (*core.ReleaseMetadata, error) {
-		if project == "_" && name == "dependency" && version == "v1.0" {
-			m := core.NewReleaseMetadata(name, "1.0")
-			m.Project = "_"
+	ctx := NewCompilerContext(plan, nil, "_")
+	ctx.DependencyFetcher = func(releaseId string) (*core.ReleaseMetadata, error) {
+		if releaseId == "_/dependency-v1.0" {
+			m := core.NewReleaseMetadata("dependency", "1.0")
 			m.AddInputVariable(v1)
 			m.AddInputVariable(v2)
 			return m, nil
 		}
 		return nil, fmt.Errorf("Resolve error")
 	}
-	ctx := NewCompilerContext(plan, reg, "_")
 	c.Assert(compileDependencies(ctx), IsNil)
 	inputs := ctx.Metadata.GetInputs()
 	c.Assert(inputs, HasLen, 1)
@@ -80,13 +75,12 @@ func (s *suite) Test_Compile_Dependencies_adds_consumers(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Depends = nil
 	plan.Depends = []string{
-		"dependency-v1.0 as dep",
+		"dependency-v1.0",
 	}
-	reg := registry.NewMockRegistry()
-	reg.ReleaseMetadata = func(project, name, version string) (*core.ReleaseMetadata, error) {
-		if project == "_" && name == "dependency" && version == "v1.0" {
-			m := core.NewReleaseMetadata(name, "1.0")
-			m.Project = "_"
+	ctx := NewCompilerContext(plan, nil, "_")
+	ctx.DependencyFetcher = func(releaseId string) (*core.ReleaseMetadata, error) {
+		if releaseId == "_/dependency-v1.0" {
+			m := core.NewReleaseMetadata("dependency", "1.0")
 			m.AddConsumes("test-consumer-1")
 			m.AddConsumes("test-consumer-1")
 			m.AddConsumes("test-consumer-2")
@@ -94,7 +88,6 @@ func (s *suite) Test_Compile_Dependencies_adds_consumers(c *C) {
 		}
 		return nil, fmt.Errorf("Resolve error")
 	}
-	ctx := NewCompilerContext(plan, reg, "_")
 	c.Assert(compileDependencies(ctx), IsNil)
 	c.Assert(ctx.Metadata.GetConsumes(), DeepEquals, []string{"test-consumer-1", "test-consumer-2"})
 }
@@ -121,10 +114,9 @@ func (s *suite) Test_Compile_Dependencies_fails_if_resolve_version_fails(c *C) {
 	plan.Depends = []string{
 		"dependency-latest",
 	}
-	reg := registry.NewMockRegistry()
-	reg.ReleaseMetadata = func(project, name, version string) (*core.ReleaseMetadata, error) {
+	ctx := NewCompilerContext(plan, nil, "_")
+	ctx.DependencyFetcher = func(releaseId string) (*core.ReleaseMetadata, error) {
 		return nil, fmt.Errorf("Resolve error")
 	}
-	ctx := NewCompilerContext(plan, reg, "_")
 	c.Assert(compileDependencies(ctx).Error(), Equals, "Resolve error")
 }
