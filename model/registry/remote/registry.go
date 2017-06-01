@@ -19,6 +19,7 @@ package remote
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/ankyra/escape-client/model/registry/types"
 	core "github.com/ankyra/escape-core"
 	"io"
 	"io/ioutil"
@@ -151,4 +152,47 @@ func (r *registry) register(project string, metadata *core.ReleaseMetadata) erro
 		return fmt.Errorf("Couldn't register package (%s): %s", resp.Status, result)
 	}
 	return nil
+}
+
+func (r *registry) GetAuthMethods(url string) (map[string]*types.AuthMethod, error) {
+	url = r.endpoints.AuthMethods(url)
+	resp, err := r.client.GET(url)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode == 404 {
+		return nil, nil
+	} else if resp.StatusCode != 200 {
+		result, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("Couldn't get auth methods from server '%s': %s", url, resp.Status)
+		}
+		return nil, fmt.Errorf("Couldn't get auth methods from server '%s': %s", url, resp.Status, result)
+	}
+	result := map[string]*types.AuthMethod{}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (r *registry) LoginWithSecretToken(url, username, password string) (string, error) {
+	payload := map[string]string{
+		"username":     username,
+		"secret_token": password,
+	}
+	resp, err := r.client.POST_json_with_authentication(url, payload)
+	if err != nil {
+		return "", err
+	}
+	if resp.StatusCode == 401 {
+		return "", fmt.Errorf("Invalid credentials")
+	} else if resp.StatusCode != 200 {
+		result, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return "", fmt.Errorf("Failed to login: %s", resp.Status)
+		}
+		return "", fmt.Errorf("Failed to login (%s): %s", resp.Status, result)
+	}
+	return resp.Header.Get("X-Escape-Token"), nil
 }

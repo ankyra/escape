@@ -19,6 +19,7 @@ package registry
 import (
 	"github.com/ankyra/escape-client/model/registry/local"
 	"github.com/ankyra/escape-client/model/registry/remote"
+	"github.com/ankyra/escape-client/model/registry/types"
 	core "github.com/ankyra/escape-core"
 )
 
@@ -27,6 +28,8 @@ type Registry interface {
 	QueryNextVersion(project, name, versionPrefix string) (string, error)
 	DownloadRelease(project, name, version, targetFile string) error
 	UploadRelease(project, releasePath string, metadata *core.ReleaseMetadata) error
+	GetAuthMethods(url string) (map[string]*types.AuthMethod, error)
+	LoginWithSecretToken(url, username, password string) (string, error)
 }
 
 func NewLocalRegistry() Registry {

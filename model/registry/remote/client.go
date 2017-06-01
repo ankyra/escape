@@ -101,3 +101,11 @@ func (c *RegistryClient) GET_with_authentication(url string) (*http.Response, er
 	req.Header.Add("X-Escape-Token", c.EscapeToken)
 	return c.GetHTTPClient().Do(req)
 }
+
+func (c *RegistryClient) GET(url string) (*http.Response, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	return c.GetHTTPClient().Do(req)
+}

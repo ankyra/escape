@@ -48,7 +48,6 @@ func (s *ServerEndpoints) NextReleaseVersion(project, name, prefix string) strin
 	v.Set("prefix", prefix)
 	return s.ProjectNameQuery(project, name) + "next-version?" + v.Encode()
 }
-
 func (s *ServerEndpoints) ProjectQuery(project string) string {
 	return s.ApiServer() + "a/" + project + "/"
 }
@@ -66,4 +65,10 @@ func (s *ServerEndpoints) UploadRelease(project, name, version string) string {
 }
 func (s *ServerEndpoints) DownloadRelease(project, name, version string) string {
 	return s.ProjectReleaseQuery(project, name, version) + "download"
+}
+func (s *ServerEndpoints) AuthMethods(baseUrl string) string {
+	if !strings.HasSuffix(baseUrl, "/") {
+		baseUrl += "/"
+	}
+	return baseUrl + "auth-methods"
 }

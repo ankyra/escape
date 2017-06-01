@@ -18,12 +18,12 @@ package local
 
 import (
 	"fmt"
+	"github.com/ankyra/escape-client/model/registry/types"
 	core "github.com/ankyra/escape-core"
 	"strings"
 )
 
-type LocalRegistry struct {
-}
+type LocalRegistry struct{}
 
 func NewLocalRegistry() *LocalRegistry {
 	return &LocalRegistry{}
@@ -46,4 +46,12 @@ func (r *LocalRegistry) DownloadRelease(project, name, version, targetFile strin
 
 func (r *LocalRegistry) UploadRelease(project, releasePath string, metadata *core.ReleaseMetadata) error {
 	return nil
+}
+
+func (r *LocalRegistry) GetAuthMethods(url string) (map[string]*types.AuthMethod, error) {
+	return nil, nil
+}
+
+func (r *LocalRegistry) LoginWithSecretToken(url, username, password string) (string, error) {
+	return "", nil
 }

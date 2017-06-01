@@ -24,7 +24,6 @@ import (
 )
 
 var username, password, url string
-var storeCredentials bool
 
 var loginCmd = &cobra.Command{
 	Use:   "login",
@@ -33,7 +32,7 @@ var loginCmd = &cobra.Command{
 		if url == "" {
 			return fmt.Errorf("Missing Escape server URL")
 		}
-		return controllers.LoginController{}.Login(context, url, username, password, storeCredentials)
+		return controllers.LoginController{}.Login(context, url, username, password)
 	},
 }
 
@@ -42,5 +41,4 @@ func init() {
 	loginCmd.Flags().StringVarP(&username, "username", "u", "", "The username")
 	loginCmd.Flags().StringVarP(&password, "password", "p", "", "The password")
 	loginCmd.Flags().StringVarP(&url, "url", "e", "", "The Escape server URL")
-	loginCmd.Flags().BoolVarP(&storeCredentials, "store", "s", false, "Store username and password in the Escape configuration file")
 }
