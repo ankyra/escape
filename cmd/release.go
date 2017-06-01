@@ -21,7 +21,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var skipTests, skipCache, skipPush bool
+var skipTests, skipCache, skipPush, skipDestroyBuild, skipDeploy, skipSmoke, skipDestroyDeploy, skipDestroy bool
 
 var releaseCmd = &cobra.Command{
 	Use:   "release",
@@ -31,7 +31,8 @@ var releaseCmd = &cobra.Command{
 			return err
 		}
 		context.SetRootDeploymentName(deployment)
-		return controllers.ReleaseController{}.Release(context, uber, skipTests, skipCache, skipPush, force)
+		return controllers.ReleaseController{}.Release(context, uber, skipBuild, skipTests,
+			skipCache, skipPush, skipDestroyBuild, skipDeploy, skipSmoke, skipDestroyDeploy, skipDestroy, force)
 	},
 }
 
@@ -40,8 +41,14 @@ func init() {
 	setLocalPlanAndStateFlags(releaseCmd)
 
 	releaseCmd.Flags().BoolVarP(&uber, "uber", "u", false, "Build an uber package containing all dependencies")
+	releaseCmd.Flags().BoolVarP(&skipBuild, "skip-build", "", false, "Skip build")
 	releaseCmd.Flags().BoolVarP(&skipTests, "skip-tests", "", false, "Skip tests")
 	releaseCmd.Flags().BoolVarP(&skipCache, "skip-cache", "", false, "Skip caching the release")
 	releaseCmd.Flags().BoolVarP(&skipPush, "skip-push", "", false, "Skip push")
+	releaseCmd.Flags().BoolVarP(&skipDeploy, "skip-deploy", "", false, "Skip deploy")
+	releaseCmd.Flags().BoolVarP(&skipSmoke, "skip-smoke", "", false, "Skip smoke tests")
+	releaseCmd.Flags().BoolVarP(&skipDestroy, "skip-destroy", "", false, "Skip destroy steps")
+	releaseCmd.Flags().BoolVarP(&skipDestroyBuild, "skip-build-destroy", "", false, "Skip build destroy step")
+	releaseCmd.Flags().BoolVarP(&skipDestroyDeploy, "skip-deploy-destroy", "", false, "Skip deploy destroy step")
 	releaseCmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite output file if it exists")
 }

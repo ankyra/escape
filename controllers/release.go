@@ -26,15 +26,37 @@ import (
 
 type ReleaseController struct{}
 
-func (r ReleaseController) Release(context Context, buildFatPackage, skipTests, skipCache, skipPush, forceOverwrite bool) error {
+func (r ReleaseController) Release(context Context, buildFatPackage, skipBuild, skipTests, skipCache, skipPush, skipDestroyBuild, skipDeploy, skipSmoke, skipDestroyDeploy, skipDestroy, forceOverwrite bool) error {
 	context.PushLogRelease(context.GetReleaseMetadata().GetReleaseId())
 	context.PushLogSection("Release")
 	context.Log("release.start", nil)
-	if err := (BuildController{}).Build(context, buildFatPackage); err != nil {
-		return err
+	if !skipBuild {
+		if err := (BuildController{}).Build(context, buildFatPackage); err != nil {
+			return err
+		}
 	}
 	if !skipTests {
 		if err := (TestController{}).Test(context); err != nil {
+			return err
+		}
+	}
+	if !skipDestroyBuild && !skipDestroy {
+		if err := (DestroyController{}).Destroy(context, true, false); err != nil {
+			return err
+		}
+	}
+	if !skipDeploy {
+		if err := (DeployController{}).Deploy(context); err != nil {
+			return err
+		}
+	}
+	if !skipSmoke {
+		if err := (SmokeController{}).Smoke(context); err != nil {
+			return err
+		}
+	}
+	if !skipDestroyDeploy && !skipDestroy {
+		if err := (DestroyController{}).Destroy(context, false, true); err != nil {
 			return err
 		}
 	}

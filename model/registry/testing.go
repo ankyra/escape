@@ -17,6 +17,7 @@ limitations under the License.
 package registry
 
 import (
+	"github.com/ankyra/escape-client/model/registry/types"
 	core "github.com/ankyra/escape-core"
 )
 
@@ -42,4 +43,10 @@ func (m *mockRegistry) DownloadRelease(project, name, version, targetFile string
 }
 func (m *mockRegistry) UploadRelease(project, releasePath string, metadata *core.ReleaseMetadata) error {
 	return m.Upload(project, releasePath, metadata)
+}
+func (m *mockRegistry) GetAuthMethods(url string) (map[string]*types.AuthMethod, error) {
+	return nil, nil
+}
+func (m *mockRegistry) LoginWithSecretToken(url, username, password string) (string, error) {
+	return "", nil
 }
