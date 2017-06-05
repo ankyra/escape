@@ -38,7 +38,9 @@ func (LoginController) Login(context Context, url, username, password string) er
 	}
 	if authMethods == nil {
 		fmt.Printf("Registry at %s does not implement authentication.", url)
-		return nil
+		context.GetEscapeConfig().GetCurrentTarget().SetAuthToken("")
+		context.GetEscapeConfig().GetCurrentTarget().SetApiServer(url)
+		return context.GetEscapeConfig().Save()
 	}
 	fmt.Println("Available authentication methods:\n")
 	i := 1
