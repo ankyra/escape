@@ -17,6 +17,7 @@ limitations under the License.
 package script
 
 import (
+	"encoding/base64"
 	"fmt"
 	"reflect"
 	"runtime"
@@ -25,14 +26,16 @@ import (
 )
 
 const (
-	func_builtinId        = "__id"
-	func_builtinEnvLookup = "__envLookup"
-	func_builtinConcat    = "__concat"
-	func_builtinToLower   = "__lower"
-	func_builtinToUpper   = "__upper"
-	func_builtinTitle     = "__title"
-	func_builtinSplit     = "__split"
-	func_builtinJoin      = "__join"
+	func_builtinId           = "__id"
+	func_builtinEnvLookup    = "__envLookup"
+	func_builtinConcat       = "__concat"
+	func_builtinToLower      = "__lower"
+	func_builtinToUpper      = "__upper"
+	func_builtinTitle        = "__title"
+	func_builtinSplit        = "__split"
+	func_builtinJoin         = "__join"
+	func_builtinBase64Encode = "__base64_encode"
+	func_builtinBase64Decode = "__base64_decode"
 )
 
 var builtinToLower = ShouldLift(strings.ToLower)
@@ -40,6 +43,8 @@ var builtinToUpper = ShouldLift(strings.ToUpper)
 var builtinTitle = ShouldLift(strings.ToTitle)
 var builtinSplit = ShouldLift(strings.Split)
 var builtinJoin = ShouldLift(strings.Join)
+var builtinBase64Encode = ShouldLift(base64.StdEncoding.EncodeToString)
+var builtinBase64Decode = ShouldLift(base64.StdEncoding.DecodeString)
 
 func LiftGoFunc(f interface{}) Script {
 	name := runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()
@@ -53,7 +58,7 @@ func LiftGoFunc(f interface{}) Script {
 
 		goArgs := []reflect.Value{}
 		for i := 0; i < nInputs; i++ {
-			argType := reflect.TypeOf(f).In(i)
+			argType := typ.In(i)
 			arg := args[i]
 
 			if argType.Kind() == reflect.String {
@@ -64,7 +69,11 @@ func LiftGoFunc(f interface{}) Script {
 				}
 			} else if argType.Kind() == reflect.Slice {
 				if !IsListAtom(arg) {
-					return nil, fmt.Errorf("Expecting list argument in call to %s, but got %s", name, arg.Type().Name())
+					if argType.Elem().Kind() == reflect.Uint8 && IsStringAtom(arg) {
+						goArgs = append(goArgs, reflect.ValueOf([]byte(ExpectStringAtom(arg))))
+					} else {
+						return nil, fmt.Errorf("Expecting list argument in call to %s, but got %s", name, arg.Type().Name())
+					}
 				} else {
 					lst := ExpectListAtom(arg) // []Script
 					if argType.Elem().Kind() == reflect.String {
@@ -85,6 +94,16 @@ func LiftGoFunc(f interface{}) Script {
 		}
 
 		outputs := reflect.ValueOf(f).Call(goArgs)
+		if nOutputs == 1 {
+			return Lift(outputs[0].Interface())
+		}
+		if nOutputs == 2 {
+			_, isError := outputs[1].Interface().(error)
+			if isError && outputs[1].Interface() != nil {
+				return nil, fmt.Errorf("Error in call to %s: %s", name, outputs[1].Interface().(error))
+			}
+			return Lift(outputs[0].Interface())
+		}
 		if nOutputs != 1 {
 			return nil, fmt.Errorf("Go functions with multiple outputs are not supported at this time")
 		}
