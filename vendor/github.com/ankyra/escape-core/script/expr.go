@@ -50,7 +50,19 @@ func Lift(val interface{}) (Script, error) {
 	case scriptFuncType:
 		return LiftFunction(val.(scriptFuncType)), nil
 	case func(string) string:
-		return LiftFunc_string_to_string(val.(func(string) string)), nil
+		return LiftGoFunc(val), nil
+	case func(string, string) []string:
+		return LiftGoFunc(val), nil
+	case func(string, string) string:
+		return LiftGoFunc(val), nil
+	case func([]string, string) string:
+		return LiftGoFunc(val), nil
+	case []string:
+		vals := []Script{}
+		for _, k := range val.([]string) {
+			vals = append(vals, LiftString(k))
+		}
+		return LiftList(vals), nil
 	case []interface{}:
 		vals := []Script{}
 		for _, k := range val.([]interface{}) {

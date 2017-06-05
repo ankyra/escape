@@ -18,6 +18,7 @@ package core
 
 import (
 	"github.com/ankyra/escape-core/parsers"
+	"strings"
 )
 
 type Dependency struct {
@@ -48,16 +49,6 @@ func NewDependencyFromString(str string) (*Dependency, error) {
 	}, nil
 }
 
-func (d *Dependency) GetName() string {
-	return d.Name
-}
-func (d *Dependency) GetVariableName() string {
-	return d.VariableName
-}
-func (d *Dependency) GetVersion() string {
-	return d.Version
-}
-
 func (d *Dependency) GetReleaseId() string {
 	version := "v" + d.Version
 	if d.Version == "latest" {
@@ -71,4 +62,8 @@ func (d *Dependency) GetQualifiedReleaseId() string {
 
 func (d *Dependency) GetVersionlessReleaseId() string {
 	return d.Project + "/" + d.Name
+}
+
+func (d *Dependency) NeedsResolving() bool {
+	return d.Version == "latest" || strings.HasSuffix(d.Version, ".@")
 }

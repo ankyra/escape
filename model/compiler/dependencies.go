@@ -43,9 +43,9 @@ func compileDependencies(ctx *CompilerContext) error {
 		ctx.VariableCtx[dep.Name] = metadata
 		ctx.Metadata.SetVariableInContext(dep.Name, metadata.GetQualifiedReleaseId())
 
-		if dep.GetVariableName() != "" {
-			ctx.VariableCtx[dep.GetVariableName()] = metadata
-			ctx.Metadata.SetVariableInContext(dep.GetVariableName(), metadata.GetQualifiedReleaseId())
+		if dep.VariableName != "" {
+			ctx.VariableCtx[dep.VariableName] = metadata
+			ctx.Metadata.SetVariableInContext(dep.VariableName, metadata.GetQualifiedReleaseId())
 		}
 
 		result = append(result, dep.GetQualifiedReleaseId())
@@ -55,9 +55,15 @@ func compileDependencies(ctx *CompilerContext) error {
 }
 
 func resolveVersion(ctx *CompilerContext, d *core.Dependency) (*core.ReleaseMetadata, error) {
-	versionQuery := d.GetVersion()
-	if versionQuery != "latest" {
-		versionQuery = "v" + versionQuery
+	if d.NeedsResolving() {
+		if ctx.ReleaseQuery == nil {
+			return nil, fmt.Errorf("Missing release query function")
+		}
+		metadata, err := ctx.ReleaseQuery(d.Project, d.Name, d.Version)
+		if err != nil {
+			return nil, err
+		}
+		d.Version = metadata.Version
 	}
 	if ctx.DependencyFetcher == nil {
 		return nil, fmt.Errorf("Missing dependency fetcher")
@@ -66,6 +72,5 @@ func resolveVersion(ctx *CompilerContext, d *core.Dependency) (*core.ReleaseMeta
 	if err != nil {
 		return nil, err
 	}
-	d.Version = metadata.Version
 	return metadata, nil
 }

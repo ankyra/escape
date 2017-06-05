@@ -110,6 +110,19 @@ func (c *Context) SetRootDeploymentName(name string) {
 	c.RootDeploymentName = name
 }
 
+func (c *Context) QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
+	metadata, ok := c.DependencyMetadata[project+"/"+name+version]
+	if ok {
+		return metadata, nil
+	}
+	metadata, err := c.GetRegistry().QueryReleaseMetadata(project, name, version)
+	if err != nil {
+		return nil, err
+	}
+	c.DependencyMetadata[project+"/"+name+version] = metadata
+	return metadata, nil
+}
+
 func (c *Context) GetDependencyMetadata(depReleaseId string) (*core.ReleaseMetadata, error) {
 	metadata, ok := c.DependencyMetadata[depReleaseId]
 	if ok {
@@ -155,7 +168,7 @@ func (c *Context) LoadEscapePlan(cfgFile string) error {
 
 func (c *Context) LoadMetadata() error {
 	c.PushLogSection("Compile")
-	metadata, err := compiler.Compile(c.EscapePlan, c.GetRegistry(), c.GetEscapeConfig().GetCurrentTarget().GetProject(), c.GetDependencyMetadata)
+	metadata, err := compiler.Compile(c.EscapePlan, c.GetRegistry(), c.GetEscapeConfig().GetCurrentTarget().GetProject(), c.GetDependencyMetadata, c.QueryReleaseMetadata)
 	if err != nil {
 		return err
 	}

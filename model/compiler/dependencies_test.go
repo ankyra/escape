@@ -28,13 +28,19 @@ func (s *suite) Test_Compile_Dependencies(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Depends = nil
 	plan.Depends = []string{
-		"dependency-v1.0 as dep",
+		"dependency-latest as dep",
 	}
+	lookupResult := core.NewReleaseMetadata("dependency", "1.0")
 	ctx := NewCompilerContext(plan, nil, "_")
 	ctx.DependencyFetcher = func(releaseId string) (*core.ReleaseMetadata, error) {
 		if releaseId == "_/dependency-v1.0" {
-			m := core.NewReleaseMetadata("dependency", "1.0")
-			return m, nil
+			return lookupResult, nil
+		}
+		return nil, fmt.Errorf("Resolve error")
+	}
+	ctx.ReleaseQuery = func(project, name, version string) (*core.ReleaseMetadata, error) {
+		if project == "_" && name == "dependency" && version == "latest" {
+			return lookupResult, nil
 		}
 		return nil, fmt.Errorf("Resolve error")
 	}
@@ -115,6 +121,9 @@ func (s *suite) Test_Compile_Dependencies_fails_if_resolve_version_fails(c *C) {
 		"dependency-latest",
 	}
 	ctx := NewCompilerContext(plan, nil, "_")
+	ctx.ReleaseQuery = func(project, name, version string) (*core.ReleaseMetadata, error) {
+		return nil, fmt.Errorf("Resolve error")
+	}
 	ctx.DependencyFetcher = func(releaseId string) (*core.ReleaseMetadata, error) {
 		return nil, fmt.Errorf("Resolve error")
 	}

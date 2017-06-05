@@ -31,43 +31,66 @@ const (
 	func_builtinToLower   = "__lower"
 	func_builtinToUpper   = "__upper"
 	func_builtinTitle     = "__title"
+	func_builtinSplit     = "__split"
+	func_builtinJoin      = "__join"
 )
 
 var builtinToLower = ShouldLift(strings.ToLower)
 var builtinToUpper = ShouldLift(strings.ToUpper)
 var builtinTitle = ShouldLift(strings.ToTitle)
+var builtinSplit = ShouldLift(strings.Split)
+var builtinJoin = ShouldLift(strings.Join)
 
-func LiftFunc_string_to_string(f func(string) string) Script {
+func LiftGoFunc(f interface{}) Script {
 	name := runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()
-	return LiftFunction(ToScriptFuncType_one_arg("builtin function "+name, wrap_one_arg_string_to_string(f)))
-}
-
-func wrap_one_arg_string_to_string(f func(string) string) func(interface{}) (interface{}, error) {
-	return func(arg_ interface{}) (interface{}, error) {
-		arg, ok := arg_.(string)
-		if !ok {
-			return nil, fmt.Errorf("Expecting string argument")
-		}
-		return f(arg), nil
-	}
-}
-
-func ToScriptFuncType_one_arg(name string, f func(interface{}) (interface{}, error)) scriptFuncType {
-	return func(env *ScriptEnvironment, args []Script) (Script, error) {
-		if err := builtinArgCheck(1, name, args); err != nil {
+	typ := reflect.TypeOf(f)
+	nInputs := typ.NumIn()
+	nOutputs := typ.NumOut()
+	scriptFunc := func(env *ScriptEnvironment, args []Script) (Script, error) {
+		if err := builtinArgCheck(nInputs, name, args); err != nil {
 			return nil, err
 		}
-		arg := args[0]
-		if !IsStringAtom(arg) {
-			return nil, fmt.Errorf("Expecting string argument in call to %s, but got %s", name, arg.Type().Name())
+
+		goArgs := []reflect.Value{}
+		for i := 0; i < nInputs; i++ {
+			argType := reflect.TypeOf(f).In(i)
+			arg := args[i]
+
+			if argType.Kind() == reflect.String {
+				if !IsStringAtom(arg) {
+					return nil, fmt.Errorf("Expecting string argument in call to %s, but got %s", name, arg.Type().Name())
+				} else {
+					goArgs = append(goArgs, reflect.ValueOf(ExpectStringAtom(arg)))
+				}
+			} else if argType.Kind() == reflect.Slice {
+				if !IsListAtom(arg) {
+					return nil, fmt.Errorf("Expecting list argument in call to %s, but got %s", name, arg.Type().Name())
+				} else {
+					lst := ExpectListAtom(arg) // []Script
+					if argType.Elem().Kind() == reflect.String {
+						strArg := []string{}
+						for k := 0; k < len(lst); k++ {
+							if !IsStringAtom(lst[k]) {
+								return nil, fmt.Errorf("Expecting string value in list in call to %s, but got %s", name, arg.Type().Name())
+							} else {
+								strArg = append(strArg, ExpectStringAtom(lst[k]))
+							}
+						}
+						goArgs = append(goArgs, reflect.ValueOf(strArg))
+					} else {
+						return nil, fmt.Errorf("Unsupported slice type in function %s", name)
+					}
+				}
+			}
 		}
-		argument := ExpectStringAtom(arg)
-		result, err := f(argument)
-		if err != nil {
-			return nil, err
+
+		outputs := reflect.ValueOf(f).Call(goArgs)
+		if nOutputs != 1 {
+			return nil, fmt.Errorf("Go functions with multiple outputs are not supported at this time")
 		}
-		return Lift(result)
+		return Lift(outputs[0].Interface())
 	}
+	return LiftFunction(scriptFunc)
 }
 
 /*

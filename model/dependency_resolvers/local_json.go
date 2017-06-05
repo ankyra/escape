@@ -42,7 +42,7 @@ func FromLocalReleaseJson(path *paths.Path, dep *core.Dependency) (bool, error) 
 			util.RemoveTree(path.UnpackedDepDirectory(dep))
 			return false, nil
 		}
-		if version.(string) != dep.GetVersion() {
+		if version.(string) != dep.Version {
 			util.RemoveTree(path.UnpackedDepDirectory(dep))
 			return false, nil
 		}
