@@ -18,6 +18,7 @@ package compiler
 
 import (
 	"fmt"
+	"strings"
 )
 
 func compileBasicFields(ctx *CompilerContext) error {
@@ -25,8 +26,7 @@ func compileBasicFields(ctx *CompilerContext) error {
 		return fmt.Errorf("Missing build name. Add a 'name' field to your Escape plan")
 	}
 	ctx.Metadata.Name = ctx.Plan.Name
-	ctx.Metadata.Description = ctx.Plan.Description
-	ctx.Metadata.Logo = ctx.Plan.Logo
+	ctx.Metadata.Description = strings.TrimSpace(ctx.Plan.Description)
 	ctx.Metadata.SetProvides(ctx.Plan.Provides)
 	ctx.Metadata.SetConsumes(ctx.Plan.Consumes)
 	project := ctx.Project
