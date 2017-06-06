@@ -1,0 +1,23 @@
+machine:
+  environment:
+    ESCAPE_PROJECT: "_"
+    ESCAPE_STORAGE_BACKEND: "escape"
+    ESCAPE_API_SERVER: "https://registry.ankyra.io"
+
+dependencies:
+  pre:
+  - curl https://storage.googleapis.com/escape-releases-eu/escape-v0.10.3.tgz > escape.tgz
+  - rm -rf escape && tar -xvzf escape.tgz
+  - mv escape /home/ubuntu/bin
+  - escape version
+
+compile:
+  override:
+  - escape state create
+  - escape state create --deploy
+  - escape release
+
+test:
+  override:
+  - echo "Already tested"
+
