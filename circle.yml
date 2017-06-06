@@ -1,4 +1,6 @@
 machine:
+  services:
+  - docker
   environment:
     ESCAPE_PROJECT: "_"
     ESCAPE_STORAGE_BACKEND: "escape"
