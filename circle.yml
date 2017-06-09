@@ -18,8 +18,9 @@ compile:
   - escape state create
   - escape state create --deploy
   - escape release
+  - echo $GCLOUD_SERVICE_KEY | base64 --decode -i > ${HOME}/gcloud-service-key.json
   - ./escape deploy escape-client-latest -d "latest-client"
-  - ./escape errands run upload_to_gcs -v bucket=escape-releases-eu -d "latest-client"
+  - ./escape errands run upload_to_gcs -v bucket=escape-releases-eu -v credentials=@${HOME}/gcloud-service-key.json -d "latest-client"
 
 
 test:
