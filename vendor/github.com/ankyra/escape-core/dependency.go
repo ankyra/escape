@@ -49,6 +49,14 @@ func NewDependencyFromString(str string) (*Dependency, error) {
 	}, nil
 }
 
+func NewDependencyFromQualifiedReleaseId(r *parsers.QualifiedReleaseId) *Dependency {
+	return &Dependency{
+		Name:    r.Name,
+		Project: r.Project,
+		Version: r.Version,
+	}
+}
+
 func (d *Dependency) GetReleaseId() string {
 	version := "v" + d.Version
 	if d.Version == "latest" {
