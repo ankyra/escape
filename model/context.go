@@ -61,7 +61,7 @@ func (c *Context) InitFromLocalEscapePlanAndState(state, environment, planPath s
 	if err := c.LoadEscapePlan(planPath); err != nil {
 		return err
 	}
-	if err := c.LoadMetadata(); err != nil {
+	if err := c.CompileEscapePlan(); err != nil {
 		return err
 	}
 	return nil
@@ -166,7 +166,7 @@ func (c *Context) LoadEscapePlan(cfgFile string) error {
 	return nil
 }
 
-func (c *Context) LoadMetadata() error {
+func (c *Context) CompileEscapePlan() error {
 	c.PushLogSection("Compile")
 	metadata, err := compiler.Compile(c.EscapePlan, c.GetRegistry(), c.GetEscapeConfig().GetCurrentTarget().GetProject(), c.GetDependencyMetadata, c.QueryReleaseMetadata)
 	if err != nil {
@@ -186,5 +186,14 @@ func (c *Context) LoadLocalState(cfgFile, environment string) error {
 		return errors.New("Empty environment state")
 	}
 	c.EnvironmentState = envState
+	return nil
+}
+
+func (c *Context) LoadReleaseJson() error {
+	m, err := core.NewReleaseMetadataFromFile("release.json")
+	if err != nil {
+		return err
+	}
+	c.ReleaseMetadata = m
 	return nil
 }

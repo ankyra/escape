@@ -28,9 +28,11 @@ import (
 type Context interface {
 	InitFromLocalEscapePlanAndState(string, string, string) error
 	GetDependencyMetadata(string) (*core.ReleaseMetadata, error)
+	QueryReleaseMetadata(string, string, string) (*core.ReleaseMetadata, error)
 	LoadEscapeConfig(cfgFile string, cfgProfile string) error
 	LoadEscapePlan(string) error
-	LoadMetadata() error
+	LoadReleaseJson() error
+	CompileEscapePlan() error
 	LoadLocalState(string, string) error
 	Log(key string, values map[string]string)
 	PushLogRelease(string)

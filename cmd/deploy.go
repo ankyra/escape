@@ -25,11 +25,21 @@ var deployCmd = &cobra.Command{
 	Use:   "deploy",
 	Short: "Deploy the last built release using a local state file.",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
-			return err
-		}
 		context.SetRootDeploymentName(deployment)
-		return controllers.DeployController{}.Deploy(context)
+		ctrl := controllers.DeployController{}
+		if len(args) == 0 {
+			if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
+				return err
+			}
+			return ctrl.Deploy(context)
+		} else {
+			for _, arg := range args {
+				if err := ctrl.FetchAndDeploy(context, arg); err != nil {
+					return err
+				}
+			}
+		}
+		return nil
 	},
 }
 

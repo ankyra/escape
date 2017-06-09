@@ -18,8 +18,12 @@ package controllers
 
 import (
 	. "github.com/ankyra/escape-client/model/interfaces"
+	"github.com/ankyra/escape-client/model/paths"
 	"github.com/ankyra/escape-client/model/runners"
 	"github.com/ankyra/escape-client/model/runners/deploy"
+	"github.com/ankyra/escape-core"
+	"github.com/ankyra/escape-core/parsers"
+	"os"
 )
 
 type DeployController struct{}
@@ -42,4 +46,38 @@ func (d DeployController) Deploy(context Context) error {
 	context.PopLogRelease()
 	context.PopLogSection()
 	return nil
+}
+
+func (d DeployController) FetchAndDeploy(context Context, releaseId string) error {
+	// TODO cd into temp directory
+	parsed, err := parsers.ParseQualifiedReleaseId(releaseId)
+	if err != nil {
+		return err
+	}
+	if parsed.NeedsResolving() {
+		metadata, err := context.QueryReleaseMetadata(parsed.Project, parsed.Name, parsed.Version)
+		if err != nil {
+			return err
+		}
+		parsed.Version = metadata.Version
+		releaseId = metadata.GetQualifiedReleaseId()
+	}
+	fetcher := FetchController{}
+	if err := fetcher.Fetch(context, []string{releaseId}); err != nil {
+		return err
+	}
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	root := paths.NewPath().UnpackedDepDirectory(core.NewDependencyFromQualifiedReleaseId(parsed))
+	err = os.Chdir(root)
+	if err := context.LoadReleaseJson(); err != nil {
+		return err
+	}
+	if err := d.Deploy(context); err != nil {
+		os.Chdir(currentDir)
+		return err
+	}
+	return os.Chdir(currentDir)
 }

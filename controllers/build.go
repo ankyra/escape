@@ -35,7 +35,7 @@ func (BuildController) Build(context Context, buildFatPackage bool) error {
 	if err := build.NewBuildRunner().Run(runnerContext); err != nil {
 		return err
 	}
-	if err := context.LoadMetadata(); err != nil {
+	if err := context.CompileEscapePlan(); err != nil {
 		return err
 	}
 	context.Log("build.finished", nil)
