@@ -65,9 +65,12 @@ func (e *environmentBuilder) GetInputsForPreStep(ctx RunnerContext, stage string
 	return prepInputs(ctx, stage, &calculatedInputs)
 }
 
-func (e *environmentBuilder) GetInputsForErrand(ctx RunnerContext, errand *core.Errand) (map[string]interface{}, error) {
+func (e *environmentBuilder) GetInputsForErrand(ctx RunnerContext, errand *core.Errand, extraVars map[string]string) (map[string]interface{}, error) {
 	deplState := ctx.GetDeploymentState()
 	inputs := deplState.GetCalculatedInputs("deploy")
+	for key, val := range extraVars {
+		inputs[key] = val
+	}
 	result, err := prepInputs(ctx, "deploy", &inputs)
 	if err != nil {
 		return nil, err

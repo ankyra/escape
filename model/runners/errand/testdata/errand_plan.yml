@@ -5,4 +5,5 @@ errands:
     script: testdata/errand.sh
     inputs:
     - variable
+    - errand_variable
 

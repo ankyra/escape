@@ -18,8 +18,8 @@ compile:
   - escape state create
   - escape state create --deploy
   - escape release
-  - ./escape deploy escape-client-latest
-  - ./escape errands run upload_to_gcs -v bucket=escape-releases-eu
+  - ./escape deploy escape-client-latest -d "latest-client"
+  - ./escape errands run upload_to_gcs -v bucket=escape-releases-eu -d "latest-client"
 
 
 test:

@@ -25,15 +25,11 @@ func NewErrandRunner(errand *core.Errand, extraVars map[string]string) Runner {
 	return NewRunner(func(ctx RunnerContext) error {
 		step := NewScriptStep(ctx, "deploy", errand.GetName(), true)
 		step.Inputs = func(ctx RunnerContext, stage string) (map[string]interface{}, error) {
-			inputs := ctx.GetDeploymentState().GetCalculatedInputs(stage)
-			result := map[string]interface{}{}
-			for key, val := range inputs {
-				result[key] = val
+			inputs, err := NewEnvironmentBuilder().GetInputsForErrand(ctx, errand, extraVars)
+			if err != nil {
+				return nil, err
 			}
-			for key, val := range extraVars {
-				result[key] = val
-			}
-			return result, nil
+			return inputs, nil
 		}
 		step.ScriptPath = errand.GetScript()
 		return step.Run(ctx)

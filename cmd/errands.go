@@ -56,17 +56,30 @@ var errandsRunCmd = &cobra.Command{
 			return fmt.Errorf("Missing 'environment'")
 		}
 		if len(args) != 1 {
-			return fmt.Errorf("Expecting one errand")
+			return fmt.Errorf("Expecting errand")
 		}
-		errand := args[0]
-		if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
-			return err
+		context.SetRootDeploymentName(deployment)
+		if deployment != "" {
+			if err := context.LoadLocalState(state, environment); err != nil {
+				return err
+			}
+			deplState := context.GetEnvironmentState().GetOrCreateDeploymentState(deployment)
+			releaseId := deplState.GetReleaseId("deploy")
+			// todo create temp dir?
+			if err := context.InitReleaseMetadataByReleaseId(releaseId); err != nil {
+				return err
+			}
+			// todo: cd into directory
+		} else {
+			if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
+				return err
+			}
 		}
 		parsedExtraVars, err := ParseExtraVars(extraVars)
 		if err != nil {
 			return err
 		}
-		context.SetRootDeploymentName(deployment)
+		errand := args[0]
 		return controllers.ErrandsController{}.Run(context, errand, parsedExtraVars)
 	},
 }
