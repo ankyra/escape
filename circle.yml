@@ -19,7 +19,7 @@ compile:
   - escape state create --deploy
   - escape release
   - ./escape deploy escape-client-latest
-  - ./escape errands run -v bucket=escape-releases-eu
+  - ./escape errands run upload_to_gcs -v bucket=escape-releases-eu
 
 
 test:
