@@ -2,11 +2,6 @@
 
 set -euf -o pipefail
 
-if [ -f escape ] ; then
-    echo "./escape already exists. Exiting"
-    exit 0
-fi
-
 user_id=$(id -u $(whoami))
 
 docker run --rm \
