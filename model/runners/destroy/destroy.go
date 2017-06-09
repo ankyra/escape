@@ -30,7 +30,14 @@ func NewDestroyRunner(stage string) Runner {
 }
 
 func NewPreDestroyRunner(stage string) Runner {
-	return NewScriptRunner(stage, "pre_destroy")
+	return NewRunner(func(ctx RunnerContext) error {
+		deferred := func() Runner { return NewDestroyRunner("deploy") }
+		err := NewDependencyRunner("destroy", deferred).Run(ctx)
+		if err != nil {
+			return err
+		}
+		return NewScriptRunner(stage, "pre_destroy").Run(ctx)
+	})
 }
 
 func NewMainDestroyRunner(stage string) Runner {
@@ -50,11 +57,6 @@ func NewPostDestroyRunner(stage string) Runner {
 }
 
 func deleteCommit(ctx RunnerContext, depl *types.DeploymentState, stage string) error {
-	deferred := func() Runner { return NewDestroyRunner("deploy") }
-	err := NewDependencyRunner("destroy", deferred).Run(ctx)
-	if err != nil {
-		return err
-	}
 	if err := depl.CommitVersion(stage, ctx.GetReleaseMetadata()); err != nil {
 		return err
 	}

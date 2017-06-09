@@ -18,6 +18,9 @@ compile:
   - escape state create
   - escape state create --deploy
   - escape release
+  - ./escape deploy escape-client-latest
+  - ./escape errands run -v bucket=escape-releases-eu
+
 
 test:
   override:

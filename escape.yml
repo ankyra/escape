@@ -147,7 +147,8 @@ errands:
     description: Upload the produced linux/amd64 binary to a GCS bucket
     inputs:
     - bucket
-    - version
+    - id: version
+      default: $this.version
     script: scripts/upload_to_gcs.sh
 
 templates:
