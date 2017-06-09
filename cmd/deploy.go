@@ -33,6 +33,9 @@ var deployCmd = &cobra.Command{
 			}
 			return ctrl.Deploy(context)
 		} else {
+			if err := context.LoadLocalState(state, environment); err != nil {
+				return err
+			}
 			for _, arg := range args {
 				if err := ctrl.FetchAndDeploy(context, arg); err != nil {
 					return err
