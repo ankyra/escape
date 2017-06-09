@@ -8,19 +8,17 @@ machine:
 
 dependencies:
   pre:
-  - curl https://storage.googleapis.com/escape-releases-eu/escape-v0.10.3.tgz > escape.tgz
+  - curl https://storage.googleapis.com/escape-releases-eu/escape-v0.10.14.tgz > escape.tgz
   - rm -rf escape && tar -xvzf escape.tgz
   - mv escape /home/ubuntu/bin
   - escape version
 
 compile:
   override:
-  - escape state create
-  - escape state create --deploy
   - escape release
   - echo $GCLOUD_SERVICE_KEY | base64 --decode -i > ${HOME}/gcloud-service-key.json
-  - ./escape deploy escape-client-latest -d "latest-client"
-  - ./escape errands run upload_to_gcs -v bucket=escape-releases-eu -v credentials=@${HOME}/gcloud-service-key.json -d "latest-client"
+  - escape deploy escape-client-latest -d "latest-client"
+  - escape errands run upload_to_gcs -v bucket=escape-releases-eu -v credentials=@${HOME}/gcloud-service-key.json -d "latest-client"
 
 
 test:
