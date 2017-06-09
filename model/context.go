@@ -28,6 +28,7 @@ import (
 	"github.com/ankyra/escape-client/model/state/types"
 	"github.com/ankyra/escape-client/util"
 	"github.com/ankyra/escape-core"
+	"github.com/ankyra/escape-core/parsers"
 )
 
 type Context struct {
@@ -64,6 +65,19 @@ func (c *Context) InitFromLocalEscapePlanAndState(state, environment, planPath s
 	if err := c.CompileEscapePlan(); err != nil {
 		return err
 	}
+	return nil
+}
+
+func (c *Context) InitReleaseMetadataByReleaseId(releaseId string) error {
+	parsed, err := parsers.ParseQualifiedReleaseId(releaseId)
+	if err != nil {
+		return err
+	}
+	metadata, err := c.QueryReleaseMetadata(core.NewDependencyFromQualifiedReleaseId(parsed))
+	if err != nil {
+		return err
+	}
+	c.ReleaseMetadata = metadata
 	return nil
 }
 
@@ -110,16 +124,16 @@ func (c *Context) SetRootDeploymentName(name string) {
 	c.RootDeploymentName = name
 }
 
-func (c *Context) QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
-	metadata, ok := c.DependencyMetadata[project+"/"+name+version]
+func (c *Context) QueryReleaseMetadata(dep *core.Dependency) (*core.ReleaseMetadata, error) {
+	metadata, ok := c.DependencyMetadata[dep.GetQualifiedReleaseId()]
 	if ok {
 		return metadata, nil
 	}
-	metadata, err := c.GetRegistry().QueryReleaseMetadata(project, name, version)
+	metadata, err := c.GetRegistry().QueryReleaseMetadata(dep.Project, dep.Name, dep.GetVersionAsString())
 	if err != nil {
 		return nil, err
 	}
-	c.DependencyMetadata[project+"/"+name+version] = metadata
+	c.DependencyMetadata[dep.GetQualifiedReleaseId()] = metadata
 	return metadata, nil
 }
 

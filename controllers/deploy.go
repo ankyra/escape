@@ -55,7 +55,7 @@ func (d DeployController) FetchAndDeploy(context Context, releaseId string) erro
 		return err
 	}
 	if parsed.NeedsResolving() {
-		metadata, err := context.QueryReleaseMetadata(parsed.Project, parsed.Name, parsed.Version)
+		metadata, err := context.QueryReleaseMetadata(core.NewDependencyFromQualifiedReleaseId(parsed))
 		if err != nil {
 			return err
 		}

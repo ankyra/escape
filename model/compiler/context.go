@@ -36,7 +36,7 @@ type CompilerContext struct {
 	Plan              *escape_plan.EscapePlan
 	VariableCtx       map[string]*core.ReleaseMetadata
 	DependencyFetcher func(string) (*core.ReleaseMetadata, error)
-	ReleaseQuery      func(string, string, string) (*core.ReleaseMetadata, error)
+	ReleaseQuery      func(*core.Dependency) (*core.ReleaseMetadata, error)
 	Registry          registry.Registry
 	Project           string
 }

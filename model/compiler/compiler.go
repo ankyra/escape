@@ -28,7 +28,7 @@ func Compile(plan *escape_plan.EscapePlan,
 	reg registry.Registry,
 	project string,
 	depFetcher func(string) (*core.ReleaseMetadata, error),
-	releaseQuery func(string, string, string) (*core.ReleaseMetadata, error)) (*core.ReleaseMetadata, error) {
+	releaseQuery func(*core.Dependency) (*core.ReleaseMetadata, error)) (*core.ReleaseMetadata, error) {
 
 	ctx := NewCompilerContext(plan, reg, project)
 	ctx.DependencyFetcher = depFetcher

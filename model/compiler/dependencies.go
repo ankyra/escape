@@ -59,7 +59,7 @@ func resolveVersion(ctx *CompilerContext, d *core.Dependency) (*core.ReleaseMeta
 		if ctx.ReleaseQuery == nil {
 			return nil, fmt.Errorf("Missing release query function")
 		}
-		metadata, err := ctx.ReleaseQuery(d.Project, d.Name, d.Version)
+		metadata, err := ctx.ReleaseQuery(d)
 		if err != nil {
 			return nil, err
 		}

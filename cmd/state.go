@@ -79,10 +79,17 @@ var createStateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create state for the given escape plan",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
-			return err
-		}
+		useEscapePlan := len(args) == 0
 		context.SetRootDeploymentName(deployment)
+		if useEscapePlan {
+			if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
+				return err
+			}
+		} else {
+			if err := context.LoadLocalState(state, environment); err != nil {
+				return err
+			}
+		}
 		stage := "build"
 		if deployStage {
 			stage = "deploy"
@@ -90,6 +97,11 @@ var createStateCmd = &cobra.Command{
 		parsedExtraVars, err := ParseExtraVars(extraVars)
 		if err != nil {
 			return err
+		}
+		if !useEscapePlan {
+			if err := context.InitReleaseMetadataByReleaseId(args[0]); err != nil {
+				return err
+			}
 		}
 		return controllers.StateController{}.CreateState(context, stage, parsedExtraVars)
 	},

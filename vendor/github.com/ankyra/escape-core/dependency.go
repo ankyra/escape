@@ -57,11 +57,16 @@ func NewDependencyFromQualifiedReleaseId(r *parsers.QualifiedReleaseId) *Depende
 	}
 }
 
-func (d *Dependency) GetReleaseId() string {
-	version := "v" + d.Version
+func (d *Dependency) GetVersionAsString() (version string) {
+	version = "v" + d.Version
 	if d.Version == "latest" {
 		version = d.Version
 	}
+	return version
+}
+
+func (d *Dependency) GetReleaseId() string {
+	version := d.GetVersionAsString()
 	return d.Name + "-" + version
 }
 func (d *Dependency) GetQualifiedReleaseId() string {
