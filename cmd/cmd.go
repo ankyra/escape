@@ -80,7 +80,7 @@ func ParseExtraVars(extraVars []string) (result map[string]string, err error) {
 					}
 				}
 			} else {
-				return nil, err
+				result[key] = ""
 			}
 		} else if strings.HasPrefix(value, "@") {
 			v, err := ioutil.ReadFile(value[1:])
