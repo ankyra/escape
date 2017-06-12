@@ -60,6 +60,7 @@ func (d DeployController) FetchAndDeploy(context Context, releaseId string) erro
 			return err
 		}
 		parsed.Version = metadata.Version
+		metadata.Project = parsed.Project // registry needs to be updated to latest core
 		releaseId = metadata.GetQualifiedReleaseId()
 	}
 	fetcher := FetchController{}
