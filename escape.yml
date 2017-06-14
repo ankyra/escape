@@ -153,6 +153,16 @@ errands:
     - id: version
       default: $this.version
     script: scripts/upload_to_gcs.sh
+  publish_binaries:
+    description: Create binaries for all platforms and upload to a GCS bucket
+    inputs:
+    - id: bucket
+      description: "The target bucket"
+    - id: credentials
+      description: "Service account credentials"
+    - id: version
+      default: $this.version
+    script: scripts/publish-binaries.sh
 
 templates:
 - file: util/metadata.go.tpl
