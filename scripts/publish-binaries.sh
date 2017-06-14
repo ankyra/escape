@@ -25,5 +25,6 @@ for GOOS in $PLATFORMS; do
             echo "File $target already exists"
         fi
         gsutil cp "$target" "gs://$INPUT_bucket/$target"
+        gsutil acl ch -u AllUsers:R "gs://$INPUT_bucket/$target"
     done
 done
