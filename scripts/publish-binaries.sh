@@ -29,11 +29,11 @@ for GOOS in $PLATFORMS; do
         gsutil cp "$target" "gs://$INPUT_bucket/$target"
         gsutil acl ch -u AllUsers:R "gs://$INPUT_bucket/$target"
         public_url="https://storage.googleapis.com/$INPUT_bucket/$target"
-        echo "<li><a href=\"$public_url\">$target</a></li>" > downloads.html
+        echo "<li><a href=\"$public_url\">$target</a></li>" >> downloads.html
     done
 done
 
-echo "</ul>" > downloads.html
+echo "</ul>" >> downloads.html
 gsutil cp "downloads.html" "gs://$INPUT_bucket/downloads.html"
 gsutil acl ch -u AllUsers:R "gs://$INPUT_bucket/downloads.html"
 echo "Published https://storage.googleapis.com/$INPUT_bucket/$target"
