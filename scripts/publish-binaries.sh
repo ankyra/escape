@@ -36,4 +36,4 @@ done
 echo "</ul>" >> downloads.html
 gsutil cp "downloads.html" "gs://$INPUT_bucket/downloads.html"
 gsutil acl ch -u AllUsers:R "gs://$INPUT_bucket/downloads.html"
-echo "Published https://storage.googleapis.com/$INPUT_bucket/$target"
+echo "Published https://storage.googleapis.com/$INPUT_bucket/downloads.html"
