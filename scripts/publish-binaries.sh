@@ -11,7 +11,7 @@ gcloud auth activate-service-account --key-file service_account.json
 
 for GOOS in $PLATFORMS; do
     for ARCH in $ARCHS; do
-        target="escape-$INPUT_version-$GOOS-$ARCH.tgz"
+        target="escape-v$INPUT_version-$GOOS-$ARCH.tgz"
         if [ ! -f $target ] ; then
             docker run --rm -v "$PWD":/go/src/github.com/ankyra/escape-client \
                             -w /go/src/github.com/ankyra/escape-client \
