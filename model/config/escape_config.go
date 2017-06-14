@@ -66,6 +66,12 @@ func newEscapeTargetConfig(cfg *EscapeConfig) *EscapeTargetConfig {
 		GcsBucketUrl:   os.Getenv("ESCAPE_BUCKET_URL"),
 		parent:         cfg,
 	}
+	if target.StorageBackend == "" {
+		target.StorageBackend = "escape"
+	}
+	if target.ApiServer == "" {
+		target.ApiServer = "https://registry.ankyra.io"
+	}
 	return target
 }
 
