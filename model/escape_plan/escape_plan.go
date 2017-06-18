@@ -94,7 +94,7 @@ func (e *EscapePlan) LoadConfig(cfgFile string) error {
 
 func (e *EscapePlan) Init(name string) *EscapePlan {
 	e.Name = name
-	e.Version = "@"
+	e.Version = "0.0.@"
 	return e
 }
 

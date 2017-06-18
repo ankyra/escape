@@ -55,7 +55,7 @@ func (s *planSuite) Test_Init(c *C) {
 	unit := NewEscapePlan()
 	unit.Init("test")
 	c.Assert(unit.Name, Equals, "test")
-	c.Assert(unit.Version, Equals, "@")
+	c.Assert(unit.Version, Equals, "0.0.@")
 }
 
 func (s *planSuite) Test_GetReleaseId(c *C) {
