@@ -29,6 +29,17 @@ var buildCmd = &cobra.Command{
 			return err
 		}
 		context.SetRootDeploymentName(deployment)
+		parsedExtraVars, err := ParseExtraVars(extraVars)
+		if err != nil {
+			return err
+		}
+		envState := context.GetEnvironmentState()
+		deplState := envState.GetOrCreateDeploymentState(context.GetRootDeploymentName())
+		inputs := deplState.GetUserInputs("build")
+		for key, val := range parsedExtraVars {
+			inputs[key] = val
+		}
+		deplState.UpdateUserInputs("build", inputs)
 		return controllers.BuildController{}.Build(context, uber)
 	},
 }
@@ -36,4 +47,5 @@ var buildCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(buildCmd)
 	setLocalPlanAndStateFlags(buildCmd)
+	buildCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
 }
