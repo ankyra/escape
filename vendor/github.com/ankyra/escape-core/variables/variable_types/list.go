@@ -17,6 +17,7 @@ limitations under the License.
 package variable_types
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 )
@@ -31,6 +32,16 @@ func validateList(value interface{}, options map[string]interface{}) (interface{
 	}
 	valueType = valueType.(string)
 	switch value.(type) {
+	case string:
+		if value.(string) == "" {
+			return validateList([]interface{}{}, options)
+		}
+		result := []interface{}{}
+		err := json.Unmarshal([]byte(value.(string)), &result)
+		if err != nil {
+			return nil, err
+		}
+		return validateList(result, options)
 	case []interface{}:
 		for _, val := range value.([]interface{}) {
 			switch val.(type) {
