@@ -28,20 +28,12 @@ var buildCmd = &cobra.Command{
 		if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
 			return err
 		}
-		context.SetRootDeploymentName(deployment)
-		if err := saveExtraInputsInDeploymentState("build"); err != nil {
+		parsedExtraVars, err := ParseExtraVars(extraVars)
+		if err != nil {
 			return err
 		}
-		return controllers.BuildController{}.Build(context, uber)
+		return controllers.BuildController{}.Build(context, uber, parsedExtraVars)
 	},
-}
-
-func saveExtraInputsInDeploymentState(stage string) error {
-	parsedExtraVars, err := ParseExtraVars(extraVars)
-	if err != nil {
-		return err
-	}
-	return controllers.SaveExtraInputsInDeploymentState(context, stage, parsedExtraVars)
 }
 
 func init() {

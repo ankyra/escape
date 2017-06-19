@@ -31,8 +31,12 @@ var releaseCmd = &cobra.Command{
 			return err
 		}
 		context.SetRootDeploymentName(deployment)
+		parsedExtraVars, err := ParseExtraVars(extraVars)
+		if err != nil {
+			return err
+		}
 		return controllers.ReleaseController{}.Release(context, uber, skipBuild, skipTests,
-			skipCache, skipPush, skipDestroyBuild, skipDeploy, skipSmoke, skipDestroyDeploy, skipDestroy, force)
+			skipCache, skipPush, skipDestroyBuild, skipDeploy, skipSmoke, skipDestroyDeploy, skipDestroy, force, parsedExtraVars)
 	},
 }
 
@@ -51,4 +55,5 @@ func init() {
 	releaseCmd.Flags().BoolVarP(&skipDestroyBuild, "skip-build-destroy", "", false, "Skip build destroy step")
 	releaseCmd.Flags().BoolVarP(&skipDestroyDeploy, "skip-deploy-destroy", "", false, "Skip deploy destroy step")
 	releaseCmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite output file if it exists")
+	releaseCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
 }

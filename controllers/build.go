@@ -24,10 +24,13 @@ import (
 
 type BuildController struct{}
 
-func (BuildController) Build(context Context, buildFatPackage bool) error {
+func (BuildController) Build(context Context, buildFatPackage bool, extraVars map[string]string) error {
 	context.PushLogRelease(context.GetReleaseMetadata().GetReleaseId())
 	context.PushLogSection("Build")
 	context.Log("build.start", nil)
+	if err := SaveExtraInputsInDeploymentState(context, "build", extraVars); err != nil {
+		return err
+	}
 	runnerContext, err := runners.NewRunnerContext(context, "build")
 	if err != nil {
 		return err
