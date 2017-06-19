@@ -31,6 +31,7 @@ var deployCmd = &cobra.Command{
 			if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
 				return err
 			}
+			saveExtraInputsInDeploymentState("deploy")
 			return ctrl.Deploy(context)
 		} else {
 			if err := context.LoadLocalState(state, environment); err != nil {
@@ -49,4 +50,5 @@ var deployCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(deployCmd)
 	setLocalPlanAndStateFlags(deployCmd)
+	deployCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
 }

@@ -29,19 +29,26 @@ var buildCmd = &cobra.Command{
 			return err
 		}
 		context.SetRootDeploymentName(deployment)
-		parsedExtraVars, err := ParseExtraVars(extraVars)
-		if err != nil {
+		if err := saveExtraInputsInDeploymentState("build"); err != nil {
 			return err
 		}
-		envState := context.GetEnvironmentState()
-		deplState := envState.GetOrCreateDeploymentState(context.GetRootDeploymentName())
-		inputs := deplState.GetUserInputs("build")
-		for key, val := range parsedExtraVars {
-			inputs[key] = val
-		}
-		deplState.UpdateUserInputs("build", inputs)
 		return controllers.BuildController{}.Build(context, uber)
 	},
+}
+
+func saveExtraInputsInDeploymentState(stage string) error {
+	parsedExtraVars, err := ParseExtraVars(extraVars)
+	if err != nil {
+		return err
+	}
+	envState := context.GetEnvironmentState()
+	deplState := envState.GetOrCreateDeploymentState(context.GetRootDeploymentName())
+	inputs := deplState.GetUserInputs(stage)
+	for key, val := range parsedExtraVars {
+		inputs[key] = val
+	}
+	deplState.UpdateUserInputs(stage, inputs)
+	return nil
 }
 
 func init() {
