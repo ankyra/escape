@@ -28,10 +28,24 @@ import (
 
 type DeployController struct{}
 
-func (d DeployController) Deploy(context Context) error {
+func SaveExtraInputsInDeploymentState(context Context, stage string, extraVars map[string]string) error {
+	envState := context.GetEnvironmentState()
+	deplState := envState.GetOrCreateDeploymentState(context.GetRootDeploymentName())
+	inputs := deplState.GetUserInputs(stage)
+	for key, val := range extraVars {
+		inputs[key] = val
+	}
+	deplState.UpdateUserInputs(stage, inputs)
+	return nil
+}
+
+func (d DeployController) Deploy(context Context, extraVars map[string]string) error {
 	context.PushLogRelease(context.GetReleaseMetadata().GetReleaseId())
 	context.PushLogSection("Deploy")
 	context.Log("deploy.start", nil)
+	if err := SaveExtraInputsInDeploymentState(context, "deploy", extraVars); err != nil {
+		return err
+	}
 	runnerContext, err := runners.NewRunnerContext(context, "deploy")
 	if err != nil {
 		return err
@@ -48,7 +62,7 @@ func (d DeployController) Deploy(context Context) error {
 	return nil
 }
 
-func (d DeployController) FetchAndDeploy(context Context, releaseId string) error {
+func (d DeployController) FetchAndDeploy(context Context, releaseId string, extraVars map[string]string) error {
 	// TODO cd into temp directory
 	parsed, err := parsers.ParseQualifiedReleaseId(releaseId)
 	if err != nil {
@@ -76,7 +90,7 @@ func (d DeployController) FetchAndDeploy(context Context, releaseId string) erro
 	if err := context.LoadReleaseJson(); err != nil {
 		return err
 	}
-	if err := d.Deploy(context); err != nil {
+	if err := d.Deploy(context, extraVars); err != nil {
 		os.Chdir(currentDir)
 		return err
 	}

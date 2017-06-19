@@ -27,18 +27,21 @@ var deployCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		context.SetRootDeploymentName(deployment)
 		ctrl := controllers.DeployController{}
+		parsedExtraVars, err := ParseExtraVars(extraVars)
+		if err != nil {
+			return err
+		}
 		if len(args) == 0 {
 			if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
 				return err
 			}
-			saveExtraInputsInDeploymentState("deploy")
-			return ctrl.Deploy(context)
+			return ctrl.Deploy(context, parsedExtraVars)
 		} else {
 			if err := context.LoadLocalState(state, environment); err != nil {
 				return err
 			}
 			for _, arg := range args {
-				if err := ctrl.FetchAndDeploy(context, arg); err != nil {
+				if err := ctrl.FetchAndDeploy(context, arg, parsedExtraVars); err != nil {
 					return err
 				}
 			}

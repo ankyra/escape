@@ -41,14 +41,7 @@ func saveExtraInputsInDeploymentState(stage string) error {
 	if err != nil {
 		return err
 	}
-	envState := context.GetEnvironmentState()
-	deplState := envState.GetOrCreateDeploymentState(context.GetRootDeploymentName())
-	inputs := deplState.GetUserInputs(stage)
-	for key, val := range parsedExtraVars {
-		inputs[key] = val
-	}
-	deplState.UpdateUserInputs(stage, inputs)
-	return nil
+	return controllers.SaveExtraInputsInDeploymentState(context, stage, parsedExtraVars)
 }
 
 func init() {
