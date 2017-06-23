@@ -17,6 +17,7 @@ limitations under the License.
 package types
 
 type AuthMethod struct {
-	URL  string
-	Type string
+	URL         string `json:"url"`
+	Type        string `json:"type"`
+	RedeemToken string `json:"redeem-token"`
 }

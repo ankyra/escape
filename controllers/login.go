@@ -19,11 +19,14 @@ package controllers
 import (
 	"bufio"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"os/exec"
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/registry/types"
@@ -71,7 +74,7 @@ func (LoginController) Login(context Context, url, username, password string) er
 	method := methods[ix-1]
 	if method.Type == "oauth" {
 		openBrowser(method.URL)
-		return nil
+		return getEscapeTokenWithRedeemToken(context, url, method.RedeemToken)
 	} else if method.Type == "secret-token" {
 		if username == "" {
 			fmt.Printf("Username: ")
@@ -119,4 +122,50 @@ func openBrowser(url string) {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
+}
+
+func getEscapeTokenWithRedeemToken(context Context, url, redeemToken string) error {
+
+	currentTry := 0
+	tries := 25
+	timeOut := time.Duration(1)
+	client := &http.Client{}
+	if !strings.HasSuffix(url, "/") {
+		url = url + "/"
+	}
+	url = url + "auth/redeem-token?redeem-token=" + redeemToken
+	for currentTry < tries {
+
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			return fmt.Errorf("Couldn't retrieve token from server: %s", err)
+		}
+		resp, err := client.Do(req)
+		if err != nil {
+			return fmt.Errorf("Couldn't retrieve token from server: %s", err)
+		}
+		if resp.StatusCode == 200 {
+			authToken, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return fmt.Errorf("Couldn't read response from server '%s': %s", url, resp.Status)
+			}
+			context.GetEscapeConfig().GetCurrentTarget().SetAuthToken(string(authToken))
+			context.GetEscapeConfig().GetCurrentTarget().SetApiServer(url)
+			context.GetEscapeConfig().Save()
+			fmt.Printf("\nSuccessfully retrieved and stored auth token %s\n", authToken)
+			return nil
+		}
+		if resp.StatusCode != 404 {
+			return fmt.Errorf("Couldn't retrieve token from server. Got status code %d", resp.Status)
+		}
+		time.Sleep(timeOut * time.Second)
+		currentTry++
+		if currentTry == 5 {
+			timeOut *= 2
+		}
+		if currentTry == 10 {
+			timeOut *= 2
+		}
+	}
+	return nil
 }
