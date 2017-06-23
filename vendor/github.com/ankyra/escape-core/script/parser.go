@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"github.com/ankyra/escape-core/parsers"
 	"strings"
+	"unicode"
 )
 
 type parseResult struct {
@@ -69,13 +70,17 @@ func parseExpressionInString(str string) *parseResult {
 
 func parseExpression(str string) *parseResult {
 	var result *parseResult
-	if strings.HasPrefix(str, "$") {
+	if str == "" {
+		return parseError(fmt.Errorf("Expecting expression starting with '$' or '\"' or '[0-9]', got empty string"))
+	} else if strings.HasPrefix(str, "$") {
 		result = parseEnvLookup(str)
 	} else if strings.HasPrefix(str, "\"") {
 		result = parseString(str)
+	} else if unicode.IsDigit(rune(str[0])) {
+		result = parseInteger(str)
 	}
 	if result == nil {
-		return parseError(fmt.Errorf("Expecting expression starting with '$' or '\"', got: '%s'", str))
+		return parseError(fmt.Errorf("Expecting expression starting with '$' or '\"' or '[0-9]', got: '%s'", str))
 	}
 	if result.Error != nil {
 		return result
@@ -84,6 +89,19 @@ func parseExpression(str string) *parseResult {
 		return parseApply(result.Result, result.Rest)
 	}
 	return result
+}
+
+func parseInteger(str string) *parseResult {
+	if str == "" {
+		return parseError(fmt.Errorf("Expecting digit"))
+	} else if !unicode.IsDigit(rune(str[0])) {
+		return parseError(fmt.Errorf("Expecting digit"))
+	}
+	integer, rest := parsers.ParseInteger(str)
+	if integer == nil {
+		return parseError(fmt.Errorf("Expecting digit"))
+	}
+	return parseSuccess(LiftInteger(*integer), rest)
 }
 
 func parseString(str string) *parseResult {
