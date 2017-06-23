@@ -34,8 +34,10 @@ const (
 	func_builtinTitle        = "__title"
 	func_builtinSplit        = "__split"
 	func_builtinJoin         = "__join"
+	func_builtinReplace      = "__replace"
 	func_builtinBase64Encode = "__base64_encode"
 	func_builtinBase64Decode = "__base64_decode"
+	func_builtinTrim         = "__trim"
 )
 
 var builtinToLower = ShouldLift(strings.ToLower)
@@ -43,6 +45,8 @@ var builtinToUpper = ShouldLift(strings.ToUpper)
 var builtinTitle = ShouldLift(strings.ToTitle)
 var builtinSplit = ShouldLift(strings.Split)
 var builtinJoin = ShouldLift(strings.Join)
+var builtinReplace = ShouldLift(strings.Replace)
+var builtinTrim = ShouldLift(strings.TrimSpace)
 var builtinBase64Encode = ShouldLift(base64.StdEncoding.EncodeToString)
 var builtinBase64Decode = ShouldLift(base64.StdEncoding.DecodeString)
 
@@ -67,6 +71,12 @@ func LiftGoFunc(f interface{}) Script {
 				} else {
 					goArgs = append(goArgs, reflect.ValueOf(ExpectStringAtom(arg)))
 				}
+			} else if argType.Kind() == reflect.Int {
+				if !IsIntegerAtom(arg) {
+					return nil, fmt.Errorf("Expecting integer argument in call to %s, but got %s", name, arg.Type().Name())
+				} else {
+					goArgs = append(goArgs, reflect.ValueOf(ExpectIntegerAtom(arg)))
+				}
 			} else if argType.Kind() == reflect.Slice {
 				if !IsListAtom(arg) {
 					if argType.Elem().Kind() == reflect.Uint8 && IsStringAtom(arg) {
@@ -90,6 +100,8 @@ func LiftGoFunc(f interface{}) Script {
 						return nil, fmt.Errorf("Unsupported slice type in function %s", name)
 					}
 				}
+			} else {
+				return nil, fmt.Errorf("Unsupported argument type '%s' in function %s", argType.Kind(), name)
 			}
 		}
 
