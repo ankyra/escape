@@ -88,6 +88,9 @@ func parseExpression(str string) *parseResult {
 	if strings.HasPrefix(result.Rest, ".") {
 		return parseApply(result.Result, result.Rest)
 	}
+	if strings.HasPrefix(result.Rest, "[") {
+		return parseListIndex(result.Result, result.Rest)
+	}
 	return result
 }
 
@@ -250,6 +253,32 @@ func parseApply(to Script, str string) *parseResult {
 	} else {
 		apply = NewApply(to, []Script{LiftString(result)})
 	}
+	if strings.HasPrefix(rest, ".") {
+		return parseApply(apply, rest)
+	}
+	if strings.HasPrefix(rest, "[") {
+		return parseListIndex(apply, rest)
+	}
+	return parseSuccess(apply, rest)
+}
+
+func parseListIndex(lst Script, str string) *parseResult {
+	if !strings.HasPrefix(str, "[") {
+		return parseError(fmt.Errorf("Expecting '[', got: '%s'", str))
+	}
+	intResult := parseInteger(str[1:])
+	if intResult.Error != nil {
+		return parseError(fmt.Errorf("Couldn't parse '%s': %s", str, intResult.Error.Error()))
+	}
+	rest := strings.TrimSpace(intResult.Rest)
+	if rest[0:1] != "]" {
+		return parseError(fmt.Errorf("Expecting ']', got: '%s'", rest))
+	}
+	rest = rest[1:]
+	envLookup := LiftFunction(builtinEnvLookup)
+	apply2 := NewApply(envLookup, []Script{LiftString("$")})
+	apply1 := NewApply(apply2, []Script{LiftString("__list_index")})
+	apply := NewApply(apply1, []Script{lst, LiftInteger(ExpectIntegerAtom(intResult.Result))})
 	if strings.HasPrefix(rest, ".") {
 		return parseApply(apply, rest)
 	}

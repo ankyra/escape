@@ -38,6 +38,7 @@ const (
 	func_builtinBase64Encode = "__base64_encode"
 	func_builtinBase64Decode = "__base64_decode"
 	func_builtinTrim         = "__trim"
+	func_builtinListIndex    = "__list_index"
 )
 
 var builtinToLower = ShouldLift(strings.ToLower)
@@ -170,4 +171,24 @@ func builtinConcat(env *ScriptEnvironment, inputValues []Script) (Script, error)
 		}
 	}
 	return LiftString(result), nil
+}
+
+func builtinListIndex(env *ScriptEnvironment, inputValues []Script) (Script, error) {
+	if err := builtinArgCheck(2, func_builtinListIndex, inputValues); err != nil {
+		return nil, err
+	}
+	lstArg := inputValues[0]
+	if !IsListAtom(lstArg) {
+		return nil, fmt.Errorf("Expecting list argument in list index call, but got '%s'", lstArg.Type().Name())
+	}
+	indexArg := inputValues[1]
+	if !IsIntegerAtom(indexArg) {
+		return nil, fmt.Errorf("Expecting integer argument in list index call, but got '%s'", indexArg.Type().Name())
+	}
+	lst := ExpectListAtom(inputValues[0])
+	index := ExpectIntegerAtom(inputValues[1])
+	if index < 0 || index >= len(lst) {
+		return nil, fmt.Errorf("Index '%d' out of range (len: %d)", index, len(lst))
+	}
+	return Lift(lst[index])
 }
