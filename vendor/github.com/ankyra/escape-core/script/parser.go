@@ -71,16 +71,16 @@ func parseExpressionInString(str string) *parseResult {
 func parseExpression(str string) *parseResult {
 	var result *parseResult
 	if str == "" {
-		return parseError(fmt.Errorf("Expecting expression starting with '$' or '\"' or '[0-9]', got empty string"))
+		return parseError(fmt.Errorf("Expecting expression starting with '$' or '\"' or '[0-9\\-]', got empty string"))
 	} else if strings.HasPrefix(str, "$") {
 		result = parseEnvLookup(str)
 	} else if strings.HasPrefix(str, "\"") {
 		result = parseString(str)
-	} else if unicode.IsDigit(rune(str[0])) {
+	} else if unicode.IsDigit(rune(str[0])) || str[0:1] == "-" {
 		result = parseInteger(str)
 	}
 	if result == nil {
-		return parseError(fmt.Errorf("Expecting expression starting with '$' or '\"' or '[0-9]', got: '%s'", str))
+		return parseError(fmt.Errorf("Expecting expression starting with '$' or '\"' or '[0-9\\-]', got: '%s'", str))
 	}
 	if result.Error != nil {
 		return result
@@ -94,7 +94,7 @@ func parseExpression(str string) *parseResult {
 func parseInteger(str string) *parseResult {
 	if str == "" {
 		return parseError(fmt.Errorf("Expecting digit"))
-	} else if !unicode.IsDigit(rune(str[0])) {
+	} else if !unicode.IsDigit(rune(str[0])) && str[0:1] != "-" {
 		return parseError(fmt.Errorf("Expecting digit"))
 	}
 	integer, rest := parsers.ParseInteger(str)

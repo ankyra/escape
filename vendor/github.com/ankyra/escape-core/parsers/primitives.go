@@ -50,12 +50,17 @@ func ParseIdent(str string) (string, string) {
 func ParseInteger(str string) (*int, string) {
 	str = GreedySpace(str)
 	result := []rune{}
+	negative := false
+	i := 0
 	for _, c := range str {
-		if c >= '0' && c <= '9' {
+		if i == 0 && c == '-' {
+			negative = true
+		} else if c >= '0' && c <= '9' {
 			result = append(result, c)
 		} else {
 			break
 		}
+		i++
 	}
 	if len(result) == 0 {
 		return nil, str
@@ -65,5 +70,10 @@ func ParseInteger(str string) (*int, string) {
 		// TODO should result in error
 		return nil, str
 	}
-	return &i, str[len(result):]
+	resultLength := len(result)
+	if negative {
+		i = 0 - i
+		resultLength += 1
+	}
+	return &i, str[resultLength:]
 }
