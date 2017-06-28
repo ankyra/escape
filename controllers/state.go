@@ -57,7 +57,7 @@ func (p StateController) ShowProviders(context Context) error {
 	return nil
 }
 
-func (p StateController) CreateState(context Context, stage string, extraVars map[string]string) error {
+func (p StateController) CreateState(context Context, stage string, extraVars, extraProviders map[string]string) error {
 	envState := context.GetEnvironmentState()
 	metadata := context.GetReleaseMetadata()
 	deplState := envState.GetOrCreateDeploymentState(context.GetRootDeploymentName())
@@ -81,12 +81,8 @@ func (p StateController) CreateState(context Context, stage string, extraVars ma
 	if changed {
 		deplState.UpdateUserInputs(stage, inputs)
 	}
-	providers := envState.GetProviders()
-	for _, c := range metadata.GetConsumes() {
-		implementations := providers[c]
-		if len(implementations) == 1 {
-			deplState.SetProvider(stage, c, implementations[0])
-		}
+	if err := SetExtraProviders(context, stage, extraProviders); err != nil {
+		return err
 	}
 	fmt.Println(deplState.ToJson())
 	return deplState.Save()

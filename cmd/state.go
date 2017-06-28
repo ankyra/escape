@@ -24,7 +24,7 @@ import (
 )
 
 var deployStage bool
-var extraVars []string
+var extraVars, extraProviders []string
 
 var stateCmd = &cobra.Command{
 	Use:   "state",
@@ -98,12 +98,16 @@ var createStateCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		parsedExtraProviders, err := ParseExtraVars(extraProviders)
+		if err != nil {
+			return err
+		}
 		if !useEscapePlan {
 			if err := context.InitReleaseMetadataByReleaseId(args[0]); err != nil {
 				return err
 			}
 		}
-		return controllers.StateController{}.CreateState(context, stage, parsedExtraVars)
+		return controllers.StateController{}.CreateState(context, stage, parsedExtraVars, parsedExtraProviders)
 	},
 }
 
@@ -140,4 +144,5 @@ func init() {
 	setLocalPlanAndStateFlags(createStateCmd)
 	createStateCmd.Flags().BoolVarP(&deployStage, "deploy", "", false, "Use deployment instead of build stage")
 	createStateCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
+	createStateCmd.Flags().StringArrayVarP(&extraProviders, "extra-providers", "p", []string{}, "Extra providers (format: provider=deployment, provider=@deployment.txt, @values.json)")
 }

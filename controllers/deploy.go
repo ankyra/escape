@@ -17,6 +17,7 @@ limitations under the License.
 package controllers
 
 import (
+	"fmt"
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/paths"
 	"github.com/ankyra/escape-client/model/runners"
@@ -28,22 +29,50 @@ import (
 
 type DeployController struct{}
 
-func SaveExtraInputsInDeploymentState(context Context, stage string, extraVars map[string]string) error {
+func SetExtraProviders(context Context, stage string, extraProviders map[string]string) error {
+	envState := context.GetEnvironmentState()
+	deplState := envState.GetOrCreateDeploymentState(context.GetRootDeploymentName())
+	metadata := context.GetReleaseMetadata()
+	configuredProviders := deplState.GetProviders(stage)
+	availableProviders := envState.GetProviders()
+	for _, c := range metadata.GetConsumes() {
+		provider, override := extraProviders[c]
+		if override {
+			deplState.SetProvider(stage, c, provider)
+			continue
+		}
+		_, configured := configuredProviders[c]
+		if configured {
+			continue
+		}
+		implementations := availableProviders[c]
+		if len(implementations) == 1 {
+			deplState.SetProvider(stage, c, implementations[0])
+		} else {
+			return fmt.Errorf("Missing provider of type '%s'. This can be configured using the -p / --extra-provider flag.", c)
+		}
+	}
+	return nil
+}
+
+func SaveExtraInputsAndProvidersInDeploymentState(context Context, stage string, extraVars, extraProviders map[string]string) error {
 	envState := context.GetEnvironmentState()
 	deplState := envState.GetOrCreateDeploymentState(context.GetRootDeploymentName())
 	inputs := deplState.GetUserInputs(stage)
 	for key, val := range extraVars {
 		inputs[key] = val
 	}
-	deplState.UpdateUserInputs(stage, inputs)
-	return nil
+	if err := SetExtraProviders(context, stage, extraProviders); err != nil {
+		return err
+	}
+	return deplState.UpdateUserInputs(stage, inputs)
 }
 
-func (d DeployController) Deploy(context Context, extraVars map[string]string) error {
+func (d DeployController) Deploy(context Context, extraVars, extraProviders map[string]string) error {
 	context.PushLogRelease(context.GetReleaseMetadata().GetReleaseId())
 	context.PushLogSection("Deploy")
 	context.Log("deploy.start", nil)
-	if err := SaveExtraInputsInDeploymentState(context, "deploy", extraVars); err != nil {
+	if err := SaveExtraInputsAndProvidersInDeploymentState(context, "deploy", extraVars, extraProviders); err != nil {
 		return err
 	}
 	runnerContext, err := runners.NewRunnerContext(context, "deploy")
@@ -62,7 +91,7 @@ func (d DeployController) Deploy(context Context, extraVars map[string]string) e
 	return nil
 }
 
-func (d DeployController) FetchAndDeploy(context Context, releaseId string, extraVars map[string]string) error {
+func (d DeployController) FetchAndDeploy(context Context, releaseId string, extraVars, extraProviders map[string]string) error {
 	// TODO cd into temp directory
 	parsed, err := parsers.ParseQualifiedReleaseId(releaseId)
 	if err != nil {
@@ -90,7 +119,7 @@ func (d DeployController) FetchAndDeploy(context Context, releaseId string, extr
 	if err := context.LoadReleaseJson(); err != nil {
 		return err
 	}
-	if err := d.Deploy(context, extraVars); err != nil {
+	if err := d.Deploy(context, extraVars, extraProviders); err != nil {
 		os.Chdir(currentDir)
 		return err
 	}

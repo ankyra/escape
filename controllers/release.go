@@ -26,12 +26,12 @@ import (
 
 type ReleaseController struct{}
 
-func (r ReleaseController) Release(context Context, buildFatPackage, skipBuild, skipTests, skipCache, skipPush, skipDestroyBuild, skipDeploy, skipSmoke, skipDestroyDeploy, skipDestroy, forceOverwrite bool, extraVars map[string]string) error {
+func (r ReleaseController) Release(context Context, buildFatPackage, skipBuild, skipTests, skipCache, skipPush, skipDestroyBuild, skipDeploy, skipSmoke, skipDestroyDeploy, skipDestroy, forceOverwrite bool, extraVars, extraProviders map[string]string) error {
 	context.PushLogRelease(context.GetReleaseMetadata().GetReleaseId())
 	context.PushLogSection("Release")
 	context.Log("release.start", nil)
 	if !skipBuild {
-		if err := (BuildController{}).Build(context, buildFatPackage, extraVars); err != nil {
+		if err := (BuildController{}).Build(context, buildFatPackage, extraVars, extraProviders); err != nil {
 			return err
 		}
 	}
@@ -46,7 +46,7 @@ func (r ReleaseController) Release(context Context, buildFatPackage, skipBuild, 
 		}
 	}
 	if !skipDeploy {
-		if err := (DeployController{}).Deploy(context, extraVars); err != nil {
+		if err := (DeployController{}).Deploy(context, extraVars, extraProviders); err != nil {
 			return err
 		}
 	}

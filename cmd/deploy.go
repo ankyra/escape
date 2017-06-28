@@ -31,17 +31,21 @@ var deployCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		parsedExtraProviders, err := ParseExtraVars(extraProviders)
+		if err != nil {
+			return err
+		}
 		if len(args) == 0 {
 			if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
 				return err
 			}
-			return ctrl.Deploy(context, parsedExtraVars)
+			return ctrl.Deploy(context, parsedExtraVars, parsedExtraProviders)
 		} else {
 			if err := context.LoadLocalState(state, environment); err != nil {
 				return err
 			}
 			for _, arg := range args {
-				if err := ctrl.FetchAndDeploy(context, arg, parsedExtraVars); err != nil {
+				if err := ctrl.FetchAndDeploy(context, arg, parsedExtraVars, parsedExtraProviders); err != nil {
 					return err
 				}
 			}
@@ -54,4 +58,5 @@ func init() {
 	RootCmd.AddCommand(deployCmd)
 	setLocalPlanAndStateFlags(deployCmd)
 	deployCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
+	deployCmd.Flags().StringArrayVarP(&extraProviders, "extra-providers", "p", []string{}, "Extra providers (format: provider=deployment, provider=@deployment.txt, @values.json)")
 }

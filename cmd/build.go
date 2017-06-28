@@ -32,7 +32,11 @@ var buildCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		return controllers.BuildController{}.Build(context, uber, parsedExtraVars)
+		parsedExtraProviders, err := ParseExtraVars(extraProviders)
+		if err != nil {
+			return err
+		}
+		return controllers.BuildController{}.Build(context, uber, parsedExtraVars, parsedExtraProviders)
 	},
 }
 
@@ -40,4 +44,5 @@ func init() {
 	RootCmd.AddCommand(buildCmd)
 	setLocalPlanAndStateFlags(buildCmd)
 	buildCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
+	buildCmd.Flags().StringArrayVarP(&extraProviders, "extra-providers", "p", []string{}, "Extra providers (format: provider=deployment, provider=@deployment.txt, @values.json)")
 }
