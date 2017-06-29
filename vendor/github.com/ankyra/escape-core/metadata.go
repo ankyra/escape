@@ -415,6 +415,7 @@ func (m *ReleaseMetadata) ToScriptMap() map[string]script.Script {
 		"name":        script.LiftString(m.Name),
 		"revision":    script.LiftString(m.Revision),
 		"version":     script.LiftString(m.Version),
-		"id":          script.LiftString(m.GetReleaseId()),
+		"release":     script.LiftString(m.GetReleaseId()),
+		"id":          script.LiftString(m.GetQualifiedReleaseId()),
 	}
 }

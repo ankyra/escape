@@ -266,19 +266,50 @@ func parseListIndex(lst Script, str string) *parseResult {
 	if !strings.HasPrefix(str, "[") {
 		return parseError(fmt.Errorf("Expecting '[', got: '%s'", str))
 	}
-	intResult := parseInteger(str[1:])
+	isBeginSlice := false
+	str = strings.TrimSpace(str[1:])
+	if strings.HasPrefix(str, ":") {
+		isBeginSlice = true
+		str = str[1:]
+	}
+	intResult := parseInteger(str)
 	if intResult.Error != nil {
 		return parseError(fmt.Errorf("Couldn't parse '%s': %s", str, intResult.Error.Error()))
 	}
 	rest := strings.TrimSpace(intResult.Rest)
-	if rest[0:1] != "]" {
-		return parseError(fmt.Errorf("Expecting ']', got: '%s'", rest))
+	if rest == "" || rest[0:1] != "]" && rest[0:1] != ":" {
+		return parseError(fmt.Errorf("Expecting ']' or ':', got: '%s'", rest))
 	}
-	rest = rest[1:]
 	envLookup := LiftFunction(builtinEnvLookup)
 	apply2 := NewApply(envLookup, []Script{LiftString("$")})
-	apply1 := NewApply(apply2, []Script{LiftString("__list_index")})
-	apply := NewApply(apply1, []Script{lst, LiftInteger(ExpectIntegerAtom(intResult.Result))})
+	var apply Script
+
+	if rest[0:1] == ":" {
+		rest = strings.TrimSpace(rest[1:])
+		apply1 := NewApply(apply2, []Script{LiftString("__list_slice")})
+		if strings.HasPrefix(rest, "]") {
+			apply = NewApply(apply1, []Script{lst, intResult.Result})
+		} else {
+			endSlice := parseInteger(rest)
+			if endSlice.Error != nil {
+				return parseError(fmt.Errorf("Couldn't parse '%s': %s", str, endSlice.Error.Error()))
+			}
+			rest = strings.TrimSpace(endSlice.Rest)
+			if !strings.HasPrefix(rest, "]") {
+				return parseError(fmt.Errorf("Expecting ']', got: '%s'", rest))
+			}
+			apply = NewApply(apply1, []Script{lst, intResult.Result, endSlice.Result})
+		}
+	} else {
+		if !isBeginSlice {
+			apply1 := NewApply(apply2, []Script{LiftString("__list_index")})
+			apply = NewApply(apply1, []Script{lst, intResult.Result})
+		} else {
+			apply1 := NewApply(apply2, []Script{LiftString("__list_slice")})
+			apply = NewApply(apply1, []Script{lst, LiftInteger(0), intResult.Result})
+		}
+	}
+	rest = rest[1:]
 	if strings.HasPrefix(rest, ".") {
 		return parseApply(apply, rest)
 	}

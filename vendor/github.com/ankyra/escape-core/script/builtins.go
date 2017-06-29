@@ -39,6 +39,7 @@ const (
 	func_builtinBase64Decode = "__base64_decode"
 	func_builtinTrim         = "__trim"
 	func_builtinListIndex    = "__list_index"
+	func_builtinListSlice    = "__list_slice"
 )
 
 var builtinToLower = ShouldLift(strings.ToLower)
@@ -191,4 +192,34 @@ func builtinListIndex(env *ScriptEnvironment, inputValues []Script) (Script, err
 		return nil, fmt.Errorf("Index '%d' out of range (len: %d)", index, len(lst))
 	}
 	return Lift(lst[index])
+}
+
+func builtinListSlice(env *ScriptEnvironment, inputValues []Script) (Script, error) {
+	if len(inputValues) < 2 || len(inputValues) > 3 {
+		return nil, fmt.Errorf("Expecting at least %d argument(s) (but not more than 3) in call to '%s', got %d",
+			2, "list slice", len(inputValues))
+	}
+	lstArg := inputValues[0]
+	if !IsListAtom(lstArg) {
+		return nil, fmt.Errorf("Expecting list argument in list slice call, but got '%s'", lstArg.Type().Name())
+	}
+	indexArg := inputValues[1]
+	if !IsIntegerAtom(indexArg) {
+		return nil, fmt.Errorf("Expecting integer argument in list slice call, but got '%s'", indexArg.Type().Name())
+	}
+	lst := ExpectListAtom(inputValues[0])
+	index := ExpectIntegerAtom(inputValues[1])
+
+	if len(inputValues) == 3 {
+		endSliceArg := inputValues[2]
+		if !IsIntegerAtom(endSliceArg) {
+			return nil, fmt.Errorf("Expecting integer argument in list slice call, but got '%s'", endSliceArg.Type().Name())
+		}
+		endIndex := ExpectIntegerAtom(inputValues[2])
+		if endIndex < 0 {
+			endIndex = len(lst) + endIndex
+		}
+		return Lift(lst[index:endIndex])
+	}
+	return Lift(lst[index:])
 }

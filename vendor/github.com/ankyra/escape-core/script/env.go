@@ -47,6 +47,7 @@ func NewScriptEnvironmentWithGlobals(globals map[string]Script) *ScriptEnvironme
 	globals[func_builtinReplace] = builtinReplace
 	globals[func_builtinTrim] = builtinTrim
 	globals[func_builtinListIndex] = LiftFunction(builtinListIndex)
+	globals[func_builtinListSlice] = LiftFunction(builtinListSlice)
 	globalsDict := LiftDict(globals)
 	result["$"] = globalsDict
 	return &result
