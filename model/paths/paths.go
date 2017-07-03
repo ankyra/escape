@@ -59,20 +59,7 @@ func (p *Path) GetBaseDir() string {
 }
 
 func (p *Path) GetAppConfigDir() string {
-	if p.os == "windows" {
-		folder := os.Getenv("APPDATA")
-		if folder == "" {
-			folder = p.homeDirectory
-		}
-		return filepath.Join(folder, "escape")
-	} else if p.os == "darwin" {
-		return filepath.Join(p.homeDirectory, "Library", "Application Support", "escape")
-	}
-	folder := os.Getenv("XDG_CONFIG_HOME")
-	if folder == "" {
-		folder = filepath.Join(p.homeDirectory, ".config")
-	}
-	return filepath.Join(folder, "escape")
+	return util.GetAppConfigDir(p.os, p.homeDirectory)
 }
 
 func (p *Path) EscapeDirectory() string {
@@ -98,6 +85,10 @@ func (p *Path) ReleaseTargetDirectory() string {
 func (p *Path) ReleaseLocation(metadata *core.ReleaseMetadata) string {
 	pkgName := metadata.GetReleaseId()
 	return filepath.Join(p.ReleaseTargetDirectory(), pkgName+".tgz")
+}
+
+func (p *Path) EscapeBinaryPath() string {
+	return filepath.Join(p.GetAppConfigDir(), ".bin")
 }
 
 func (p *Path) DependencyCacheDirectory(project string) string {
@@ -156,4 +147,8 @@ func (p *Path) EnsureScratchSpaceDirectoryExists(metadata *core.ReleaseMetadata)
 
 func (p *Path) EnsureReleaseTargetDirectoryExists() error {
 	return util.MkdirRecursively(p.ReleaseTargetDirectory())
+}
+
+func (p *Path) EnsureEscapePathDirectoryExists() error {
+	return util.MkdirRecursively(p.EscapeBinaryPath())
 }

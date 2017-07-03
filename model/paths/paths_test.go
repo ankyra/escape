@@ -121,6 +121,14 @@ func (s *pathsSuite) Test_Path_DependecyReleaseArchive(c *C) {
 	c.Assert(unit.DependencyReleaseArchive(dep), Equals, "/base/dep-v1.0.tgz")
 }
 
+func (s *pathsSuite) Test_Path_Escape_Binary_Path(c *C) {
+	unit := Path{
+		os:            "linux",
+		homeDirectory: "/home/test-user",
+	}
+	c.Assert(unit.EscapeBinaryPath(), Equals, "/home/test-user/.config/escape/.bin")
+}
+
 func (s *pathsSuite) Test_Path_DependecyDownloadTarget(c *C) {
 	unit := Path{
 		os:            "linux",

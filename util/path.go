@@ -77,3 +77,20 @@ func CopyFile(src, dst string) error {
 	}
 	return os.Rename(tmp.Name(), dst)
 }
+
+func GetAppConfigDir(osString, homeDirectory string) string {
+	if osString == "windows" {
+		folder := os.Getenv("APPDATA")
+		if folder == "" {
+			folder = homeDirectory
+		}
+		return filepath.Join(folder, "escape")
+	} else if osString == "darwin" {
+		return filepath.Join(homeDirectory, "Library", "Application Support", "escape")
+	}
+	folder := os.Getenv("XDG_CONFIG_HOME")
+	if folder == "" {
+		folder = filepath.Join(homeDirectory, ".config")
+	}
+	return filepath.Join(folder, "escape")
+}

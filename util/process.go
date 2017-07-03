@@ -20,7 +20,9 @@ import (
 	"bufio"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -42,10 +44,26 @@ func (p *processRecorder) SetWorkingDirectory(cwd string) {
 	p.WorkingDirectory = cwd
 }
 
+func getExtraPathDir() string {
+	currentUser, _ := user.Current()
+	return filepath.Join(GetAppConfigDir(runtime.GOOS, currentUser.HomeDir), ".bin")
+}
+
 func (p *processRecorder) Record(cmd []string, env []string, log Logger) (string, error) {
+	extraPath := getExtraPathDir()
+	MkdirRecursively(extraPath)
+	newEnv := []string{}
+	for _, e := range env {
+		if strings.HasPrefix(e, "PATH=") {
+			path := e[5:]
+			newEnv = append(newEnv, "PATH="+extraPath+":"+path)
+		} else {
+			newEnv = append(newEnv, e)
+		}
+	}
 	proc := exec.Command(cmd[0], cmd[1:]...)
 	proc.Dir = p.WorkingDirectory
-	proc.Env = env
+	proc.Env = newEnv
 	bufferSize := 2
 	quitChannel := make(chan int)
 	stdoutChannel := make(chan string, bufferSize)

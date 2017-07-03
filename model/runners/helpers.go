@@ -120,6 +120,7 @@ func postCommit(ctx RunnerContext, deploymentState *state.DeploymentState, stage
 }
 
 func (b *ScriptStep) Run(ctx RunnerContext) error {
+	ctx.GetPath().EnsureEscapeDirectoryExists()
 	if b.ScriptPath != "" {
 		scriptPath, err := b.initScript(ctx)
 		if err != nil {
