@@ -3,15 +3,11 @@ machine:
   - docker
   environment:
     ESCAPE_PROJECT: "_"
-    ESCAPE_STORAGE_BACKEND: "escape"
-    ESCAPE_API_SERVER: "https://registry.ankyra.io"
 
 dependencies:
-  pre:
-  - curl https://storage.googleapis.com/escape-releases-eu/escape-v0.10.14.tgz > escape.tgz
-  - rm -rf escape && tar -xvzf escape.tgz
-  - mv escape /home/ubuntu/bin
-  - escape version
+  override:
+  - curl https://storage.googleapis.com/escape-releases-eu/escape-v0.11.2.tgz > /home/ubuntu/bin/escape.tgz
+  - tar -C /home/ubuntu/bin -xvzf /home/ubuntu/bin/escape.tgz
 
 compile:
   override:
