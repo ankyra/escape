@@ -39,11 +39,16 @@ func setEscapeStateEnvironmentFlag(c *cobra.Command) {
 		"dev", "The logical environment to target")
 }
 
+func setEscapeDeploymentFlag(c *cobra.Command) {
+	c.Flags().StringVarP(&deployment, "deployment", "d",
+		"", "Deployment name (default \"<release name>\")")
+}
+
 func setLocalPlanAndStateFlags(c *cobra.Command) {
 	setEscapePlanLocationFlag(c)
 	setEscapeStateLocationFlag(c)
 	setEscapeStateEnvironmentFlag(c)
-	c.Flags().StringVarP(&deployment, "deployment", "d", "", "Deployment name (default \"<release name>\")")
+	setEscapeDeploymentFlag(c)
 }
 
 func ParseExtraVars(extraVars []string) (result map[string]string, err error) {

@@ -136,6 +136,7 @@ func init() {
 
 	setEscapeStateLocationFlag(showDeploymentCmd)
 	setEscapeStateEnvironmentFlag(showDeploymentCmd)
+	setEscapeDeploymentFlag(showDeploymentCmd)
 
 	setEscapeStateLocationFlag(showProvidersCmd)
 	setEscapeStateEnvironmentFlag(showProvidersCmd)
