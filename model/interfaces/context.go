@@ -49,4 +49,5 @@ type Context interface {
 	GetLogger() util.Logger
 	GetRootDeploymentName() string
 	SetRootDeploymentName(string)
+	SetLogCollapse(bool)
 }

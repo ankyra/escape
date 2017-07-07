@@ -26,6 +26,7 @@ import (
 )
 
 var cfgFile, cfgProfile, cfgLogLevel string
+var cfgLogCollapse bool
 var context Context
 
 var RootCmd = &cobra.Command{
@@ -46,6 +47,7 @@ Website: http://escape.ankyra.io/
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		context = model.NewContext()
 		err := context.LoadEscapeConfig(cfgFile, cfgProfile)
+		context.SetLogCollapse(cfgLogCollapse)
 		if err != nil {
 			return err
 		}
@@ -70,4 +72,5 @@ func init() {
 	RootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "~/.escape_config", "Global Escape configuration file")
 	RootCmd.PersistentFlags().StringVar(&cfgProfile, "profile", "default", "Configuration profile")
 	RootCmd.PersistentFlags().StringVarP(&cfgLogLevel, "level", "l", "info", "Log level: debug, info, warn, error")
+	RootCmd.PersistentFlags().BoolVarP(&cfgLogCollapse, "collapse-logs", "", true, "Collapse logs (Default: true)")
 }

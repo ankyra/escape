@@ -35,7 +35,7 @@ type fancyTerminalOutput struct {
 	LastLineWasCollapsed  bool
 }
 
-func NewFancyTerminalOutputLogConsumer() LogConsumer {
+func NewFancyTerminalOutputLogConsumer() *fancyTerminalOutput {
 	return &fancyTerminalOutput{
 		PreviousSectionStack: []string{},
 		CollapseSections:     true,

@@ -52,6 +52,12 @@ func NewContext() *Context {
 	return ctx
 }
 
+func (c *Context) SetLogCollapse(s bool) {
+	consumer := util.NewFancyTerminalOutputLogConsumer()
+	consumer.CollapseSections = s
+	c.Logger = util.NewLogger([]util.LogConsumer{consumer})
+}
+
 func (c *Context) InitFromLocalEscapePlanAndState(state, environment, planPath string) error {
 	if environment == "" {
 		return errors.New("Missing 'environment'")
