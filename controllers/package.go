@@ -24,7 +24,7 @@ import (
 type PackageController struct{}
 
 func (PackageController) Package(context Context, forceOverwrite bool) error {
-	context.PushLogRelease(context.GetReleaseMetadata().GetReleaseId())
+	context.PushLogRelease(context.GetReleaseMetadata().GetQualifiedReleaseId())
 	context.PushLogSection("Package")
 	context.Log("package.start", nil)
 	archiver := model.NewReleaseArchiver()

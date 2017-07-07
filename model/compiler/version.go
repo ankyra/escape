@@ -42,7 +42,7 @@ func compileVersion(ctx *CompilerContext) error {
 	}
 	if strings.HasSuffix(version, "@") {
 		prefix := version[:len(version)-1]
-		nextVersion, err := ctx.Registry.QueryNextVersion(ctx.Project, ctx.Plan.Name, prefix)
+		nextVersion, err := ctx.Registry.QueryNextVersion(ctx.Metadata.Project, ctx.Metadata.Name, prefix)
 		if err != nil {
 			return err
 		}

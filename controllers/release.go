@@ -27,7 +27,7 @@ import (
 type ReleaseController struct{}
 
 func (r ReleaseController) Release(context Context, buildFatPackage, skipBuild, skipTests, skipCache, skipPush, skipDestroyBuild, skipDeploy, skipSmoke, skipDestroyDeploy, skipDestroy, forceOverwrite bool, extraVars, extraProviders map[string]string) error {
-	context.PushLogRelease(context.GetReleaseMetadata().GetReleaseId())
+	context.PushLogRelease(context.GetReleaseMetadata().GetQualifiedReleaseId())
 	context.PushLogSection("Release")
 	context.Log("release.start", nil)
 	if !skipBuild {

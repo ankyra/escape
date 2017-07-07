@@ -55,7 +55,7 @@ func (p PushController) upload(context Context) error {
 	context.Log("upload.start", nil)
 	releasePath := paths.NewPath().ReleaseLocation(context.GetReleaseMetadata())
 	metadata := context.GetReleaseMetadata()
-	project := context.GetEscapeConfig().GetCurrentTarget().GetProject()
+	project := metadata.Project
 	if err := context.GetRegistry().UploadRelease(project, releasePath, metadata); err != nil {
 		return err
 	}
