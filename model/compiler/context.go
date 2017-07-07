@@ -39,6 +39,7 @@ type CompilerContext struct {
 	ReleaseQuery      func(*core.Dependency) (*core.ReleaseMetadata, error)
 	Registry          registry.Registry
 	Project           string
+	Logger            util.Logger
 }
 
 func NewCompilerContext(plan *escape_plan.EscapePlan, registry registry.Registry, project string) *CompilerContext {
@@ -49,6 +50,12 @@ func NewCompilerContext(plan *escape_plan.EscapePlan, registry registry.Registry
 		Registry:    registry,
 		Project:     project,
 	}
+}
+
+func NewCompilerContextWithLogger(plan *escape_plan.EscapePlan, registry registry.Registry, project string, logger util.Logger) *CompilerContext {
+	ctx := NewCompilerContext(plan, registry, project)
+	ctx.Logger = logger
+	return ctx
 }
 
 func (c *CompilerContext) AddFileDigest(path string) error {

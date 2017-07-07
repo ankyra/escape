@@ -19,6 +19,7 @@ package compiler
 import (
 	"github.com/ankyra/escape-client/model/escape_plan"
 	"github.com/ankyra/escape-client/model/registry"
+	"github.com/ankyra/escape-client/util"
 	core "github.com/ankyra/escape-core"
 )
 
@@ -28,13 +29,15 @@ func Compile(plan *escape_plan.EscapePlan,
 	reg registry.Registry,
 	project string,
 	depFetcher func(string) (*core.ReleaseMetadata, error),
-	releaseQuery func(*core.Dependency) (*core.ReleaseMetadata, error)) (*core.ReleaseMetadata, error) {
+	releaseQuery func(*core.Dependency) (*core.ReleaseMetadata, error),
+	logger util.Logger) (*core.ReleaseMetadata, error) {
 
-	ctx := NewCompilerContext(plan, reg, project)
+	ctx := NewCompilerContextWithLogger(plan, reg, project, logger)
 	ctx.DependencyFetcher = depFetcher
 	ctx.ReleaseQuery = releaseQuery
 	compilerSteps := []CompilerFunc{
 		compileBasicFields,
+		compileGit,
 		compileExtensions,
 		compileDependencies,
 		compileVersion,

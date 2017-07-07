@@ -182,7 +182,7 @@ func (c *Context) LoadEscapePlan(cfgFile string) error {
 
 func (c *Context) CompileEscapePlan() error {
 	c.PushLogSection("Compile")
-	metadata, err := compiler.Compile(c.EscapePlan, c.GetRegistry(), c.GetEscapeConfig().GetCurrentTarget().GetProject(), c.GetDependencyMetadata, c.QueryReleaseMetadata)
+	metadata, err := compiler.Compile(c.EscapePlan, c.GetRegistry(), c.GetEscapeConfig().GetCurrentTarget().GetProject(), c.GetDependencyMetadata, c.QueryReleaseMetadata, c.Logger)
 	if err != nil {
 		return err
 	}
