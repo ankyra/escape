@@ -38,7 +38,7 @@ func compileTemplates(ctx *CompilerContext) error {
 			}
 		}
 		extraVars := []string{"branch", "description", "logo", "name",
-			"revision", "id", "version"}
+			"revision", "id", "version", "repository", "release", "versionless_release"}
 		for _, v := range extraVars {
 			_, exists := mapping[v]
 			if !exists {

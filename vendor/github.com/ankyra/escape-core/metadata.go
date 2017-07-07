@@ -436,15 +436,15 @@ func (m *ReleaseMetadata) ToScriptMap() map[string]script.Script {
 	return map[string]script.Script{
 		"metadata": script.LiftDict(metadataDict),
 
-		"branch":             script.LiftString(m.Branch),
-		"description":        script.LiftString(m.Description),
-		"logo":               script.LiftString(m.Logo),
-		"name":               script.LiftString(m.Name),
-		"revision":           script.LiftString(m.Revision),
-		"repository":         script.LiftString(m.Repository),
-		"version":            script.LiftString(m.Version),
-		"release":            script.LiftString(m.GetReleaseId()),
-		"versionlessRelease": script.LiftString(m.GetVersionlessReleaseId()),
-		"id":                 script.LiftString(m.GetQualifiedReleaseId()),
+		"branch":              script.LiftString(m.Branch),
+		"description":         script.LiftString(m.Description),
+		"logo":                script.LiftString(m.Logo),
+		"name":                script.LiftString(m.Name),
+		"revision":            script.LiftString(m.Revision),
+		"repository":          script.LiftString(m.Repository),
+		"version":             script.LiftString(m.Version),
+		"release":             script.LiftString(m.GetReleaseId()),
+		"versionless_release": script.LiftString(m.GetVersionlessReleaseId()),
+		"id": script.LiftString(m.GetQualifiedReleaseId()),
 	}
 }
