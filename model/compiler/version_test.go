@@ -42,7 +42,8 @@ func (s *suite) Test_Compile_Version_resolve_version(c *C) {
 		plan.Name = "my-build"
 		plan.Version = version
 		ctx := NewCompilerContext(plan, reg, "_")
-		ctx.Project = "cheeky-project"
+		ctx.Metadata.Name = "my-build"
+		ctx.Metadata.Project = "cheeky-project"
 		c.Assert(compileVersion(ctx), IsNil)
 		c.Assert(ctx.Metadata.Version, Equals, expected)
 		c.Assert(*capturedProject, Equals, "cheeky-project")
