@@ -220,3 +220,30 @@ func (r *registry) LoginWithSecretToken(url, username, password string) (string,
 	}
 	return resp.Header.Get("X-Escape-Token"), nil
 }
+
+func (r *registry) urlToList(url, doingMessage string) ([]string, error) {
+	resp, err := r.client.GET_with_authentication(url)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode == 401 {
+		return nil, fmt.Errorf("Unauthorized")
+	} else if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("Couldn't %s: %s", doingMessage, resp.Status)
+	}
+	result := []string{}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (r *registry) ListProjects() ([]string, error) {
+	return r.urlToList(r.endpoints.ListProjects(), "list projects")
+}
+func (r *registry) ListApplications(project string) ([]string, error) {
+	return r.urlToList(r.endpoints.ProjectQuery(project), "list applications for project '"+project+"'")
+}
+func (r *registry) ListVersions(project, app string) ([]string, error) {
+	return r.urlToList(r.endpoints.ProjectNameQuery(project, app), "list version for project '"+project+"/"+app+"'")
+}

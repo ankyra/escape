@@ -58,3 +58,12 @@ func (r *LocalRegistry) GetAuthMethods(url string) (map[string]*types.AuthMethod
 func (r *LocalRegistry) LoginWithSecretToken(url, username, password string) (string, error) {
 	return "", nil
 }
+func (r *LocalRegistry) ListProjects() ([]string, error) {
+	return []string{}, nil
+}
+func (r *LocalRegistry) ListApplications(project string) ([]string, error) {
+	return []string{}, nil
+}
+func (r *LocalRegistry) ListVersions(project, app string) ([]string, error) {
+	return []string{}, nil
+}

@@ -31,6 +31,10 @@ type Registry interface {
 	UploadRelease(project, releasePath string, metadata *core.ReleaseMetadata) error
 	GetAuthMethods(url string) (map[string]*types.AuthMethod, error)
 	LoginWithSecretToken(url, username, password string) (string, error)
+
+	ListProjects() ([]string, error)
+	ListApplications(project string) ([]string, error)
+	ListVersions(project, app string) ([]string, error)
 }
 
 func NewLocalRegistry() Registry {

@@ -53,3 +53,12 @@ func (m *mockRegistry) GetAuthMethods(url string) (map[string]*types.AuthMethod,
 func (m *mockRegistry) LoginWithSecretToken(url, username, password string) (string, error) {
 	return "", nil
 }
+func (r *mockRegistry) ListProjects() ([]string, error) {
+	return []string{}, nil
+}
+func (r *mockRegistry) ListApplications(project string) ([]string, error) {
+	return []string{}, nil
+}
+func (r *mockRegistry) ListVersions(project, app string) ([]string, error) {
+	return []string{}, nil
+}
