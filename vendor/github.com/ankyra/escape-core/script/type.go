@@ -25,6 +25,7 @@ type ValueType interface {
 	IsList() bool
 	IsMap() bool
 	IsString() bool
+	IsLambda() bool
 }
 
 /*
@@ -54,4 +55,7 @@ func (typ *valueType) IsInteger() bool {
 }
 func (typ *valueType) IsList() bool {
 	return typ.Type == "list"
+}
+func (typ *valueType) IsLambda() bool {
+	return typ.Type == "lambda"
 }

@@ -60,6 +60,30 @@ func (r *registry) QueryReleaseMetadata(project, name, version string) (*core.Re
 	return result, nil
 }
 
+func (r *registry) QueryPreviousReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
+	url := r.endpoints.PreviousReleaseQuery(project, name, version)
+	resp, err := r.client.GET_with_authentication(url)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode == 401 {
+		return nil, fmt.Errorf("Unauthorized")
+	} else if resp.StatusCode == 404 {
+		return nil, nil
+	} else if resp.StatusCode != 200 {
+		releaseQuery := project + "/" + name + "-" + version
+		if project == "_" {
+			releaseQuery = name + "-" + version
+		}
+		return nil, fmt.Errorf("Couldn't query previous release '%s': %s", releaseQuery, resp.Status)
+	}
+	result := core.NewEmptyReleaseMetadata()
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 func (r *registry) QueryNextVersion(project, name, versionPrefix string) (string, error) {
 	url := r.endpoints.NextReleaseVersion(project, name, versionPrefix)
 	resp, err := r.client.GET_with_authentication(url)

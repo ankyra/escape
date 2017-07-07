@@ -29,19 +29,6 @@ type Errand struct {
 	Inputs      []*variables.Variable `json:"inputs"`
 }
 
-func (e *Errand) GetName() string {
-	return e.Name
-}
-func (e *Errand) GetDescription() string {
-	return e.Description
-}
-func (e *Errand) GetScript() string {
-	return e.Script
-}
-func (e *Errand) SetScript(s string) {
-	e.Script = s
-}
-
 func (e *Errand) GetInputs() []*variables.Variable {
 	result := []*variables.Variable{}
 	for _, i := range e.Inputs {
@@ -65,6 +52,16 @@ func (e *Errand) Validate() error {
 		}
 	}
 	return nil
+}
+
+func NewErrand(name, script, description string) *Errand {
+	result := &Errand{
+		Name:        name,
+		Script:      script,
+		Description: description,
+		Inputs:      []*variables.Variable{},
+	}
+	return result
 }
 
 func NewErrandFromDict(name string, dict interface{}) (*Errand, error) {
@@ -107,11 +104,11 @@ func NewErrandFromDict(name string, dict interface{}) (*Errand, error) {
 								stringVar := inputDict.(string)
 								v, err := variables.NewVariableFromString(stringVar, "string")
 								if err != nil {
-									return nil, errors.New("Not a valid errand variable : " + stringVar)
+									return nil, errors.New("Not a valid errand variable: " + stringVar)
 								}
 								inputs = append(inputs, v)
 							default:
-								return nil, errors.New("Expecting dict type for input item in errand " + name)
+								return nil, errors.New("Expecting dict or string type for input item in errand " + name)
 							}
 						}
 					default:
@@ -131,10 +128,8 @@ func NewErrandFromDict(name string, dict interface{}) (*Errand, error) {
 			Inputs:      inputs,
 		}
 		return result, result.Validate()
-	default:
-		return nil, errors.New("Expecting a dictionary for errand " + name)
 	}
-	return nil, errors.New("Unreachable code")
+	return nil, errors.New("Expecting a dictionary for errand " + name)
 }
 
 func getString(val interface{}) (string, error) {

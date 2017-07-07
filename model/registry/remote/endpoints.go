@@ -42,6 +42,9 @@ func (s *ServerEndpoints) ApiServer() string {
 func (s *ServerEndpoints) ReleaseQuery(project, name, version string) string {
 	return s.ApiServer() + "a/" + project + "/" + name + "/" + version + "/"
 }
+func (s *ServerEndpoints) PreviousReleaseQuery(project, name, version string) string {
+	return s.ReleaseQuery(project, name, version) + "previous/"
+}
 
 func (s *ServerEndpoints) NextReleaseVersion(project, name, prefix string) string {
 	v := url.Values{}
@@ -54,17 +57,14 @@ func (s *ServerEndpoints) ProjectQuery(project string) string {
 func (s *ServerEndpoints) ProjectNameQuery(project, name string) string {
 	return s.ProjectQuery(project) + name + "/"
 }
-func (s *ServerEndpoints) ProjectReleaseQuery(project, name, version string) string {
-	return s.ProjectNameQuery(project, name) + "v" + version + "/"
-}
 func (s *ServerEndpoints) RegisterPackage(project string) string {
 	return s.ProjectQuery(project) + "register"
 }
 func (s *ServerEndpoints) UploadRelease(project, name, version string) string {
-	return s.ProjectReleaseQuery(project, name, version) + "upload"
+	return s.ReleaseQuery(project, name, version) + "upload"
 }
 func (s *ServerEndpoints) DownloadRelease(project, name, version string) string {
-	return s.ProjectReleaseQuery(project, name, version) + "download"
+	return s.ReleaseQuery(project, name, version) + "download"
 }
 func (s *ServerEndpoints) AuthMethods(baseUrl string) string {
 	if !strings.HasSuffix(baseUrl, "/") {

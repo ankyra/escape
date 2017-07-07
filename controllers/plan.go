@@ -21,6 +21,7 @@ import (
 	"github.com/ankyra/escape-client/model/escape_plan"
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/util"
+	"github.com/ankyra/escape-core"
 	"io/ioutil"
 )
 
@@ -28,6 +29,22 @@ type PlanController struct{}
 
 func (p PlanController) Compile(context Context) {
 	fmt.Println(context.GetReleaseMetadata().ToJson())
+}
+
+func (p PlanController) Diff(context Context) error {
+	metadata := context.GetReleaseMetadata()
+	registry := context.GetRegistry()
+	previous, err := registry.QueryPreviousReleaseMetadata(metadata.Project, metadata.Name, "latest")
+	if err != nil {
+		return err
+	}
+	if previous == nil {
+		return fmt.Errorf("No previous versions found")
+	}
+	for _, change := range core.Diff(previous, metadata) {
+		fmt.Println(change.ToString())
+	}
+	return nil
 }
 
 func (p PlanController) Format(context Context, outputLocation string) error {

@@ -38,7 +38,7 @@ func (s *testSuite) Test_ErrandRunner_no_script_defined(c *C) {
 	runCtx, err := runners.NewRunnerContext(ctx, "deploy")
 	c.Assert(err, IsNil)
 	errand := ctx.GetReleaseMetadata().GetErrands()["my-errand"]
-	errand.SetScript("")
+	errand.Script = ""
 	err = NewErrandRunner(errand, nil).Run(runCtx)
 	c.Assert(err, Not(IsNil))
 }
@@ -50,7 +50,7 @@ func (s *testSuite) Test_ErrandRunner_missing_test_file(c *C) {
 	runCtx, err := runners.NewRunnerContext(ctx, "deploy")
 	c.Assert(err, IsNil)
 	errand := ctx.GetReleaseMetadata().GetErrands()["my-errand"]
-	errand.SetScript("testdata/doesnt_exist.sh")
+	errand.Script = "testdata/doesnt_exist.sh"
 	err = NewErrandRunner(errand, nil).Run(runCtx)
 	c.Assert(err, Not(IsNil))
 }
@@ -100,7 +100,7 @@ func (s *testSuite) Test_ErrandRunner_failing_script(c *C) {
 	runCtx, err := runners.NewRunnerContext(ctx, "deploy")
 	c.Assert(err, IsNil)
 	errand := ctx.GetReleaseMetadata().GetErrands()["my-errand"]
-	errand.SetScript("testdata/failing_test.sh")
+	errand.Script = "testdata/failing_test.sh"
 	err = NewErrandRunner(errand, nil).Run(runCtx)
 	c.Assert(err, Not(IsNil))
 }

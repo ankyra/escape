@@ -51,6 +51,8 @@ func Lift(val interface{}) (Script, error) {
 		return LiftList(val.([]Script)), nil
 	case scriptFuncType:
 		return LiftFunction(val.(scriptFuncType)), nil
+	case func() string:
+		return LiftGoFunc(val), nil
 	case func([]byte) string:
 		return LiftGoFunc(val), nil
 	case func(string) ([]byte, error):
@@ -64,6 +66,10 @@ func Lift(val interface{}) (Script, error) {
 	case func(string, string, string, int) string:
 		return LiftGoFunc(val), nil
 	case func([]string, string) string:
+		return LiftGoFunc(val), nil
+	case func(int) int:
+		return LiftGoFunc(val), nil
+	case func(int, int) int:
 		return LiftGoFunc(val), nil
 	case []string:
 		vals := []Script{}
@@ -314,6 +320,44 @@ func ExpectFunctionAtom(s Script) scriptFuncType {
 }
 
 /*
+   Lambda
+*/
+type lambda struct {
+	Arguments []string
+	Body      Script
+}
+
+func NewLambda(args []string, body Script) Script {
+	return &lambda{
+		Arguments: args,
+		Body:      body,
+	}
+}
+
+func (l *lambda) Eval(env *ScriptEnvironment) (Script, error) {
+	return l, nil
+}
+
+func (l *lambda) Type() ValueType {
+	return NewType("lambda")
+}
+
+func (l *lambda) Value() (interface{}, error) {
+	return nil, fmt.Errorf("Function application can not be converted to Go value (forgot to eval?)")
+}
+
+func IsLambdaAtom(v Script) bool {
+	_, ok := v.(*lambda)
+	return ok
+}
+func ExpectLambdaAtom(v Script) *lambda {
+	if IsLambdaAtom(v) {
+		return v.(*lambda)
+	}
+	panic("Expecting lambda function, got " + v.Type().Name())
+}
+
+/*
    Apply
 */
 type apply struct {
@@ -357,6 +401,8 @@ func (f *apply) Eval(env *ScriptEnvironment) (Script, error) {
 		return f.evalDictApply(evaledTo, args)
 	} else if typ.IsString() {
 		return f.evalStringApply(evaledTo, args)
+	} else if typ.IsLambda() {
+		return f.evalLambdaApply(evaledTo, args, env)
 	}
 	return nil, fmt.Errorf("Expecting function, map or string for apply, but got '%s'", typ.Name())
 }
@@ -367,6 +413,34 @@ func (f *apply) evalFuncApply(script Script, args []Script, env *ScriptEnvironme
 		return nil, err
 	}
 	return fun.(scriptFuncType)(env, args)
+}
+
+func (f *apply) evalLambdaApply(script Script, args []Script, env *ScriptEnvironment) (Script, error) {
+	lambda := ExpectLambdaAtom(script)
+	if len(lambda.Arguments) != len(args) {
+		return nil, fmt.Errorf("Argument arity mismatch. Expecting %d arguments, got %d.", len(lambda.Arguments), len(args))
+	}
+	if env == nil {
+		env = NewScriptEnvironment()
+	}
+	newEnv := map[string]Script{}
+	for key, val := range *env {
+		newEnv[key] = val
+	}
+	globals, found := newEnv["$"]
+	if !found {
+		globals = LiftDict(map[string]Script{})
+	}
+	globalsDict := ExpectDictAtom(globals)
+	newGlobals := map[string]Script{}
+	for key, val := range globalsDict {
+		newGlobals[key] = val
+	}
+	for ix, variable := range lambda.Arguments {
+		newGlobals[variable] = args[ix]
+	}
+	newEnv["$"] = LiftDict(newGlobals)
+	return lambda.Body.Eval(NewScriptEnvironmentFromMap(newEnv))
 }
 
 func (f *apply) evalDictApply(dict Script, args []Script) (Script, error) {

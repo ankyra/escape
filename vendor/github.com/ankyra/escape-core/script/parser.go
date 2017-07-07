@@ -61,6 +61,14 @@ func ParseScript(str string) (Script, error) {
 	return result.Result, nil
 }
 
+func ShouldParse(str string) Script {
+	result, err := ParseScript(str)
+	if err != nil {
+		panic(err)
+	}
+	return result
+}
+
 // TODO
 // "this should concat {{ $gcp.test }} yall"
 
@@ -161,11 +169,74 @@ func parseEnvLookup(str string) *parseResult {
 		}
 		return parseError(fmt.Errorf("Expecting indentifier, got '%s'", str))
 	}
+	if result == "func" {
+		return parseLambdaFunction(rest)
+	}
 	envLookup := LiftFunction(builtinEnvLookup)
 	key := LiftString(result)
 	apply2 := NewApply(envLookup, []Script{LiftString("$")})
 	apply1 := NewApply(apply2, []Script{key})
 	return parseSuccess(apply1, rest)
+}
+
+func parseLambdaFunction(str string) *parseResult {
+	if !strings.HasPrefix(str, "(") {
+		return parseError(fmt.Errorf("Expecting '(', got '%s'", str))
+	}
+	orig := str
+	str = str[1:]
+	args := []string{}
+	for {
+		if str == "" {
+			return parseError(fmt.Errorf("Expecting ')', got EOF in %s", orig))
+		}
+		if strings.HasPrefix(str, ")") {
+			break
+		}
+
+		variable, rest := parsers.ParseIdent(str)
+		if variable == "" {
+			return parseError(fmt.Errorf("Couldn't parse lambda argument: %s", str))
+		}
+		args = append(args, variable)
+
+		str = strings.TrimSpace(rest)
+		if strings.HasPrefix(str, ")") {
+			break
+		}
+		if !strings.HasPrefix(str, ",") {
+			return parseError(fmt.Errorf("Expecting ',' or ')', but got: \"%s\" in \"%s\"", str, orig))
+		}
+		str = strings.TrimSpace(str[1:])
+	}
+
+	str = strings.TrimSpace(str[1:])
+	if !strings.HasPrefix(str, "{") {
+		return parseError(fmt.Errorf("Expecting '{', got '%s'", str))
+	}
+
+	str = strings.TrimSpace(str[1:])
+	bodyResult := parseExpression(str)
+	if bodyResult.Error != nil {
+		return parseError(fmt.Errorf("Couldn't parse lambda body: %s.", bodyResult.Error.Error()))
+	}
+	body := bodyResult.Result
+	str = strings.TrimSpace(bodyResult.Rest)
+	if !strings.HasPrefix(str, "}") {
+		return parseError(fmt.Errorf("Expecting '}', got '%s'", str))
+	}
+	rest := strings.TrimSpace(str[1:])
+
+	lambda := NewLambda(args, body)
+	if !strings.HasPrefix(rest, "(") {
+		return parseSuccess(lambda, rest)
+	}
+	parseArgsResult := parseArguments(rest)
+	if parseArgsResult.Error != nil {
+		return parseError(fmt.Errorf("Failed to parse lambda function call: %s", parseArgsResult.Error.Error()))
+	}
+	apply := NewApply(lambda, ExpectListAtom(parseArgsResult.Result))
+	return parseSuccess(apply, parseArgsResult.Rest)
 }
 
 func parseArguments(str string) *parseResult {

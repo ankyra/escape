@@ -49,7 +49,7 @@ func compileExtensions(ctx *CompilerContext) error {
 			if exists {
 				continue
 			}
-			newErrand.Script = extensionPath(metadata, newErrand.GetScript())
+			newErrand.Script = extensionPath(metadata, newErrand.Script)
 			ctx.Metadata.Errands[name] = newErrand
 		}
 		for key, val := range metadata.Metadata {

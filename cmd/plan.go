@@ -62,6 +62,18 @@ var fmtCmd = &cobra.Command{
 	},
 }
 
+var diffCmd = &cobra.Command{
+	Use:   "diff",
+	Short: "Diff compiled Escape plan against latest version",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
+			return err
+		}
+		context.SetRootDeploymentName(deployment)
+		return controllers.PlanController{}.Diff(context)
+	},
+}
+
 var minifyCmd = &cobra.Command{
 	Use:   "minify",
 	Short: "Minify an existing Escape plan",
@@ -93,12 +105,14 @@ func init() {
 	planCmd.AddCommand(fmtCmd)
 	planCmd.AddCommand(minifyCmd)
 	planCmd.AddCommand(compileCmd)
+	planCmd.AddCommand(diffCmd)
 
 	initCmd.Flags().StringVarP(&releaseName, "name", "n", "", "The release name (eg. hello-world)")
 	initCmd.Flags().StringVarP(&outputPath, "output", "o", "escape.yml", "The output location")
 	initCmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite output file if it exists")
 
 	setLocalPlanAndStateFlags(compileCmd)
+	setLocalPlanAndStateFlags(diffCmd)
 	setEscapePlanLocationFlag(fmtCmd)
 	setEscapePlanLocationFlag(minifyCmd)
 }

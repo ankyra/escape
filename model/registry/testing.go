@@ -35,6 +35,9 @@ func NewMockRegistry() *mockRegistry {
 func (m *mockRegistry) QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
 	return m.ReleaseMetadata(project, name, version)
 }
+func (m *mockRegistry) QueryPreviousReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
+	return nil, nil
+}
 func (m *mockRegistry) QueryNextVersion(project, name, versionPrefix string) (string, error) {
 	return m.NextVersion(project, name, versionPrefix)
 }

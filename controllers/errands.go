@@ -32,10 +32,10 @@ func (ErrandsController) List(context Context) error {
 	}
 	for _, errand := range metadata.GetErrands() {
 		description := "No description given."
-		if errand.GetDescription() != "" {
-			description = errand.GetDescription()
+		if errand.Description != "" {
+			description = errand.Description
 		}
-		fmt.Println("- " + errand.GetName() + ": " + description)
+		fmt.Println("- " + errand.Name + ": " + description)
 	}
 	return nil
 }

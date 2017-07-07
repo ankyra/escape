@@ -27,9 +27,16 @@ func validateBool(value interface{}, options map[string]interface{}) (interface{
 	case bool:
 		return value.(bool), nil
 	case int:
-		return value.(int) == 1, nil
+		return value.(int) >= 1, nil
 	case string:
-		return value.(string) == "1", nil
+		truthy := map[string]bool{
+			"true": true,
+			"1":    true,
+			"yay":  true,
+			"yes":  true,
+		}
+		_, found := truthy[value.(string)]
+		return found, nil
 	}
 	return nil, fmt.Errorf("Expecting 'bool' value, but got '%T'", value)
 }

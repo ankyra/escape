@@ -35,6 +35,9 @@ func (r *LocalRegistry) QueryReleaseMetadata(project, name, version string) (*co
 	}
 	return nil, fmt.Errorf("Not implemented")
 }
+func (r *LocalRegistry) QueryPreviousReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
+	return nil, fmt.Errorf("Not implemented")
+}
 
 func (r *LocalRegistry) QueryNextVersion(project, name, versionPrefix string) (string, error) {
 	return "", fmt.Errorf("Auto versioning is not implemented for local registries. The registry can be configured in the global Escape configuration (see `escape config`)")

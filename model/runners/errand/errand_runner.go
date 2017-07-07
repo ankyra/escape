@@ -23,7 +23,7 @@ import (
 
 func NewErrandRunner(errand *core.Errand, extraVars map[string]string) Runner {
 	return NewRunner(func(ctx RunnerContext) error {
-		step := NewScriptStep(ctx, "deploy", errand.GetName(), true)
+		step := NewScriptStep(ctx, "deploy", errand.Name, true)
 		step.Inputs = func(ctx RunnerContext, stage string) (map[string]interface{}, error) {
 			inputs, err := NewEnvironmentBuilder().GetInputsForErrand(ctx, errand, extraVars)
 			if err != nil {
@@ -31,7 +31,7 @@ func NewErrandRunner(errand *core.Errand, extraVars map[string]string) Runner {
 			}
 			return inputs, nil
 		}
-		step.ScriptPath = errand.GetScript()
+		step.ScriptPath = errand.Script
 		return step.Run(ctx)
 	})
 }

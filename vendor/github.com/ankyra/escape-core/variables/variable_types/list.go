@@ -54,7 +54,7 @@ func validateList(value interface{}, options map[string]interface{}) (interface{
 					return nil, err
 				}
 				result = append(result, str)
-			case int:
+			case int, float64:
 				if valueType != "integer" {
 					return nil, errors.New("Unexpected 'integer' value in list, expecting '" + valueType.(string) + "'")
 				}
