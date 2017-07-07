@@ -47,5 +47,28 @@ func (s *suite) Test_Compile_Basics_set_default_project(c *C) {
 	plan.Name = "testor"
 	ctx := NewCompilerContext(plan, nil, "")
 	c.Assert(compileBasicFields(ctx), IsNil)
+	c.Assert(ctx.Metadata.Name, Equals, "testor")
 	c.Assert(ctx.Metadata.Project, Equals, "_")
+}
+
+func (s *suite) Test_Compile_Basics_parse_project(c *C) {
+	plan := escape_plan.NewEscapePlan()
+	plan.Name = "project/testor"
+	ctx := NewCompilerContext(plan, nil, "")
+	c.Assert(compileBasicFields(ctx), IsNil)
+	c.Assert(ctx.Metadata.Name, Equals, "testor")
+	c.Assert(ctx.Metadata.Project, Equals, "project")
+}
+
+func (s *suite) Test_Compile_Basics_parse_project_fails(c *C) {
+	testCases := []string{
+		"project/",
+		"/",
+	}
+	for _, test := range testCases {
+		plan := escape_plan.NewEscapePlan()
+		plan.Name = test
+		ctx := NewCompilerContext(plan, nil, "")
+		c.Assert(compileBasicFields(ctx), Not(IsNil))
+	}
 }

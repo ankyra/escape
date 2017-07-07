@@ -22,17 +22,23 @@ import (
 )
 
 func compileBasicFields(ctx *CompilerContext) error {
-	if ctx.Plan.Name == "" {
-		return fmt.Errorf("Missing build name. Add a 'name' field to your Escape plan")
-	}
-	ctx.Metadata.Name = ctx.Plan.Name
-	ctx.Metadata.Description = strings.TrimSpace(ctx.Plan.Description)
-	ctx.Metadata.SetProvides(ctx.Plan.Provides)
-	ctx.Metadata.SetConsumes(ctx.Plan.Consumes)
 	project := ctx.Project
 	if project == "" {
 		project = "_"
 	}
+	ix := strings.Index(ctx.Plan.Name, "/")
+	if ix == -1 {
+		ctx.Metadata.Name = ctx.Plan.Name
+	} else {
+		project = strings.Split(ctx.Plan.Name, "/")[0]
+		ctx.Metadata.Name = ctx.Plan.Name[ix+1:]
+	}
+	if ctx.Metadata.Name == "" {
+		return fmt.Errorf("Missing build name. Add a 'name' field to your Escape plan")
+	}
+	ctx.Metadata.Description = strings.TrimSpace(ctx.Plan.Description)
+	ctx.Metadata.SetProvides(ctx.Plan.Provides)
+	ctx.Metadata.SetConsumes(ctx.Plan.Consumes)
 	ctx.Metadata.Project = project
 	return nil
 }

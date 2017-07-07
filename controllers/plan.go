@@ -34,7 +34,7 @@ func (p PlanController) Compile(context Context) {
 func (p PlanController) Diff(context Context) error {
 	metadata := context.GetReleaseMetadata()
 	registry := context.GetRegistry()
-	previous, err := registry.QueryPreviousReleaseMetadata(metadata.Project, metadata.Name, "latest")
+	previous, err := registry.QueryReleaseMetadata(metadata.Project, metadata.Name, "latest")
 	if err != nil {
 		return err
 	}
