@@ -52,6 +52,7 @@ func compileDependencyConfig(ctx *CompilerContext, depend *core.DependencyConfig
 	}
 	for _, input := range metadata.GetInputs() {
 		if !input.HasDefault() {
+			input.EvalBeforeDependencies = true
 			ctx.Metadata.AddInputVariable(input)
 		}
 	}

@@ -60,7 +60,7 @@ func (e *environmentBuilder) GetInputsForPreStep(ctx RunnerContext, stage string
 		if err != nil {
 			return nil, err
 		}
-		calculatedInputs[inputVar.GetId()] = val
+		calculatedInputs[inputVar.Id] = val
 	}
 	return prepInputs(ctx, stage, &calculatedInputs, false)
 }
@@ -84,7 +84,7 @@ func (e *environmentBuilder) GetInputsForErrand(ctx RunnerContext, errand *core.
 		if err != nil {
 			return nil, err
 		}
-		result[inputVar.GetId()] = val
+		result[inputVar.Id] = val
 	}
 	return result, nil
 }
@@ -103,7 +103,7 @@ func (e *environmentBuilder) GetOutputs(ctx RunnerContext, stage string) (map[st
 		if err != nil {
 			return nil, err
 		}
-		result[outputVar.GetId()] = val
+		result[outputVar.Id] = val
 	}
 	for key, _ := range buildOutputs {
 		if _, expected := result[key]; !expected {

@@ -32,9 +32,9 @@ func compileTemplates(ctx *CompilerContext) error {
 		}
 		mapping := template.Mapping
 		for _, i := range ctx.Metadata.GetInputs() {
-			_, exists := mapping[i.GetId()]
+			_, exists := mapping[i.Id]
 			if !exists {
-				mapping[i.GetId()] = "$this.inputs." + i.GetId()
+				mapping[i.Id] = "$this.inputs." + i.Id
 			}
 		}
 		extraVars := []string{"branch", "description", "logo", "name",

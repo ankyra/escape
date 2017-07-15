@@ -44,7 +44,8 @@ type UntypedVariable map[interface{}]interface{}
 
 func NewVariable() *Variable {
 	return &Variable{
-		Visible: true,
+		Visible:                true,
+		EvalBeforeDependencies: true,
 	}
 }
 
@@ -93,37 +94,8 @@ func (v *Variable) Validate() error {
 	return nil
 }
 
-func (v *Variable) GetId() string {
-	return v.Id
-}
-
-func (v *Variable) GetType() string {
-	return v.Type
-}
-
-func (v *Variable) SetDefault(def interface{}) *Variable {
-	v.Default = def
-	return v
-}
 func (v *Variable) HasDefault() bool {
 	return v.Default != nil
-}
-func (v *Variable) SetSensitive(s bool) *Variable {
-	v.Sensitive = s
-	return v
-}
-func (v *Variable) SetVisible(s bool) *Variable {
-	v.Visible = s
-	return v
-}
-func (v *Variable) SetDescription(desc string) *Variable {
-	v.Description = desc
-	return v
-}
-
-func (v *Variable) SetOneOfItems(items []interface{}) *Variable {
-	v.Items = items
-	return v
 }
 
 func (v *Variable) AskUserInput() interface{} {

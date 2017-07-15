@@ -69,12 +69,12 @@ func (p StateController) CreateState(context Context, stage string, extraVars, e
 		changed = true
 	}
 	for _, i := range metadata.GetInputs() {
-		val, ok := inputs[i.GetId()]
+		val, ok := inputs[i.Id]
 		if !ok {
 			val = i.AskUserInput()
 			if val != nil {
 				changed = true
-				inputs[i.GetId()] = val
+				inputs[i.Id] = val
 			}
 		}
 	}

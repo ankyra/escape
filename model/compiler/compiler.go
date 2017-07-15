@@ -55,5 +55,5 @@ func Compile(plan *escape_plan.EscapePlan,
 			return nil, err
 		}
 	}
-	return ctx.Metadata, nil
+	return ctx.Metadata, ctx.Metadata.Validate()
 }

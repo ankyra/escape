@@ -110,14 +110,14 @@ func toScript(d *DeploymentState, metadata *core.ReleaseMetadata, stage string) 
 	outputs := map[string]interface{}{}
 	for key, val := range d.GetCalculatedInputs(stage) {
 		for _, defined := range metadata.GetInputs() {
-			if key == defined.GetId() {
+			if key == defined.Id {
 				inputs[key] = val
 			}
 		}
 	}
 	for key, val := range d.GetCalculatedOutputs(stage) {
 		for _, defined := range metadata.GetOutputs() {
-			if key == defined.GetId() {
+			if key == defined.Id {
 				outputs[key] = val
 			}
 		}
