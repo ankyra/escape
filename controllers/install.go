@@ -32,12 +32,12 @@ func (InstallController) Install(context Context) error {
 	}
 	depends, err := context.GetEscapePlan().GetDependencies()
 	if err != nil {
-        return err
-    }
+		return err
+	}
 	err = model.DependencyResolver{}.Resolve(context.GetEscapeConfig(), depends)
 	if err != nil {
-        return err
-    }
+		return err
+	}
 	context.Log("install.finished", nil)
 	context.PopLogRelease()
 	context.PopLogSection()

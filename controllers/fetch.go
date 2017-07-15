@@ -18,8 +18,8 @@ package controllers
 
 import (
 	"github.com/ankyra/escape-client/model"
-	"github.com/ankyra/escape-core"
 	. "github.com/ankyra/escape-client/model/interfaces"
+	"github.com/ankyra/escape-core"
 )
 
 type FetchController struct{}

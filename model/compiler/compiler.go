@@ -28,7 +28,7 @@ type CompilerFunc func(*CompilerContext) error
 func Compile(plan *escape_plan.EscapePlan,
 	reg registry.Registry,
 	project string,
-	depFetcher func(string) (*core.ReleaseMetadata, error),
+	depFetcher func(*core.DependencyConfig) (*core.ReleaseMetadata, error),
 	releaseQuery func(*core.Dependency) (*core.ReleaseMetadata, error),
 	logger util.Logger) (*core.ReleaseMetadata, error) {
 

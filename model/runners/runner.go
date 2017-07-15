@@ -39,7 +39,7 @@ func NewDependencyRunner(logKey string, depRunner func() Runner) Runner {
 	return NewRunner(func(ctx RunnerContext) error {
 		metadata := ctx.GetReleaseMetadata()
 		for _, depend := range metadata.Depends {
-			if err := runDependency(ctx, depend.ReleaseId, logKey, depRunner()); err != nil {
+			if err := runDependency(ctx, depend, logKey, depRunner()); err != nil {
 				return err
 			}
 		}
@@ -47,7 +47,8 @@ func NewDependencyRunner(logKey string, depRunner func() Runner) Runner {
 	})
 }
 
-func runDependency(ctx RunnerContext, dependency, logKey string, runner Runner) error {
+func runDependency(ctx RunnerContext, depCfg *core.DependencyConfig, logKey string, runner Runner) error {
+	dependency := depCfg.ReleaseId
 	ctx.Logger().PushSection("Dependency " + dependency)
 	ctx.Logger().Log(logKey+"."+logKey+"_dependency", map[string]string{
 		"dependency": dependency,

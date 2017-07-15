@@ -28,7 +28,7 @@ func compileExtensions(ctx *CompilerContext) error {
 		if err != nil {
 			return err
 		}
-		metadata, err := resolveVersion(ctx, dep)
+		metadata, err := resolveVersion(ctx, core.NewDependencyConfig(extend), dep)
 		if err != nil {
 			return err
 		}
@@ -84,7 +84,7 @@ func compileExtensions(ctx *CompilerContext) error {
 			if ctx.DependencyFetcher == nil {
 				return fmt.Errorf("Missing dependency fetcher")
 			}
-			metadata, err := ctx.DependencyFetcher(val)
+			metadata, err := ctx.DependencyFetcher(core.NewDependencyConfig(val))
 			if err != nil {
 				return err
 			}

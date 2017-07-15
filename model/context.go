@@ -148,13 +148,14 @@ func (c *Context) QueryReleaseMetadata(dep *core.Dependency) (*core.ReleaseMetad
 	return metadata, nil
 }
 
-func (c *Context) GetDependencyMetadata(depReleaseId string) (*core.ReleaseMetadata, error) {
+func (c *Context) GetDependencyMetadata(depCfg *core.DependencyConfig) (*core.ReleaseMetadata, error) {
+	depReleaseId := depCfg.ReleaseId
 	metadata, ok := c.DependencyMetadata[depReleaseId]
 	if ok {
 		return metadata, nil
 	}
 	var err error
-	metadata, err = c.fetchDependencyAndReadMetadata(depReleaseId)
+	metadata, err = c.fetchDependencyAndReadMetadata(depCfg)
 	if err != nil {
 		return nil, err
 	}
@@ -163,9 +164,10 @@ func (c *Context) GetDependencyMetadata(depReleaseId string) (*core.ReleaseMetad
 
 }
 
-func (c *Context) fetchDependencyAndReadMetadata(depReleaseId string) (*core.ReleaseMetadata, error) {
+func (c *Context) fetchDependencyAndReadMetadata(depCfg *core.DependencyConfig) (*core.ReleaseMetadata, error) {
+	depReleaseId := depCfg.ReleaseId
 	c.Log("fetch.start", map[string]string{"dependency": depReleaseId})
-	err := DependencyResolver{}.Resolve(c.EscapeConfig, []*core.DependencyConfig{core.NewDependencyConfig(depReleaseId)})
+	err := DependencyResolver{}.Resolve(c.EscapeConfig, []*core.DependencyConfig{depCfg})
 	if err != nil {
 		return nil, err
 	}

@@ -32,8 +32,8 @@ func (s *suite) Test_Compile_Dependencies(c *C) {
 	}
 	lookupResult := core.NewReleaseMetadata("dependency", "1.0")
 	ctx := NewCompilerContext(plan, nil, "_")
-	ctx.DependencyFetcher = func(releaseId string) (*core.ReleaseMetadata, error) {
-		if releaseId == "_/dependency-v1.0" {
+	ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
+		if dep.ReleaseId == "_/dependency-v1.0" {
 			return lookupResult, nil
 		}
 		return nil, fmt.Errorf("Resolve error")
@@ -65,8 +65,8 @@ func (s *suite) Test_Compile_Dependencies_with_mapping(c *C) {
 	}
 	lookupResult := core.NewReleaseMetadata("dependency", "1.0")
 	ctx := NewCompilerContext(plan, nil, "_")
-	ctx.DependencyFetcher = func(releaseId string) (*core.ReleaseMetadata, error) {
-		if releaseId == "_/dependency-v1.0" {
+	ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
+		if dep.ReleaseId == "_/dependency-v1.0" {
 			return lookupResult, nil
 		}
 		return nil, fmt.Errorf("Resolve error")
@@ -96,8 +96,8 @@ func (s *suite) Test_Compile_Dependencies_adds_inputs_without_defaults(c *C) {
 	v2, _ := variables.NewVariableFromString("with-default", "string")
 	v2.Default = "test"
 	ctx := NewCompilerContext(plan, nil, "_")
-	ctx.DependencyFetcher = func(releaseId string) (*core.ReleaseMetadata, error) {
-		if releaseId == "_/dependency-v1.0" {
+	ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
+		if dep.ReleaseId == "_/dependency-v1.0" {
 			m := core.NewReleaseMetadata("dependency", "1.0")
 			m.AddInputVariable(v1)
 			m.AddInputVariable(v2)
@@ -118,8 +118,8 @@ func (s *suite) Test_Compile_Dependencies_adds_consumers(c *C) {
 		"dependency-v1.0",
 	}
 	ctx := NewCompilerContext(plan, nil, "_")
-	ctx.DependencyFetcher = func(releaseId string) (*core.ReleaseMetadata, error) {
-		if releaseId == "_/dependency-v1.0" {
+	ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
+		if dep.ReleaseId == "_/dependency-v1.0" {
 			m := core.NewReleaseMetadata("dependency", "1.0")
 			m.AddConsumes("test-consumer-1")
 			m.AddConsumes("test-consumer-1")
@@ -158,7 +158,7 @@ func (s *suite) Test_Compile_Dependencies_fails_if_resolve_version_fails(c *C) {
 	ctx.ReleaseQuery = func(dep *core.Dependency) (*core.ReleaseMetadata, error) {
 		return nil, fmt.Errorf("Resolve error")
 	}
-	ctx.DependencyFetcher = func(releaseId string) (*core.ReleaseMetadata, error) {
+	ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
 		return nil, fmt.Errorf("Resolve error")
 	}
 	c.Assert(compileDependencies(ctx).Error(), Equals, "Resolve error")

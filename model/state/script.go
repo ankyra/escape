@@ -24,23 +24,23 @@ import (
 )
 
 type DeploymentResolver interface {
-	GetDependencyMetadata(depend string) (*core.ReleaseMetadata, error)
+	GetDependencyMetadata(depend *core.DependencyConfig) (*core.ReleaseMetadata, error)
 }
 
 type deploymentResolver struct {
-	resolver func(string) (*core.ReleaseMetadata, error)
+	resolver func(*core.DependencyConfig) (*core.ReleaseMetadata, error)
 }
 
-func (d *deploymentResolver) GetDependencyMetadata(depend string) (*core.ReleaseMetadata, error) {
+func (d *deploymentResolver) GetDependencyMetadata(depend *core.DependencyConfig) (*core.ReleaseMetadata, error) {
 	return d.resolver(depend)
 }
 
 func newResolverFromMap(metaMap map[string]*core.ReleaseMetadata) DeploymentResolver {
 	return &deploymentResolver{
-		resolver: func(depend string) (*core.ReleaseMetadata, error) {
-			m, ok := metaMap[depend]
+		resolver: func(depend *core.DependencyConfig) (*core.ReleaseMetadata, error) {
+			m, ok := metaMap[depend.ReleaseId]
 			if !ok {
-				return nil, fmt.Errorf("Metadata for '%s' not found", depend)
+				return nil, fmt.Errorf("Metadata for '%s' not found", depend.ReleaseId)
 			}
 			return m, nil
 		},
@@ -63,7 +63,7 @@ func ToScript(d *DeploymentState, metadata *core.ReleaseMetadata, stage string, 
 	result["this"] = toScript(d, metadata, stage)
 
 	for _, depend := range metadata.Depends {
-		depMetadata, err := context.GetDependencyMetadata(depend.ReleaseId)
+		depMetadata, err := context.GetDependencyMetadata(depend)
 		if err != nil {
 			return nil, err
 		}
@@ -81,7 +81,7 @@ func ToScript(d *DeploymentState, metadata *core.ReleaseMetadata, stage string, 
 		if err != nil {
 			return nil, err
 		}
-		depMetadata, err := context.GetDependencyMetadata(deplState.GetReleaseId("deploy"))
+		depMetadata, err := context.GetDependencyMetadata(core.NewDependencyConfig(deplState.GetReleaseId("deploy")))
 		if err != nil {
 			return nil, err
 		}

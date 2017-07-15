@@ -43,7 +43,7 @@ func compileDependencyConfig(ctx *CompilerContext, depend *core.DependencyConfig
 	if err != nil {
 		return nil, err
 	}
-	metadata, err := resolveVersion(ctx, dep)
+	metadata, err := resolveVersion(ctx, depend, dep)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func compileDependencyConfig(ctx *CompilerContext, depend *core.DependencyConfig
 	return depend, nil
 }
 
-func resolveVersion(ctx *CompilerContext, d *core.Dependency) (*core.ReleaseMetadata, error) {
+func resolveVersion(ctx *CompilerContext, depCfg *core.DependencyConfig, d *core.Dependency) (*core.ReleaseMetadata, error) {
 	if d.NeedsResolving() {
 		if ctx.ReleaseQuery == nil {
 			return nil, fmt.Errorf("Missing release query function")
@@ -80,7 +80,8 @@ func resolveVersion(ctx *CompilerContext, d *core.Dependency) (*core.ReleaseMeta
 	if ctx.DependencyFetcher == nil {
 		return nil, fmt.Errorf("Missing dependency fetcher")
 	}
-	metadata, err := ctx.DependencyFetcher(d.GetQualifiedReleaseId())
+	depCfg.ReleaseId = d.GetQualifiedReleaseId()
+	metadata, err := ctx.DependencyFetcher(depCfg)
 	if err != nil {
 		return nil, err
 	}
