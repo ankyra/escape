@@ -58,6 +58,11 @@ func (c *Context) SetLogCollapse(s bool) {
 	c.Logger = util.NewLogger([]util.LogConsumer{consumer})
 }
 
+func (c *Context) DisableLogger() {
+	consumer := util.NewNullLogConsumer()
+	c.Logger = util.NewLogger([]util.LogConsumer{consumer})
+}
+
 func (c *Context) InitFromLocalEscapePlanAndState(state, environment, planPath string) error {
 	if environment == "" {
 		return errors.New("Missing 'environment'")

@@ -35,11 +35,20 @@ type fancyTerminalOutput struct {
 	LastLineWasCollapsed  bool
 }
 
+type nullLogConsumer struct {}
+
 func NewFancyTerminalOutputLogConsumer() *fancyTerminalOutput {
 	return &fancyTerminalOutput{
 		PreviousSectionStack: []string{},
 		CollapseSections:     true,
 	}
+}
+
+func NewNullLogConsumer() *nullLogConsumer {
+    return &nullLogConsumer{}
+}
+func (t *nullLogConsumer) Consume(entry *LogEntry) error {
+    return nil
 }
 
 func (t *fancyTerminalOutput) Consume(entry *LogEntry) error {
