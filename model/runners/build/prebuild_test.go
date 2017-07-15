@@ -66,3 +66,21 @@ func (s *testSuite) Test_PreBuildRunner_failing_script(c *C) {
 	runCtx.GetReleaseMetadata().SetStage("pre_build", "testdata/failing_test.sh")
 	c.Assert(NewPreBuildRunner().Run(runCtx), Not(IsNil))
 }
+
+func (s *testSuite) Test_PreBuildRunner_propagates_default_updates(c *C) {
+    runCtx := getRunContext(c, "testdata/pre_build_default_state.json", "testdata/pre_build_plan.yml")
+    runCtx.GetDeploymentState().UpdateInputs("build", nil)
+    c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs("build"), HasLen, 0)
+	runCtx.GetReleaseMetadata().Stages["pre_build"].Script = ""
+    runCtx.GetReleaseMetadata().Inputs[0].Default = "test"
+
+	c.Assert(NewPreBuildRunner().Run(runCtx), IsNil)
+    c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs("build"), HasLen, 1)
+    c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs("build")["variable"], Equals, "test")
+
+    runCtx.GetReleaseMetadata().Inputs[0].Default = "another test"
+	c.Assert(NewPreBuildRunner().Run(runCtx), IsNil)
+    c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs("build"), HasLen, 2)
+    c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs("build")["variable"], Equals, "another test")
+    c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs("build")["PREVIOUS_variable"], Equals, "test")
+}
