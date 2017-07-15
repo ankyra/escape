@@ -1,0 +1,30 @@
+{
+   "name": "bspaans",
+   "environments": {
+      "dev": {
+         "name": "dev",
+         "inputs": {},
+         "deployments": {
+            "_/name": {
+               "name": "_/name",
+               "release": "_/name",
+               "stages": {
+                  "deploy": {
+                     "inputs": {},
+                     "calculated_inputs": {
+                        "test": "hello"
+                     },
+                     "calculated_outputs": {},
+                     "deployments": {},
+                     "providers": {},
+                     "provides": [],
+                     "version": "",
+                     "step": ""
+                  }
+               },
+               "inputs": {}
+            }
+         }
+      }
+   }
+}

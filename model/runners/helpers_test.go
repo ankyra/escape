@@ -17,6 +17,7 @@ limitations under the License.
 package runners
 
 import (
+    "fmt"
     "os"
 	. "gopkg.in/check.v1"
 )
@@ -60,6 +61,71 @@ func (s *testSuite) Test_NewScriptStep_initScript_fails_if_script_doesnt_exist(c
     _, err := step.initScript(runCtx)
     c.Assert(err, Not(IsNil))
 }
+
+func (s *testSuite) Test_NewScriptStep_initDeploymentState(c *C) {
+    runCtx := getRunContext(c, "testdata/helper_state.json", "testdata/helper.yml")
+    runCtx.GetDeploymentState().UpdateInputs("deploy", nil)
+    step := NewScriptStep(runCtx, "deploy", "pre_build", false)
+    state, err := step.initDeploymentState(runCtx)
+    c.Assert(err, IsNil)
+    c.Assert(state, DeepEquals, runCtx.GetDeploymentState())
+    c.Assert(runCtx.GetBuildInputs(), HasLen, 0)
+    c.Assert(runCtx.GetBuildOutputs(), HasLen, 0)
+}
+
+func (s *testSuite) Test_NewScriptStep_initDeploymentState_fails_if_should_be_deployed(c *C) {
+    runCtx := getRunContext(c, "testdata/helper_state.json", "testdata/helper.yml")
+    runCtx.GetDeploymentState().UpdateInputs("deploy", nil)
+    step := NewScriptStep(runCtx, "deploy", "pre_build", true)
+    state, err := step.initDeploymentState(runCtx)
+    c.Assert(state, IsNil)
+    c.Assert(err.Error(), Equals, "Deployment state '_/name' for release 'name-v0.0.1' could not be found")
+}
+
+func (s *testSuite) Test_NewScriptStep_initDeploymentState_uses_Inputs_function(c *C) {
+    runCtx := getRunContext(c, "testdata/helper_state.json", "testdata/helper.yml")
+    inputFunc := func(ctx RunnerContext, stage string) (map[string]interface{}, error) {
+        v := map[string]interface{}{
+            "test": "hello",
+        }
+        return v, nil
+    }
+    runCtx.GetDeploymentState().UpdateInputs("deploy", nil)
+    step := NewScriptStep(runCtx, "deploy", "pre_build", false)
+    step.Inputs = inputFunc
+    state, err := step.initDeploymentState(runCtx)
+    c.Assert(err, IsNil)
+    c.Assert(state, DeepEquals, runCtx.GetDeploymentState())
+    c.Assert(runCtx.GetBuildInputs(), HasLen, 1)
+    c.Assert(runCtx.GetBuildInputs()["test"], Equals, "hello")
+}
+
+func (s *testSuite) Test_NewScriptStep_initDeploymentState_fails_if_Inputs_fails(c *C) {
+    runCtx := getRunContext(c, "testdata/helper_state.json", "testdata/helper.yml")
+    inputFunc := func(ctx RunnerContext, stage string) (map[string]interface{}, error) {
+        return nil, fmt.Errorf("error")
+    }
+    runCtx.GetDeploymentState().UpdateInputs("deploy", nil)
+    step := NewScriptStep(runCtx, "deploy", "pre_build", false)
+    step.Inputs = inputFunc
+    _, err := step.initDeploymentState(runCtx)
+    c.Assert(err.Error(), Equals, "error")
+}
+
+func (s *testSuite) Test_NewScriptStep_initDeploymentState_uses_calculated_inputs_if_Inputs_function_is_not_set(c *C) {
+    runCtx := getRunContext(c, "testdata/helper_state.json", "testdata/helper.yml")
+    inputs := map[string]interface{}{
+        "test": "hello",
+    }
+    runCtx.GetDeploymentState().UpdateInputs("deploy", inputs)
+    step := NewScriptStep(runCtx, "deploy", "pre_build", false)
+    state, err := step.initDeploymentState(runCtx)
+    c.Assert(err, IsNil)
+    c.Assert(state, Not(IsNil))
+    c.Assert(runCtx.GetBuildInputs(), HasLen, 1)
+    c.Assert(runCtx.GetBuildInputs()["test"], Equals, "hello")
+}
+
 
 func (s *testSuite) Test_ReadOutputsFromFile(c *C) {
     outputs, err := readOutputsFromFile("testdata/outputs.json")
