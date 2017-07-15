@@ -22,36 +22,48 @@ import (
 )
 
 func compileDependencies(ctx *CompilerContext) error {
-	result := []string{}
-	for _, depend := range ctx.Plan.Depends {
-		dep, err := core.NewDependencyFromString(depend)
-		if err != nil {
-			return err
-		}
-		metadata, err := resolveVersion(ctx, dep)
-		if err != nil {
-			return err
-		}
-		for _, consume := range metadata.GetConsumes() {
-			ctx.Metadata.AddConsumes(consume)
-		}
-		for _, input := range metadata.GetInputs() {
-			if !input.HasDefault() {
-				ctx.Metadata.AddInputVariable(input)
-			}
-		}
-		ctx.VariableCtx[dep.Name] = metadata
-		ctx.Metadata.SetVariableInContext(dep.Name, metadata.GetQualifiedReleaseId())
-
-		if dep.VariableName != "" {
-			ctx.VariableCtx[dep.VariableName] = metadata
-			ctx.Metadata.SetVariableInContext(dep.VariableName, metadata.GetQualifiedReleaseId())
-		}
-
-		result = append(result, dep.GetQualifiedReleaseId())
+	ctx.Metadata.Depends = []*core.DependencyConfig{}
+	deps, err := ctx.Plan.GetDependencies()
+	if err != nil {
+		return err
 	}
-	ctx.Metadata.SetDependencies(result)
+	for _, depend := range deps {
+		depend, err := compileDependencyConfig(ctx, depend)
+		if err != nil {
+			return err
+		}
+		ctx.Metadata.AddDependency(depend)
+	}
 	return nil
+}
+
+func compileDependencyConfig(ctx *CompilerContext, depend *core.DependencyConfig) (*core.DependencyConfig, error) {
+
+	dep, err := core.NewDependencyFromString(depend.ReleaseId)
+	if err != nil {
+		return nil, err
+	}
+	metadata, err := resolveVersion(ctx, dep)
+	if err != nil {
+		return nil, err
+	}
+	for _, consume := range metadata.GetConsumes() {
+		ctx.Metadata.AddConsumes(consume)
+	}
+	for _, input := range metadata.GetInputs() {
+		if !input.HasDefault() {
+			ctx.Metadata.AddInputVariable(input)
+		}
+	}
+	ctx.VariableCtx[dep.Name] = metadata
+	ctx.Metadata.SetVariableInContext(dep.Name, metadata.GetQualifiedReleaseId())
+
+	if dep.VariableName != "" {
+		ctx.VariableCtx[dep.VariableName] = metadata
+		ctx.Metadata.SetVariableInContext(dep.VariableName, metadata.GetQualifiedReleaseId())
+	}
+	depend.ReleaseId = dep.GetQualifiedReleaseId()
+	return depend, nil
 }
 
 func resolveVersion(ctx *CompilerContext, d *core.Dependency) (*core.ReleaseMetadata, error) {

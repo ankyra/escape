@@ -62,13 +62,13 @@ func ToScript(d *DeploymentState, metadata *core.ReleaseMetadata, stage string, 
 	result := map[string]script.Script{}
 	result["this"] = toScript(d, metadata, stage)
 
-	for _, depend := range metadata.GetDependencies() {
-		depMetadata, err := context.GetDependencyMetadata(depend)
+	for _, depend := range metadata.Depends {
+		depMetadata, err := context.GetDependencyMetadata(depend.ReleaseId)
 		if err != nil {
 			return nil, err
 		}
 		depState := d.GetDeployment(stage, depMetadata.GetVersionlessReleaseId())
-		result[depend] = toScript(depState, depMetadata, "deploy")
+		result[depend.ReleaseId] = toScript(depState, depMetadata, "deploy")
 	}
 
 	providers := d.GetProviders(stage)

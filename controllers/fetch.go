@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"github.com/ankyra/escape-client/model"
+	"github.com/ankyra/escape-core"
 	. "github.com/ankyra/escape-client/model/interfaces"
 )
 
@@ -25,7 +26,7 @@ type FetchController struct{}
 
 func (FetchController) Fetch(context Context, releaseIds []string) error {
 	for _, releaseId := range releaseIds {
-		err := model.DependencyResolver{}.Resolve(context.GetEscapeConfig(), []string{releaseId})
+		err := model.DependencyResolver{}.Resolve(context.GetEscapeConfig(), []*core.DependencyConfig{core.NewDependencyConfig(releaseId)})
 		if err != nil {
 			return err
 		}

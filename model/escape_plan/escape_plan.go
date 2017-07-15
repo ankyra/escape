@@ -19,6 +19,7 @@ package escape_plan
 import (
 	"fmt"
 	"github.com/ankyra/escape-client/util"
+	"github.com/ankyra/escape-core"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
@@ -27,7 +28,7 @@ import (
 type EscapePlan struct {
 	Build       string                 `yaml:"build,omitempty"`
 	Consumes    []string               `yaml:"consumes,omitempty"`
-	Depends     []string               `yaml:"depends,omitempty"`
+	Depends     []interface{}          `yaml:"depends,omitempty"`
 	Deploy      string                 `yaml:"deploy,omitempty"`
 	Destroy     string                 `yaml:"destroy,omitempty"`
 	Description string                 `yaml:"description,omitempty"`
@@ -57,7 +58,7 @@ func NewEscapePlan() *EscapePlan {
 	return &EscapePlan{
 		Consumes: []string{},
 		Provides: []string{},
-		Depends:  []string{},
+		Depends:  []interface{}{},
 		Includes: []string{},
 		Metadata: map[string]string{},
 		Errands:  map[string]interface{}{},
@@ -122,4 +123,36 @@ func (e *EscapePlan) ToDict() map[string]interface{} {
 		panic(err)
 	}
 	return yamlMap
+}
+
+func (e *EscapePlan) GetDependencies() ([]*core.DependencyConfig, error) {
+	result := []*core.DependencyConfig{}
+	for _, depend := range e.Depends {
+		switch depend.(type) {
+		case string:
+			result = append(result, core.NewDependencyConfig(depend.(string)))
+		case map[interface{}]interface{}:
+			dep, err := core.NewDependencyConfigFromMap(depend.(map[interface{}]interface{}))
+			if err != nil {
+				return nil, err
+			}
+			result = append(result, dep)
+		default:
+			return nil, fmt.Errorf("Invalid dependency format '%v' (expecting dict or string, got '%T')", depend, depend)
+		}
+	}
+	return result, nil
+}
+
+func (e *EscapePlan) AddDependency(d *core.DependencyConfig) error {
+	bytes, err := yaml.Marshal(d)
+	if err != nil {
+		return err
+	}
+	result := map[interface{}]interface{}{}
+	if err := yaml.Unmarshal(bytes, &result); err != nil {
+		return err
+	}
+	e.Depends = append(e.Depends, result)
+	return nil
 }

@@ -30,11 +30,14 @@ func (InstallController) Install(context Context) error {
 	if len(context.GetEscapePlan().Depends) == 0 {
 		return nil
 	}
-	depends := context.GetEscapePlan().Depends
-	err := model.DependencyResolver{}.Resolve(context.GetEscapeConfig(), depends)
+	depends, err := context.GetEscapePlan().GetDependencies()
 	if err != nil {
-		return err
-	}
+        return err
+    }
+	err = model.DependencyResolver{}.Resolve(context.GetEscapeConfig(), depends)
+	if err != nil {
+        return err
+    }
 	context.Log("install.finished", nil)
 	context.PopLogRelease()
 	context.PopLogSection()

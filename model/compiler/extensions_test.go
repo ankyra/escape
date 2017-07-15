@@ -55,7 +55,9 @@ func (s *suite) Test_Compile_Extensions_adds_dependencies_to_plan(c *C) {
 		return nil, fmt.Errorf("Resolve error %s", releaseId)
 	}
 	c.Assert(compileExtensions(ctx), IsNil)
-	c.Assert(ctx.Plan.Depends, DeepEquals, []string{"recursive-dep-latest as dep", "another-dep-v1.0"})
+	deps, err := ctx.Plan.GetDependencies()
+	c.Assert(err, IsNil)
+	c.Assert(deps, DeepEquals, []*core.DependencyConfig{core.NewDependencyConfig("recursive-dep-latest as dep"), core.NewDependencyConfig("another-dep-v1.0")})
 }
 
 func (s *suite) Test_Compile_Extensions_adds_variable_context(c *C) {

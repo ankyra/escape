@@ -27,7 +27,7 @@ import (
 func (s *suite) Test_Compile_Dependencies(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Depends = nil
-	plan.Depends = []string{
+	plan.Depends = []interface{}{
 		"dependency-latest as dep",
 	}
 	lookupResult := core.NewReleaseMetadata("dependency", "1.0")
@@ -45,7 +45,41 @@ func (s *suite) Test_Compile_Dependencies(c *C) {
 		return nil, fmt.Errorf("Resolve error")
 	}
 	c.Assert(compileDependencies(ctx), IsNil)
-	c.Assert(ctx.Metadata.GetDependencies(), DeepEquals, []string{"_/dependency-v1.0"})
+	c.Assert(ctx.Metadata.Depends[0], DeepEquals, core.NewDependencyConfig("_/dependency-v1.0"))
+	c.Assert(ctx.Metadata.VariableCtx["dependency"], Equals, "_/dependency-v1.0")
+	c.Assert(ctx.Metadata.VariableCtx["dep"], Equals, "_/dependency-v1.0")
+	c.Assert(ctx.VariableCtx["dependency"].GetQualifiedReleaseId(), Equals, "_/dependency-v1.0")
+	c.Assert(ctx.VariableCtx["dep"].GetQualifiedReleaseId(), Equals, "_/dependency-v1.0")
+}
+
+func (s *suite) Test_Compile_Dependencies_with_mapping(c *C) {
+	plan := escape_plan.NewEscapePlan()
+	plan.Depends = nil
+	plan.Depends = []interface{}{
+		map[interface{}]interface{}{
+			"release_id": "dependency-latest as dep",
+			"mapping": map[interface{}]interface{}{
+				"input_variable": "test",
+			},
+		},
+	}
+	lookupResult := core.NewReleaseMetadata("dependency", "1.0")
+	ctx := NewCompilerContext(plan, nil, "_")
+	ctx.DependencyFetcher = func(releaseId string) (*core.ReleaseMetadata, error) {
+		if releaseId == "_/dependency-v1.0" {
+			return lookupResult, nil
+		}
+		return nil, fmt.Errorf("Resolve error")
+	}
+	ctx.ReleaseQuery = func(dep *core.Dependency) (*core.ReleaseMetadata, error) {
+		if dep.GetQualifiedReleaseId() == "_/dependency-latest" {
+			return lookupResult, nil
+		}
+		return nil, fmt.Errorf("Resolve error")
+	}
+	c.Assert(compileDependencies(ctx), IsNil)
+	c.Assert(ctx.Metadata.Depends[0].ReleaseId, Equals, "_/dependency-v1.0")
+	c.Assert(ctx.Metadata.Depends[0].Mapping["input_variable"], Equals, "test")
 	c.Assert(ctx.Metadata.VariableCtx["dependency"], Equals, "_/dependency-v1.0")
 	c.Assert(ctx.Metadata.VariableCtx["dep"], Equals, "_/dependency-v1.0")
 	c.Assert(ctx.VariableCtx["dependency"].GetQualifiedReleaseId(), Equals, "_/dependency-v1.0")
@@ -55,7 +89,7 @@ func (s *suite) Test_Compile_Dependencies(c *C) {
 func (s *suite) Test_Compile_Dependencies_adds_inputs_without_defaults(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Depends = nil
-	plan.Depends = []string{
+	plan.Depends = []interface{}{
 		"dependency-v1.0",
 	}
 	v1, _ := variables.NewVariableFromString("no-default", "string")
@@ -80,7 +114,7 @@ func (s *suite) Test_Compile_Dependencies_adds_inputs_without_defaults(c *C) {
 func (s *suite) Test_Compile_Dependencies_adds_consumers(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Depends = nil
-	plan.Depends = []string{
+	plan.Depends = []interface{}{
 		"dependency-v1.0",
 	}
 	ctx := NewCompilerContext(plan, nil, "_")
@@ -103,12 +137,12 @@ func (s *suite) Test_Compile_Dependencies_nil(c *C) {
 	plan.Depends = nil
 	ctx := NewCompilerContext(plan, nil, "_")
 	c.Assert(compileDependencies(ctx), IsNil)
-	c.Assert(ctx.Metadata.GetDependencies(), DeepEquals, []string{})
+	c.Assert(ctx.Metadata.Depends, HasLen, 0)
 }
 
 func (s *suite) Test_Compile_Dependencies_fails_if_invalid_format(c *C) {
 	plan := escape_plan.NewEscapePlan()
-	plan.Depends = []string{
+	plan.Depends = []interface{}{
 		"$invalid_dependency$",
 	}
 	ctx := NewCompilerContext(plan, nil, "_")
@@ -117,7 +151,7 @@ func (s *suite) Test_Compile_Dependencies_fails_if_invalid_format(c *C) {
 
 func (s *suite) Test_Compile_Dependencies_fails_if_resolve_version_fails(c *C) {
 	plan := escape_plan.NewEscapePlan()
-	plan.Depends = []string{
+	plan.Depends = []interface{}{
 		"dependency-latest",
 	}
 	ctx := NewCompilerContext(plan, nil, "_")
@@ -128,4 +162,13 @@ func (s *suite) Test_Compile_Dependencies_fails_if_resolve_version_fails(c *C) {
 		return nil, fmt.Errorf("Resolve error")
 	}
 	c.Assert(compileDependencies(ctx).Error(), Equals, "Resolve error")
+}
+
+func (s *suite) Test_Compile_Dependencies_fails_if_unexpected_type(c *C) {
+	plan := escape_plan.NewEscapePlan()
+	plan.Depends = []interface{}{
+		5,
+	}
+	ctx := NewCompilerContext(plan, nil, "_")
+	c.Assert(compileDependencies(ctx).Error(), Equals, "Invalid dependency format '5' (expecting dict or string, got 'int')")
 }

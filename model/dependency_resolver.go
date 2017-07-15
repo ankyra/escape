@@ -27,7 +27,7 @@ import (
 type DependencyResolver struct{}
 type ReleaseFetcher struct{}
 
-func (resolver DependencyResolver) Resolve(cfg *config.EscapeConfig, resolveDependencies []string) error {
+func (resolver DependencyResolver) Resolve(cfg *config.EscapeConfig, resolveDependencies []*core.DependencyConfig) error {
 	path := paths.NewPath()
 	for _, dep := range resolveDependencies {
 		if err := resolver.resolve(cfg, path, dep); err != nil {
@@ -37,9 +37,9 @@ func (resolver DependencyResolver) Resolve(cfg *config.EscapeConfig, resolveDepe
 	return nil
 }
 
-func (resolver DependencyResolver) resolve(cfg *config.EscapeConfig, path *paths.Path, dep string) error {
+func (resolver DependencyResolver) resolve(cfg *config.EscapeConfig, path *paths.Path, dep *core.DependencyConfig) error {
 	fetcher := ReleaseFetcher{}
-	d, err := core.NewDependencyFromString(dep)
+	d, err := core.NewDependencyFromString(dep.ReleaseId)
 	if err != nil {
 		return err
 	}
@@ -52,7 +52,7 @@ func (resolver DependencyResolver) resolve(cfg *config.EscapeConfig, path *paths
 	if err != nil {
 		return err
 	}
-	for _, depDep := range metadata.GetDependencies() {
+	for _, depDep := range metadata.Depends {
 		depPath := path.NewPathForDependency(metadata)
 		if err := resolver.resolve(cfg, depPath, depDep); err != nil {
 			return err
@@ -60,7 +60,7 @@ func (resolver DependencyResolver) resolve(cfg *config.EscapeConfig, path *paths
 	}
 	for _, extension := range metadata.GetExtensions() {
 		depPath := path.NewPathForDependency(metadata)
-		if err := resolver.resolve(cfg, depPath, extension); err != nil {
+		if err := resolver.resolve(cfg, depPath, core.NewDependencyConfig(extension)); err != nil {
 			return err
 		}
 	}

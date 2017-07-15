@@ -63,15 +63,21 @@ func compileExtensions(ctx *CompilerContext) error {
 		for name, stage := range metadata.Stages {
 			ctx.Metadata.SetStage(name, extensionPath(metadata, stage.Script))
 		}
-		for _, d := range metadata.GetDependencies() {
+		for _, d := range metadata.Depends {
 			found := false
-			for _, existing := range ctx.Plan.Depends {
-				if existing == d {
+			deps, err := ctx.Plan.GetDependencies()
+			if err != nil {
+				return err
+			}
+			for _, existing := range deps {
+				if existing.ReleaseId == d.ReleaseId {
 					found = true
 				}
 			}
 			if !found {
-				ctx.Plan.Depends = append(ctx.Plan.Depends, d)
+				if err := ctx.Plan.AddDependency(d); err != nil {
+					return err
+				}
 			}
 		}
 		for key, val := range metadata.GetVariableContext() {

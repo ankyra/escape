@@ -38,8 +38,8 @@ func NewCompoundRunner(runners ...Runner) Runner {
 func NewDependencyRunner(logKey string, depRunner func() Runner) Runner {
 	return NewRunner(func(ctx RunnerContext) error {
 		metadata := ctx.GetReleaseMetadata()
-		for _, depend := range metadata.GetDependencies() {
-			if err := runDependency(ctx, depend, logKey, depRunner()); err != nil {
+		for _, depend := range metadata.Depends {
+			if err := runDependency(ctx, depend.ReleaseId, logKey, depRunner()); err != nil {
 				return err
 			}
 		}

@@ -165,7 +165,7 @@ func (c *Context) GetDependencyMetadata(depReleaseId string) (*core.ReleaseMetad
 
 func (c *Context) fetchDependencyAndReadMetadata(depReleaseId string) (*core.ReleaseMetadata, error) {
 	c.Log("fetch.start", map[string]string{"dependency": depReleaseId})
-	err := DependencyResolver{}.Resolve(c.EscapeConfig, []string{depReleaseId})
+	err := DependencyResolver{}.Resolve(c.EscapeConfig, []*core.DependencyConfig{core.NewDependencyConfig(depReleaseId)})
 	if err != nil {
 		return nil, err
 	}
