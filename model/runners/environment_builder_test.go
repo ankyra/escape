@@ -23,6 +23,7 @@ import (
 
 func getRunContext(c *C, stateFile, escapePlan string) RunnerContext {
 	ctx := model.NewContext()
+    ctx.DisableLogger()
 	err := ctx.InitFromLocalEscapePlanAndState(stateFile, "dev", escapePlan)
 	c.Assert(err, IsNil)
 	runCtx, err := NewRunnerContext(ctx, "deploy")

@@ -75,6 +75,7 @@ func (s *testSuite) Test_BuildRunner_has_access_to_previous_outputs(c *C) {
 
 func getRunContext(c *C, stateFile, escapePlan string) runners.RunnerContext {
 	ctx := model.NewContext()
+    ctx.DisableLogger()
 	err := ctx.InitFromLocalEscapePlanAndState(stateFile, "dev", escapePlan)
 	c.Assert(err, IsNil)
 	runCtx, err := runners.NewRunnerContext(ctx, "build")

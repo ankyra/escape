@@ -1,0 +1,31 @@
+{
+   "name": "1000",
+   "environments": {
+      "dev": {
+         "name": "dev",
+         "inputs": null,
+         "deployments": {
+            "_/name": {
+               "name": "_/name",
+               "release": "_/name",
+               "stages": {
+                  "build": {
+                     "inputs": {},
+                     "calculated_inputs": {
+                        "PREVIOUS_variable": "test",
+                        "variable": "another test"
+                     },
+                     "calculated_outputs": {},
+                     "deployments": {},
+                     "providers": {},
+                     "provides": [],
+                     "version": "0.0.1",
+                     "step": ""
+                  }
+               },
+               "inputs": {}
+            }
+         }
+      }
+   }
+}
