@@ -29,32 +29,32 @@ type testSuite struct{}
 var _ = Suite(&testSuite{})
 
 func (s *testSuite) Test_PreBuildRunner(c *C) {
-    runCtx := getRunContext(c, "testdata/pre_build_state.json", "testdata/pre_build_plan.yml")
+	runCtx := getRunContext(c, "testdata/pre_build_state.json", "testdata/pre_build_plan.yml")
 	c.Assert(NewPreBuildRunner().Run(runCtx), IsNil)
 }
 
 func (s *testSuite) Test_PreBuildRunner_no_script_defined(c *C) {
 	os.RemoveAll("testdata/escape_state")
-    runCtx := getRunContext(c, "testdata/escape_state", "testdata/plan.yml")
+	runCtx := getRunContext(c, "testdata/escape_state", "testdata/plan.yml")
 	c.Assert(NewPreBuildRunner().Run(runCtx), IsNil)
 }
 
 func (s *testSuite) Test_PreBuildRunner_missing_test_file(c *C) {
-    runCtx := getRunContext(c, "testdata/pre_build_state.json", "testdata/plan.yml")
+	runCtx := getRunContext(c, "testdata/pre_build_state.json", "testdata/plan.yml")
 	runCtx.GetReleaseMetadata().SetStage("pre_build", "testdata/doesnt_exist.sh")
 	c.Assert(NewPreBuildRunner().Run(runCtx), Not(IsNil))
 }
 
 func (s *testSuite) Test_PreBuildRunner_missing_deployment_state(c *C) {
 	os.RemoveAll("testdata/escape_state")
-    runCtx := getRunContext(c, "testdata/escape_state", "testdata/pre_build_plan.yml")
-    err := NewPreBuildRunner().Run(runCtx)
+	runCtx := getRunContext(c, "testdata/escape_state", "testdata/pre_build_plan.yml")
+	err := NewPreBuildRunner().Run(runCtx)
 	c.Assert(err, Not(IsNil))
 	c.Assert(err.Error(), Equals, "Missing value for variable 'variable'")
 }
 
 func (s *testSuite) Test_PreBuildRunner_sets_version(c *C) {
-    runCtx := getRunContext(c, "testdata/pre_build_state.json", "testdata/pre_build_plan.yml")
+	runCtx := getRunContext(c, "testdata/pre_build_state.json", "testdata/pre_build_plan.yml")
 	deploymentState := runCtx.GetDeploymentState()
 	deploymentState.CommitVersion("build", runCtx.GetReleaseMetadata())
 	c.Assert(NewPreBuildRunner().Run(runCtx), IsNil)
@@ -62,25 +62,25 @@ func (s *testSuite) Test_PreBuildRunner_sets_version(c *C) {
 }
 
 func (s *testSuite) Test_PreBuildRunner_failing_script(c *C) {
-    runCtx := getRunContext(c, "testdata/pre_build_state.json", "testdata/pre_build_plan.yml")
+	runCtx := getRunContext(c, "testdata/pre_build_state.json", "testdata/pre_build_plan.yml")
 	runCtx.GetReleaseMetadata().SetStage("pre_build", "testdata/failing_test.sh")
 	c.Assert(NewPreBuildRunner().Run(runCtx), Not(IsNil))
 }
 
 func (s *testSuite) Test_PreBuildRunner_propagates_default_updates(c *C) {
-    runCtx := getRunContext(c, "testdata/pre_build_default_state.json", "testdata/pre_build_plan.yml")
-    runCtx.GetDeploymentState().UpdateInputs("build", nil)
-    c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs("build"), HasLen, 0)
+	runCtx := getRunContext(c, "testdata/pre_build_default_state.json", "testdata/pre_build_plan.yml")
+	runCtx.GetDeploymentState().UpdateInputs("build", nil)
+	c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs("build"), HasLen, 0)
 	runCtx.GetReleaseMetadata().Stages["pre_build"].Script = ""
-    runCtx.GetReleaseMetadata().Inputs[0].Default = "test"
+	runCtx.GetReleaseMetadata().Inputs[0].Default = "test"
 
 	c.Assert(NewPreBuildRunner().Run(runCtx), IsNil)
-    c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs("build"), HasLen, 1)
-    c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs("build")["variable"], Equals, "test")
+	c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs("build"), HasLen, 1)
+	c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs("build")["variable"], Equals, "test")
 
-    runCtx.GetReleaseMetadata().Inputs[0].Default = "another test"
+	runCtx.GetReleaseMetadata().Inputs[0].Default = "another test"
 	c.Assert(NewPreBuildRunner().Run(runCtx), IsNil)
-    c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs("build"), HasLen, 2)
-    c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs("build")["variable"], Equals, "another test")
-    c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs("build")["PREVIOUS_variable"], Equals, "test")
+	c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs("build"), HasLen, 2)
+	c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs("build")["variable"], Equals, "another test")
+	c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs("build")["PREVIOUS_variable"], Equals, "test")
 }

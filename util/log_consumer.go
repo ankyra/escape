@@ -35,7 +35,7 @@ type fancyTerminalOutput struct {
 	LastLineWasCollapsed  bool
 }
 
-type nullLogConsumer struct {}
+type nullLogConsumer struct{}
 
 func NewFancyTerminalOutputLogConsumer() *fancyTerminalOutput {
 	return &fancyTerminalOutput{
@@ -45,10 +45,10 @@ func NewFancyTerminalOutputLogConsumer() *fancyTerminalOutput {
 }
 
 func NewNullLogConsumer() *nullLogConsumer {
-    return &nullLogConsumer{}
+	return &nullLogConsumer{}
 }
 func (t *nullLogConsumer) Consume(entry *LogEntry) error {
-    return nil
+	return nil
 }
 
 func (t *fancyTerminalOutput) Consume(entry *LogEntry) error {

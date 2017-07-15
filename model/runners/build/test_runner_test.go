@@ -22,31 +22,31 @@ import (
 )
 
 func (s *testSuite) Test_TestRunner(c *C) {
-    runCtx := getRunContext(c, "testdata/test_state.json", "testdata/test_plan.yml")
+	runCtx := getRunContext(c, "testdata/test_state.json", "testdata/test_plan.yml")
 	c.Assert(NewTestRunner().Run(runCtx), IsNil)
 }
 
 func (s *testSuite) Test_TestRunner_no_test_script_defined(c *C) {
 	os.RemoveAll("testdata/escape_state")
-    runCtx := getRunContext(c, "testdata/test_state.json", "testdata/plan.yml")
+	runCtx := getRunContext(c, "testdata/test_state.json", "testdata/plan.yml")
 	c.Assert(NewTestRunner().Run(runCtx), IsNil)
 }
 
 func (s *testSuite) Test_TestRunner_missing_test_file(c *C) {
-    runCtx := getRunContext(c, "testdata/test_state.json", "testdata/plan.yml")
+	runCtx := getRunContext(c, "testdata/test_state.json", "testdata/plan.yml")
 	runCtx.GetReleaseMetadata().SetStage("test", "testdata/doesnt_exist.sh")
 	c.Assert(NewTestRunner().Run(runCtx), Not(IsNil))
 }
 
 func (s *testSuite) Test_TestRunner_missing_deployment_state(c *C) {
 	os.RemoveAll("testdata/escape_state")
-    runCtx := getRunContext(c, "testdata/escape_state", "testdata/test_plan.yml")
-    err := NewTestRunner().Run(runCtx)
+	runCtx := getRunContext(c, "testdata/escape_state", "testdata/test_plan.yml")
+	err := NewTestRunner().Run(runCtx)
 	c.Assert(err, Not(IsNil))
 	c.Assert(err.Error(), Equals, "Build state '_/name' for release 'name-v0.0.1' could not be found")
 }
 
 func (s *testSuite) Test_TestRunner_failing_test(c *C) {
-    runCtx := getRunContext(c, "testdata/test_state.json", "testdata/failing_test_plan.yml")
+	runCtx := getRunContext(c, "testdata/test_state.json", "testdata/failing_test_plan.yml")
 	c.Assert(NewTestRunner().Run(runCtx), Not(IsNil))
 }

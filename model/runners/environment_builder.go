@@ -92,7 +92,7 @@ func (e *environmentBuilder) GetInputsForErrand(ctx RunnerContext, errand *core.
 func (e *environmentBuilder) GetOutputs(ctx RunnerContext, stage string) (map[string]interface{}, error) {
 	metadata := ctx.GetReleaseMetadata()
 	buildOutputs := ctx.GetBuildOutputs()
-    outputVariables := metadata.GetOutputs()
+	outputVariables := metadata.GetOutputs()
 	result := map[string]interface{}{}
 	scriptEnv, err := ctx.GetScriptEnvironment(stage)
 	if err != nil {
@@ -105,11 +105,11 @@ func (e *environmentBuilder) GetOutputs(ctx RunnerContext, stage string) (map[st
 		}
 		result[outputVar.GetId()] = val
 	}
-    for key, _ := range buildOutputs {
-        if _, expected := result[key]; !expected {
-            fmt.Printf("Warning: received unexpected output variable '%s'\n", key)
-        }
-    }
+	for key, _ := range buildOutputs {
+		if _, expected := result[key]; !expected {
+			fmt.Printf("Warning: received unexpected output variable '%s'\n", key)
+		}
+	}
 	return result, nil
 }
 
@@ -157,13 +157,13 @@ func prepInputs(ctx RunnerContext, stage string, inputs *map[string]interface{},
 	}
 	calcInputs := deplState.GetCalculatedInputs(stage)
 	calcOutputs := deplState.GetCalculatedOutputs(stage)
-    if isErrand {
-        addValues(&result, &calcInputs, "")
-        addValues(&result, &calcOutputs, "OUTPUT_")
-    } else {
-        addValues(&result, &calcInputs, "PREVIOUS_")
-        addValues(&result, &calcOutputs, "PREVIOUS_OUTPUT_")
-    }
+	if isErrand {
+		addValues(&result, &calcInputs, "")
+		addValues(&result, &calcOutputs, "OUTPUT_")
+	} else {
+		addValues(&result, &calcInputs, "PREVIOUS_")
+		addValues(&result, &calcOutputs, "PREVIOUS_OUTPUT_")
+	}
 	addValues(&result, inputs, "")
 	return result, nil
 }

@@ -22,37 +22,37 @@ import (
 )
 
 func (s *testSuite) Test_PostBuildRunner(c *C) {
-    runCtx := getRunContext(c, "testdata/post_build_state.json", "testdata/post_build_plan.yml")
+	runCtx := getRunContext(c, "testdata/post_build_state.json", "testdata/post_build_plan.yml")
 	c.Assert(NewPostBuildRunner().Run(runCtx), IsNil)
 }
 
 func (s *testSuite) Test_PostBuildRunner_no_script_defined(c *C) {
-    runCtx := getRunContext(c, "testdata/post_build_state.json", "testdata/plan.yml")
+	runCtx := getRunContext(c, "testdata/post_build_state.json", "testdata/plan.yml")
 	c.Assert(NewPostBuildRunner().Run(runCtx), IsNil)
 }
 
 func (s *testSuite) Test_PostBuildRunner_missing_test_file(c *C) {
-    runCtx := getRunContext(c, "testdata/post_build_state.json", "testdata/plan.yml")
+	runCtx := getRunContext(c, "testdata/post_build_state.json", "testdata/plan.yml")
 	runCtx.GetReleaseMetadata().SetStage("post_build", "testdata/doesnt_exist.sh")
 	c.Assert(NewPostBuildRunner().Run(runCtx), Not(IsNil))
 }
 
 func (s *testSuite) Test_PostBuildRunner_missing_deployment_state(c *C) {
 	os.RemoveAll("testdata/escape_state")
-    runCtx := getRunContext(c, "testdata/escape_state", "testdata/post_build_plan.yml")
-    err := NewPostBuildRunner().Run(runCtx)
+	runCtx := getRunContext(c, "testdata/escape_state", "testdata/post_build_plan.yml")
+	err := NewPostBuildRunner().Run(runCtx)
 	c.Assert(err, Not(IsNil))
 	c.Assert(err.Error(), Equals, "Build state '_/name' for release 'name-v0.0.1' could not be found")
 }
 
 func (s *testSuite) Test_PostBuildRunner_failing_script(c *C) {
-    runCtx := getRunContext(c, "testdata/post_build_state.json", "testdata/post_build_plan.yml")
+	runCtx := getRunContext(c, "testdata/post_build_state.json", "testdata/post_build_plan.yml")
 	runCtx.GetReleaseMetadata().SetStage("post_build", "testdata/failing_test.sh")
 	c.Assert(NewPostBuildRunner().Run(runCtx), Not(IsNil))
 }
 
 func (s *testSuite) Test_PostBuildRunner_default_outputs_dont_calculate(c *C) {
-    runCtx := getRunContext(c, "testdata/default_outputs.json", "testdata/default_outputs_plan.yml")
+	runCtx := getRunContext(c, "testdata/default_outputs.json", "testdata/default_outputs_plan.yml")
 	deploymentState := runCtx.GetDeploymentState()
 	deploymentState.UpdateOutputs("build", map[string]interface{}{
 		"variable": "not test",

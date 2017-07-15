@@ -22,33 +22,33 @@ import (
 )
 
 func (s *testSuite) Test_PostDeployRunner(c *C) {
-    runCtx := getRunContext(c, "testdata/post_deploy_state.json", "testdata/post_deploy_plan.yml")
+	runCtx := getRunContext(c, "testdata/post_deploy_state.json", "testdata/post_deploy_plan.yml")
 	outputs := map[string]interface{}{"output_variable": "testinput"}
 	runCtx.GetDeploymentState().UpdateOutputs("deploy", outputs)
 	c.Assert(NewPostDeployRunner().Run(runCtx), IsNil)
 }
 
 func (s *testSuite) Test_PostDeployRunner_no_script_defined(c *C) {
-    runCtx := getRunContext(c, "testdata/post_deploy_state.json", "testdata/plan.yml")
+	runCtx := getRunContext(c, "testdata/post_deploy_state.json", "testdata/plan.yml")
 	c.Assert(NewPostDeployRunner().Run(runCtx), IsNil)
 }
 
 func (s *testSuite) Test_PostDeployRunner_missing_test_file(c *C) {
-    runCtx := getRunContext(c, "testdata/post_deploy_state.json", "testdata/plan.yml")
+	runCtx := getRunContext(c, "testdata/post_deploy_state.json", "testdata/plan.yml")
 	runCtx.GetReleaseMetadata().SetStage("post_deploy", "testdata/doesnt_exist.sh")
 	c.Assert(NewPostDeployRunner().Run(runCtx), Not(IsNil))
 }
 
 func (s *testSuite) Test_PostDeployRunner_missing_deployment_state(c *C) {
 	os.RemoveAll("testdata/escape_state")
-    runCtx := getRunContext(c, "testdata/escape_state", "testdata/post_deploy_plan.yml")
-    err := NewPostDeployRunner().Run(runCtx)
+	runCtx := getRunContext(c, "testdata/escape_state", "testdata/post_deploy_plan.yml")
+	err := NewPostDeployRunner().Run(runCtx)
 	c.Assert(err, Not(IsNil))
 	c.Assert(err.Error(), Equals, "Deployment state '_/name' for release 'name-v0.0.1' could not be found")
 }
 
 func (s *testSuite) Test_PostDeployRunner_failing_script(c *C) {
-    runCtx := getRunContext(c, "testdata/post_deploy_state.json", "testdata/post_deploy_plan.yml")
+	runCtx := getRunContext(c, "testdata/post_deploy_state.json", "testdata/post_deploy_plan.yml")
 	runCtx.GetReleaseMetadata().SetStage("post_deploy", "testdata/failing_test.sh")
 	c.Assert(NewPostDeployRunner().Run(runCtx), Not(IsNil))
 }

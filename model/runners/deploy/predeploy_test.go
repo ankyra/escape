@@ -22,31 +22,31 @@ import (
 )
 
 func (s *testSuite) Test_PreDeployRunner(c *C) {
-    runCtx := getRunContext(c, "testdata/pre_deploy_state.json", "testdata/pre_deploy_plan.yml")
+	runCtx := getRunContext(c, "testdata/pre_deploy_state.json", "testdata/pre_deploy_plan.yml")
 	c.Assert(NewPreDeployRunner().Run(runCtx), IsNil)
 }
 
 func (s *testSuite) Test_PreDeployRunner_no_script_defined(c *C) {
 	os.RemoveAll("testdata/escape_state")
-    runCtx := getRunContext(c, "testdata/escape_state", "testdata/plan.yml")
+	runCtx := getRunContext(c, "testdata/escape_state", "testdata/plan.yml")
 	c.Assert(NewPreDeployRunner().Run(runCtx), IsNil)
 }
 
 func (s *testSuite) Test_PreDeployRunner_missing_test_file(c *C) {
-    runCtx := getRunContext(c, "testdata/pre_deploy_state.json", "testdata/plan.yml")
+	runCtx := getRunContext(c, "testdata/pre_deploy_state.json", "testdata/plan.yml")
 	runCtx.GetReleaseMetadata().SetStage("pre_deploy", "testdata/doesnt_exist.sh")
 	c.Assert(NewPreDeployRunner().Run(runCtx), Not(IsNil))
 }
 
 func (s *testSuite) Test_PreDeployRunner_missing_deployment_state(c *C) {
-    runCtx := getRunContext(c, "testdata/escape_state", "testdata/pre_deploy_plan.yml")
-    err := NewPreDeployRunner().Run(runCtx)
+	runCtx := getRunContext(c, "testdata/escape_state", "testdata/pre_deploy_plan.yml")
+	err := NewPreDeployRunner().Run(runCtx)
 	c.Assert(err, Not(IsNil))
 	c.Assert(err.Error(), Equals, "Missing value for variable 'variable'")
 }
 
 func (s *testSuite) Test_PreDeployRunner_failing_script(c *C) {
-    runCtx := getRunContext(c, "testdata/pre_deploy_state.json", "testdata/pre_deploy_plan.yml")
+	runCtx := getRunContext(c, "testdata/pre_deploy_state.json", "testdata/pre_deploy_plan.yml")
 	runCtx.GetReleaseMetadata().SetStage("pre_deploy", "testdata/failing_test.sh")
 	c.Assert(NewPreDeployRunner().Run(runCtx), Not(IsNil))
 }

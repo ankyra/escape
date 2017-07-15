@@ -23,16 +23,16 @@ import (
 
 func getRunContext(c *C, stateFile, escapePlan string) RunnerContext {
 	ctx := model.NewContext()
-    ctx.DisableLogger()
+	ctx.DisableLogger()
 	err := ctx.InitFromLocalEscapePlanAndState(stateFile, "dev", escapePlan)
 	c.Assert(err, IsNil)
 	runCtx, err := NewRunnerContext(ctx, "deploy")
 	c.Assert(err, IsNil)
-    return runCtx
+	return runCtx
 }
 
 func (s *testSuite) Test_GetInputsForPreStep(c *C) {
-    runCtx := getRunContext(c, "testdata/env_state.json", "testdata/env_test_plan.yml")
+	runCtx := getRunContext(c, "testdata/env_state.json", "testdata/env_test_plan.yml")
 	inputs, err := NewEmptyEnvEnvironmentBuilder().GetInputsForPreStep(runCtx, "deploy")
 	c.Assert(err, IsNil)
 	c.Assert(inputs, HasLen, 4)
@@ -43,7 +43,7 @@ func (s *testSuite) Test_GetInputsForPreStep(c *C) {
 }
 
 func (s *testSuite) Test_GetInputsForPreStep_calculated_inputs(c *C) {
-    runCtx := getRunContext(c, "testdata/env_calculated_inputs.json", "testdata/env_calculated_inputs.yml")
+	runCtx := getRunContext(c, "testdata/env_calculated_inputs.json", "testdata/env_calculated_inputs.yml")
 	inputs, err := NewEmptyEnvEnvironmentBuilder().GetInputsForPreStep(runCtx, "deploy")
 	c.Assert(err, IsNil)
 	c.Assert(inputs, HasLen, 5)
@@ -55,9 +55,9 @@ func (s *testSuite) Test_GetInputsForPreStep_calculated_inputs(c *C) {
 }
 
 func (s *testSuite) Test_GetInputsForErrand(c *C) {
-    runCtx := getRunContext(c, "testdata/errand.json", "testdata/errand.yml")
-    errand := runCtx.GetReleaseMetadata().Errands["my-errand"]
-    extraVars := map[string]string{}
+	runCtx := getRunContext(c, "testdata/errand.json", "testdata/errand.yml")
+	errand := runCtx.GetReleaseMetadata().Errands["my-errand"]
+	extraVars := map[string]string{}
 	inputs, err := NewEmptyEnvEnvironmentBuilder().GetInputsForErrand(runCtx, errand, extraVars)
 	c.Assert(err, IsNil)
 	c.Assert(inputs, HasLen, 4)
@@ -68,10 +68,10 @@ func (s *testSuite) Test_GetInputsForErrand(c *C) {
 }
 
 func (s *testSuite) Test_GetInputsForErrand_default_inputs(c *C) {
-    runCtx := getRunContext(c, "testdata/errand.json", "testdata/errand.yml")
-    errand := runCtx.GetReleaseMetadata().Errands["my-errand"]
-    errand.Inputs = nil
-    extraVars := map[string]string{}
+	runCtx := getRunContext(c, "testdata/errand.json", "testdata/errand.yml")
+	errand := runCtx.GetReleaseMetadata().Errands["my-errand"]
+	errand.Inputs = nil
+	extraVars := map[string]string{}
 	inputs, err := NewEmptyEnvEnvironmentBuilder().GetInputsForErrand(runCtx, errand, extraVars)
 	c.Assert(err, IsNil)
 	c.Assert(inputs, HasLen, 2)
@@ -80,12 +80,12 @@ func (s *testSuite) Test_GetInputsForErrand_default_inputs(c *C) {
 }
 
 func (s *testSuite) Test_GetInputsForErrand_extravars_override(c *C) {
-    runCtx := getRunContext(c, "testdata/errand.json", "testdata/errand.yml")
-    errand := runCtx.GetReleaseMetadata().Errands["my-errand"]
-    extraVars := map[string]string{
-        "input_variable": "aight",
-        "override": "yo",
-    }
+	runCtx := getRunContext(c, "testdata/errand.json", "testdata/errand.yml")
+	errand := runCtx.GetReleaseMetadata().Errands["my-errand"]
+	extraVars := map[string]string{
+		"input_variable": "aight",
+		"override":       "yo",
+	}
 	inputs, err := NewEmptyEnvEnvironmentBuilder().GetInputsForErrand(runCtx, errand, extraVars)
 	c.Assert(err, IsNil)
 	c.Assert(inputs, HasLen, 4)
@@ -96,7 +96,7 @@ func (s *testSuite) Test_GetInputsForErrand_extravars_override(c *C) {
 }
 
 func (s *testSuite) Test_MergeInputsWithOsEnvironment(c *C) {
-    runCtx := getRunContext(c, "testdata/env_state.json", "testdata/env_test_plan.yml")
+	runCtx := getRunContext(c, "testdata/env_state.json", "testdata/env_test_plan.yml")
 	inputs := map[string]interface{}{"input_variable": "yo"}
 	runCtx.SetBuildInputs(inputs)
 
@@ -108,7 +108,7 @@ func (s *testSuite) Test_MergeInputsWithOsEnvironment(c *C) {
 }
 
 func (s *testSuite) Test_MergeInputsAndOutputsWithOsEnvironment(c *C) {
-    runCtx := getRunContext(c, "testdata/env_state.json", "testdata/env_test_plan.yml")
+	runCtx := getRunContext(c, "testdata/env_state.json", "testdata/env_test_plan.yml")
 	inputs := map[string]interface{}{"input_variable": "yo"}
 	outputs := map[string]interface{}{"output_variable": "yo"}
 	runCtx.SetBuildInputs(inputs)
@@ -122,7 +122,7 @@ func (s *testSuite) Test_MergeInputsAndOutputsWithOsEnvironment(c *C) {
 }
 
 func (s *testSuite) Test_GetOutputs(c *C) {
-    runCtx := getRunContext(c, "testdata/env_state.json", "testdata/env_test_plan.yml")
+	runCtx := getRunContext(c, "testdata/env_state.json", "testdata/env_test_plan.yml")
 	runCtx.SetBuildOutputs(map[string]interface{}{"output_variable": "test"})
 	outputs, err := NewEmptyEnvEnvironmentBuilder().GetOutputs(runCtx, "deploy")
 	c.Assert(err, IsNil)
@@ -131,8 +131,8 @@ func (s *testSuite) Test_GetOutputs(c *C) {
 }
 
 func (s *testSuite) Test_GetOutputs_only_warns_if_unexpected_output_is_given(c *C) {
-    runCtx := getRunContext(c, "testdata/env_state.json", "testdata/env_test_plan.yml")
-    runCtx.SetBuildOutputs(map[string]interface{}{"output_variable": "test", "unexpected": "no worries"})
+	runCtx := getRunContext(c, "testdata/env_state.json", "testdata/env_test_plan.yml")
+	runCtx.SetBuildOutputs(map[string]interface{}{"output_variable": "test", "unexpected": "no worries"})
 	outputs, err := NewEmptyEnvEnvironmentBuilder().GetOutputs(runCtx, "deploy")
 	c.Assert(err, IsNil)
 	c.Assert(outputs, HasLen, 1)
@@ -140,15 +140,15 @@ func (s *testSuite) Test_GetOutputs_only_warns_if_unexpected_output_is_given(c *
 }
 
 func (s *testSuite) Test_GetOutputs_fails_if_outputs_not_set(c *C) {
-    runCtx := getRunContext(c, "testdata/env_state.json", "testdata/env_test_plan.yml")
-    _, err := NewEmptyEnvEnvironmentBuilder().GetOutputs(runCtx, "deploy")
+	runCtx := getRunContext(c, "testdata/env_state.json", "testdata/env_test_plan.yml")
+	_, err := NewEmptyEnvEnvironmentBuilder().GetOutputs(runCtx, "deploy")
 	c.Assert(err, Not(IsNil))
 	c.Assert(err.Error(), Equals, "Missing value for variable 'output_variable'")
 }
 
 func (s *testSuite) Test_GetOutputs_fails_if_stage_is_wrong(c *C) {
-    runCtx := getRunContext(c, "testdata/env_state.json", "testdata/env_test_plan.yml")
-    _, err := NewEmptyEnvEnvironmentBuilder().GetOutputs(runCtx, "wut")
+	runCtx := getRunContext(c, "testdata/env_state.json", "testdata/env_test_plan.yml")
+	_, err := NewEmptyEnvEnvironmentBuilder().GetOutputs(runCtx, "wut")
 	c.Assert(err, Not(IsNil))
 	c.Assert(err.Error(), Equals, "Missing value for variable 'output_variable'")
 }

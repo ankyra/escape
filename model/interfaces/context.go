@@ -50,5 +50,5 @@ type Context interface {
 	GetRootDeploymentName() string
 	SetRootDeploymentName(string)
 	SetLogCollapse(bool)
-    DisableLogger()
+	DisableLogger()
 }
