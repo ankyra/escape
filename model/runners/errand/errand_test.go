@@ -30,77 +30,58 @@ type testSuite struct{}
 
 var _ = Suite(&testSuite{})
 
-func (s *testSuite) Test_ErrandRunner_no_script_defined(c *C) {
-	os.RemoveAll("testdata/escape_state")
+func getRunContext(c *C, stateFile, escapePlan string) runners.RunnerContext {
 	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/errand_state.json", "dev", "testdata/errand_plan.yml")
+	err := ctx.InitFromLocalEscapePlanAndState(stateFile, "dev", escapePlan)
 	c.Assert(err, IsNil)
 	runCtx, err := runners.NewRunnerContext(ctx, "deploy")
 	c.Assert(err, IsNil)
-	errand := ctx.GetReleaseMetadata().GetErrands()["my-errand"]
+    return runCtx
+}
+
+
+func (s *testSuite) Test_ErrandRunner(c *C) {
+    runCtx := getRunContext(c, "testdata/errand_state.json", "testdata/errand_plan.yml")
+	errand := runCtx.GetReleaseMetadata().GetErrands()["my-errand"]
+	extraVars := map[string]string{
+		"errand_variable": "yo",
+	}
+	c.Assert(NewErrandRunner(errand, extraVars).Run(runCtx), IsNil)
+}
+
+func (s *testSuite) Test_ErrandRunner_no_script_defined(c *C) {
+    runCtx := getRunContext(c, "testdata/errand_state.json", "testdata/errand_plan.yml")
+	errand := runCtx.GetReleaseMetadata().GetErrands()["my-errand"]
 	errand.Script = ""
-	err = NewErrandRunner(errand, nil).Run(runCtx)
-	c.Assert(err, Not(IsNil))
+	c.Assert(NewErrandRunner(errand, nil).Run(runCtx), Not(IsNil))
 }
 
 func (s *testSuite) Test_ErrandRunner_missing_test_file(c *C) {
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/errand_state.json", "dev", "testdata/errand_plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx, "deploy")
-	c.Assert(err, IsNil)
-	errand := ctx.GetReleaseMetadata().GetErrands()["my-errand"]
+    runCtx := getRunContext(c, "testdata/errand_state.json", "testdata/errand_plan.yml")
+	errand := runCtx.GetReleaseMetadata().GetErrands()["my-errand"]
 	errand.Script = "testdata/doesnt_exist.sh"
-	err = NewErrandRunner(errand, nil).Run(runCtx)
-	c.Assert(err, Not(IsNil))
+	c.Assert(NewErrandRunner(errand, nil).Run(runCtx), Not(IsNil))
 }
 
 func (s *testSuite) Test_ErrandRunner_missing_deployment_state(c *C) {
 	os.RemoveAll("testdata/escape_state")
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/escape_state", "dev", "testdata/errand_plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx, "deploy")
-	c.Assert(err, IsNil)
-	errand := ctx.GetReleaseMetadata().GetErrands()["my-errand"]
-	err = NewErrandRunner(errand, nil).Run(runCtx)
+    runCtx := getRunContext(c, "testdata/escape_state", "testdata/errand_plan.yml")
+	errand := runCtx.GetReleaseMetadata().GetErrands()["my-errand"]
+    err := NewErrandRunner(errand, nil).Run(runCtx)
 	c.Assert(err, Not(IsNil))
 	c.Assert(err.Error(), Equals, "Deployment state '_/name' for release 'name-v0.0.1' could not be found")
 }
 
-func (s *testSuite) Test_ErrandRunner(c *C) {
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/errand_state.json", "dev", "testdata/errand_plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx, "deploy")
-	c.Assert(err, IsNil)
-	errand := ctx.GetReleaseMetadata().GetErrands()["my-errand"]
-	extraVars := map[string]string{
-		"errand_variable": "yo",
-	}
-	err = NewErrandRunner(errand, extraVars).Run(runCtx)
-	c.Assert(err, IsNil)
-}
-
 func (s *testSuite) Test_ErrandRunner_fails_if_errand_variable_is_missing(c *C) {
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/errand_state.json", "dev", "testdata/errand_plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx, "deploy")
-	c.Assert(err, IsNil)
-	errand := ctx.GetReleaseMetadata().GetErrands()["my-errand"]
-	err = NewErrandRunner(errand, nil).Run(runCtx)
+    runCtx := getRunContext(c, "testdata/errand_state.json", "testdata/errand_plan.yml")
+	errand := runCtx.GetReleaseMetadata().GetErrands()["my-errand"]
+    err := NewErrandRunner(errand, nil).Run(runCtx)
 	c.Assert(err.Error(), Equals, "Missing value for variable 'errand_variable'")
 }
 
 func (s *testSuite) Test_ErrandRunner_failing_script(c *C) {
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/errand_state.json", "dev", "testdata/errand_plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx, "deploy")
-	c.Assert(err, IsNil)
-	errand := ctx.GetReleaseMetadata().GetErrands()["my-errand"]
+    runCtx := getRunContext(c, "testdata/errand_state.json", "testdata/errand_plan.yml")
+	errand := runCtx.GetReleaseMetadata().GetErrands()["my-errand"]
 	errand.Script = "testdata/failing_test.sh"
-	err = NewErrandRunner(errand, nil).Run(runCtx)
-	c.Assert(err, Not(IsNil))
+	c.Assert(NewErrandRunner(errand, nil).Run(runCtx), Not(IsNil))
 }
