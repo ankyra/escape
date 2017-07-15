@@ -25,79 +25,60 @@ import (
 
 func (s *testSuite) Test_BuildRunner_no_script_defined(c *C) {
 	os.RemoveAll("testdata/escape_state")
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/escape_state", "dev", "testdata/build_plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx, "build")
-	c.Assert(err, IsNil)
-	err = NewBuildRunner().Run(runCtx)
-	c.Assert(err, IsNil)
+    runCtx := getRunContext(c, "testdata/escape_state", "testdata/build_plan.yml")
+	c.Assert(NewBuildRunner().Run(runCtx), IsNil)
 }
 
 func (s *testSuite) Test_BuildRunner_missing_test_file(c *C) {
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/build_state.json", "dev", "testdata/build_plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx, "build")
-	c.Assert(err, IsNil)
-	ctx.GetReleaseMetadata().SetStage("post_build", "testdata/doesnt_exist.sh")
-	err = NewBuildRunner().Run(runCtx)
-	c.Assert(err, Not(IsNil))
+    runCtx := getRunContext(c, "testdata/build_state.json", "testdata/build_plan.yml")
+	runCtx.GetReleaseMetadata().SetStage("post_build", "testdata/doesnt_exist.sh")
+	c.Assert(NewBuildRunner().Run(runCtx), Not(IsNil))
 }
 
-func (s *testSuite) Test_BuildRunner(c *C) {
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/build_state.json", "dev", "testdata/build_plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx, "build")
-	c.Assert(err, IsNil)
-	err = NewBuildRunner().Run(runCtx)
-	c.Assert(err, IsNil)
+func (s *testSuite) Test_BuildRunner_failing_script(c *C) {
+    runCtx := getRunContext(c, "testdata/build_state.json", "testdata/build_plan.yml")
+	runCtx.GetReleaseMetadata().SetStage("post_build", "testdata/failing_test.sh")
+	c.Assert(NewBuildRunner().Run(runCtx), Not(IsNil))
+}
 
+func (s *testSuite) Test_BuildRunner_sets_deployment_status(c *C) {
+    runCtx := getRunContext(c, "testdata/build_state.json", "testdata/build_plan.yml")
+	c.Assert(NewBuildRunner().Run(runCtx), IsNil)
 	deploymentState := runCtx.GetDeploymentState()
 	c.Assert(deploymentState.GetVersion("build"), Equals, "0.0.1")
 }
 
-func (s *testSuite) Test_BuildRunner_failing_script(c *C) {
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/build_state.json", "dev", "testdata/build_plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx, "build")
-	c.Assert(err, IsNil)
-	ctx.GetReleaseMetadata().SetStage("post_build", "testdata/failing_test.sh")
-	err = NewBuildRunner().Run(runCtx)
-	c.Assert(err, Not(IsNil))
-}
-
 func (s *testSuite) Test_BuildRunner_variables_are_set_even_if_there_is_no_pre_step(c *C) {
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/build_no_pre_step_state.json", "dev", "testdata/build_no_pre_step_plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx, "build")
-	c.Assert(err, IsNil)
+    runCtx := getRunContext(c, "testdata/build_no_pre_step_state.json", "testdata/build_no_pre_step_plan.yml")
+
 	deploymentState := runCtx.GetDeploymentState()
 	deploymentState.UpdateInputs("build", nil)
 	c.Assert(deploymentState.GetCalculatedInputs("build"), HasLen, 0)
 	c.Assert(deploymentState.GetUserInputs("build"), HasLen, 1)
-	deploymentState.CommitVersion("build", ctx.GetReleaseMetadata())
-	err = NewBuildRunner().Run(runCtx)
-	c.Assert(err, IsNil)
+	deploymentState.CommitVersion("build", runCtx.GetReleaseMetadata())
+
+	c.Assert(NewBuildRunner().Run(runCtx), IsNil)
 	c.Assert(deploymentState.GetVersion("build"), Equals, "0.0.1")
 	c.Assert(deploymentState.GetCalculatedInputs("build"), HasLen, 1)
 }
 
 func (s *testSuite) Test_BuildRunner_has_access_to_previous_outputs(c *C) {
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/default_outputs.json", "dev", "testdata/default_outputs_plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx, "build")
-	c.Assert(err, IsNil)
+    runCtx := getRunContext(c, "testdata/default_outputs.json", "testdata/default_outputs_plan.yml")
 	deploymentState := runCtx.GetDeploymentState()
 	deploymentState.UpdateOutputs("build", map[string]interface{}{
 		"variable": "not test",
 	})
 	c.Assert(deploymentState.GetCalculatedOutputs("build")["variable"], Equals, "not test")
-	err = NewBuildRunner().Run(runCtx)
-	c.Assert(err, IsNil)
+	c.Assert(NewBuildRunner().Run(runCtx), IsNil)
 	c.Assert(deploymentState.GetCalculatedOutputs("build")["variable"], Equals, "test")
 }
+
+func getRunContext(c *C, stateFile, escapePlan string) runners.RunnerContext {
+	ctx := model.NewContext()
+	err := ctx.InitFromLocalEscapePlanAndState(stateFile, "dev", escapePlan)
+	c.Assert(err, IsNil)
+	runCtx, err := runners.NewRunnerContext(ctx, "build")
+	c.Assert(err, IsNil)
+    return runCtx
+}
+

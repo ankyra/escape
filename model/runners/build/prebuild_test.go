@@ -17,8 +17,6 @@ limitations under the License.
 package build
 
 import (
-	"github.com/ankyra/escape-client/model"
-	"github.com/ankyra/escape-client/model/runners"
 	. "gopkg.in/check.v1"
 	"os"
 	"testing"
@@ -30,70 +28,41 @@ type testSuite struct{}
 
 var _ = Suite(&testSuite{})
 
+func (s *testSuite) Test_PreBuildRunner(c *C) {
+    runCtx := getRunContext(c, "testdata/pre_build_state.json", "testdata/pre_build_plan.yml")
+	c.Assert(NewPreBuildRunner().Run(runCtx), IsNil)
+}
+
 func (s *testSuite) Test_PreBuildRunner_no_script_defined(c *C) {
 	os.RemoveAll("testdata/escape_state")
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/escape_state", "dev", "testdata/plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx, "build")
-	c.Assert(err, IsNil)
-	err = NewPreBuildRunner().Run(runCtx)
-	c.Assert(err, IsNil)
+    runCtx := getRunContext(c, "testdata/escape_state", "testdata/plan.yml")
+	c.Assert(NewPreBuildRunner().Run(runCtx), IsNil)
 }
 
 func (s *testSuite) Test_PreBuildRunner_missing_test_file(c *C) {
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/pre_build_state.json", "dev", "testdata/plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx, "build")
-	c.Assert(err, IsNil)
-	ctx.GetReleaseMetadata().SetStage("pre_build", "testdata/doesnt_exist.sh")
-	err = NewPreBuildRunner().Run(runCtx)
-	c.Assert(err, Not(IsNil))
+    runCtx := getRunContext(c, "testdata/pre_build_state.json", "testdata/plan.yml")
+	runCtx.GetReleaseMetadata().SetStage("pre_build", "testdata/doesnt_exist.sh")
+	c.Assert(NewPreBuildRunner().Run(runCtx), Not(IsNil))
 }
 
 func (s *testSuite) Test_PreBuildRunner_missing_deployment_state(c *C) {
 	os.RemoveAll("testdata/escape_state")
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/escape_state", "dev", "testdata/pre_build_plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx, "build")
-	c.Assert(err, IsNil)
-	err = NewPreBuildRunner().Run(runCtx)
+    runCtx := getRunContext(c, "testdata/escape_state", "testdata/pre_build_plan.yml")
+    err := NewPreBuildRunner().Run(runCtx)
 	c.Assert(err, Not(IsNil))
 	c.Assert(err.Error(), Equals, "Missing value for variable 'variable'")
 }
 
-func (s *testSuite) Test_PreBuildRunner(c *C) {
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/pre_build_state.json", "dev", "testdata/pre_build_plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx, "build")
-	c.Assert(err, IsNil)
-	err = NewPreBuildRunner().Run(runCtx)
-	c.Assert(err, IsNil)
-}
-
 func (s *testSuite) Test_PreBuildRunner_sets_version(c *C) {
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/pre_build_state.json", "dev", "testdata/pre_build_plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx, "build")
-	c.Assert(err, IsNil)
+    runCtx := getRunContext(c, "testdata/pre_build_state.json", "testdata/pre_build_plan.yml")
 	deploymentState := runCtx.GetDeploymentState()
-	deploymentState.CommitVersion("build", ctx.GetReleaseMetadata())
-	err = NewPreBuildRunner().Run(runCtx)
-	c.Assert(err, IsNil)
+	deploymentState.CommitVersion("build", runCtx.GetReleaseMetadata())
+	c.Assert(NewPreBuildRunner().Run(runCtx), IsNil)
 	c.Assert(deploymentState.GetVersion("build"), Equals, "0.0.1")
 }
 
 func (s *testSuite) Test_PreBuildRunner_failing_script(c *C) {
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/pre_build_state.json", "dev", "testdata/pre_build_plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx, "build")
-	c.Assert(err, IsNil)
-	ctx.GetReleaseMetadata().SetStage("pre_build", "testdata/failing_test.sh")
-	err = NewPreBuildRunner().Run(runCtx)
-	c.Assert(err, Not(IsNil))
+    runCtx := getRunContext(c, "testdata/pre_build_state.json", "testdata/pre_build_plan.yml")
+	runCtx.GetReleaseMetadata().SetStage("pre_build", "testdata/failing_test.sh")
+	c.Assert(NewPreBuildRunner().Run(runCtx), Not(IsNil))
 }
