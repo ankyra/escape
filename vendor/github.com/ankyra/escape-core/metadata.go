@@ -31,7 +31,7 @@ import (
 	"strings"
 )
 
-const CurrentApiVersion = 2
+const CurrentApiVersion = 3
 
 type ExecStage struct {
 	Script string `json:"script"`
@@ -54,11 +54,22 @@ func NewProviderConfig(name string) *ProviderConfig {
 }
 
 type DependencyConfig struct {
-	ReleaseId string `json:"release_id"`
+	ReleaseId string                 `json:"release_id"`
+	Mapping   map[string]interface{} `json:"mapping"`
+}
+
+func (d *DependencyConfig) Validate() error {
+	if d.Mapping == nil {
+		d.Mapping = map[string]interface{}{}
+	}
+	return nil
 }
 
 func NewDependencyConfig(releaseId string) *DependencyConfig {
-	return &DependencyConfig{releaseId}
+	return &DependencyConfig{
+		ReleaseId: releaseId,
+		Mapping:   map[string]interface{}{},
+	}
 }
 
 type ExtensionConfig struct {
@@ -172,6 +183,11 @@ func validate(m *ReleaseMetadata) error {
 	}
 	for _, i := range m.Outputs {
 		if err := i.Validate(); err != nil {
+			return err
+		}
+	}
+	for _, d := range m.Depends {
+		if err := d.Validate(); err != nil {
 			return err
 		}
 	}
@@ -313,12 +329,19 @@ func (m *ReleaseMetadata) GetDependencies() []string {
 	return result
 }
 
+func (m *ReleaseMetadata) AddDependency(dep *DependencyConfig) {
+	m.Depends = append(m.Depends, dep)
+}
+
+func (m *ReleaseMetadata) AddDependencyFromString(dep string) {
+	m.Depends = append(m.Depends, NewDependencyConfig(dep))
+}
+
 func (m *ReleaseMetadata) SetDependencies(deps []string) {
-	result := []*DependencyConfig{}
+	m.Depends = []*DependencyConfig{}
 	for _, d := range deps {
-		result = append(result, NewDependencyConfig(d))
+		m.AddDependencyFromString(d)
 	}
-	m.Depends = result
 }
 
 func (m *ReleaseMetadata) GetVariableContext() map[string]string {

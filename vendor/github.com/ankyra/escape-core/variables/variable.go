@@ -28,15 +28,16 @@ import (
 )
 
 type Variable struct {
-	Id          string                 `json:"id"`
-	Type        string                 `json:"type"`
-	Default     interface{}            `json:"default,omitempty"`
-	Description string                 `json:"description,omitempty"`
-	Friendly    string                 `json:"friendly,omitempty"`
-	Visible     bool                   `json:"visible"`
-	Options     map[string]interface{} `json:"options,omitempty"`
-	Sensitive   bool                   `json:"sensitive,omitempty"`
-	Items       []interface{}          `json:"items"`
+	Id                     string                 `json:"id"`
+	Type                   string                 `json:"type"`
+	Default                interface{}            `json:"default,omitempty"`
+	Description            string                 `json:"description,omitempty"`
+	Friendly               string                 `json:"friendly,omitempty"`
+	Visible                bool                   `json:"visible"`
+	Options                map[string]interface{} `json:"options,omitempty"`
+	Sensitive              bool                   `json:"sensitive,omitempty"`
+	Items                  []interface{}          `json:"items"`
+	EvalBeforeDependencies bool                   `json:"eval_before_dependencies,omitempty"`
 }
 
 type UntypedVariable map[interface{}]interface{}
