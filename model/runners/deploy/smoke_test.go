@@ -17,63 +17,36 @@ limitations under the License.
 package deploy
 
 import (
-	"github.com/ankyra/escape-client/model"
-	"github.com/ankyra/escape-client/model/runners"
 	. "gopkg.in/check.v1"
 	"os"
 )
 
+func (s *testSuite) Test_SmokeRunner(c *C) {
+    runCtx := getRunContext(c, "testdata/smoke_state.json", "testdata/smoke_plan.yml")
+	c.Assert(NewSmokeRunner().Run(runCtx), IsNil)
+}
+
 func (s *testSuite) Test_SmokeRunner_no_test_script_defined(c *C) {
-	os.RemoveAll("testdata/escape_state")
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/smoke_state.json", "dev", "testdata/plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx, "deploy")
-	c.Assert(err, IsNil)
-	err = NewSmokeRunner().Run(runCtx)
-	c.Assert(err, IsNil)
+    runCtx := getRunContext(c, "testdata/smoke_state.json", "testdata/plan.yml")
+	c.Assert(NewSmokeRunner().Run(runCtx), IsNil)
 }
 
 func (s *testSuite) Test_SmokeRunner_missing_smoke_file(c *C) {
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/smoke_state.json", "dev", "testdata/plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx, "deploy")
-	c.Assert(err, IsNil)
-	ctx.GetReleaseMetadata().SetStage("smoke", "testdata/doesnt_exist.sh")
-	err = NewSmokeRunner().Run(runCtx)
-	c.Assert(err, Not(IsNil))
+    runCtx := getRunContext(c, "testdata/smoke_state.json", "testdata/plan.yml")
+	runCtx.GetReleaseMetadata().SetStage("smoke", "testdata/doesnt_exist.sh")
+	c.Assert(NewSmokeRunner().Run(runCtx), Not(IsNil))
 }
 
 func (s *testSuite) Test_SmokeRunner_missing_deployment_state(c *C) {
 	os.RemoveAll("testdata/escape_state")
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/escape_state", "dev", "testdata/smoke_plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx, "deploy")
-	c.Assert(err, IsNil)
-	err = NewSmokeRunner().Run(runCtx)
+    runCtx := getRunContext(c, "testdata/escape_state", "testdata/smoke_plan.yml")
+    err := NewSmokeRunner().Run(runCtx)
 	c.Assert(err, Not(IsNil))
 	c.Assert(err.Error(), Equals, "Deployment state '_/name' for release 'name-v0.0.1' could not be found")
 }
 
-func (s *testSuite) Test_SmokeRunner(c *C) {
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/smoke_state.json", "dev", "testdata/smoke_plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx, "deploy")
-	c.Assert(err, IsNil)
-	err = NewSmokeRunner().Run(runCtx)
-	c.Assert(err, IsNil)
-}
-
 func (s *testSuite) Test_SmokeRunner_failing_test(c *C) {
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/smoke_state.json", "dev", "testdata/smoke_plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx, "deploy")
-	c.Assert(err, IsNil)
-	ctx.GetReleaseMetadata().SetStage("smoke", "testdata/failing_test.sh")
-	err = NewSmokeRunner().Run(runCtx)
-	c.Assert(err, Not(IsNil))
+    runCtx := getRunContext(c, "testdata/smoke_state.json", "testdata/smoke_plan.yml")
+	runCtx.GetReleaseMetadata().SetStage("smoke", "testdata/failing_test.sh")
+	c.Assert(NewSmokeRunner().Run(runCtx), Not(IsNil))
 }
