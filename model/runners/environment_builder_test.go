@@ -21,12 +21,18 @@ import (
 	. "gopkg.in/check.v1"
 )
 
-func (s *testSuite) Test_GetInputsForPreStep(c *C) {
+func getRunContext(c *C, stateFile, escapePlan string) RunnerContext {
 	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/env_state.json", "dev", "testdata/env_test_plan.yml")
+	err := ctx.InitFromLocalEscapePlanAndState(stateFile, "dev", escapePlan)
 	c.Assert(err, IsNil)
 	runCtx, err := NewRunnerContext(ctx, "deploy")
 	c.Assert(err, IsNil)
+    return runCtx
+}
+
+
+func (s *testSuite) Test_GetInputsForPreStep(c *C) {
+    runCtx := getRunContext(c, "testdata/env_state.json", "testdata/env_test_plan.yml")
 	inputs, err := NewEmptyEnvEnvironmentBuilder().GetInputsForPreStep(runCtx, "deploy")
 	c.Assert(err, IsNil)
 	c.Assert(inputs, HasLen, 4)
@@ -37,12 +43,7 @@ func (s *testSuite) Test_GetInputsForPreStep(c *C) {
 }
 
 func (s *testSuite) Test_GetInputsForPreStep_calculated_inputs(c *C) {
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/env_calculated_inputs.json", "dev", "testdata/env_calculated_inputs.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx, "deploy")
-	c.Assert(err, IsNil)
-	runCtx.GetDeploymentState().UpdateInputs("build", nil)
+    runCtx := getRunContext(c, "testdata/env_calculated_inputs.json", "testdata/env_calculated_inputs.yml")
 	inputs, err := NewEmptyEnvEnvironmentBuilder().GetInputsForPreStep(runCtx, "deploy")
 	c.Assert(err, IsNil)
 	c.Assert(inputs, HasLen, 5)
@@ -51,6 +52,48 @@ func (s *testSuite) Test_GetInputsForPreStep_calculated_inputs(c *C) {
 	c.Assert(inputs["override"], DeepEquals, "override")
 	c.Assert(inputs["METADATA_key"], DeepEquals, "value")
 	c.Assert(inputs["PREVIOUS_OUTPUT_output_variable"], DeepEquals, "testoutput")
+}
+
+func (s *testSuite) Test_MergeInputsWithOsEnvironment(c *C) {
+    runCtx := getRunContext(c, "testdata/env_state.json", "testdata/env_test_plan.yml")
+	inputs := map[string]interface{}{"input_variable": "yo"}
+	runCtx.SetBuildInputs(inputs)
+
+	unit := NewEnvironmentBuilderWithEnv([]string{"test=test"})
+	c.Assert(unit.GetEnviron(), DeepEquals, []string{"test=test"})
+	env := unit.MergeInputsWithOsEnvironment(runCtx)
+	c.Assert(env, HasLen, 2)
+	c.Assert(env, DeepEquals, []string{"test=test", "INPUT_input_variable=yo"})
+}
+
+func (s *testSuite) Test_MergeInputsAndOutputsWithOsEnvironment(c *C) {
+    runCtx := getRunContext(c, "testdata/env_state.json", "testdata/env_test_plan.yml")
+	inputs := map[string]interface{}{"input_variable": "yo"}
+	outputs := map[string]interface{}{"output_variable": "yo"}
+	runCtx.SetBuildInputs(inputs)
+	runCtx.SetBuildOutputs(outputs)
+
+	unit := NewEnvironmentBuilderWithEnv([]string{"test=test"})
+	c.Assert(unit.GetEnviron(), DeepEquals, []string{"test=test"})
+	env := unit.MergeInputsAndOutputsWithOsEnvironment(runCtx)
+	c.Assert(env, HasLen, 3)
+	c.Assert(env, DeepEquals, []string{"test=test", "INPUT_input_variable=yo", "OUTPUT_output_variable=yo"})
+}
+
+func (s *testSuite) Test_GetOutputs_fails_if_outputs_not_set(c *C) {
+    runCtx := getRunContext(c, "testdata/env_state.json", "testdata/env_test_plan.yml")
+    _, err := NewEmptyEnvEnvironmentBuilder().GetOutputs(runCtx, "deploy")
+	c.Assert(err, Not(IsNil))
+	c.Assert(err.Error(), Equals, "Missing value for variable 'output_variable'")
+}
+
+func (s *testSuite) Test_GetOutputs(c *C) {
+    runCtx := getRunContext(c, "testdata/env_state.json", "testdata/env_test_plan.yml")
+	runCtx.SetBuildOutputs(map[string]interface{}{"output_variable": "test"})
+	outputs, err := NewEmptyEnvEnvironmentBuilder().GetOutputs(runCtx, "deploy")
+	c.Assert(err, IsNil)
+	c.Assert(outputs, HasLen, 1)
+	c.Assert(outputs["output_variable"], DeepEquals, "test")
 }
 
 func (s *testSuite) Test_AddToEnvironmentWithKeyPrefix_empty_values(c *C) {
@@ -88,62 +131,4 @@ func (s *testSuite) Test_AddToEnvironmentWithKeyPrefix_unsupported_type(c *C) {
 	}
 	c.Assert(func() { addToEnvironmentWithKeyPrefix(nil, values, "PREFIX_") }, PanicMatches,
 		`Type '.*' not supported \(key: 'test'\). This is a bug in Escape.`)
-}
-
-func (s *testSuite) Test_MergeInputsWithOsEnvironment(c *C) {
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/env_state.json", "dev", "testdata/env_test_plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx, "deploy")
-	c.Assert(err, IsNil)
-	inputs := map[string]interface{}{"input_variable": "yo"}
-	runCtx.SetBuildInputs(inputs)
-
-	unit := NewEnvironmentBuilderWithEnv([]string{"test=test"})
-	c.Assert(unit.GetEnviron(), DeepEquals, []string{"test=test"})
-	env := unit.MergeInputsWithOsEnvironment(runCtx)
-	c.Assert(env, HasLen, 2)
-	c.Assert(env, DeepEquals, []string{"test=test", "INPUT_input_variable=yo"})
-}
-
-func (s *testSuite) Test_MergeInputsAndOutputsWithOsEnvironment(c *C) {
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/env_state.json", "dev", "testdata/env_test_plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx, "deploy")
-	c.Assert(err, IsNil)
-	inputs := map[string]interface{}{"input_variable": "yo"}
-	outputs := map[string]interface{}{"output_variable": "yo"}
-	runCtx.SetBuildInputs(inputs)
-	runCtx.SetBuildOutputs(outputs)
-
-	unit := NewEnvironmentBuilderWithEnv([]string{"test=test"})
-	c.Assert(unit.GetEnviron(), DeepEquals, []string{"test=test"})
-	env := unit.MergeInputsAndOutputsWithOsEnvironment(runCtx)
-	c.Assert(env, HasLen, 3)
-	c.Assert(env, DeepEquals, []string{"test=test", "INPUT_input_variable=yo", "OUTPUT_output_variable=yo"})
-}
-
-func (s *testSuite) Test_GetOutputs_fails_if_outputs_not_set(c *C) {
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/env_state.json", "dev", "testdata/env_test_plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx, "deploy")
-	c.Assert(err, IsNil)
-	_, err = NewEmptyEnvEnvironmentBuilder().GetOutputs(runCtx, "deploy")
-	c.Assert(err, Not(IsNil))
-	c.Assert(err.Error(), Equals, "Missing value for variable 'output_variable'")
-}
-
-func (s *testSuite) Test_GetOutputs(c *C) {
-	ctx := model.NewContext()
-	err := ctx.InitFromLocalEscapePlanAndState("testdata/env_state.json", "dev", "testdata/env_test_plan.yml")
-	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx, "deploy")
-	c.Assert(err, IsNil)
-	runCtx.SetBuildOutputs(map[string]interface{}{"output_variable": "test"})
-	outputs, err := NewEmptyEnvEnvironmentBuilder().GetOutputs(runCtx, "deploy")
-	c.Assert(err, IsNil)
-	c.Assert(outputs, HasLen, 1)
-	c.Assert(outputs["output_variable"], DeepEquals, "test")
 }
