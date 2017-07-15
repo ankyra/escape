@@ -62,7 +62,7 @@ func (e *environmentBuilder) GetInputsForPreStep(ctx RunnerContext, stage string
 		}
 		calculatedInputs[inputVar.GetId()] = val
 	}
-	return prepInputs(ctx, stage, &calculatedInputs)
+	return prepInputs(ctx, stage, &calculatedInputs, false)
 }
 
 func (e *environmentBuilder) GetInputsForErrand(ctx RunnerContext, errand *core.Errand, extraVars map[string]string) (map[string]interface{}, error) {
@@ -71,12 +71,9 @@ func (e *environmentBuilder) GetInputsForErrand(ctx RunnerContext, errand *core.
 	for key, val := range extraVars {
 		inputs[key] = val
 	}
-	result, err := prepInputs(ctx, "deploy", &inputs)
+	result, err := prepInputs(ctx, "deploy", &inputs, true)
 	if err != nil {
 		return nil, err
-	}
-	if errand.GetInputs() == nil {
-		return result, nil
 	}
 	scriptEnv, err := ctx.GetScriptEnvironment("deploy")
 	if err != nil {
@@ -95,26 +92,24 @@ func (e *environmentBuilder) GetInputsForErrand(ctx RunnerContext, errand *core.
 func (e *environmentBuilder) GetOutputs(ctx RunnerContext, stage string) (map[string]interface{}, error) {
 	metadata := ctx.GetReleaseMetadata()
 	buildOutputs := ctx.GetBuildOutputs()
+    outputVariables := metadata.GetOutputs()
 	result := map[string]interface{}{}
-	if len(metadata.GetOutputs()) == 0 {
-		if buildOutputs != nil && len(buildOutputs) > 0 {
-			for key, _ := range buildOutputs {
-				fmt.Printf("Warning: received unexpected output variable '%s'\n", key)
-			}
-		}
-		return result, nil
-	}
 	scriptEnv, err := ctx.GetScriptEnvironment(stage)
 	if err != nil {
 		return nil, err
 	}
-	for _, outputVar := range metadata.GetOutputs() {
+	for _, outputVar := range outputVariables {
 		val, err := outputVar.GetValue(&buildOutputs, scriptEnv)
 		if err != nil {
 			return nil, err
 		}
 		result[outputVar.GetId()] = val
 	}
+    for key, _ := range buildOutputs {
+        if _, expected := result[key]; !expected {
+            fmt.Printf("Warning: received unexpected output variable '%s'\n", key)
+        }
+    }
 	return result, nil
 }
 
@@ -153,7 +148,7 @@ func addValues(result, values *map[string]interface{}, prefix string) {
 	}
 }
 
-func prepInputs(ctx RunnerContext, stage string, inputs *map[string]interface{}) (map[string]interface{}, error) {
+func prepInputs(ctx RunnerContext, stage string, inputs *map[string]interface{}, isErrand bool) (map[string]interface{}, error) {
 	metadata := ctx.GetReleaseMetadata()
 	deplState := ctx.GetDeploymentState()
 	result := map[string]interface{}{}
@@ -162,8 +157,13 @@ func prepInputs(ctx RunnerContext, stage string, inputs *map[string]interface{})
 	}
 	calcInputs := deplState.GetCalculatedInputs(stage)
 	calcOutputs := deplState.GetCalculatedOutputs(stage)
-	addValues(&result, &calcInputs, "PREVIOUS_")
-	addValues(&result, &calcOutputs, "PREVIOUS_OUTPUT_")
+    if isErrand {
+        addValues(&result, &calcInputs, "")
+        addValues(&result, &calcOutputs, "OUTPUT_")
+    } else {
+        addValues(&result, &calcInputs, "PREVIOUS_")
+        addValues(&result, &calcOutputs, "PREVIOUS_OUTPUT_")
+    }
 	addValues(&result, inputs, "")
 	return result, nil
 }

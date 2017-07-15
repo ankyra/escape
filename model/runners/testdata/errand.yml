@@ -1,0 +1,11 @@
+name: name
+version: 0.0.1
+errands:
+  my-errand:
+    script: testdata/errand.sh
+    inputs:
+    - id: input_variable
+      default: $this.version
+    - version
+    - id: override
+      default: not overridden
