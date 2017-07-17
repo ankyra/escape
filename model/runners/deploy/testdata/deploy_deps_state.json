@@ -33,19 +33,17 @@
                      "inputs": {
                         "variable": "testinput"
                      },
-                     "calculated_inputs": {
-                        "variable": "testinput"
-                     },
-                     "calculated_outputs": {
-                        "output_variable": "dependency output"
-                     },
+                     "calculated_inputs": {},
+                     "calculated_outputs": {},
                      "deployments": {
                         "_/dependency": {
                            "name": "_/dependency",
                            "release": "_/dependency",
                            "stages": {
                               "deploy": {
-                                 "inputs": {},
+                                 "inputs": {
+                                    "variable": "$this.inputs.variable"
+                                 },
                                  "calculated_inputs": {
                                     "PREVIOUS_OUTPUT_output_variable": "dependency output"
                                  },
