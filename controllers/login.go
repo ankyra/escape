@@ -74,7 +74,7 @@ func (LoginController) Login(context Context, url, username, password string) er
 	method := methods[ix-1]
 	if method.Type == "oauth" {
 		openBrowser(method.URL)
-		return getEscapeTokenWithRedeemToken(context, url, method.RedeemToken)
+		return getEscapeTokenWithRedeemToken(context, url, method.RedeemToken, method.RedeemURL)
 	} else if method.Type == "secret-token" {
 		if username == "" {
 			fmt.Printf("Username: ")
@@ -124,7 +124,7 @@ func openBrowser(url string) {
 	}
 }
 
-func getEscapeTokenWithRedeemToken(context Context, url, redeemToken string) error {
+func getEscapeTokenWithRedeemToken(context Context, url, redeemToken, redeemURL string) error {
 
 	currentTry := 0
 	tries := 25
@@ -133,10 +133,10 @@ func getEscapeTokenWithRedeemToken(context Context, url, redeemToken string) err
 	if !strings.HasSuffix(url, "/") {
 		url = url + "/"
 	}
-	url = url + "auth/redeem-token?redeem-token=" + redeemToken
+	redeemURL += "?redeem-token=" + redeemToken
 	for currentTry < tries {
 
-		req, err := http.NewRequest("GET", url, nil)
+		req, err := http.NewRequest("GET", redeemURL, nil)
 		if err != nil {
 			return fmt.Errorf("Couldn't retrieve token from server: %s", err)
 		}
@@ -147,7 +147,7 @@ func getEscapeTokenWithRedeemToken(context Context, url, redeemToken string) err
 		if resp.StatusCode == 200 {
 			authToken, err := ioutil.ReadAll(resp.Body)
 			if err != nil {
-				return fmt.Errorf("Couldn't read response from server '%s': %s", url, resp.Status)
+				return fmt.Errorf("Couldn't read response from server '%s': %s", redeemURL, resp.Status)
 			}
 			context.GetEscapeConfig().GetCurrentTarget().SetAuthToken(string(authToken))
 			context.GetEscapeConfig().GetCurrentTarget().SetApiServer(url)

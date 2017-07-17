@@ -20,4 +20,5 @@ type AuthMethod struct {
 	URL         string `json:"url"`
 	Type        string `json:"type"`
 	RedeemToken string `json:"redeem-token"`
+	RedeemURL   string `json:"redeem-url"`
 }
