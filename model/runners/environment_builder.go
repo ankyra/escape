@@ -72,38 +72,15 @@ func (e *environmentBuilder) GetPreDependencyInputs(ctx RunnerContext, stage str
 		return nil, err
 	}
 	for _, inputVar := range ctx.GetReleaseMetadata().GetInputs() {
-        if inputVar.EvalBeforeDependencies {
-            val, err := inputVar.GetValue(&inputs, scriptEnv)
-            if err != nil {
-                return nil, err
-            }
-            inputs[inputVar.Id] = val
-        }
+		if inputVar.EvalBeforeDependencies {
+			val, err := inputVar.GetValue(&inputs, scriptEnv)
+			if err != nil {
+				return nil, err
+			}
+			inputs[inputVar.Id] = val
+		}
 	}
 	return inputs, nil
-}
-
-func (e *environmentBuilder) GetInputsForDependency(ctx RunnerContext, depCfg *core.DependencyConfig) (map[string]interface{}, error) {
-	inputs := map[string]interface{}{}
-	scriptEnv, err := ctx.GetScriptEnvironment("deploy")
-	if err != nil {
-		return nil, err
-	}
-    for key, mapping := range depCfg.Mapping {
-        for _, input := range ctx.GetReleaseMetadata().Inputs {
-            if input.Id == key {
-                previousDefault := input.Default
-                input.Default = mapping
-                val, err := input.GetValue(&inputs, scriptEnv)
-                if err != nil {
-                    return nil, err
-                }
-                input.Default = previousDefault
-                inputs[key] = val
-            }
-        }
-    }
-    return inputs, nil
 }
 
 func (e *environmentBuilder) GetInputsForErrand(ctx RunnerContext, errand *core.Errand, extraVars map[string]string) (map[string]interface{}, error) {

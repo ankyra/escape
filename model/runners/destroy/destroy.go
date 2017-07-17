@@ -32,7 +32,7 @@ func NewDestroyRunner(stage string) Runner {
 func NewPreDestroyRunner(stage string) Runner {
 	return NewRunner(func(ctx RunnerContext) error {
 		deferred := func() Runner { return NewDestroyRunner("deploy") }
-		err := NewDependencyRunner("destroy", deferred).Run(ctx)
+		err := NewDependencyRunner("destroy", stage, deferred).Run(ctx)
 		if err != nil {
 			return err
 		}

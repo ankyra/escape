@@ -37,7 +37,7 @@ func NewSmokeRunner() Runner {
 
 func NewDeployRunner() Runner {
 	return NewCompoundRunner(
-		NewDependencyRunner("deploy", NewDeployRunner),
+		NewDependencyRunner("deploy", "deploy", NewDeployRunner),
 		NewPreDeployRunner(),
 		NewMainDeployRunner(),
 		NewPostDeployRunner(),

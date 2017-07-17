@@ -36,7 +36,7 @@ func NewTestRunner() Runner {
 
 func NewBuildRunner() Runner {
 	return NewCompoundRunner(
-		NewDependencyRunner("deploy", deploy.NewDeployRunner),
+		NewDependencyRunner("deploy", "build", deploy.NewDeployRunner),
 		NewPreBuildRunner(),
 		NewMainBuildRunner(),
 		NewPostBuildRunner(),
