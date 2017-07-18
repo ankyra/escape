@@ -52,7 +52,7 @@ func (s *deplSuite) Test_ToScript(c *C) {
 	c.Assert(err, IsNil)
 	metadata.AddInputVariable(input)
 	metadata.AddOutputVariable(input)
-	unit := toScript(depl, metadata, "deploy")
+	unit := NewStateCompiler(nil).CompileState(depl, metadata, "deploy", true)
 	dicts := map[string][]string{
 		"inputs":   []string{"user_level"},
 		"outputs":  []string{"user_level"},
@@ -63,7 +63,7 @@ func (s *deplSuite) Test_ToScript(c *C) {
 
 func (s *deplSuite) Test_ToScript_doesnt_include_variable_that_are_not_defined_in_release_metadata(c *C) {
 	metadata := core.NewReleaseMetadata("test", "1.0")
-	unit := toScript(depl, metadata, "deploy")
+	unit := NewStateCompiler(nil).CompileState(depl, metadata, "deploy", true)
 	dicts := map[string][]string{
 		"inputs":   []string{},
 		"outputs":  []string{},

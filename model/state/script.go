@@ -51,54 +51,95 @@ func ToScriptEnvironment(d *DeploymentState, metadata *core.ReleaseMetadata, sta
 	if d == nil {
 		return nil, fmt.Errorf("Missing deployment state. This is a bug in Escape.")
 	}
-	result, err := ToScript(d, metadata, stage, context)
+	result, err := NewStateCompiler(context).Compile(d, metadata, stage)
 	if err != nil {
 		return nil, err
 	}
 	return script.NewScriptEnvironmentWithGlobals(script.ExpectDictAtom(result)), nil
 }
 
-func ToScript(d *DeploymentState, metadata *core.ReleaseMetadata, stage string, context DeploymentResolver) (script.Script, error) {
-	result := map[string]script.Script{}
-	result["this"] = toScript(d, metadata, stage)
+func ToScriptEnvironmentForDependencyStep(d *DeploymentState, metadata *core.ReleaseMetadata, stage string, context DeploymentResolver) (*script.ScriptEnvironment, error) {
+	if d == nil {
+		return nil, fmt.Errorf("Missing deployment state. This is a bug in Escape.")
+	}
+	st := NewStateCompiler(context)
+	st.DependencyInputsAreAvailable = false
+	result, err := st.Compile(d, metadata, stage)
+	if err != nil {
+		return nil, err
+	}
+	return script.NewScriptEnvironmentWithGlobals(script.ExpectDictAtom(result)), nil
+}
 
+type StateCompiler struct {
+	Result                       map[string]script.Script
+	Resolver                     DeploymentResolver
+	DependencyInputsAreAvailable bool
+}
+
+func NewStateCompiler(context DeploymentResolver) *StateCompiler {
+	return &StateCompiler{
+		Result:                       map[string]script.Script{},
+		Resolver:                     context,
+		DependencyInputsAreAvailable: true,
+	}
+}
+
+func (s *StateCompiler) CompileDependencies(d *DeploymentState, metadata *core.ReleaseMetadata, stage string) error {
 	for _, depend := range metadata.Depends {
-		depMetadata, err := context.GetDependencyMetadata(depend)
+		depMetadata, err := s.Resolver.GetDependencyMetadata(depend)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		depState := d.GetDeployment(stage, depMetadata.GetVersionlessReleaseId())
-		result[depend.ReleaseId] = toScript(depState, depMetadata, "deploy")
+		s.Result[depend.ReleaseId] = s.CompileState(depState, depMetadata, "deploy", s.DependencyInputsAreAvailable)
 	}
+	return nil
+}
 
+func (s *StateCompiler) CompileProviders(d *DeploymentState, metadata *core.ReleaseMetadata, stage string) error {
 	providers := d.GetProviders(stage)
 	for _, consumes := range metadata.GetConsumes() {
 		deplName, ok := providers[consumes]
 		if !ok {
-			return nil, fmt.Errorf("No provider of type '%s' was configured in the deployment state.", consumes)
+			return fmt.Errorf("No provider of type '%s' was configured in the deployment state.", consumes)
 		}
 		deplState, err := d.GetEnvironmentState().LookupDeploymentState(deplName)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		depMetadata, err := context.GetDependencyMetadata(core.NewDependencyConfig(deplState.GetReleaseId("deploy")))
+		depMetadata, err := s.Resolver.GetDependencyMetadata(core.NewDependencyConfig(deplState.GetReleaseId("deploy")))
 		if err != nil {
-			return nil, err
+			return err
 		}
-		result[consumes] = toScript(deplState, depMetadata, "deploy")
+		s.Result[consumes] = s.CompileState(deplState, depMetadata, "deploy", true)
 	}
+	return nil
+}
 
+func (s *StateCompiler) CompileVariableCtx(metadata *core.ReleaseMetadata) {
 	for key, ref := range metadata.GetVariableContext() {
-		script, ok := result[ref]
+		script, ok := s.Result[ref]
 		if !ok {
 			continue
 		}
-		result[key] = script
+		s.Result[key] = script
 	}
-	return script.LiftDict(result), nil
 }
 
-func toScript(d *DeploymentState, metadata *core.ReleaseMetadata, stage string) script.Script {
+func (s *StateCompiler) Compile(d *DeploymentState, metadata *core.ReleaseMetadata, stage string) (script.Script, error) {
+	s.Result["this"] = s.CompileState(d, metadata, stage, s.DependencyInputsAreAvailable)
+	if err := s.CompileDependencies(d, metadata, stage); err != nil {
+		return nil, err
+	}
+	if err := s.CompileProviders(d, metadata, stage); err != nil {
+		return nil, err
+	}
+	s.CompileVariableCtx(metadata)
+	return script.LiftDict(s.Result), nil
+}
+
+func (s *StateCompiler) CompileState(d *DeploymentState, metadata *core.ReleaseMetadata, stage string, includeVariables bool) script.Script {
 	result := map[string]script.Script{}
 	if metadata != nil {
 		result = metadata.ToScriptMap()
@@ -106,24 +147,26 @@ func toScript(d *DeploymentState, metadata *core.ReleaseMetadata, stage string) 
 	if d == nil {
 		return script.LiftDict(result)
 	}
-	inputs := map[string]interface{}{}
-	outputs := map[string]interface{}{}
-	for key, val := range d.GetCalculatedInputs(stage) {
-		for _, defined := range metadata.GetInputs() {
-			if key == defined.Id {
-				inputs[key] = val
+	if includeVariables {
+		inputs := map[string]interface{}{}
+		outputs := map[string]interface{}{}
+		for key, val := range d.GetCalculatedInputs(stage) {
+			for _, defined := range metadata.GetInputs() {
+				if key == defined.Id {
+					inputs[key] = val
+				}
 			}
 		}
-	}
-	for key, val := range d.GetCalculatedOutputs(stage) {
-		for _, defined := range metadata.GetOutputs() {
-			if key == defined.Id {
-				outputs[key] = val
+		for key, val := range d.GetCalculatedOutputs(stage) {
+			for _, defined := range metadata.GetOutputs() {
+				if key == defined.Id {
+					outputs[key] = val
+				}
 			}
 		}
+		result["inputs"] = script.ShouldLift(inputs)
+		result["outputs"] = script.ShouldLift(outputs)
 	}
-	result["inputs"] = script.ShouldLift(inputs)
-	result["outputs"] = script.ShouldLift(outputs)
 	env := d.GetEnvironmentState()
 	result["project"] = script.LiftString(env.GetProjectName())
 	result["environment"] = script.LiftString(env.GetName())

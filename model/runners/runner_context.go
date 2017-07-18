@@ -41,6 +41,7 @@ type RunnerContext interface {
 	SetBuildOutputs(map[string]interface{})
 	NewContextForDependency(*core.ReleaseMetadata) RunnerContext
 	GetScriptEnvironment(stage string) (*script.ScriptEnvironment, error)
+	GetScriptEnvironmentForPreDependencyStep(stage string) (*script.ScriptEnvironment, error)
 	GetRootDeploymentName() string
 }
 
@@ -124,6 +125,11 @@ func (r *runnerContext) SetBuildOutputs(outputs map[string]interface{}) {
 
 func (r *runnerContext) GetScriptEnvironment(stage string) (*script.ScriptEnvironment, error) {
 	return state.ToScriptEnvironment(r.GetDeploymentState(), r.GetReleaseMetadata(), stage, r.context)
+}
+
+func (r *runnerContext) GetScriptEnvironmentForPreDependencyStep(stage string) (*script.ScriptEnvironment, error) {
+	// should only contain metadata, parent inputs and providers
+	return state.ToScriptEnvironmentForDependencyStep(r.GetDeploymentState(), r.GetReleaseMetadata(), stage, r.context)
 }
 
 func (r *runnerContext) NewContextForDependency(metadata *core.ReleaseMetadata) RunnerContext {

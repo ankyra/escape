@@ -73,7 +73,6 @@ func inputVariableWithDefault(variableId, defaultValue string) error {
 		"id":      variableId,
 		"default": defaultValue,
 	})
-	fmt.Println(string(plan.ToMinifiedYaml()))
 	return ioutil.WriteFile("escape.yml", plan.ToMinifiedYaml(), 0644)
 }
 
@@ -95,10 +94,6 @@ func itHasSetTo(arg1, arg2 string) error {
 }
 
 func itsCalculatedInputIsSetTo(key, value string) error {
-	fmt.Println(CapturedDeployment.Stages["deploy"])
-	fmt.Println(CapturedStage)
-	b, _ := ioutil.ReadFile("escape_state.json")
-	fmt.Println(string(b))
 	inputs := CapturedDeployment.GetCalculatedInputs(CapturedStage)
 	v, found := inputs[key]
 	if !found {

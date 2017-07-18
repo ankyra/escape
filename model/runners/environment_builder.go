@@ -23,6 +23,7 @@ import (
 
 	"github.com/ankyra/escape-client/util"
 	"github.com/ankyra/escape-core"
+	"github.com/ankyra/escape-core/script"
 )
 
 type environmentBuilder struct {
@@ -66,7 +67,10 @@ func (e *environmentBuilder) GetInputsForPreStep(ctx RunnerContext, stage string
 }
 
 func (e *environmentBuilder) GetPreDependencyInputs(ctx RunnerContext, stage string) (map[string]interface{}, error) {
-	inputs := ctx.GetDeploymentState().GetUserInputs(stage)
+	inputs := map[string]interface{}{}
+	for key, val := range ctx.GetDeploymentState().GetUserInputs(stage) {
+		inputs[key] = val
+	}
 	scriptEnv, err := ctx.GetScriptEnvironment(stage)
 	if err != nil {
 		return nil, err
@@ -78,6 +82,30 @@ func (e *environmentBuilder) GetPreDependencyInputs(ctx RunnerContext, stage str
 				return nil, err
 			}
 			inputs[inputVar.Id] = val
+		}
+	}
+	return inputs, nil
+}
+
+func (e *environmentBuilder) GetInputsForDependency(ctx RunnerContext, stage string, mapping map[string]interface{}, parentInputs map[string]interface{}) (map[string]interface{}, error) {
+	inputs := map[string]interface{}{}
+	scriptEnv, err := ctx.GetScriptEnvironmentForPreDependencyStep(stage)
+	if err != nil {
+		return nil, err
+	}
+	globals := script.ExpectDictAtom((*scriptEnv)["$"])
+	this := script.ExpectDictAtom(globals["this"])
+	this["inputs"] = script.ShouldLift(parentInputs)
+	for key, val := range mapping {
+		strVal, ok := val.(string)
+		if !ok {
+			inputs[key] = val
+		} else {
+			val, err := script.ParseAndEvalToGoValue(strVal, scriptEnv)
+			if err != nil {
+				return nil, err
+			}
+			inputs[key] = val
 		}
 	}
 	return inputs, nil
