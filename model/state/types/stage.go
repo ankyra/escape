@@ -17,14 +17,14 @@ limitations under the License.
 package types
 
 type StageState struct {
-	UserInputs  map[string]interface{}      `json:"inputs"`
-	Inputs      map[string]interface{}      `json:"calculated_inputs"`
-	Outputs     map[string]interface{}      `json:"calculated_outputs"`
-	Deployments map[string]*DeploymentState `json:"deployments"`
-	Providers   map[string]string           `json:"providers"`
-	Provides    []string                    `json:"provides"`
-	Version     string                      `json:"version"`
-	Step        string                      `json:"step"`
+	UserInputs  map[string]interface{}      `json:"inputs,omitempty"`
+	Inputs      map[string]interface{}      `json:"calculated_inputs,omitempty"`
+	Outputs     map[string]interface{}      `json:"calculated_outputs,omitempty"`
+	Deployments map[string]*DeploymentState `json:"deployments,omitempty"`
+	Providers   map[string]string           `json:"providers,omitempty"`
+	Provides    []string                    `json:"provides,omitempty"`
+	Version     string                      `json:"version,omitempty"`
+	Step        string                      `json:"step,omitempty"`
 	Name        string                      `json:"-"`
 }
 

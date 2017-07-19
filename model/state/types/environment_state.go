@@ -22,8 +22,8 @@ import (
 
 type EnvironmentState struct {
 	Name        string                      `json:"name"`
-	Inputs      map[string]interface{}      `json:"inputs"`
-	Deployments map[string]*DeploymentState `json:"deployments"`
+	Inputs      map[string]interface{}      `json:"inputs,omitempty"`
+	Deployments map[string]*DeploymentState `json:"deployments,omitempty"`
 	ProjectName string                      `json:"-"`
 	provider    StateProvider               `json:"-"`
 }

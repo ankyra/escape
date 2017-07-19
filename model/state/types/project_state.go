@@ -26,7 +26,7 @@ import (
 
 type ProjectState struct {
 	Name         string                       `json:"name"`
-	Environments map[string]*EnvironmentState `json:"environments"`
+	Environments map[string]*EnvironmentState `json:"environments,omitempty"`
 	saveLocation string                       `json:"-"`
 	provider     StateProvider                `json:"-"`
 }

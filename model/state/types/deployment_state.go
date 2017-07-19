@@ -24,9 +24,9 @@ import (
 
 type DeploymentState struct {
 	Name        string                 `json:"name"`
-	Release     string                 `json:"release"`
-	Stages      map[string]*StageState `json:"stages"`
-	Inputs      map[string]interface{} `json:"inputs"`
+	Release     string                 `json:"release,omitempty"`
+	Stages      map[string]*StageState `json:"stages,omitempty"`
+	Inputs      map[string]interface{} `json:"inputs,omitempty"`
 	environment *EnvironmentState      `json:"-"`
 	parent      *DeploymentState       `json:"-"`
 	parentStage *StageState            `json:"-"`
