@@ -3,46 +3,34 @@
    "environments": {
       "dev": {
          "name": "dev",
-         "inputs": null,
          "deployments": {
             "_/name": {
                "name": "_/name",
                "release": "_/name",
                "stages": {
                   "": {
-                     "inputs": {},
-                     "calculated_inputs": {},
-                     "calculated_outputs": {},
-                     "deployments": {},
-                     "providers": {},
-                     "provides": [],
-                     "version": "",
-                     "step": ""
+                     "status": {
+                        "status": "empty",
+                        "updated_at": "2017-07-19T02:48:43.067040558+01:00"
+                     }
                   },
                   "build": {
-                     "inputs": {},
-                     "calculated_inputs": {},
-                     "calculated_outputs": {},
-                     "deployments": {},
-                     "providers": {},
-                     "provides": [],
-                     "version": "",
-                     "step": ""
+                     "status": {
+                        "status": "empty",
+                        "updated_at": "2017-07-19T02:48:43.067039516+01:00"
+                     }
                   },
                   "deploy": {
                      "inputs": {
                         "variable": "testinput"
                      },
-                     "calculated_inputs": {},
-                     "calculated_outputs": {},
-                     "deployments": {},
-                     "providers": {},
-                     "provides": [],
                      "version": "0.0.1",
-                     "step": ""
+                     "status": {
+                        "status": "failure",
+                        "updated_at": "2017-07-19T03:10:38.063082862+01:00"
+                     }
                   }
-               },
-               "inputs": {}
+               }
             }
          }
       }

@@ -3,7 +3,6 @@
    "environments": {
       "dev": {
          "name": "dev",
-         "inputs": null,
          "deployments": {
             "_/name": {
                "name": "_/name",
@@ -16,25 +15,19 @@
                      "calculated_inputs": {
                         "variable": "test"
                      },
-                     "calculated_outputs": {},
-                     "deployments": {},
-                     "providers": {},
-                     "provides": [],
                      "version": "0.0.1",
-                     "step": ""
+                     "status": {
+                        "status": "ok",
+                        "updated_at": "2017-07-19T03:10:38.064111573+01:00"
+                     }
                   },
                   "deploy": {
-                     "inputs": {},
-                     "calculated_inputs": {},
-                     "calculated_outputs": {},
-                     "deployments": {},
-                     "providers": {},
-                     "provides": [],
-                     "version": "",
-                     "step": ""
+                     "status": {
+                        "status": "empty",
+                        "updated_at": "2017-07-19T02:49:06.01854016+01:00"
+                     }
                   }
-               },
-               "inputs": {}
+               }
             }
          }
       }

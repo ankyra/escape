@@ -19,26 +19,30 @@ package build
 import (
 	. "github.com/ankyra/escape-client/model/runners"
 	"github.com/ankyra/escape-client/model/runners/deploy"
+	"github.com/ankyra/escape-client/model/state/types"
 )
 
+var Stage = "build"
+
 func NewPreBuildRunner() Runner {
-	return NewPreScriptStepRunner("build", "pre_build")
+	return NewPreScriptStepRunner(Stage, "pre_build")
 }
 func NewMainBuildRunner() Runner {
-	return NewMainStepRunner("build", "build")
+	return NewMainStepRunner(Stage, "build")
 }
 func NewPostBuildRunner() Runner {
-	return NewPostScriptStepRunner("build", "post_build")
+	return NewPostScriptStepRunner(Stage, "post_build")
 }
 func NewTestRunner() Runner {
-	return NewScriptRunner("build", "test")
+	return NewScriptRunner(Stage, "test")
 }
 
 func NewBuildRunner() Runner {
 	return NewCompoundRunner(
-		NewDependencyRunner("deploy", "build", deploy.NewDeployRunner),
+		NewDependencyRunner("deploy", Stage, deploy.NewDeployRunner),
 		NewPreBuildRunner(),
 		NewMainBuildRunner(),
 		NewPostBuildRunner(),
+		NewStatusCodeRunner(Stage, types.OK),
 	)
 }

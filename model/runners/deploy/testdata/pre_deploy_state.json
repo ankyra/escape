@@ -3,7 +3,6 @@
    "environments": {
       "dev": {
          "name": "dev",
-         "inputs": null,
          "deployments": {
             "_/name": {
                "name": "_/name",
@@ -21,14 +20,13 @@
                      "calculated_outputs": {
                         "variable": "testoutput"
                      },
-                     "deployments": {},
-                     "providers": {},
-                     "provides": [],
                      "version": "0.0.1",
-                     "step": ""
+                     "status": {
+                        "status": "failure",
+                        "updated_at": "2017-07-19T03:10:38.12256114+01:00"
+                     }
                   }
-               },
-               "inputs": {}
+               }
             }
          }
       }

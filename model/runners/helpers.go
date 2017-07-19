@@ -49,12 +49,28 @@ func NewScriptStep(ctx RunnerContext, stage, step string, shouldBeDeployed bool)
 	}
 }
 
+func ReportFailure(ctx RunnerContext, stage string, err error) error {
+	if err2 := ctx.GetDeploymentState().UpdateStatus(stage, state.NewStatus(state.Failure)); err2 != nil {
+		return fmt.Errorf("Could update status '%s'. Trying to set failure status, because: %s", err2.Error(), err.Error())
+	}
+	return err
+}
+
+func RunOrReportFailure(ctx RunnerContext, stage string, runner Runner) error {
+	err := runner.Run(ctx)
+	if err != nil {
+		return ReportFailure(ctx, stage, err)
+	}
+	return err
+}
+
 func NewPreScriptStepRunner(stage, field string) Runner {
 	return NewRunner(func(ctx RunnerContext) error {
 		step := NewScriptStep(ctx, stage, field, false)
 		step.Inputs = NewEnvironmentBuilder().GetInputsForPreStep
 		step.Commit = preCommit
-		return step.Run(ctx)
+		ctx.GetDeploymentState().UpdateStatus(stage, state.NewStatus(state.RunningPreStep))
+		return RunOrReportFailure(ctx, stage, step)
 	})
 }
 func NewMainStepRunner(stage, field string) Runner {
@@ -63,7 +79,8 @@ func NewMainStepRunner(stage, field string) Runner {
 		step.Commit = mainCommit
 		step.LoadOutputs = false
 		step.ModifiesOutputVariables = true
-		return step.Run(ctx)
+		ctx.GetDeploymentState().UpdateStatus(stage, state.NewStatus(state.RunningMainStep))
+		return RunOrReportFailure(ctx, stage, step)
 	})
 }
 func NewPostScriptStepRunner(stage, field string) Runner {
@@ -71,7 +88,8 @@ func NewPostScriptStepRunner(stage, field string) Runner {
 		step := NewScriptStep(ctx, stage, field, true)
 		step.Commit = postCommit
 		step.ModifiesOutputVariables = true
-		return step.Run(ctx)
+		ctx.GetDeploymentState().UpdateStatus(stage, state.NewStatus(state.RunningPostStep))
+		return RunOrReportFailure(ctx, stage, step)
 	})
 }
 

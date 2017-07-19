@@ -3,48 +3,37 @@
    "environments": {
       "dev": {
          "name": "dev",
-         "inputs": null,
          "deployments": {
             "_/name": {
                "name": "_/name",
                "release": "_/name",
                "stages": {
                   "": {
-                     "inputs": {},
-                     "calculated_inputs": {},
-                     "calculated_outputs": {},
-                     "deployments": {},
-                     "providers": {},
-                     "provides": [],
-                     "version": "",
-                     "step": ""
+                     "status": {
+                        "status": "empty",
+                        "updated_at": "2017-07-19T02:49:05.916452168+01:00"
+                     }
                   },
                   "build": {
-                     "inputs": {},
                      "calculated_inputs": {
                         "PREVIOUS_OUTPUT_variable": "not test"
                      },
                      "calculated_outputs": {
                         "variable": "not test"
                      },
-                     "deployments": {},
-                     "providers": {},
-                     "provides": [],
                      "version": "0.0.1",
-                     "step": ""
+                     "status": {
+                        "status": "running_post_step",
+                        "updated_at": "2017-07-19T03:10:38.07855567+01:00"
+                     }
                   },
                   "deploy": {
-                     "inputs": {},
-                     "calculated_inputs": {},
-                     "calculated_outputs": {},
-                     "deployments": {},
-                     "providers": {},
-                     "provides": [],
-                     "version": "",
-                     "step": ""
+                     "status": {
+                        "status": "empty",
+                        "updated_at": "2017-07-19T02:49:05.916451821+01:00"
+                     }
                   }
-               },
-               "inputs": {}
+               }
             }
          }
       }

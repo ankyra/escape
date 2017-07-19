@@ -3,26 +3,22 @@
    "environments": {
       "dev": {
          "name": "dev",
-         "inputs": null,
          "deployments": {
             "_/name": {
                "name": "_/name",
                "release": "_/name",
                "stages": {
                   "deploy": {
-                     "inputs": {},
                      "calculated_inputs": {
                         "variable": "testinput"
                      },
-                     "calculated_outputs": {},
-                     "deployments": {},
-                     "providers": {},
-                     "provides": [],
                      "version": "0.0.1",
-                     "step": ""
+                     "status": {
+                        "status": "running_post_step",
+                        "updated_at": "2017-07-19T03:10:38.104277857+01:00"
+                     }
                   }
-               },
-               "inputs": {}
+               }
             }
          }
       }

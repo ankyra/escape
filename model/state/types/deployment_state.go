@@ -103,6 +103,14 @@ func (d *DeploymentState) CommitVersion(stage string, metadata *core.ReleaseMeta
 	return nil
 }
 
+func (d *DeploymentState) UpdateStatus(stage string, status *Status) error {
+	d.getStage(stage).Status = status
+	return d.Save()
+}
+func (d *DeploymentState) GetStatus(stage string) *Status {
+	return d.getStage(stage).Status
+}
+
 func (d *DeploymentState) IsDeployed(stage string, metadata *core.ReleaseMetadata) bool {
 	return d.getStage(stage).Version == metadata.Version
 }

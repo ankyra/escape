@@ -19,6 +19,7 @@ package build
 import (
 	"github.com/ankyra/escape-client/model"
 	"github.com/ankyra/escape-client/model/runners"
+	"github.com/ankyra/escape-client/model/state/types"
 	. "gopkg.in/check.v1"
 	"os"
 )
@@ -27,50 +28,62 @@ func (s *testSuite) Test_BuildRunner_no_script_defined(c *C) {
 	os.RemoveAll("testdata/escape_state")
 	runCtx := getRunContext(c, "testdata/escape_state", "testdata/build_plan.yml")
 	c.Assert(NewBuildRunner().Run(runCtx), IsNil)
+	checkStatus(c, runCtx, types.OK)
 }
 
 func (s *testSuite) Test_BuildRunner_missing_test_file(c *C) {
 	runCtx := getRunContext(c, "testdata/build_state.json", "testdata/build_plan.yml")
 	runCtx.GetReleaseMetadata().SetStage("post_build", "testdata/doesnt_exist.sh")
 	c.Assert(NewBuildRunner().Run(runCtx), Not(IsNil))
+	checkStatus(c, runCtx, types.Failure)
 }
 
 func (s *testSuite) Test_BuildRunner_failing_script(c *C) {
 	runCtx := getRunContext(c, "testdata/build_state.json", "testdata/build_plan.yml")
 	runCtx.GetReleaseMetadata().SetStage("post_build", "testdata/failing_test.sh")
 	c.Assert(NewBuildRunner().Run(runCtx), Not(IsNil))
+	checkStatus(c, runCtx, types.Failure)
 }
 
 func (s *testSuite) Test_BuildRunner_sets_deployment_status(c *C) {
 	runCtx := getRunContext(c, "testdata/build_state.json", "testdata/build_plan.yml")
 	c.Assert(NewBuildRunner().Run(runCtx), IsNil)
 	deploymentState := runCtx.GetDeploymentState()
-	c.Assert(deploymentState.GetVersion("build"), Equals, "0.0.1")
+	c.Assert(deploymentState.GetVersion(Stage), Equals, "0.0.1")
+	checkStatus(c, runCtx, types.OK)
 }
 
 func (s *testSuite) Test_BuildRunner_variables_are_set_even_if_there_is_no_pre_step(c *C) {
 	runCtx := getRunContext(c, "testdata/build_no_pre_step_state.json", "testdata/build_no_pre_step_plan.yml")
 
 	deploymentState := runCtx.GetDeploymentState()
-	deploymentState.UpdateInputs("build", nil)
-	c.Assert(deploymentState.GetCalculatedInputs("build"), HasLen, 0)
-	c.Assert(deploymentState.GetUserInputs("build"), HasLen, 1)
-	deploymentState.CommitVersion("build", runCtx.GetReleaseMetadata())
+	deploymentState.UpdateInputs(Stage, nil)
+	c.Assert(deploymentState.GetCalculatedInputs(Stage), HasLen, 0)
+	c.Assert(deploymentState.GetUserInputs(Stage), HasLen, 1)
+	deploymentState.CommitVersion(Stage, runCtx.GetReleaseMetadata())
+	checkStatus(c, runCtx, types.OK)
 
 	c.Assert(NewBuildRunner().Run(runCtx), IsNil)
-	c.Assert(deploymentState.GetVersion("build"), Equals, "0.0.1")
-	c.Assert(deploymentState.GetCalculatedInputs("build"), HasLen, 1)
+	c.Assert(deploymentState.GetVersion(Stage), Equals, "0.0.1")
+	c.Assert(deploymentState.GetCalculatedInputs(Stage), HasLen, 1)
+	checkStatus(c, runCtx, types.OK)
 }
 
 func (s *testSuite) Test_BuildRunner_has_access_to_previous_outputs(c *C) {
 	runCtx := getRunContext(c, "testdata/default_outputs.json", "testdata/default_outputs_plan.yml")
 	deploymentState := runCtx.GetDeploymentState()
-	deploymentState.UpdateOutputs("build", map[string]interface{}{
+	deploymentState.UpdateOutputs(Stage, map[string]interface{}{
 		"variable": "not test",
 	})
-	c.Assert(deploymentState.GetCalculatedOutputs("build")["variable"], Equals, "not test")
+	c.Assert(deploymentState.GetCalculatedOutputs(Stage)["variable"], Equals, "not test")
 	c.Assert(NewBuildRunner().Run(runCtx), IsNil)
-	c.Assert(deploymentState.GetCalculatedOutputs("build")["variable"], Equals, "test")
+	c.Assert(deploymentState.GetCalculatedOutputs(Stage)["variable"], Equals, "test")
+	checkStatus(c, runCtx, types.OK)
+}
+
+func checkStatus(c *C, runCtx runners.RunnerContext, code types.StatusCode) {
+	deploymentState := runCtx.GetDeploymentState()
+	c.Assert(deploymentState.GetStatus(Stage).Code, Equals, types.StatusCode(code))
 }
 
 func getRunContext(c *C, stateFile, escapePlan string) runners.RunnerContext {
@@ -78,7 +91,7 @@ func getRunContext(c *C, stateFile, escapePlan string) runners.RunnerContext {
 	ctx.DisableLogger()
 	err := ctx.InitFromLocalEscapePlanAndState(stateFile, "dev", escapePlan)
 	c.Assert(err, IsNil)
-	runCtx, err := runners.NewRunnerContext(ctx, "build")
+	runCtx, err := runners.NewRunnerContext(ctx, Stage)
 	c.Assert(err, IsNil)
 	return runCtx
 }
