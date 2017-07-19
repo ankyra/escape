@@ -60,11 +60,11 @@ func (s *testSuite) Test_PostBuildRunner_failing_script(c *C) {
 func (s *testSuite) Test_PostBuildRunner_default_outputs_dont_calculate(c *C) {
 	runCtx := getRunContext(c, "testdata/default_outputs.json", "testdata/default_outputs_plan.yml")
 	deploymentState := runCtx.GetDeploymentState()
-	deploymentState.UpdateOutputs("build", map[string]interface{}{
+	deploymentState.UpdateOutputs(Stage, map[string]interface{}{
 		"variable": "not test",
 	})
-	c.Assert(deploymentState.GetCalculatedOutputs("build")["variable"], Equals, "not test")
+	c.Assert(deploymentState.GetCalculatedOutputs(Stage)["variable"], Equals, "not test")
 	c.Assert(NewPostBuildRunner().Run(runCtx), IsNil)
-	c.Assert(deploymentState.GetCalculatedOutputs("build")["variable"], Equals, "not test")
+	c.Assert(deploymentState.GetCalculatedOutputs(Stage)["variable"], Equals, "not test")
 	checkStatus(c, runCtx, types.RunningPostStep)
 }

@@ -61,9 +61,9 @@ func (s *testSuite) Test_PreBuildRunner_missing_deployment_state(c *C) {
 func (s *testSuite) Test_PreBuildRunner_sets_version(c *C) {
 	runCtx := getRunContext(c, "testdata/pre_build_state.json", "testdata/pre_build_plan.yml")
 	deploymentState := runCtx.GetDeploymentState()
-	deploymentState.CommitVersion("build", runCtx.GetReleaseMetadata())
+	deploymentState.CommitVersion(Stage, runCtx.GetReleaseMetadata())
 	c.Assert(NewPreBuildRunner().Run(runCtx), IsNil)
-	c.Assert(deploymentState.GetVersion("build"), Equals, "0.0.1")
+	c.Assert(deploymentState.GetVersion(Stage), Equals, "0.0.1")
 	checkStatus(c, runCtx, types.RunningPreStep)
 }
 
@@ -76,19 +76,19 @@ func (s *testSuite) Test_PreBuildRunner_failing_script(c *C) {
 
 func (s *testSuite) Test_PreBuildRunner_propagates_default_updates(c *C) {
 	runCtx := getRunContext(c, "testdata/pre_build_default_state.json", "testdata/pre_build_plan.yml")
-	runCtx.GetDeploymentState().UpdateInputs("build", nil)
-	c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs("build"), HasLen, 0)
+	runCtx.GetDeploymentState().UpdateInputs(Stage, nil)
+	c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs(Stage), HasLen, 0)
 	runCtx.GetReleaseMetadata().Stages["pre_build"].Script = ""
 	runCtx.GetReleaseMetadata().Inputs[0].Default = "test"
 
 	c.Assert(NewPreBuildRunner().Run(runCtx), IsNil)
-	c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs("build"), HasLen, 1)
-	c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs("build")["variable"], Equals, "test")
+	c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs(Stage), HasLen, 1)
+	c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs(Stage)["variable"], Equals, "test")
 
 	runCtx.GetReleaseMetadata().Inputs[0].Default = "another test"
 	c.Assert(NewPreBuildRunner().Run(runCtx), IsNil)
-	c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs("build"), HasLen, 2)
-	c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs("build")["variable"], Equals, "another test")
-	c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs("build")["PREVIOUS_variable"], Equals, "test")
+	c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs(Stage), HasLen, 2)
+	c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs(Stage)["variable"], Equals, "another test")
+	c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs(Stage)["PREVIOUS_variable"], Equals, "test")
 	checkStatus(c, runCtx, types.RunningPreStep)
 }

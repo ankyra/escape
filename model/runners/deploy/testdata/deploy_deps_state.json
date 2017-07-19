@@ -41,8 +41,8 @@
                                  },
                                  "version": "0.0.1",
                                  "status": {
-                                    "status": "running_post_step",
-                                    "updated_at": "2017-07-19T03:10:38.085251184+01:00"
+                                    "status": "ok",
+                                    "updated_at": "2017-07-19T03:20:33.183429158+01:00"
                                  }
                               }
                            }
@@ -50,8 +50,8 @@
                      },
                      "version": "0.0.1",
                      "status": {
-                        "status": "running_post_step",
-                        "updated_at": "2017-07-19T03:10:38.085753334+01:00"
+                        "status": "ok",
+                        "updated_at": "2017-07-19T03:20:33.184033284+01:00"
                      }
                   }
                }

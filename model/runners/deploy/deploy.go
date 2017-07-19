@@ -18,28 +18,32 @@ package deploy
 
 import (
 	. "github.com/ankyra/escape-client/model/runners"
+	"github.com/ankyra/escape-client/model/state/types"
 )
 
+var Stage = "deploy"
+
 func NewPreDeployRunner() Runner {
-	return NewPreScriptStepRunner("deploy", "pre_deploy")
+	return NewPreScriptStepRunner(Stage, "pre_deploy")
 }
 func NewMainDeployRunner() Runner {
-	return NewMainStepRunner("deploy", "deploy")
+	return NewMainStepRunner(Stage, "deploy")
 }
 
 func NewPostDeployRunner() Runner {
-	return NewPostScriptStepRunner("deploy", "post_deploy")
+	return NewPostScriptStepRunner(Stage, "post_deploy")
 }
 
 func NewSmokeRunner() Runner {
-	return NewScriptRunner("deploy", "smoke")
+	return NewScriptRunner(Stage, "smoke")
 }
 
 func NewDeployRunner() Runner {
 	return NewCompoundRunner(
-		NewDependencyRunner("deploy", "deploy", NewDeployRunner),
+		NewDependencyRunner(Stage, Stage, NewDeployRunner),
 		NewPreDeployRunner(),
 		NewMainDeployRunner(),
 		NewPostDeployRunner(),
+		NewStatusCodeRunner(Stage, types.OK),
 	)
 }

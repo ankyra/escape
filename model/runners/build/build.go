@@ -39,7 +39,7 @@ func NewTestRunner() Runner {
 
 func NewBuildRunner() Runner {
 	return NewCompoundRunner(
-		NewDependencyRunner("deploy", Stage, deploy.NewDeployRunner),
+		NewDependencyRunner(deploy.Stage, Stage, deploy.NewDeployRunner),
 		NewPreBuildRunner(),
 		NewMainBuildRunner(),
 		NewPostBuildRunner(),
