@@ -1,23 +1,20 @@
 {
    "name": "1000",
-   "inputs": {},
    "environments": {
       "dev": {
          "name": "dev",
-         "inputs": null,
          "deployments": {
             "_/name": {
                "name": "_/name",
+               "release": "_/name",
                "stages": {
                   "build": {
-                     "inputs": {},
-                     "calculated_inputs": {},
-                     "calculated_outputs": {},
-                     "version": "",
-                     "step": ""
+                     "status": {
+                        "status": "empty",
+                        "updated_at": "2017-07-19T03:36:12.905906168+01:00"
+                     }
                   },
                   "deploy": {
-                     "inputs": {},
                      "calculated_inputs": {
                         "variable": "testinput"
                      },
@@ -25,12 +22,12 @@
                         "variable": "testoutput test"
                      },
                      "version": "0.0.1",
-                     "step": ""
+                     "status": {
+                        "status": "ok",
+                        "updated_at": "2017-07-19T03:53:12.406983009+01:00"
+                     }
                   }
-               },
-               "inputs": {},
-               "deployments": {},
-               "providers": {}
+               }
             }
          }
       }

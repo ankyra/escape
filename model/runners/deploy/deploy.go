@@ -24,23 +24,23 @@ import (
 var Stage = "deploy"
 
 func NewPreDeployRunner() Runner {
-	return NewPreScriptStepRunner(Stage, "pre_deploy")
+	return NewPreScriptStepRunner(Stage, "pre_deploy", types.RunningPreStep, types.Failure)
 }
 func NewMainDeployRunner() Runner {
-	return NewMainStepRunner(Stage, "deploy")
+	return NewMainStepRunner(Stage, "deploy", types.RunningMainStep, types.Failure)
 }
 
 func NewPostDeployRunner() Runner {
-	return NewPostScriptStepRunner(Stage, "post_deploy")
+	return NewPostScriptStepRunner(Stage, "post_deploy", types.RunningPostStep, types.Failure)
 }
 
 func NewSmokeRunner() Runner {
-	return NewScriptRunner(Stage, "smoke")
+	return NewScriptRunner(Stage, "smoke", types.OK, types.TestFailure)
 }
 
 func NewDeployRunner() Runner {
 	return NewCompoundRunner(
-		NewDependencyRunner(Stage, Stage, NewDeployRunner),
+		NewDependencyRunner(Stage, Stage, NewDeployRunner, types.Failure),
 		NewPreDeployRunner(),
 		NewMainDeployRunner(),
 		NewPostDeployRunner(),

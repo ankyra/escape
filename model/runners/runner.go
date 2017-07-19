@@ -43,16 +43,16 @@ func NewStatusCodeRunner(stage string, status types.StatusCode) Runner {
 	})
 }
 
-func NewDependencyRunner(logKey, stage string, depRunner func() Runner) Runner {
+func NewDependencyRunner(logKey, stage string, depRunner func() Runner, errorCode types.StatusCode) Runner {
 	return NewRunner(func(ctx RunnerContext) error {
 		parentInputs, err := NewEnvironmentBuilder().GetPreDependencyInputs(ctx, stage)
 		if err != nil {
-			return ReportFailure(ctx, stage, err)
+			return ReportFailure(ctx, stage, err, errorCode)
 		}
 		metadata := ctx.GetReleaseMetadata()
 		for _, depend := range metadata.Depends {
 			if err := runDependency(ctx, depend, logKey, stage, depRunner(), parentInputs); err != nil {
-				return ReportFailure(ctx, stage, err)
+				return ReportFailure(ctx, stage, err, errorCode)
 			}
 		}
 		return nil

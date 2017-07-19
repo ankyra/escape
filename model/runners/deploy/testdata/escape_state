@@ -1,5 +1,5 @@
 {
-   "name": "1000",
+   "name": "bspaans",
    "environments": {
       "dev": {
          "name": "dev",
@@ -9,13 +9,9 @@
                "release": "_/name",
                "stages": {
                   "deploy": {
-                     "calculated_inputs": {
-                        "variable": "testinput"
-                     },
-                     "version": "0.0.1",
                      "status": {
-                        "status": "running_post_step",
-                        "updated_at": "2017-07-19T03:53:12.309403022+01:00"
+                        "status": "test_failure",
+                        "updated_at": "2017-07-19T03:53:12.397002745+01:00"
                      }
                   }
                }
