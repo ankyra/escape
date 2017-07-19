@@ -17,7 +17,7 @@ and operational systems with a cohesive model.
 * Common release engineering tasks: optional automatic versioning, version
   control linking, packaging, uploading, downloading, templating
 * Operations as code
-* Releases that work with Docker, Packer, Kubernetes, Terraform
+* Extensions to work with Docker, Packer, Kubernetes, Terraform, ...
 
 ## Installation
 
@@ -201,7 +201,53 @@ release process.
 
 ### Inputs and outputs
 
-For more information on the scripting language see https://github.com/ankyra/escape-core/
+It's easy to take a string input
+
+```
+name: my-project/my-deployment-unit
+version: 0.0.@
+inputs:
+- my_variable
+```
+
+Or in the longer form:
+
+```
+name: my-project/my-deployment-unit
+version: 0.0.@
+inputs:
+- id: my_variable
+  type: string
+```
+
+We can also specify the types `integer`, `bool` and `list`.
+
+```
+name: my-project/my-deployment-unit
+version: 0.0.@
+inputs:
+- id: my_variable
+  type: bool
+  default: true
+  description: "Is this a boolean?"
+  friendly: "My Variable"
+```
+
+We can tell it to pick a value out of a list:
+
+```
+name: my-project/my-deployment-unit
+version: 0.0.@
+inputs:
+- id: my_variable
+  type: string
+  items:
+  - choice number 1
+  - choice number 2
+```
+
+And calculate a default value:
+
 
 ### State management
 
@@ -209,15 +255,76 @@ For more information on the scripting language see https://github.com/ankyra/esc
 
 ### Dependencies
 
+```
+name: my-project/my-deployment-unit
+version: 0.0.@
+depends:
+- stdlib-latest
+```
+
 A unit can use its dependencies' outputs as its own inputs.
+
+For more information on the scripting language see https://github.com/ankyra/escape-core/
 
 ### Providers and Consumers
 
-A unit can consume a provider
+
+```
+name: my-project/my-provider
+version: 0.0.@
+provides:
+- a-provider
+
+outputs:
+- id: test_output
+  default: hello world
+```
+
+```
+name: my-project/my-consumer
+version: 0.0.@
+consumes:
+- a-provider
+
+inputs:
+- id: test_input
+  default: $a-provider.outputs.test_output
+```
+
 
 ### Extensions
 
+```
+name: my-project/my-deployment-unit
+version: 0.0.@
+extends:
+- extension-docker-latest
+```
+
 ### Templates
+
+```
+name: my-project/my-deployment-unit
+version: 0.0.@
+inputs:
+- my_variable
+
+templates:
+- file: output.txt.tpl
+```
+
+```
+name: my-project/my-deployment-unit
+version: 0.0.@
+inputs:
+- my_variable
+
+templates:
+- file: output.txt.tpl
+  mapping:
+    input: $this.inputs.my_variable
+    input2: "yo"
+```
 
 ## Example releases
 
