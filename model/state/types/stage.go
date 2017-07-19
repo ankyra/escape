@@ -24,7 +24,7 @@ type StageState struct {
 	Providers   map[string]string           `json:"providers,omitempty"`
 	Provides    []string                    `json:"provides,omitempty"`
 	Version     string                      `json:"version,omitempty"`
-	Step        string                      `json:"step,omitempty"`
+	Status      *Status                     `json:"status,omitempty"`
 	Name        string                      `json:"-"`
 }
 
@@ -36,6 +36,7 @@ func newStage() *StageState {
 		Providers:   map[string]string{},
 		Provides:    []string{},
 		Deployments: map[string]*DeploymentState{},
+		Status:      NewStatus(Empty),
 	}
 }
 
@@ -58,6 +59,13 @@ func (st *StageState) validateAndFix(name string, envState *EnvironmentState, de
 	}
 	if st.Deployments == nil {
 		st.Deployments = map[string]*DeploymentState{}
+	}
+	if st.Status == nil { // bootstrap old state files
+		if st.Version == "" {
+			st.Status = NewStatus(Empty)
+		} else {
+			st.Status = NewStatus(OK)
+		}
 	}
 	for name, depl := range st.Deployments {
 		depl.Name = name

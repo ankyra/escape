@@ -20,39 +20,39 @@ import (
 	"time"
 )
 
-type StatusCode int
+type StatusCode string
 
 const (
 	// Initial state
-	Empty StatusCode = iota
+	Empty StatusCode = "empty"
 
 	// Configured, but not running
-	Pending
+	Pending = "pending"
 
 	// Build and deployment phase
-	RunningPreStep
-	RunningMainStep
-	RunningPostStep
+	RunningPreStep  = "running_pre_step"
+	RunningMainStep = "running_main_step"
+	RunningPostStep = "running_post_step"
 
 	// Build and deployment failure
-	Failure
+	Failure = "failure"
 
 	// Build, deployment, test and smoke success
-	OK
+	OK = "ok"
 
 	// Test and smoke phase
-	RunningTestStep
+	RunningTestStep = "running_test_step"
 
 	// Test and smoke failure
-	TestFailure
+	TestFailure = "test_failure"
 
 	// Destroy phase
-	RunningPreDestroyStep
-	RunningMainDestroyStep
-	RunningPostDestroyStep
+	RunningPreDestroyStep  = "running_pre_destroy_step"
+	RunningMainDestroyStep = "running_main_destroy_step"
+	RunningPostDestroyStep = "running_post_destroy_step"
 
 	// Destroy failure
-	DestroyFailure
+	DestroyFailure = "destroy_failure"
 )
 
 var ErrorStatuses = map[StatusCode]bool{
@@ -69,9 +69,9 @@ var RunningStatus = map[StatusCode]bool{}
 
 type Status struct {
 	Code      StatusCode `json:"status"`
-	UpdatedAt time.Time  `json:"updated_at"`
-	UpdatedBy string     `json:"updated_by"`
-	Data      string     `json:"data"`
+	UpdatedAt time.Time  `json:"updated_at,omitempty"`
+	UpdatedBy string     `json:"updated_by,omitempty"`
+	Data      string     `json:"data,omitempty"`
 }
 
 func NewStatus(code StatusCode) *Status {
