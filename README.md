@@ -187,7 +187,7 @@ build: build_my_thing.sh
 
 This will first build `1.0.0`, but once that's been released it will take
 `1.0.1`, `1.0.2`, `1.0.3`, ...  If we want to work on a new minor version, we
-can do change the field manually to:
+can change the field manually to:
 
 ```
 name: my-project/my-deployment-unit

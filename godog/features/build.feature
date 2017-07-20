@@ -68,7 +68,8 @@ Feature: Running the build phase
        Then "_/my-consumer" version "0.0.0" is present in the build state
         And "_/my-provider" is the provider for "provider"
 
-    Scenario: Build with provider (output linking)
+
+    Scenario: Build with provider (output -> default linking)
       Given a new Escape plan called "my-provider2"
         And it provides "provider"
         And output variable "output_variable" with default "test"
@@ -84,3 +85,22 @@ Feature: Running the build phase
        Then "_/my-consumer" version "0.0.0" is present in the build state
         And "_/my-provider2" is the provider for "provider"
         And its calculated input "input_variable" is set to "test"
+
+
+    Scenario: Build with provider (output -> items linking)
+      Given a new Escape plan called "my-provider3"
+        And it provides "provider"
+        And output variable "default_output" with default "a"
+        And list output variable "output_variable" with default '["a", "b", "c"]'
+        And I release the application
+       When I deploy "_/my-provider3-v0.0.0"
+       Then "_/my-provider3" version "0.0.0" is present in the deploy state
+        And its calculated output "default_output" is set to "a"
+
+      Given a new Escape plan called "my-consumer"
+        And it consumes "provider"
+        And input variable "input_variable" with default "$provider.outputs.default_output" and items "$provider.outputs.output_variable"
+       When I build the application
+       Then "_/my-consumer" version "0.0.0" is present in the build state
+        And "_/my-provider3" is the provider for "provider"
+        And its calculated input "input_variable" is set to "a"

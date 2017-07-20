@@ -226,10 +226,26 @@ func LiftList(l []Script) Script {
 	return &list{List: l}
 }
 func (l *list) Eval(env *ScriptEnvironment) (Script, error) {
-	return l, nil
+	result := []Script{}
+	for _, i := range l.List {
+		val, err := i.Eval(env)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, val)
+	}
+	return LiftList(result), nil
 }
 func (l *list) Value() (interface{}, error) {
-	return l.List, nil
+	result := []interface{}{}
+	for _, i := range l.List {
+		val, err := i.Value()
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, val)
+	}
+	return result, nil
 }
 func (l *list) Type() ValueType {
 	return NewType("list")

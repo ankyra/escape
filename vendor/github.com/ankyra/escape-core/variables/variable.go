@@ -36,7 +36,7 @@ type Variable struct {
 	Visible                bool                   `json:"visible"`
 	Options                map[string]interface{} `json:"options,omitempty"`
 	Sensitive              bool                   `json:"sensitive,omitempty"`
-	Items                  []interface{}          `json:"items"`
+	Items                  interface{}            `json:"items"`
 	EvalBeforeDependencies bool                   `json:"eval_before_dependencies,omitempty"`
 }
 
@@ -144,7 +144,7 @@ func (v *Variable) getValueForUserManagedVariable(variableCtx *map[string]interf
 	if err != nil {
 		return nil, errors.New(err.Error() + " for variable '" + v.Id + "'")
 	}
-	return v.validateOneOf(val)
+	return v.validateOneOf(env, val)
 }
 
 func (v *Variable) getValue(variableCtx *map[string]interface{}, env *script.ScriptEnvironment) (interface{}, error) {
@@ -201,12 +201,45 @@ func (v *Variable) parseEvalAndGetValue(str string, env *script.ScriptEnvironmen
 	return result, nil
 }
 
-func (v *Variable) validateOneOf(item interface{}) (interface{}, error) {
+func (v *Variable) validateOneOf(env *script.ScriptEnvironment, item interface{}) (interface{}, error) {
 	items := v.Items
+	return v.validateOneOfInterface(env, item, items)
+}
+
+func (v *Variable) validateOneOfInterface(env *script.ScriptEnvironment, item interface{}, items interface{}) (interface{}, error) {
 	if items == nil {
 		return item, nil
 	}
+	switch items.(type) {
+	case string:
+		pv, err := v.parseEvalAndGetValue(items.(string), env)
+		if err != nil {
+			return nil, fmt.Errorf("In items field of variable '%s': %s", v.Id, err.Error())
+		}
+		_, isString := pv.(string)
+		if isString {
+			if pv == item {
+				return item, nil
+			}
+			return nil, fmt.Errorf("Unexpected value '%s' for variable '%s', only '%s' is allowed", item, v.Id, pv)
+		}
+		return v.validateOneOfInterface(env, item, pv)
+	case []interface{}:
+		return v.validateOneOfList(env, item, items.([]interface{}))
+	}
+	return nil, fmt.Errorf("Unexpected type '%T' for 'items' field of variable '%s'", items, v.Id)
+}
+
+func (v *Variable) validateOneOfList(env *script.ScriptEnvironment, item interface{}, items []interface{}) (interface{}, error) {
 	for _, i := range items {
+		_, isString := i.(string)
+		if isString {
+			pv, err := v.parseEvalAndGetValue(i.(string), env)
+			if err != nil {
+				return nil, fmt.Errorf("In items field of variable '%s': %s", v.Id, err.Error())
+			}
+			i = pv
+		}
 		if i == item {
 			return item, nil
 		}

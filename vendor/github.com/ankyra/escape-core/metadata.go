@@ -31,7 +31,7 @@ import (
 	"strings"
 )
 
-const CurrentApiVersion = 3
+const CurrentApiVersion = 4
 
 type ExecStage struct {
 	Script string `json:"script"`

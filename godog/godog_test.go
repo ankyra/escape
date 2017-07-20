@@ -27,6 +27,7 @@ func StartRegistry() {
 		os.RemoveAll("escape_state.json")
 		os.RemoveAll("escape.yml")
 		os.RemoveAll("releases/")
+		os.RemoveAll("deps/")
 		os.Mkdir("releases/", 0755)
 		env := []string{
 			"DATABASE=sqlite",
@@ -76,7 +77,25 @@ func inputVariableWithDefault(variableId, defaultValue string) error {
 	return ioutil.WriteFile("escape.yml", plan.ToMinifiedYaml(), 0644)
 }
 
+func inputVariableWithDefaultAndItems(variableId, defaultValue, items string) error {
+	plan := escape_plan.NewEscapePlan()
+	err := plan.LoadConfig("escape.yml")
+	if err != nil {
+		return nil
+	}
+	plan.Inputs = append(plan.Inputs, map[string]interface{}{
+		"id":      variableId,
+		"default": defaultValue,
+		"items":   items,
+	})
+	return ioutil.WriteFile("escape.yml", plan.ToMinifiedYaml(), 0644)
+}
+
 func outputVariableWithDefault(variableId, defaultValue string) error {
+	return outputVariable("string", variableId, defaultValue)
+}
+
+func outputVariable(typ, variableId, defaultValue string) error {
 	plan := escape_plan.NewEscapePlan()
 	err := plan.LoadConfig("escape.yml")
 	if err != nil {
@@ -85,8 +104,13 @@ func outputVariableWithDefault(variableId, defaultValue string) error {
 	plan.Outputs = append(plan.Outputs, map[string]interface{}{
 		"id":      variableId,
 		"default": defaultValue,
+		"type":    typ,
 	})
 	return ioutil.WriteFile("escape.yml", plan.ToMinifiedYaml(), 0644)
+}
+
+func outputListVariableWithDefault(variableId, defaultValue string) error {
+	return outputVariable("list[string]", variableId, defaultValue)
 }
 
 func itHasSetTo(arg1, arg2 string) error {
@@ -149,6 +173,7 @@ func iDeploy(arg1 string) error {
 	if err != nil {
 		fmt.Println(stdout)
 	}
+	CapturedStage = "deploy"
 	return err
 }
 
@@ -279,6 +304,7 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^"([^"]*)" version "([^"]*)" is present in the build state$`, versionIsPresentInTheBuildState)
 	s.Step(`^"([^"]*)" version "([^"]*)" is present in the deploy state$`, versionIsPresentInTheDeployState)
 	s.Step(`^input variable "([^"]*)" with default "([^"]*)"$`, inputVariableWithDefault)
+	s.Step(`^input variable "([^"]*)" with default "([^"]*)" and items "([^"]*)"$`, inputVariableWithDefaultAndItems)
 	s.Step(`^its calculated input "([^"]*)" is set to "([^"]*)"$`, itsCalculatedInputIsSetTo)
 	s.Step(`^its calculated output "([^"]*)" is set to "([^"]*)"$`, itsCalculatedOutputIsSetTo)
 	s.Step(`^I release the application$`, iReleaseTheApplication)
@@ -289,6 +315,8 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^it consumes "([^"]*)"$`, itConsumes)
 	s.Step(`^"([^"]*)" is the provider for "([^"]*)"$`, isTheProviderFor)
 	s.Step(`^output variable "([^"]*)" with default "([^"]*)"$`, outputVariableWithDefault)
+	s.Step(`^output variable "([^"]*)" with default '([^']*)'$`, outputVariableWithDefault)
+	s.Step(`^list output variable "([^"]*)" with default '([^']*)'$`, outputListVariableWithDefault)
 
 	s.BeforeScenario(func(interface{}) {
 		StartRegistry()

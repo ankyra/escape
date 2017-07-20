@@ -1,5 +1,8 @@
 # Escape Core
 
+Core library containing datastructures for working with Release Metadata and
+the Escape Scripting Language.
+
 Please see http://escape.ankyra.io for the full documentation.
 
 ## Build
@@ -11,10 +14,10 @@ git clone https://github.com/ankyra/escape-core.git "$GOPATH/src/github.com/anky
 go build
 ```
 
-## Build
+To run all the tests:
 
 ```
-make test
+make go-test
 ```
 
 ## License
