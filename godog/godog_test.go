@@ -76,6 +76,19 @@ func inputVariableWithDefault(variableId, defaultValue string) error {
 	return ioutil.WriteFile("escape.yml", plan.ToMinifiedYaml(), 0644)
 }
 
+func outputVariableWithDefault(variableId, defaultValue string) error {
+	plan := escape_plan.NewEscapePlan()
+	err := plan.LoadConfig("escape.yml")
+	if err != nil {
+		return nil
+	}
+	plan.Outputs = append(plan.Outputs, map[string]interface{}{
+		"id":      variableId,
+		"default": defaultValue,
+	})
+	return ioutil.WriteFile("escape.yml", plan.ToMinifiedYaml(), 0644)
+}
+
 func itHasSetTo(arg1, arg2 string) error {
 	plan := map[string]interface{}{}
 	bytes, err := ioutil.ReadFile("escape.yml")
@@ -97,6 +110,18 @@ func itsCalculatedInputIsSetTo(key, value string) error {
 	inputs := CapturedDeployment.GetCalculatedInputs(CapturedStage)
 	v, found := inputs[key]
 	if !found {
+		return fmt.Errorf("'%s' not found in calculated inputs", key)
+	}
+	if v != value {
+		return fmt.Errorf("Expecting '%s', got '%s'", value, v)
+	}
+	return nil
+}
+
+func itsCalculatedOutputIsSetTo(key, value string) error {
+	inputs := CapturedDeployment.GetCalculatedOutputs(CapturedStage)
+	v, found := inputs[key]
+	if !found {
 		return fmt.Errorf("'%s' not found in calculated outputs", key)
 	}
 	if v != value {
@@ -108,6 +133,17 @@ func itsCalculatedInputIsSetTo(key, value string) error {
 func iBuildTheApplication() error {
 	rec := util.NewProcessRecorder()
 	cmd := []string{"escape", "build"}
+	stdout, err := rec.Record(cmd, nil, eutil.NewLoggerDummy())
+	CapturedStdout = stdout
+	if err != nil {
+		fmt.Println(stdout)
+	}
+	return err
+}
+
+func iDeploy(arg1 string) error {
+	rec := util.NewProcessRecorder()
+	cmd := []string{"escape", "deploy", arg1}
 	stdout, err := rec.Record(cmd, nil, eutil.NewLoggerDummy())
 	CapturedStdout = stdout
 	if err != nil {
@@ -137,6 +173,38 @@ func itHasAsADependency(dependency string) error {
 	return ioutil.WriteFile("escape.yml", plan.ToMinifiedYaml(), 0644)
 }
 
+func itProvides(arg1 string) error {
+	plan := escape_plan.NewEscapePlan()
+	err := plan.LoadConfig("escape.yml")
+	if err != nil {
+		return nil
+	}
+	plan.Provides = append(plan.Provides, arg1)
+	return ioutil.WriteFile("escape.yml", plan.ToMinifiedYaml(), 0644)
+}
+
+func itConsumes(arg1 string) error {
+	plan := escape_plan.NewEscapePlan()
+	err := plan.LoadConfig("escape.yml")
+	if err != nil {
+		return nil
+	}
+	plan.Consumes = append(plan.Consumes, arg1)
+	return ioutil.WriteFile("escape.yml", plan.ToMinifiedYaml(), 0644)
+}
+
+func isTheProviderFor(deploymentName, providerName string) error {
+	d := CapturedDeployment.GetDeployment("build", deploymentName)
+	prov, found := d.GetProviders("build")[providerName]
+	if !found {
+		return fmt.Errorf("'%s' provider not found", providerName)
+	}
+	if prov != deploymentName {
+		return fmt.Errorf("'%s' provider is '%s' not expected '%s'", providerName, prov, deploymentName)
+	}
+	return nil
+}
+
 func versionIsPresentInItsDeploymentState(deploymentName, version string) error {
 	d := CapturedDeployment.GetDeployment("build", deploymentName)
 	if d.GetVersion("deploy") != version {
@@ -158,6 +226,20 @@ func versionIsPresentInTheBuildState(deploymentName, version string) error {
 	}
 	CapturedDeployment = d
 	CapturedStage = "build"
+	return nil
+}
+
+func versionIsPresentInTheDeployState(deploymentName, version string) error {
+	env, err := state.NewLocalStateProvider("escape_state.json").Load("prj", "dev")
+	if err != nil {
+		return err
+	}
+	d := env.GetOrCreateDeploymentState(deploymentName)
+	if d.GetVersion("deploy") != version {
+		return fmt.Errorf("Expecting '%s', got '%s'", version, d.GetVersion("build"))
+	}
+	CapturedDeployment = d
+	CapturedStage = "deploy"
 	return nil
 }
 
@@ -192,13 +274,22 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^I should have valid release metadata$`, iShouldHaveValidReleaseMetadata)
 	s.Step(`^the metadata should have its "([^"]*)" set to "([^"]*)"$`, theMetadataShouldHaveItsSetTo)
 	s.Step(`^I build the application$`, iBuildTheApplication)
+	s.Step(`^I build the application again$`, iBuildTheApplication)
+	s.Step(`^I deploy "([^"]*)"$`, iDeploy)
 	s.Step(`^"([^"]*)" version "([^"]*)" is present in the build state$`, versionIsPresentInTheBuildState)
+	s.Step(`^"([^"]*)" version "([^"]*)" is present in the deploy state$`, versionIsPresentInTheDeployState)
 	s.Step(`^input variable "([^"]*)" with default "([^"]*)"$`, inputVariableWithDefault)
 	s.Step(`^its calculated input "([^"]*)" is set to "([^"]*)"$`, itsCalculatedInputIsSetTo)
+	s.Step(`^its calculated output "([^"]*)" is set to "([^"]*)"$`, itsCalculatedOutputIsSetTo)
 	s.Step(`^I release the application$`, iReleaseTheApplication)
 	s.Step(`^it has "([^"]*)" as a dependency$`, itHasAsADependency)
 	s.Step(`^it has "([^"]*)" set to "([^"]*)"$`, itHasSetTo)
 	s.Step(`^"([^"]*)" version "([^"]*)" is present in its deployment state$`, versionIsPresentInItsDeploymentState)
+	s.Step(`^it provides "([^"]*)"$`, itProvides)
+	s.Step(`^it consumes "([^"]*)"$`, itConsumes)
+	s.Step(`^"([^"]*)" is the provider for "([^"]*)"$`, isTheProviderFor)
+	s.Step(`^output variable "([^"]*)" with default "([^"]*)"$`, outputVariableWithDefault)
+
 	s.BeforeScenario(func(interface{}) {
 		StartRegistry()
 	})

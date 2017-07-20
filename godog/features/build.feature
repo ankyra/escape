@@ -20,13 +20,13 @@ Feature: Running the build phase
     Scenario: Default input variables update on every build
       Given a new Escape plan called "my-release"
         And input variable "input_variable" with default "test"
-        And I build the application
-        And "_/my-release" version "0.0.0" is present in the build state
+       When I build the application
+       Then "_/my-release" version "0.0.0" is present in the build state
         And its calculated input "input_variable" is set to "test"
         And input variable "input_variable" with default "new default baby"
-      When I build the application
-      Then "_/my-release" version "0.0.0" is present in the build state
-       And its calculated input "input_variable" is set to "new default baby"
+       When I build the application
+       Then "_/my-release" version "0.0.0" is present in the build state
+        And its calculated input "input_variable" is set to "new default baby"
 
     Scenario: Default build with dependencies
       Given a new Escape plan called "my-dependency"
@@ -44,15 +44,43 @@ Feature: Running the build phase
       Given a new Escape plan called "my-input-dependency"
         And input variable "input_variable" with default "test"
         And I release the application
-        And a new Escape plan called "my-release"
+      Given a new Escape plan called "my-release"
         And it has "my-input-dependency-latest" as a dependency 
-        And I build the application
-        And "_/my-release" version "0.0.0" is present in the build state
+       When I build the application
+       Then "_/my-release" version "0.0.0" is present in the build state
         And "_/my-input-dependency" version "0.0.0" is present in its deployment state
         And its calculated input "input_variable" is set to "test"
         And input variable "input_variable" with default "new default baby"
-      When I build the application
-      Then "_/my-release" version "0.0.0" is present in the build state
-       And "_/my-input-dependency" version "0.0.0" is present in its deployment state
-       And its calculated input "PREVIOUS_input_variable" is set to "test"
-       And its calculated input "input_variable" is set to "new default baby"
+       When I build the application again
+       Then "_/my-release" version "0.0.0" is present in the build state
+        And "_/my-input-dependency" version "0.0.0" is present in its deployment state
+        And its calculated input "PREVIOUS_input_variable" is set to "test"
+        And its calculated input "input_variable" is set to "new default baby"
+       
+    Scenario: Build with provider (simplest case)
+      Given a new Escape plan called "my-provider"
+        And it provides "provider"
+        And I release the application
+      Given a new Escape plan called "my-consumer"
+        And it consumes "provider"
+       When I deploy "my-provider-v0.0.0"
+        And I build the application
+       Then "_/my-consumer" version "0.0.0" is present in the build state
+        And "_/my-provider" is the provider for "provider"
+
+    Scenario: Build with provider (output linking)
+      Given a new Escape plan called "my-provider2"
+        And it provides "provider"
+        And output variable "output_variable" with default "test"
+        And I release the application
+       When I deploy "_/my-provider2-v0.0.0"
+       Then "_/my-provider2" version "0.0.0" is present in the deploy state
+        And its calculated output "output_variable" is set to "test"
+
+      Given a new Escape plan called "my-consumer"
+        And it consumes "provider"
+        And input variable "input_variable" with default "$provider.outputs.output_variable"
+       When I build the application
+       Then "_/my-consumer" version "0.0.0" is present in the build state
+        And "_/my-provider2" is the provider for "provider"
+        And its calculated input "input_variable" is set to "test"
