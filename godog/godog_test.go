@@ -1,4 +1,4 @@
-package main
+package godog
 
 import (
 	"encoding/json"

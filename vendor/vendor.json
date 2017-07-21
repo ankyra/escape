@@ -3,12 +3,6 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "DdY9Kw+VClMSZdjFUTRIxzHL/Mc=",
-			"path": "github.com/DATA-DOG/godog",
-			"revision": "70f777599da0f5de682b8848d356611c1738b695",
-			"revisionTime": "2017-07-02T16:22:23Z"
-		},
-		{
 			"checksumSHA1": "wbBy+PwuadGhTgX7IP05lwIR+Qs=",
 			"path": "github.com/DATA-DOG/godog/colors",
 			"revision": "70f777599da0f5de682b8848d356611c1738b695",
@@ -212,6 +206,11 @@
 			"path": "github.com/spf13/pflag",
 			"revision": "e57e3eeb33f795204c1ca35f56c44f83227c6e66",
 			"revisionTime": "2017-05-08T18:43:26Z"
+		},
+		{
+			"checksumSHA1": "HsVYpgtd2iRZeBbJJHdnFgGMr4s=",
+			"path": "go",
+			"revision": ""
 		},
 		{
 			"checksumSHA1": "ziMb9+ANGRJSSIuxYdRbA+cDRBQ=",
