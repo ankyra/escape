@@ -2,8 +2,8 @@ package runners
 
 import (
 	"github.com/ankyra/escape-client/model/paths"
-	"github.com/ankyra/escape-client/model/state/types"
 	core "github.com/ankyra/escape-core"
+	"github.com/ankyra/escape-core/state"
 	"os"
 )
 
@@ -36,14 +36,14 @@ func NewCompoundRunner(runners ...Runner) Runner {
 	})
 }
 
-func NewStatusCodeRunner(stage string, status types.StatusCode) Runner {
+func NewStatusCodeRunner(stage string, status state.StatusCode) Runner {
 	return NewRunner(func(ctx RunnerContext) error {
-		st := types.NewStatus(status)
+		st := state.NewStatus(status)
 		return ctx.GetDeploymentState().UpdateStatus(stage, st)
 	})
 }
 
-func NewDependencyRunner(logKey, stage string, depRunner func() Runner, errorCode types.StatusCode) Runner {
+func NewDependencyRunner(logKey, stage string, depRunner func() Runner, errorCode state.StatusCode) Runner {
 	return NewRunner(func(ctx RunnerContext) error {
 		parentInputs, err := NewEnvironmentBuilder().GetPreDependencyInputs(ctx, stage)
 		if err != nil {

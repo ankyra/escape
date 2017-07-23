@@ -17,7 +17,7 @@ limitations under the License.
 package build
 
 import (
-	"github.com/ankyra/escape-client/model/state/types"
+	"github.com/ankyra/escape-core/state"
 	. "gopkg.in/check.v1"
 	"os"
 	"testing"
@@ -32,21 +32,21 @@ var _ = Suite(&testSuite{})
 func (s *testSuite) Test_PreBuildRunner(c *C) {
 	runCtx := getRunContext(c, "testdata/pre_build_state.json", "testdata/pre_build_plan.yml")
 	c.Assert(NewPreBuildRunner().Run(runCtx), IsNil)
-	checkStatus(c, runCtx, types.RunningPreStep)
+	checkStatus(c, runCtx, state.RunningPreStep)
 }
 
 func (s *testSuite) Test_PreBuildRunner_no_script_defined(c *C) {
 	os.RemoveAll("testdata/escape_state")
 	runCtx := getRunContext(c, "testdata/escape_state", "testdata/plan.yml")
 	c.Assert(NewPreBuildRunner().Run(runCtx), IsNil)
-	checkStatus(c, runCtx, types.RunningPreStep)
+	checkStatus(c, runCtx, state.RunningPreStep)
 }
 
 func (s *testSuite) Test_PreBuildRunner_missing_test_file(c *C) {
 	runCtx := getRunContext(c, "testdata/pre_build_state.json", "testdata/plan.yml")
 	runCtx.GetReleaseMetadata().SetStage("pre_build", "testdata/doesnt_exist.sh")
 	c.Assert(NewPreBuildRunner().Run(runCtx), Not(IsNil))
-	checkStatus(c, runCtx, types.Failure)
+	checkStatus(c, runCtx, state.Failure)
 }
 
 func (s *testSuite) Test_PreBuildRunner_missing_deployment_state(c *C) {
@@ -55,7 +55,7 @@ func (s *testSuite) Test_PreBuildRunner_missing_deployment_state(c *C) {
 	err := NewPreBuildRunner().Run(runCtx)
 	c.Assert(err, Not(IsNil))
 	c.Assert(err.Error(), Equals, "Missing value for variable 'variable'")
-	checkStatus(c, runCtx, types.Failure)
+	checkStatus(c, runCtx, state.Failure)
 }
 
 func (s *testSuite) Test_PreBuildRunner_sets_version(c *C) {
@@ -64,14 +64,14 @@ func (s *testSuite) Test_PreBuildRunner_sets_version(c *C) {
 	deploymentState.CommitVersion(Stage, runCtx.GetReleaseMetadata())
 	c.Assert(NewPreBuildRunner().Run(runCtx), IsNil)
 	c.Assert(deploymentState.GetVersion(Stage), Equals, "0.0.1")
-	checkStatus(c, runCtx, types.RunningPreStep)
+	checkStatus(c, runCtx, state.RunningPreStep)
 }
 
 func (s *testSuite) Test_PreBuildRunner_failing_script(c *C) {
 	runCtx := getRunContext(c, "testdata/pre_build_state.json", "testdata/pre_build_plan.yml")
 	runCtx.GetReleaseMetadata().SetStage("pre_build", "testdata/failing_test.sh")
 	c.Assert(NewPreBuildRunner().Run(runCtx), Not(IsNil))
-	checkStatus(c, runCtx, types.Failure)
+	checkStatus(c, runCtx, state.Failure)
 }
 
 func (s *testSuite) Test_PreBuildRunner_propagates_default_updates(c *C) {
@@ -90,5 +90,5 @@ func (s *testSuite) Test_PreBuildRunner_propagates_default_updates(c *C) {
 	c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs(Stage), HasLen, 2)
 	c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs(Stage)["variable"], Equals, "another test")
 	c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs(Stage)["PREVIOUS_variable"], Equals, "test")
-	checkStatus(c, runCtx, types.RunningPreStep)
+	checkStatus(c, runCtx, state.RunningPreStep)
 }

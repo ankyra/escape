@@ -18,7 +18,7 @@ package destroy
 
 import (
 	. "github.com/ankyra/escape-client/model/runners"
-	"github.com/ankyra/escape-client/model/state/types"
+	"github.com/ankyra/escape-core/state"
 )
 
 func NewDestroyRunner(stage string) Runner {
@@ -32,11 +32,11 @@ func NewDestroyRunner(stage string) Runner {
 func NewPreDestroyRunner(stage string) Runner {
 	return NewRunner(func(ctx RunnerContext) error {
 		deferred := func() Runner { return NewDestroyRunner("deploy") }
-		err := NewDependencyRunner("destroy", stage, deferred, types.DestroyFailure).Run(ctx)
+		err := NewDependencyRunner("destroy", stage, deferred, state.DestroyFailure).Run(ctx)
 		if err != nil {
 			return err
 		}
-		return NewScriptRunner(stage, "pre_destroy", types.RunningPreStep, types.DestroyFailure).Run(ctx)
+		return NewScriptRunner(stage, "pre_destroy", state.RunningPreStep, state.DestroyFailure).Run(ctx)
 	})
 }
 
@@ -44,7 +44,7 @@ func NewMainDestroyRunner(stage string) Runner {
 	return NewRunner(func(ctx RunnerContext) error {
 		step := NewScriptStep(ctx, stage, "destroy", true)
 		step.ModifiesOutputVariables = true
-		return RunOrReportFailure(ctx, stage, step, types.RunningMainDestroyStep, types.DestroyFailure)
+		return RunOrReportFailure(ctx, stage, step, state.RunningMainDestroyStep, state.DestroyFailure)
 	})
 }
 
@@ -52,11 +52,11 @@ func NewPostDestroyRunner(stage string) Runner {
 	return NewRunner(func(ctx RunnerContext) error {
 		step := NewScriptStep(ctx, stage, "post_destroy", true)
 		step.Commit = deleteCommit
-		return RunOrReportFailure(ctx, stage, step, types.RunningPostDestroyStep, types.DestroyFailure)
+		return RunOrReportFailure(ctx, stage, step, state.RunningPostDestroyStep, state.DestroyFailure)
 	})
 }
 
-func deleteCommit(ctx RunnerContext, depl *types.DeploymentState, stage string) error {
+func deleteCommit(ctx RunnerContext, depl *state.DeploymentState, stage string) error {
 	if err := depl.CommitVersion(stage, ctx.GetReleaseMetadata()); err != nil {
 		return err
 	}
@@ -66,5 +66,5 @@ func deleteCommit(ctx RunnerContext, depl *types.DeploymentState, stage string) 
 	if err := depl.UpdateOutputs(stage, nil); err != nil {
 		return err
 	}
-	return ctx.GetDeploymentState().UpdateStatus(stage, types.NewStatus(types.Pending))
+	return ctx.GetDeploymentState().UpdateStatus(stage, state.NewStatus(state.Pending))
 }

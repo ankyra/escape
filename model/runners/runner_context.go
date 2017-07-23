@@ -20,17 +20,16 @@ import (
 	"fmt"
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/paths"
-	"github.com/ankyra/escape-client/model/state"
-	"github.com/ankyra/escape-client/model/state/types"
 	"github.com/ankyra/escape-client/util"
 	"github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/script"
+	"github.com/ankyra/escape-core/state"
 )
 
 type RunnerContext interface {
-	GetEnvironmentState() *types.EnvironmentState
-	GetDeploymentState() *types.DeploymentState
-	SetDeploymentState(*types.DeploymentState)
+	GetEnvironmentState() *state.EnvironmentState
+	GetDeploymentState() *state.DeploymentState
+	SetDeploymentState(*state.DeploymentState)
 	GetReleaseMetadata() *core.ReleaseMetadata
 	SetReleaseMetadata(*core.ReleaseMetadata)
 	Logger() util.Logger
@@ -46,8 +45,8 @@ type RunnerContext interface {
 }
 
 type runnerContext struct {
-	environmentState *types.EnvironmentState
-	deploymentState  *types.DeploymentState
+	environmentState *state.EnvironmentState
+	deploymentState  *state.DeploymentState
 	releaseMetadata  *core.ReleaseMetadata
 	path             *paths.Path
 	inputs           map[string]interface{}
@@ -79,11 +78,11 @@ func (r *runnerContext) GetPath() *paths.Path {
 	return r.path
 }
 
-func (r *runnerContext) GetEnvironmentState() *types.EnvironmentState {
+func (r *runnerContext) GetEnvironmentState() *state.EnvironmentState {
 	return r.environmentState
 }
 
-func (r *runnerContext) GetDeploymentState() *types.DeploymentState {
+func (r *runnerContext) GetDeploymentState() *state.DeploymentState {
 	return r.deploymentState
 }
 
@@ -91,7 +90,7 @@ func (r *runnerContext) GetRootDeploymentName() string {
 	return r.context.GetRootDeploymentName()
 }
 
-func (r *runnerContext) SetDeploymentState(d *types.DeploymentState) {
+func (r *runnerContext) SetDeploymentState(d *state.DeploymentState) {
 	r.deploymentState = d
 }
 

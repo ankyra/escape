@@ -18,7 +18,6 @@ package state
 
 import (
 	"fmt"
-	. "github.com/ankyra/escape-client/model/state/types"
 	"github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/script"
 )

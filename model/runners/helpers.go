@@ -20,8 +20,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ankyra/escape-client/model/paths"
-	state "github.com/ankyra/escape-client/model/state/types"
 	"github.com/ankyra/escape-client/util"
+	"github.com/ankyra/escape-core/state"
 	"io/ioutil"
 )
 

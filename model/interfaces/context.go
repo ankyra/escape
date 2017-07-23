@@ -20,9 +20,9 @@ import (
 	"github.com/ankyra/escape-client/model/config"
 	plan "github.com/ankyra/escape-client/model/escape_plan"
 	"github.com/ankyra/escape-client/model/registry"
-	state "github.com/ankyra/escape-client/model/state/types"
 	"github.com/ankyra/escape-client/util"
 	"github.com/ankyra/escape-core"
+	"github.com/ankyra/escape-core/state"
 )
 
 type Context interface {

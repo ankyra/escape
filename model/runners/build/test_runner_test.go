@@ -17,7 +17,7 @@ limitations under the License.
 package build
 
 import (
-	"github.com/ankyra/escape-client/model/state/types"
+	"github.com/ankyra/escape-core/state"
 	. "gopkg.in/check.v1"
 	"os"
 )
@@ -25,21 +25,21 @@ import (
 func (s *testSuite) Test_TestRunner(c *C) {
 	runCtx := getRunContext(c, "testdata/test_state.json", "testdata/test_plan.yml")
 	c.Assert(NewTestRunner().Run(runCtx), IsNil)
-	checkStatus(c, runCtx, types.OK)
+	checkStatus(c, runCtx, state.OK)
 }
 
 func (s *testSuite) Test_TestRunner_no_test_script_defined(c *C) {
 	os.RemoveAll("testdata/escape_state")
 	runCtx := getRunContext(c, "testdata/test_state.json", "testdata/plan.yml")
 	c.Assert(NewTestRunner().Run(runCtx), IsNil)
-	checkStatus(c, runCtx, types.OK)
+	checkStatus(c, runCtx, state.OK)
 }
 
 func (s *testSuite) Test_TestRunner_missing_test_file(c *C) {
 	runCtx := getRunContext(c, "testdata/test_state.json", "testdata/plan.yml")
 	runCtx.GetReleaseMetadata().SetStage("test", "testdata/doesnt_exist.sh")
 	c.Assert(NewTestRunner().Run(runCtx), Not(IsNil))
-	checkStatus(c, runCtx, types.TestFailure)
+	checkStatus(c, runCtx, state.TestFailure)
 }
 
 func (s *testSuite) Test_TestRunner_missing_deployment_state(c *C) {
@@ -48,11 +48,11 @@ func (s *testSuite) Test_TestRunner_missing_deployment_state(c *C) {
 	err := NewTestRunner().Run(runCtx)
 	c.Assert(err, Not(IsNil))
 	c.Assert(err.Error(), Equals, "Build state '_/name' for release 'name-v0.0.1' could not be found")
-	checkStatus(c, runCtx, types.TestFailure)
+	checkStatus(c, runCtx, state.TestFailure)
 }
 
 func (s *testSuite) Test_TestRunner_failing_test(c *C) {
 	runCtx := getRunContext(c, "testdata/test_state.json", "testdata/failing_test_plan.yml")
 	c.Assert(NewTestRunner().Run(runCtx), Not(IsNil))
-	checkStatus(c, runCtx, types.TestFailure)
+	checkStatus(c, runCtx, state.TestFailure)
 }

@@ -19,7 +19,7 @@ package deploy
 import (
 	"github.com/ankyra/escape-client/model"
 	"github.com/ankyra/escape-client/model/runners"
-	"github.com/ankyra/escape-client/model/state/types"
+	"github.com/ankyra/escape-core/state"
 	. "gopkg.in/check.v1"
 	"os"
 	"testing"
@@ -41,44 +41,44 @@ func getRunContext(c *C, stateFile, escapePlan string) runners.RunnerContext {
 	return runCtx
 }
 
-func checkStatus(c *C, runCtx runners.RunnerContext, code types.StatusCode) {
+func checkStatus(c *C, runCtx runners.RunnerContext, code state.StatusCode) {
 	deploymentState := runCtx.GetDeploymentState()
-	c.Assert(deploymentState.GetStatus(Stage).Code, Equals, types.StatusCode(code))
+	c.Assert(deploymentState.GetStatus(Stage).Code, Equals, state.StatusCode(code))
 }
 
 func (s *testSuite) Test_DeployRunner_no_script_defined(c *C) {
 	os.RemoveAll("testdata/escape_state")
 	runCtx := getRunContext(c, "testdata/escape_state", "testdata/deploy_plan.yml")
 	c.Assert(NewDeployRunner().Run(runCtx), IsNil)
-	checkStatus(c, runCtx, types.OK)
+	checkStatus(c, runCtx, state.OK)
 }
 
 func (s *testSuite) Test_DeployRunner_commits_version(c *C) {
 	runCtx := getRunContext(c, "testdata/deploy_state.json", "testdata/deploy_plan.yml")
 	c.Assert(NewDeployRunner().Run(runCtx), IsNil)
 	c.Assert(runCtx.GetDeploymentState().GetVersion(Stage), Equals, "0.0.1")
-	checkStatus(c, runCtx, types.OK)
+	checkStatus(c, runCtx, state.OK)
 }
 
 func (s *testSuite) Test_DeployRunner_failing_pre_deploy_file(c *C) {
 	runCtx := getRunContext(c, "testdata/deploy_state.json", "testdata/deploy_plan.yml")
 	runCtx.GetReleaseMetadata().SetStage("pre_deploy", "testdata/failing_test.sh")
 	c.Assert(NewDeployRunner().Run(runCtx), Not(IsNil))
-	checkStatus(c, runCtx, types.Failure)
+	checkStatus(c, runCtx, state.Failure)
 }
 
 func (s *testSuite) Test_DeployRunner_failing_deploy_file(c *C) {
 	runCtx := getRunContext(c, "testdata/deploy_state.json", "testdata/deploy_plan.yml")
 	runCtx.GetReleaseMetadata().SetStage(Stage, "testdata/failing_test.sh")
 	c.Assert(NewDeployRunner().Run(runCtx), Not(IsNil))
-	checkStatus(c, runCtx, types.Failure)
+	checkStatus(c, runCtx, state.Failure)
 }
 
 func (s *testSuite) Test_DeployRunner_missing_post_deploy_file(c *C) {
 	runCtx := getRunContext(c, "testdata/deploy_state.json", "testdata/deploy_plan.yml")
 	runCtx.GetReleaseMetadata().SetStage("post_deploy", "testdata/doesnt_exist.sh")
 	c.Assert(NewDeployRunner().Run(runCtx), Not(IsNil))
-	checkStatus(c, runCtx, types.Failure)
+	checkStatus(c, runCtx, state.Failure)
 }
 
 func (s *testSuite) Test_DeployRunner_variables_are_set_even_if_there_is_no_pre_step(c *C) {
@@ -91,7 +91,7 @@ func (s *testSuite) Test_DeployRunner_variables_are_set_even_if_there_is_no_pre_
 	c.Assert(NewDeployRunner().Run(runCtx), IsNil)
 	c.Assert(deploymentState.GetVersion(Stage), Equals, "0.0.1")
 	c.Assert(deploymentState.GetCalculatedInputs(Stage), HasLen, 1)
-	checkStatus(c, runCtx, types.OK)
+	checkStatus(c, runCtx, state.OK)
 }
 
 func (s *testSuite) Test_DeployRunner_with_dependencies(c *C) {
@@ -109,5 +109,5 @@ func (s *testSuite) Test_DeployRunner_with_dependencies(c *C) {
 	c.Assert(deploymentState.GetVersion(Stage), Equals, "0.0.1")
 	c.Assert(deploymentState.GetCalculatedInputs(Stage), HasLen, 1)
 	c.Assert(deploymentState.GetCalculatedOutputs(Stage), HasLen, 1)
-	checkStatus(c, runCtx, types.OK)
+	checkStatus(c, runCtx, state.OK)
 }

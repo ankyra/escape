@@ -18,7 +18,7 @@ package local
 
 import (
 	"fmt"
-	. "github.com/ankyra/escape-client/model/state/types"
+	. "github.com/ankyra/escape-core/state"
 	"io/ioutil"
 	"os/user"
 	"path/filepath"

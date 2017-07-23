@@ -19,7 +19,7 @@ package build
 import (
 	"github.com/ankyra/escape-client/model"
 	"github.com/ankyra/escape-client/model/runners"
-	"github.com/ankyra/escape-client/model/state/types"
+	"github.com/ankyra/escape-core/state"
 	. "gopkg.in/check.v1"
 	"os"
 )
@@ -28,21 +28,21 @@ func (s *testSuite) Test_BuildRunner_no_script_defined(c *C) {
 	os.RemoveAll("testdata/escape_state")
 	runCtx := getRunContext(c, "testdata/escape_state", "testdata/build_plan.yml")
 	c.Assert(NewBuildRunner().Run(runCtx), IsNil)
-	checkStatus(c, runCtx, types.OK)
+	checkStatus(c, runCtx, state.OK)
 }
 
 func (s *testSuite) Test_BuildRunner_missing_test_file(c *C) {
 	runCtx := getRunContext(c, "testdata/build_state.json", "testdata/build_plan.yml")
 	runCtx.GetReleaseMetadata().SetStage("post_build", "testdata/doesnt_exist.sh")
 	c.Assert(NewBuildRunner().Run(runCtx), Not(IsNil))
-	checkStatus(c, runCtx, types.Failure)
+	checkStatus(c, runCtx, state.Failure)
 }
 
 func (s *testSuite) Test_BuildRunner_failing_script(c *C) {
 	runCtx := getRunContext(c, "testdata/build_state.json", "testdata/build_plan.yml")
 	runCtx.GetReleaseMetadata().SetStage("post_build", "testdata/failing_test.sh")
 	c.Assert(NewBuildRunner().Run(runCtx), Not(IsNil))
-	checkStatus(c, runCtx, types.Failure)
+	checkStatus(c, runCtx, state.Failure)
 }
 
 func (s *testSuite) Test_BuildRunner_sets_deployment_status(c *C) {
@@ -50,7 +50,7 @@ func (s *testSuite) Test_BuildRunner_sets_deployment_status(c *C) {
 	c.Assert(NewBuildRunner().Run(runCtx), IsNil)
 	deploymentState := runCtx.GetDeploymentState()
 	c.Assert(deploymentState.GetVersion(Stage), Equals, "0.0.1")
-	checkStatus(c, runCtx, types.OK)
+	checkStatus(c, runCtx, state.OK)
 }
 
 func (s *testSuite) Test_BuildRunner_variables_are_set_even_if_there_is_no_pre_step(c *C) {
@@ -61,12 +61,12 @@ func (s *testSuite) Test_BuildRunner_variables_are_set_even_if_there_is_no_pre_s
 	c.Assert(deploymentState.GetCalculatedInputs(Stage), HasLen, 0)
 	c.Assert(deploymentState.GetUserInputs(Stage), HasLen, 1)
 	deploymentState.CommitVersion(Stage, runCtx.GetReleaseMetadata())
-	checkStatus(c, runCtx, types.OK)
+	checkStatus(c, runCtx, state.OK)
 
 	c.Assert(NewBuildRunner().Run(runCtx), IsNil)
 	c.Assert(deploymentState.GetVersion(Stage), Equals, "0.0.1")
 	c.Assert(deploymentState.GetCalculatedInputs(Stage), HasLen, 1)
-	checkStatus(c, runCtx, types.OK)
+	checkStatus(c, runCtx, state.OK)
 }
 
 func (s *testSuite) Test_BuildRunner_has_access_to_previous_outputs(c *C) {
@@ -78,12 +78,12 @@ func (s *testSuite) Test_BuildRunner_has_access_to_previous_outputs(c *C) {
 	c.Assert(deploymentState.GetCalculatedOutputs(Stage)["variable"], Equals, "not test")
 	c.Assert(NewBuildRunner().Run(runCtx), IsNil)
 	c.Assert(deploymentState.GetCalculatedOutputs(Stage)["variable"], Equals, "test")
-	checkStatus(c, runCtx, types.OK)
+	checkStatus(c, runCtx, state.OK)
 }
 
-func checkStatus(c *C, runCtx runners.RunnerContext, code types.StatusCode) {
+func checkStatus(c *C, runCtx runners.RunnerContext, code state.StatusCode) {
 	deploymentState := runCtx.GetDeploymentState()
-	c.Assert(deploymentState.GetStatus(Stage).Code, Equals, types.StatusCode(code))
+	c.Assert(deploymentState.GetStatus(Stage).Code, Equals, state.StatusCode(code))
 }
 
 func getRunContext(c *C, stateFile, escapePlan string) runners.RunnerContext {

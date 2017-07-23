@@ -18,8 +18,13 @@ package state
 
 import (
 	"github.com/ankyra/escape-client/model/state/local"
-	. "github.com/ankyra/escape-client/model/state/types"
+	"github.com/ankyra/escape-core/state"
 )
+
+type StateProvider interface {
+	Save(d *state.DeploymentState) error
+	Load(project, env string) (*state.EnvironmentState, error)
+}
 
 func NewLocalStateProvider(file string) StateProvider {
 	return local.NewLocalStateProvider(file)
