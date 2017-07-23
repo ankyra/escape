@@ -24,17 +24,15 @@ type EnvironmentState struct {
 	Name        string                      `json:"name"`
 	Inputs      map[string]interface{}      `json:"inputs,omitempty"`
 	Deployments map[string]*DeploymentState `json:"deployments,omitempty"`
-	ProjectName string                      `json:"-"`
-	provider    StateProvider               `json:"-"`
+	Project     *ProjectState               `json:"-"`
 }
 
-func NewEnvironmentState(prjName, envName string, provider StateProvider) *EnvironmentState {
+func NewEnvironmentState(envName string, project *ProjectState) *EnvironmentState {
 	return &EnvironmentState{
-		ProjectName: prjName,
 		Name:        envName,
 		Inputs:      map[string]interface{}{},
 		Deployments: map[string]*DeploymentState{},
-		provider:    provider,
+		Project:     project,
 	}
 }
 
@@ -47,25 +45,16 @@ func (e *EnvironmentState) GetDeployments() []*DeploymentState {
 }
 
 func (e *EnvironmentState) GetProjectName() string {
-	return e.ProjectName
-}
-func (e *EnvironmentState) getInputs() map[string]interface{} {
-	return e.Inputs
-}
-func (e *EnvironmentState) GetName() string {
-	return e.Name
-}
-func (e *EnvironmentState) Save(d *DeploymentState) error {
-	if e.provider == nil {
-		return fmt.Errorf("No state provider configured. This is a bug in Escape.")
-	}
-	return e.provider.Save(d)
+	return e.Project.Name
 }
 
-func (e *EnvironmentState) ValidateAndFix(name, prjName string, provider StateProvider) error {
+func (e *EnvironmentState) Save(d *DeploymentState) error {
+	return e.Project.Save(d)
+}
+
+func (e *EnvironmentState) ValidateAndFix(name string, project *ProjectState) error {
 	e.Name = name
-	e.provider = provider
-	e.ProjectName = prjName
+	e.Project = project
 	if e.Deployments == nil {
 		e.Deployments = map[string]*DeploymentState{}
 	}
@@ -73,9 +62,6 @@ func (e *EnvironmentState) ValidateAndFix(name, prjName string, provider StatePr
 		if err := depl.validateAndFix(deplName, e); err != nil {
 			return err
 		}
-	}
-	if e.ProjectName == "" {
-		return fmt.Errorf("EnvironmentState's ProjectState reference has not been set")
 	}
 	if e.Name == "" {
 		return fmt.Errorf("Environment name is missing from the EnvironmentState")

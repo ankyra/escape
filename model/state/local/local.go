@@ -17,8 +17,11 @@ limitations under the License.
 package local
 
 import (
+	"fmt"
 	. "github.com/ankyra/escape-client/model/state/types"
+	"io/ioutil"
 	"os/user"
+	"path/filepath"
 )
 
 type localStateProvider struct {
@@ -45,11 +48,20 @@ func (l *localStateProvider) Load(project, env string) (*EnvironmentState, error
 		return nil, err
 	}
 	l.state = prj
+	path, err := filepath.Abs(l.saveLocation)
+	if err != nil {
+		return nil, err
+	}
+	l.saveLocation = path
 	return prj.GetEnvironmentStateOrMakeNew(env), nil
 }
 
 func (l *localStateProvider) Save(depl *DeploymentState) error {
-	return l.state.Save()
+	if l.saveLocation == "" {
+		return fmt.Errorf("Save location has not been set. Inexplicably")
+	}
+	contents := []byte(l.state.ToJson())
+	return ioutil.WriteFile(l.saveLocation, contents, 0644)
 }
 
 func getDefaultName() (string, error) {

@@ -91,7 +91,7 @@ func (s *StateCompiler) CompileDependencies(d *DeploymentState, metadata *core.R
 		if err != nil {
 			return err
 		}
-		depState := d.GetDeployment(stage, depMetadata.GetVersionlessReleaseId())
+		depState := d.GetDeploymentOrMakeNew(stage, depMetadata.GetVersionlessReleaseId())
 		s.Result[depend.ReleaseId] = s.CompileState(depState, depMetadata, "deploy", s.DependencyInputsAreAvailable)
 	}
 	return nil
@@ -169,7 +169,7 @@ func (s *StateCompiler) CompileState(d *DeploymentState, metadata *core.ReleaseM
 	}
 	env := d.GetEnvironmentState()
 	result["project"] = script.LiftString(env.GetProjectName())
-	result["environment"] = script.LiftString(env.GetName())
-	result["deployment"] = script.LiftString(d.GetName())
+	result["environment"] = script.LiftString(env.Name)
+	result["deployment"] = script.LiftString(d.Name)
 	return script.LiftDict(result)
 }

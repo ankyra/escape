@@ -38,23 +38,23 @@ func (s *deplSuite) SetUpTest(c *C) {
 	depl = env.GetOrCreateDeploymentState("archive-release")
 	fullDepl = env.GetOrCreateDeploymentState("archive-full")
 	dep := env.GetOrCreateDeploymentState("archive-release-with-deps")
-	deplWithDeps = dep.GetDeployment("deploy", "archive-release")
+	deplWithDeps = dep.GetDeploymentOrMakeNew("deploy", "archive-release")
 
 	dep = env.GetOrCreateDeploymentState("archive-release-deployed-deps")
-	deployedDepsDepl = dep.GetDeployment("build", "archive-release")
+	deployedDepsDepl = dep.GetDeploymentOrMakeNew("build", "archive-release")
 }
 
-func (s *deplSuite) Test_GetDeployment(c *C) {
+func (s *deplSuite) Test_GetDeploymentOrMakeNew(c *C) {
 	depDepl := deployedDepsDepl
-	c.Assert(depDepl.GetName(), Equals, "archive-release")
+	c.Assert(depDepl.Name, Equals, "archive-release")
 	c.Assert(depDepl.parentStage.Name, Equals, "build")
 
-	depDepl2 := depDepl.GetDeployment("deploy", "deploy-dep-name")
-	c.Assert(depDepl2.GetName(), Equals, "deploy-dep-name")
+	depDepl2 := depDepl.GetDeploymentOrMakeNew("deploy", "deploy-dep-name")
+	c.Assert(depDepl2.Name, Equals, "deploy-dep-name")
 	c.Assert(depDepl2.parentStage.Name, Equals, "deploy")
 
-	depDepl3 := depDepl2.GetDeployment("deploy", "deploy-dep-name")
-	c.Assert(depDepl3.GetName(), Equals, "deploy-dep-name")
+	depDepl3 := depDepl2.GetDeploymentOrMakeNew("deploy", "deploy-dep-name")
+	c.Assert(depDepl3.Name, Equals, "deploy-dep-name")
 	c.Assert(depDepl3.parentStage.Name, Equals, "deploy")
 }
 
@@ -64,14 +64,14 @@ func (s *deplSuite) Test_GetPreStepInputs_for_dependency_uses_parent_build_stage
 }
 
 func (s *deplSuite) Test_GetPreStepInputs_for_nested_dependency_uses_parent_build_stage(c *C) {
-	nestedDepl := deployedDepsDepl.GetDeployment("deploy", "nested1").GetDeployment("deploy", "nested2")
+	nestedDepl := deployedDepsDepl.GetDeploymentOrMakeNew("deploy", "nested1").GetDeploymentOrMakeNew("deploy", "nested2")
 	inputs := nestedDepl.GetPreStepInputs("deploy")
 	c.Assert(inputs["variable"], Equals, "build_variable")
 }
 
 func (s *deplSuite) Test_GetEnvironmentState(c *C) {
 	env := depl.GetEnvironmentState()
-	c.Assert(env.GetName(), Equals, "dev")
+	c.Assert(env.Name, Equals, "dev")
 }
 func (s *deplSuite) Test_CommitVersion(c *C) {
 	c.Assert(depl.GetVersion("build"), Equals, "")
@@ -122,7 +122,7 @@ func (s *deplSuite) Test_GetProviders_includes_parent_build_providers_for_dep(c 
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
 	dep := env.GetOrCreateDeploymentState("archive-release-with-deps")
-	deplWithDeps = dep.GetDeployment("build", "archive-release")
+	deplWithDeps = dep.GetDeploymentOrMakeNew("build", "archive-release")
 	providers := deplWithDeps.GetProviders("deploy")
 	c.Assert(providers, HasLen, 3)
 	c.Assert(providers["kubernetes"], Equals, "archive-release")

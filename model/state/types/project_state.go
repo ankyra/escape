@@ -27,8 +27,7 @@ import (
 type ProjectState struct {
 	Name         string                       `json:"name"`
 	Environments map[string]*EnvironmentState `json:"environments,omitempty"`
-	saveLocation string                       `json:"-"`
-	provider     StateProvider                `json:"-"`
+	Backend      StateProvider                `json:"-"`
 }
 
 func newProjectState(prjName string) (*ProjectState, error) {
@@ -49,7 +48,7 @@ func NewProjectStateFromJsonString(data string, provider StateProvider) (*Projec
 	if err := prjState.validateAndFix(); err != nil {
 		return nil, err
 	}
-	prjState.provider = provider
+	prjState.Backend = provider
 	return prjState, nil
 }
 
@@ -66,8 +65,7 @@ func NewProjectStateFromFile(prjName, cfgFile string, provider StateProvider) (*
 		if err != nil {
 			return nil, err
 		}
-		p.saveLocation = cfgFile
-		p.provider = provider
+		p.Backend = provider
 		return p, p.validateAndFix()
 	}
 	data, err := ioutil.ReadFile(cfgFile)
@@ -78,11 +76,14 @@ func NewProjectStateFromFile(prjName, cfgFile string, provider StateProvider) (*
 	if err != nil {
 		return nil, err
 	}
-	result.saveLocation = cfgFile
 	if result.Name == "" {
 		result.Name = prjName
 	}
 	return result, nil
+}
+
+func (p *ProjectState) Save(d *DeploymentState) error {
+	return p.Backend.Save(d)
 }
 
 func (p *ProjectState) validateAndFix() error {
@@ -93,37 +94,20 @@ func (p *ProjectState) validateAndFix() error {
 		p.Environments = map[string]*EnvironmentState{}
 	}
 	for name, env := range p.Environments {
-		if err := env.ValidateAndFix(name, p.Name, p.provider); err != nil {
+		if err := env.ValidateAndFix(name, p); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (p *ProjectState) GetName() string {
-	return p.Name
-}
-
-func (p *ProjectState) SetName(name string) {
-	p.Name = name
-}
-
 func (p *ProjectState) GetEnvironmentStateOrMakeNew(env string) *EnvironmentState {
 	e, ok := p.Environments[env]
 	if !ok || e == nil {
-		p.Environments[env] = NewEnvironmentState(p.Name, env, p.provider)
+		p.Environments[env] = NewEnvironmentState(env, p)
 		return p.Environments[env]
 	}
-	e.provider = p.provider
 	return e
-}
-
-func (p *ProjectState) Save() error {
-	if p.saveLocation == "" {
-		return fmt.Errorf("Save location has not been set. Inexplicably")
-	}
-	contents := []byte(p.ToJson())
-	return ioutil.WriteFile(p.saveLocation, contents, 0644)
 }
 
 func (p *ProjectState) ToJson() string {

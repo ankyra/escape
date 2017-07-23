@@ -219,7 +219,7 @@ func itConsumes(arg1 string) error {
 }
 
 func isTheProviderFor(deploymentName, providerName string) error {
-	d := CapturedDeployment.GetDeployment("build", deploymentName)
+	d := CapturedDeployment.GetDeploymentOrMakeNew("build", deploymentName)
 	prov, found := d.GetProviders("build")[providerName]
 	if !found {
 		return fmt.Errorf("'%s' provider not found", providerName)
@@ -231,7 +231,7 @@ func isTheProviderFor(deploymentName, providerName string) error {
 }
 
 func versionIsPresentInItsDeploymentState(deploymentName, version string) error {
-	d := CapturedDeployment.GetDeployment("build", deploymentName)
+	d := CapturedDeployment.GetDeploymentOrMakeNew("build", deploymentName)
 	if d.GetVersion("deploy") != version {
 		return fmt.Errorf("Expecting '%s', got '%s'", version, d.GetVersion("deploy"))
 	}

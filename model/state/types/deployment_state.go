@@ -58,7 +58,7 @@ func (d *DeploymentState) GetEnvironmentState() *EnvironmentState {
 	return d.environment
 }
 
-func (d *DeploymentState) GetDeployment(stage, deploymentName string) *DeploymentState {
+func (d *DeploymentState) GetDeploymentOrMakeNew(stage, deploymentName string) *DeploymentState {
 	st := d.getStage(stage)
 	depl, ok := st.Deployments[deploymentName]
 	if !ok {
@@ -143,7 +143,7 @@ func (d *DeploymentState) GetProviders(stage string) map[string]string {
 
 func (d *DeploymentState) GetPreStepInputs(stage string) map[string]interface{} {
 	result := map[string]interface{}{}
-	for key, val := range d.environment.getInputs() {
+	for key, val := range d.environment.Inputs {
 		result[key] = val
 	}
 	d.walkStatesAndStages(stage, func(p *DeploymentState, st *StageState) {

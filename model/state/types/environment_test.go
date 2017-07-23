@@ -29,7 +29,7 @@ func (s *envSuite) Test_Name_Field_Is_Set(c *C) {
 	p, err := NewProjectStateFromFile("prj", "testdata/project.json", nil)
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("incomplete_env")
-	c.Assert(env.GetName(), Equals, "incomplete_env")
+	c.Assert(env.Name, Equals, "incomplete_env")
 }
 
 func (s *envSuite) Test_LookupDeploymentState(c *C) {
@@ -38,7 +38,7 @@ func (s *envSuite) Test_LookupDeploymentState(c *C) {
 	env := p.GetEnvironmentStateOrMakeNew("dev")
 	depl, err := env.LookupDeploymentState("archive-release")
 	c.Assert(err, IsNil)
-	c.Assert(depl.GetName(), Equals, "archive-release")
+	c.Assert(depl.Name, Equals, "archive-release")
 	c.Assert(depl.Inputs["input_variable"], DeepEquals, "depl_override")
 	c.Assert(depl.Inputs["list_input"], DeepEquals, []interface{}{"depl_override"})
 }
@@ -57,7 +57,7 @@ func (s *envSuite) Test_GetOrCreateDeploymentState_no_deps(c *C) {
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
 	depl := env.GetOrCreateDeploymentState("archive-release")
-	c.Assert(depl.GetName(), Equals, "archive-release")
+	c.Assert(depl.Name, Equals, "archive-release")
 	c.Assert(depl.Inputs["input_variable"], DeepEquals, "depl_override")
 	c.Assert(depl.Inputs["list_input"], DeepEquals, []interface{}{"depl_override"})
 }
@@ -67,7 +67,7 @@ func (s *envSuite) Test_GetOrCreateDeploymentState_doesnt_exist_no_deps_returns_
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
 	depl := env.GetOrCreateDeploymentState("doesnt-exist")
-	c.Assert(depl.GetName(), Equals, "doesnt-exist")
+	c.Assert(depl.Name, Equals, "doesnt-exist")
 	c.Assert(depl.Inputs, HasLen, 0)
 }
 

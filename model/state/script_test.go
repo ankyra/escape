@@ -42,7 +42,7 @@ func (s *deplSuite) SetUpTest(c *C) {
 	depl = env.GetOrCreateDeploymentState("archive-release")
 	fullDepl = env.GetOrCreateDeploymentState("archive-full")
 	dep := env.GetOrCreateDeploymentState("archive-release-with-deps")
-	deplWithDeps = dep.GetDeployment("deploy", "archive-release")
+	deplWithDeps = dep.GetDeploymentOrMakeNew("deploy", "archive-release")
 }
 
 func (s *deplSuite) Test_ToScript(c *C) {

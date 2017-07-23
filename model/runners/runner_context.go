@@ -135,7 +135,7 @@ func (r *runnerContext) GetScriptEnvironmentForPreDependencyStep(stage string) (
 func (r *runnerContext) NewContextForDependency(metadata *core.ReleaseMetadata) RunnerContext {
 	return &runnerContext{
 		environmentState: r.environmentState,
-		deploymentState:  r.deploymentState.GetDeployment(r.stage, metadata.GetVersionlessReleaseId()),
+		deploymentState:  r.deploymentState.GetDeploymentOrMakeNew(r.stage, metadata.GetVersionlessReleaseId()),
 		path:             r.path.NewPathForDependency(metadata),
 		releaseMetadata:  metadata,
 		logger:           r.logger,
