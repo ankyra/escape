@@ -124,6 +124,8 @@ includes:
 - model/
 - util/
 - vendor/
+- godog/
+- docs/
 
 # Errands.
 #
