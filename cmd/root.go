@@ -39,8 +39,6 @@ var RootCmd = &cobra.Command{
 Escape is a tool that can be used to version, package, build, release, 
 deploy and operate software in the large and the small. Software of all sizes. 
 Everyone welcome.
-
-    ` + util.EscapeLogo + `
     
 Website: http://escape.ankyra.io/
 `,
@@ -69,8 +67,8 @@ func Execute() {
 }
 
 func init() {
-	RootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "~/.escape_config", "Global Escape configuration file")
+	RootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "~/.escape_config", "Local of the global Escape configuration file")
 	RootCmd.PersistentFlags().StringVar(&cfgProfile, "profile", "default", "Configuration profile")
 	RootCmd.PersistentFlags().StringVarP(&cfgLogLevel, "level", "l", "info", "Log level: debug, info, warn, error")
-	RootCmd.PersistentFlags().BoolVarP(&cfgLogCollapse, "collapse-logs", "", true, "Collapse logs (Default: true)")
+	RootCmd.PersistentFlags().BoolVarP(&cfgLogCollapse, "collapse-logs", "", true, "Collapse log sections.")
 }
