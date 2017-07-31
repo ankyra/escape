@@ -1,9 +1,13 @@
-## Quickstart
+---
+title: "Quickstart"
+slug: quickstart 
+type: "docs"
+---
 
 At its core Escape provides abstractions to work with _units of deployments_. A
 _unit of deployment_ is a collection of files, plus a bit of metadata to tell
 Escape what can be done with it. Based on the metadata Escape knows how to
-deploy, test and destroy the unit.
+build, test, deploy, destroy and operate the unit.
 
 Metadata doesn't have to be written by hand, but can be compiled from an
 _Escape plan_. The smallest Escape plan looks like this:

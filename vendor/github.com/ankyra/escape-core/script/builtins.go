@@ -27,39 +27,42 @@ import (
 	"time"
 )
 
-const (
-	func_builtinId                = "__id"
-	func_builtinEnvLookup         = "__envLookup"
-	func_builtinConcat            = "__concat"
-	func_builtinToLower           = "__lower"
-	func_builtinToUpper           = "__upper"
-	func_builtinTitle             = "__title"
-	func_builtinSplit             = "__split"
-	func_builtinJoin              = "__join"
-	func_builtinReplace           = "__replace"
-	func_builtinBase64Encode      = "__base64_encode"
-	func_builtinBase64Decode      = "__base64_decode"
-	func_builtinTrim              = "__trim"
-	func_builtinListIndex         = "__list_index"
-	func_builtinListSlice         = "__list_slice"
-	func_builtinAdd               = "__add"
-	func_builtinTimestamp         = "__timestamp"
-	func_builtinReadFile          = "__read_file"
-	func_builtinTrackMajorVersion = "__track_major_version"
-	func_builtinTrackMinorVersion = "__track_minor_version"
-	func_builtinTrackPatchVersion = "__track_patch_version"
-	func_builtinTrackVersion      = "__track_version"
-)
+type StdlibFunc struct {
+	Id     string
+	Func   Script
+	Doc    string
+	ActsOn string
+	Args   string
+}
 
-var builtinToLower = ShouldLift(strings.ToLower)
-var builtinToUpper = ShouldLift(strings.ToUpper)
-var builtinTitle = ShouldLift(strings.ToTitle)
-var builtinSplit = ShouldLift(strings.Split)
-var builtinJoin = ShouldLift(strings.Join)
-var builtinReplace = ShouldLift(strings.Replace)
-var builtinTrim = ShouldLift(strings.TrimSpace)
-var builtinBase64Encode = ShouldLift(base64.StdEncoding.EncodeToString)
-var builtinBase64Decode = ShouldLift(base64.StdEncoding.DecodeString)
+var trackMajorVersion = ShouldParse(`$func(v) { $v.split(".")[:1].join(".").concat(".@") }`)
+var trackMinorVersion = ShouldParse(`$func(v) { $v.split(".")[:2].join(".").concat(".@") }`)
+var trackPatchVersion = ShouldParse(`$func(v) { $v.split(".")[:3].join(".").concat(".@") }`)
+var trackVersion = ShouldParse(`$func(v) { $v.concat(".@") }`)
+
+var Stdlib = []StdlibFunc{
+	StdlibFunc{"id", LiftFunction(builtinId), "Returns its argument", "everything", "parameter :: *"},
+	StdlibFunc{"env_lookup", LiftFunction(builtinEnvLookup), "Lookup key in environment. Usually called implicitly when using '$'", "lists", "key :: string"},
+	StdlibFunc{"concat", LiftFunction(builtinConcat), "Concatate stringable arguments", "strings", "v1 :: string, v2 :: string, ..."},
+	StdlibFunc{"lower", ShouldLift(strings.ToLower), "Returns a copy of the string v with all Unicode characters mapped to their lower case", "strings", "v :: string"},
+	StdlibFunc{"upper", ShouldLift(strings.ToUpper), "Returns a copy of the string v with all Unicode characters mapped to their upper case", "strings", "v :: string"},
+	StdlibFunc{"title", ShouldLift(strings.ToTitle), "Returns a copy of the string v with all Unicode characters mapped to their title case", "strings", "v :: string"},
+	StdlibFunc{"split", ShouldLift(strings.Split), "Split slices s into all substrings separated by sep and returns a slice of the substrings between those separators. If sep is empty, Split splits after each UTF-8 sequence.", "strings", "sep :: string"},
+	StdlibFunc{"join", ShouldLift(strings.Join), "Join concatenates the elements of a to create a single string. The separator string sep is placed between elements in the resulting string. ", "lists", "sep :: string"},
+	StdlibFunc{"replace", ShouldLift(strings.Replace), "Replace returns a copy of the string s with the first n non-overlapping instances of old replaced by new. If old is empty, it matches at the beginning of the string and after each UTF-8 sequence, yielding up to k+1 replacements for a k-rune string. If n < 0, there is no limit on the number of replacements.", "strings", "old :: string, new :: string, n :: integer"},
+	StdlibFunc{"base64_encode", ShouldLift(base64.StdEncoding.EncodeToString), "Encode string to base64", "strings", ""},
+	StdlibFunc{"base64_decode", ShouldLift(base64.StdEncoding.DecodeString), "Decode string from base64", "strings", ""},
+	StdlibFunc{"trim", ShouldLift(strings.TrimSpace), "Returns a slice of the string s, with all leading and trailing white space removed, as defined by Unicode. ", "strings", ""},
+	StdlibFunc{"list_index", LiftFunction(builtinListIndex), "Index a list at position `n`. Usually accessed implicitly using indexing syntax (eg. `list[0]`)", "lists", "n :: integer"},
+	StdlibFunc{"list_slice", LiftFunction(builtinListSlice), "Slice a list. Usually accessed implicitly using slice syntax (eg. `list[0:5]`)", "lists", "i :: integer, j :: integer"},
+	StdlibFunc{"add", ShouldLift(builtinAdd), "Add two integers", "integers", "y :: integer"},
+	StdlibFunc{"timestamp", ShouldLift(builtinTimestamp), "Returns a UNIX timestamp", "", ""},
+	StdlibFunc{"read_file", ShouldLift(builtinReadfile), "Read the contents of a file", "strings", ""},
+	StdlibFunc{"track_major_version", trackMajorVersion, "Track major version", "strings", ""},
+	StdlibFunc{"track_minor_version", trackMinorVersion, "Track minor version", "strings", ""},
+	StdlibFunc{"track_patch_version", trackPatchVersion, "Track patch version", "strings", ""},
+	StdlibFunc{"track_version", trackVersion, "Track version", "strings", ""},
+}
 
 func LiftGoFunc(f interface{}) Script {
 	name := runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name()
@@ -147,14 +150,14 @@ func builtinArgCheck(expected int, funcName string, inputValues []Script) error 
 }
 
 func builtinId(env *ScriptEnvironment, inputValues []Script) (Script, error) {
-	if err := builtinArgCheck(1, func_builtinId, inputValues); err != nil {
+	if err := builtinArgCheck(1, "id", inputValues); err != nil {
 		return nil, err
 	}
 	return inputValues[0], nil
 }
 
 func builtinEnvLookup(env *ScriptEnvironment, inputValues []Script) (Script, error) {
-	if err := builtinArgCheck(1, func_builtinEnvLookup, inputValues); err != nil {
+	if err := builtinArgCheck(1, "env_lookup", inputValues); err != nil {
 		return nil, err
 	}
 	arg := inputValues[0]
@@ -184,7 +187,7 @@ func builtinConcat(env *ScriptEnvironment, inputValues []Script) (Script, error)
 }
 
 func builtinListIndex(env *ScriptEnvironment, inputValues []Script) (Script, error) {
-	if err := builtinArgCheck(2, func_builtinListIndex, inputValues); err != nil {
+	if err := builtinArgCheck(2, "list_index", inputValues); err != nil {
 		return nil, err
 	}
 	lstArg := inputValues[0]

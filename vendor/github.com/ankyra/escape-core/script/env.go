@@ -34,26 +34,9 @@ func NewScriptEnvironmentWithGlobals(globals map[string]Script) *ScriptEnvironme
 	if globals == nil {
 		globals = map[string]Script{}
 	}
-	globals[func_builtinId] = LiftFunction(builtinId)
-	globals[func_builtinEnvLookup] = LiftFunction(builtinEnvLookup)
-	globals[func_builtinConcat] = LiftFunction(builtinConcat)
-	globals[func_builtinToLower] = builtinToLower
-	globals[func_builtinToUpper] = builtinToUpper
-	globals[func_builtinTitle] = builtinTitle
-	globals[func_builtinSplit] = builtinSplit
-	globals[func_builtinJoin] = builtinJoin
-	globals[func_builtinBase64Encode] = builtinBase64Encode
-	globals[func_builtinBase64Decode] = builtinBase64Decode
-	globals[func_builtinReplace] = builtinReplace
-	globals[func_builtinTrim] = builtinTrim
-	globals[func_builtinAdd] = ShouldLift(builtinAdd)
-	globals[func_builtinListIndex] = LiftFunction(builtinListIndex)
-	globals[func_builtinListSlice] = LiftFunction(builtinListSlice)
-	globals[func_builtinTimestamp] = ShouldLift(builtinTimestamp)
-	globals[func_builtinTrackMajorVersion] = ShouldParse(`$func(v) { $v.split(".")[:1].join(".").concat(".@") }`)
-	globals[func_builtinTrackMinorVersion] = ShouldParse(`$func(v) { $v.split(".")[:2].join(".").concat(".@") }`)
-	globals[func_builtinTrackPatchVersion] = ShouldParse(`$func(v) { $v.split(".")[:3].join(".").concat(".@") }`)
-	globals[func_builtinTrackVersion] = ShouldParse(`$func(v) { $v.concat(".@") }`)
+	for _, f := range Stdlib {
+		globals["__"+f.Id] = f.Func
+	}
 	globalsDict := LiftDict(globals)
 	result["$"] = globalsDict
 	return &result

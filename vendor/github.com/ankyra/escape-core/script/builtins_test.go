@@ -105,34 +105,50 @@ func (s *exprSuite) Test_Builtin_Concat_fails_with_wrong_type(c *C) {
 }
 
 func (s *exprSuite) Test_Builtin_base64_encode(c *C) {
-	apply := NewApply(builtinBase64Encode, []Script{LiftString("TEST")})
-	result, err := apply.Eval(nil)
-	c.Assert(err, IsNil)
-	c.Assert(IsStringAtom(result), Equals, true)
-	c.Assert(ExpectStringAtom(result), Equals, "VEVTVA==")
+	for _, f := range Stdlib {
+		if f.Id == "base64_encode" {
+			apply := NewApply(f.Func, []Script{LiftString("TEST")})
+			result, err := apply.Eval(nil)
+			c.Assert(err, IsNil)
+			c.Assert(IsStringAtom(result), Equals, true)
+			c.Assert(ExpectStringAtom(result), Equals, "VEVTVA==")
+		}
+	}
 }
 
 func (s *exprSuite) Test_Builtin_base64_decode(c *C) {
-	apply := NewApply(builtinBase64Decode, []Script{LiftString("VEVTVA==")})
-	result, err := apply.Eval(nil)
-	c.Assert(err, IsNil)
-	c.Assert(IsStringAtom(result), Equals, true)
-	c.Assert(ExpectStringAtom(result), Equals, "TEST")
+	for _, f := range Stdlib {
+		if f.Id == "base64_decode" {
+			apply := NewApply(f.Func, []Script{LiftString("VEVTVA==")})
+			result, err := apply.Eval(nil)
+			c.Assert(err, IsNil)
+			c.Assert(IsStringAtom(result), Equals, true)
+			c.Assert(ExpectStringAtom(result), Equals, "TEST")
+		}
+	}
 }
 
 func (s *exprSuite) Test_Builtin_base64_decode_fails_if_invalid(c *C) {
-	apply := NewApply(builtinBase64Decode, []Script{LiftString("1")})
-	_, err := apply.Eval(nil)
-	c.Assert(err, Not(IsNil))
+	for _, f := range Stdlib {
+		if f.Id == "base64_decode" {
+			apply := NewApply(f.Func, []Script{LiftString("1")})
+			_, err := apply.Eval(nil)
+			c.Assert(err, Not(IsNil))
+		}
+	}
 }
 
 func (s *exprSuite) Test_Builtin_replace(c *C) {
-	apply := NewApply(builtinReplace, []Script{
-		LiftString("TEST"), LiftString("T"), LiftString("B"), LiftInteger(1)})
-	result, err := apply.Eval(nil)
-	c.Assert(err, IsNil)
-	c.Assert(IsStringAtom(result), Equals, true)
-	c.Assert(ExpectStringAtom(result), Equals, "BEST")
+	for _, f := range Stdlib {
+		if f.Id == "replace" {
+			apply := NewApply(f.Func, []Script{
+				LiftString("TEST"), LiftString("T"), LiftString("B"), LiftInteger(1)})
+			result, err := apply.Eval(nil)
+			c.Assert(err, IsNil)
+			c.Assert(IsStringAtom(result), Equals, true)
+			c.Assert(ExpectStringAtom(result), Equals, "BEST")
+		}
+	}
 }
 
 func (s *exprSuite) Test_Builtin_slice_no_end(c *C) {

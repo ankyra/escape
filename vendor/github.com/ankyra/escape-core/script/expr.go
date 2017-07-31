@@ -57,6 +57,8 @@ func Lift(val interface{}) (Script, error) {
 		return LiftGoFunc(val), nil
 	case func(string) ([]byte, error):
 		return LiftGoFunc(val), nil
+	case func(string) (string, error):
+		return LiftGoFunc(val), nil
 	case func(string) string:
 		return LiftGoFunc(val), nil
 	case func(string, string) []string:
@@ -306,31 +308,38 @@ func ExpectDict(s Script) map[string]interface{} {
 /*
    Functions
 */
-type function struct {
+type Function struct {
 	Func scriptFuncType
+	Doc  string
 }
 
 func LiftFunction(f scriptFuncType) Script {
-	return &function{
+	return &Function{
 		Func: f,
 	}
 }
-func (f *function) Eval(env *ScriptEnvironment) (Script, error) {
+func (f *Function) Eval(env *ScriptEnvironment) (Script, error) {
 	return f, nil
 }
-func (f *function) Value() (interface{}, error) {
+func (f *Function) Value() (interface{}, error) {
 	return f.Func, nil
 }
-func (f *function) Type() ValueType {
+func (f *Function) Type() ValueType {
 	return NewType("func")
 }
 func IsFunctionAtom(s Script) bool {
-	_, ok := s.(*function)
+	_, ok := s.(*Function)
 	return ok
+}
+func ExpectFunction(s Script) *Function {
+	if IsFunctionAtom(s) {
+		return s.(*Function)
+	}
+	panic("Expecting function type, got " + s.Type().Name())
 }
 func ExpectFunctionAtom(s Script) scriptFuncType {
 	if IsFunctionAtom(s) {
-		return s.(*function).Func
+		return s.(*Function).Func
 	}
 	panic("Expecting function type, got " + s.Type().Name())
 }

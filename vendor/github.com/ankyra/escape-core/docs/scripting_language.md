@@ -1,9 +1,13 @@
-# Scripting Language
+---
+title: "Scripting Language"
+slug: scripting-language 
+type: "docs"
+---
 
-The scripting language is a tiny language meant to make it easier to wire up
-inputs and outputs. It is by no means a fully fledged language and it's not its
-goal to become one either. More complicated logic should be pushed into the
-build scripts, where it can be properly tested. 
+The scripting language is a tiny language that is meant to improve the wiring up
+of inputs and outputs. It is by no means a fully fledged language and it's
+not its goal to become one either. More complicated logic should be pushed into
+the build scripts, where it can be properly tested. 
 
 ## Examples
 
