@@ -17,27 +17,6 @@ h2 {
 Standard library functions for the [Escape Scripting Language](../scripting-language/)
 
 
-# Functions acting on integers
-
-## add(y :: integer)
-
-Add two integers
-
-
-# Unary functions
-
-## timestamp()
-
-Returns a UNIX timestamp
-
-
-# Functions acting on everything
-
-## id(parameter :: *)
-
-Returns its argument
-
-
 # Functions acting on lists
 
 ## env_lookup(key :: string)
@@ -59,21 +38,13 @@ Slice a list. Usually accessed implicitly using slice syntax (eg. `list[0:5]`)
 
 # Functions acting on strings
 
-## title(v :: string)
+## base64_encode()
 
-Returns a copy of the string v with all Unicode characters mapped to their title case
-
-## split(sep :: string)
-
-Split slices s into all substrings separated by sep and returns a slice of the substrings between those separators. If sep is empty, Split splits after each UTF-8 sequence.
+Encode string to base64
 
 ## trim()
 
 Returns a slice of the string s, with all leading and trailing white space removed, as defined by Unicode. 
-
-## track_version()
-
-Track version
 
 ## read_file()
 
@@ -83,29 +54,33 @@ Read the contents of a file
 
 Track minor version
 
+## upper(v :: string)
+
+Returns a copy of the string v with all Unicode characters mapped to their upper case
+
 ## track_patch_version()
 
 Track patch version
-
-## track_major_version()
-
-Track major version
 
 ## concat(v1 :: string, v2 :: string, ...)
 
 Concatate stringable arguments
 
-## upper(v :: string)
-
-Returns a copy of the string v with all Unicode characters mapped to their upper case
-
-## base64_encode()
-
-Encode string to base64
-
 ## lower(v :: string)
 
 Returns a copy of the string v with all Unicode characters mapped to their lower case
+
+## title(v :: string)
+
+Returns a copy of the string v with all Unicode characters mapped to their title case
+
+## split(sep :: string)
+
+Split slices s into all substrings separated by sep and returns a slice of the substrings between those separators. If sep is empty, Split splits after each UTF-8 sequence.
+
+## track_version()
+
+Track version
 
 ## replace(old :: string, new :: string, n :: integer)
 
@@ -114,4 +89,29 @@ Replace returns a copy of the string s with the first n non-overlapping instance
 ## base64_decode()
 
 Decode string from base64
+
+## track_major_version()
+
+Track major version
+
+
+# Functions acting on integers
+
+## add(y :: integer)
+
+Add two integers
+
+
+# Unary functions
+
+## timestamp()
+
+Returns a UNIX timestamp
+
+
+# Functions acting on everything
+
+## id(parameter :: *)
+
+Returns its argument
 
