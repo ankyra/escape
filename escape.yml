@@ -46,7 +46,8 @@ logo: ""
 # To resolve the latest path release:
 #   depends: [archive-example-v0.1.@]
 #
-depends: []
+depends:
+- escape-core-latest as core
 
 # The release can consume zero or more providers from the environment its
 # deployed in.

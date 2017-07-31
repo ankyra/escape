@@ -8,3 +8,4 @@ escape
 escape_state.json
 lock.json
 manifest.json
+deps/

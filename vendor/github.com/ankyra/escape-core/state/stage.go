@@ -76,22 +76,22 @@ func (st *StageState) validateAndFix(name string, envState *EnvironmentState, de
 	return nil
 }
 
-func (st *StageState) setVersion(v string) *StageState {
+func (st *StageState) SetVersion(v string) *StageState {
 	st.Version = v
 	return st
 }
 
-func (st *StageState) setInputs(v map[string]interface{}) *StageState {
+func (st *StageState) SetInputs(v map[string]interface{}) *StageState {
 	st.Inputs = st.initIfNil(v)
 	return st
 }
 
-func (st *StageState) setUserInputs(v map[string]interface{}) *StageState {
+func (st *StageState) SetUserInputs(v map[string]interface{}) *StageState {
 	st.UserInputs = st.initIfNil(v)
 	return st
 }
 
-func (st *StageState) setOutputs(v map[string]interface{}) *StageState {
+func (st *StageState) SetOutputs(v map[string]interface{}) *StageState {
 	st.Outputs = st.initIfNil(v)
 	return st
 }

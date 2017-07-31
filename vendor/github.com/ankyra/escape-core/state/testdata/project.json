@@ -1,0 +1,126 @@
+{
+    "name": "project_name",
+    "environments": {
+        "dev": {
+            "name": "dev",
+            "inputs": {
+                "env_level_variable": "env",
+                "input_variable": "env_override",
+                "list_input": [
+                    "env_override"
+                ]
+            },
+            "deployments": {
+                "archive-full": {
+                    "stages": {
+                        "build": {
+                            "deployments": {
+                                "archive-dep": {
+                                    "version": "1",
+                                    "stages": {
+                                        "deploy": {
+                                            "version": "1"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "deploy": {
+                            "inputs": {
+                            },
+                            "calculated_inputs": {
+                            },
+                            "calculated_outputs": {
+                            }
+                        }
+                    }
+                },
+                "archive-release": {
+                    "stages": {
+                        "deploy": {
+                            "inputs": {
+                                "user_level": "user"
+                            },
+                            "calculated_inputs": {
+                                "user_level": "user"
+                            },
+                            "calculated_outputs": {
+                                "user_level": "user"
+                            }
+                        }
+                    },
+                    "inputs": {
+                        "depl_level_variable": "depl",
+                        "input_variable": "depl_override",
+                        "list_input": [
+                            "depl_override"
+                        ]
+                    }
+                },
+                "archive-release-deployed-deps": {
+                    "stages": {
+                        "build": {
+                            "inputs": {
+                                "variable": "build_variable"
+                            },
+                            "deployments": {
+                                "archive-release": {
+                                    "stages": {
+                                        "deploy": {
+
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "archive-release-with-deps": {
+                    "stages": {
+                        "build": {
+                            "providers": {
+                                "gcp": "archive-release-build",
+                                "doesnt-exist": "doesnt-exist-build"
+                            },
+                            "deployments": {
+                                "archive-release": {
+                                    "stages": {
+                                        "deploy": {
+                                            "providers": {
+                                                "kubernetes": "archive-release"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "deploy": {
+                            "deployments": {
+                                "archive-release": {
+                                    "stages": {
+                                        "deploy": {
+                                            "providers": {
+                                                "kubernetes": "archive-release"
+                                            }
+                                        }
+                                    },
+                                    "inputs": {
+                                        "input_variable": "depl_override2",
+                                        "list_input": [
+                                            "depl_override2"
+                                        ]
+                                    }
+                                }
+                            },
+                            "providers": {
+                                "gcp": "archive-release",
+                                "doesnt-exist": "doesnt-exist"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "incomplete_env": {}
+    }
+}
