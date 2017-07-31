@@ -16,7 +16,7 @@ compile:
   - escape deploy escape-client-latest -d "latest-client"
   - escape errands run upload_to_gcs -v bucket=escape-releases-eu -v credentials=@${HOME}/gcloud-service-key.json -d "latest-client"
   - escape errands run publish_binaries -v bucket=escape-releases-eu -v credentials=@${HOME}/gcloud-service-key.json -d "latest-client"
-
+  - curl -X POST https://circleci.com/api/v1.1/project/github/ankyra/docker-escape-client/tree/master?circle_token=${CIRCLE_DOCKER_ESCAPE_TOKEN}
 
 test:
   override:
