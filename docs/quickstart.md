@@ -14,6 +14,7 @@ but you can find 32 bit builds on the [Downloads](/downloads/) page.
 
 ```
 curl https://
+tar -xvzf 
 sudo mv escape /usr/bin/escape
 ```
 
@@ -21,6 +22,7 @@ sudo mv escape /usr/bin/escape
 
 ```
 curl https://
+tar -xvzf 
 sudo mv escape /usr/bin/escape
 ```
 
