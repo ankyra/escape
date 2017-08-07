@@ -70,7 +70,7 @@ func newEscapeTargetConfig(cfg *EscapeConfig) *EscapeTargetConfig {
 		target.StorageBackend = "escape"
 	}
 	if target.ApiServer == "" {
-		target.ApiServer = "https://registry.ankyra.io"
+		target.ApiServer = "https://escape.ankyra.io"
 	}
 	return target
 }
