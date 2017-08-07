@@ -162,6 +162,7 @@ func (r *registry) UploadRelease(project, releasePath string, metadata *core.Rel
 
 func (r *registry) register(project string, metadata *core.ReleaseMetadata) error {
 	url := r.endpoints.RegisterPackage(project)
+	fmt.Println(url)
 	resp, err := r.client.POST_json_with_authentication(url, metadata)
 	if err != nil {
 		return err

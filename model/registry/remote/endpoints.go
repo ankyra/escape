@@ -40,7 +40,7 @@ func (s *ServerEndpoints) ApiServer() string {
 	return s.apiServer + "/"
 }
 func (s *ServerEndpoints) ReleaseQuery(project, name, version string) string {
-	return s.ApiServer() + "a/" + project + "/" + name + "/" + version + "/"
+	return s.ApiServer() + "api/v1/registry/" + project + "/units/" + name + "/versions/" + version + "/"
 }
 func (s *ServerEndpoints) PreviousReleaseQuery(project, name, version string) string {
 	return s.ReleaseQuery(project, name, version) + "previous/"
@@ -52,16 +52,16 @@ func (s *ServerEndpoints) NextReleaseVersion(project, name, prefix string) strin
 	return s.ProjectNameQuery(project, name) + "next-version?" + v.Encode()
 }
 func (s *ServerEndpoints) ListProjects() string {
-	return s.ApiServer() + "a/"
+	return s.ApiServer() + "api/v1/registry/"
 }
 func (s *ServerEndpoints) ProjectQuery(project string) string {
-	return s.ApiServer() + "a/" + project + "/"
+	return s.ApiServer() + "api/v1/registry/" + project + "/"
 }
 func (s *ServerEndpoints) ProjectNameQuery(project, name string) string {
-	return s.ProjectQuery(project) + name + "/"
+	return s.ProjectQuery(project) + "units/" + name + "/"
 }
 func (s *ServerEndpoints) ProjectReleaseQuery(project, name, version string) string {
-	return s.ProjectNameQuery(project, name) + "v" + version + "/"
+	return s.ProjectNameQuery(project, name) + "versions/v" + version + "/"
 }
 func (s *ServerEndpoints) RegisterPackage(project string) string {
 	return s.ProjectQuery(project) + "register"
@@ -76,5 +76,5 @@ func (s *ServerEndpoints) AuthMethods(baseUrl string) string {
 	if !strings.HasSuffix(baseUrl, "/") {
 		baseUrl += "/"
 	}
-	return baseUrl + "login-methods"
+	return baseUrl + "api/v1/login-methods"
 }
