@@ -76,5 +76,5 @@ func (s *ServerEndpoints) AuthMethods(baseUrl string) string {
 	if !strings.HasSuffix(baseUrl, "/") {
 		baseUrl += "/"
 	}
-	return baseUrl + "api/v1/login-methods"
+	return baseUrl + "api/v1/auth/login-methods"
 }
