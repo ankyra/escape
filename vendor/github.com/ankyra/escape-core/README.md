@@ -1,24 +1,9 @@
 # Escape Core
 
-Core library containing datastructures for working with Release Metadata and
-the Escape Scripting Language.
+Core library containing datastructures for working with Release Metadata, State
+and the Escape Scripting Language.
 
-Please see http://escape.ankyra.io for the full documentation.
-
-## Build
-
-This library can be build using standard Go tools. 
-
-```
-git clone https://github.com/ankyra/escape-core.git "$GOPATH/src/github.com/ankyra/escape-core"
-go build
-```
-
-To run all the tests:
-
-```
-make go-test
-```
+Please see https://escape.ankyra.io for the full documentation.
 
 ## License
 

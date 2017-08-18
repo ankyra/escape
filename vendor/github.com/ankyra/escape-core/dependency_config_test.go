@@ -29,6 +29,8 @@ func (s *metadataSuite) Test_DependencyConfig_Mapping_is_set(c *C) {
 	c.Assert(dep.Validate(metadata), IsNil)
 	c.Assert(dep.Mapping, Not(IsNil))
 	c.Assert(dep.Mapping, HasLen, 0)
+	c.Assert(dep.Scopes, DeepEquals, []string{"build", "deploy"})
+	c.Assert(dep.Consumes, DeepEquals, map[string]string{})
 }
 
 func (s *metadataSuite) Test_NewDependencyConfigFromMap(c *C) {
@@ -37,12 +39,18 @@ func (s *metadataSuite) Test_NewDependencyConfigFromMap(c *C) {
 		"mapping": map[interface{}]interface{}{
 			"input_variable1": "test",
 		},
+		"scopes": []interface{}{"build"},
+		"consumes": map[interface{}]interface{}{
+			"test": "whatver",
+		},
 	})
 	c.Assert(err, IsNil)
 	c.Assert(dep.ReleaseId, Equals, "test-latest")
 	c.Assert(dep.Mapping, Not(IsNil))
 	c.Assert(dep.Mapping, HasLen, 1)
 	c.Assert(dep.Mapping["input_variable1"], Equals, "test")
+	c.Assert(dep.Scopes, DeepEquals, []string{"build"})
+	c.Assert(dep.Consumes, DeepEquals, map[string]string{"test": "whatver"})
 }
 
 func (s *metadataSuite) Test_DependencyConfig_validate_sets_default_mapping(c *C) {
@@ -63,6 +71,8 @@ func (s *metadataSuite) Test_DependencyConfig_validate_sets_default_mapping(c *C
 	c.Assert(dep.Mapping, HasLen, 2)
 	c.Assert(dep.Mapping["input_variable1"], Equals, "$this.inputs.input_variable1")
 	c.Assert(dep.Mapping["input_variable2"], Equals, "test")
+	c.Assert(dep.Scopes, DeepEquals, []string{})
+	c.Assert(dep.Consumes, DeepEquals, map[string]string{})
 }
 
 func (s *metadataSuite) Test_DependencyConfig_validate_doesnt_set_mapping_if_not_EvalBeforeDependencies(c *C) {

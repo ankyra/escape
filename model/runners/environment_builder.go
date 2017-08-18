@@ -56,7 +56,7 @@ func (e *environmentBuilder) GetInputsForPreStep(ctx RunnerContext, stage string
 	if err != nil {
 		return nil, err
 	}
-	for _, inputVar := range ctx.GetReleaseMetadata().GetInputs() {
+	for _, inputVar := range ctx.GetReleaseMetadata().GetInputs(stage) {
 		val, err := inputVar.GetValue(&inputs, scriptEnv)
 		if err != nil {
 			return nil, err
@@ -75,7 +75,7 @@ func (e *environmentBuilder) GetPreDependencyInputs(ctx RunnerContext, stage str
 	if err != nil {
 		return nil, err
 	}
-	for _, inputVar := range ctx.GetReleaseMetadata().GetInputs() {
+	for _, inputVar := range ctx.GetReleaseMetadata().GetInputs(stage) {
 		if inputVar.EvalBeforeDependencies {
 			val, err := inputVar.GetValue(&inputs, scriptEnv)
 			if err != nil {
@@ -138,12 +138,12 @@ func (e *environmentBuilder) GetInputsForErrand(ctx RunnerContext, errand *core.
 func (e *environmentBuilder) GetOutputs(ctx RunnerContext, stage string) (map[string]interface{}, error) {
 	metadata := ctx.GetReleaseMetadata()
 	buildOutputs := ctx.GetBuildOutputs()
-	outputVariables := metadata.GetOutputs()
 	result := map[string]interface{}{}
 	scriptEnv, err := ctx.GetScriptEnvironment(stage)
 	if err != nil {
 		return nil, err
 	}
+	outputVariables := metadata.GetOutputs(stage)
 	for _, outputVar := range outputVariables {
 		val, err := outputVar.GetValue(&buildOutputs, scriptEnv)
 		if err != nil {

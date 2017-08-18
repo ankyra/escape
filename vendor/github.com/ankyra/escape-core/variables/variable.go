@@ -20,11 +20,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/ankyra/escape-core/parsers"
 	"github.com/ankyra/escape-core/script"
 	"github.com/ankyra/escape-core/variables/variable_types"
 	"gopkg.in/yaml.v2"
-	"strings"
 )
 
 type Variable struct {
@@ -38,6 +39,7 @@ type Variable struct {
 	Sensitive              bool                   `json:"sensitive,omitempty"`
 	Items                  interface{}            `json:"items"`
 	EvalBeforeDependencies bool                   `json:"eval_before_dependencies,omitempty"`
+	Scopes                 []string               `json:"scopes"`
 }
 
 type UntypedVariable map[interface{}]interface{}
@@ -46,16 +48,32 @@ func NewVariable() *Variable {
 	return &Variable{
 		Visible:                true,
 		EvalBeforeDependencies: true,
+		Scopes:                 []string{"build", "deploy"},
 	}
+}
+
+func NewVariableFromInterface(v interface{}) (result *Variable, err error) {
+	switch v.(type) {
+	case string:
+		result, err = NewVariableFromString(v.(string), "string")
+		if err != nil {
+			return nil, err
+		}
+	case map[interface{}]interface{}:
+		result, err = NewVariableFromDict(v.(map[interface{}]interface{}))
+		if err != nil {
+			return nil, err
+		}
+	default:
+		return nil, fmt.Errorf("Expecting dict or string type")
+	}
+	return result, nil
 }
 
 func NewVariableFromString(id, typ string) (*Variable, error) {
 	v := NewVariable()
 	v.Id = id
 	v.Type = typ
-	if variable_types.VariableIdIsReservedType(v.Id) {
-		v.Type = v.Id
-	}
 	return v, v.Validate()
 }
 
@@ -65,8 +83,7 @@ func NewVariableFromDict(input UntypedVariable) (*Variable, error) {
 		return nil, errors.New("Invalid input variable format: " + err.Error())
 	}
 	result := NewVariable()
-	err = yaml.Unmarshal(str, result)
-	if err != nil {
+	if err = yaml.Unmarshal(str, result); err != nil {
 		return nil, errors.New("Invalid input variable format: " + err.Error())
 	}
 	if result.Id == "" {
@@ -84,14 +101,29 @@ func (v *Variable) Validate() error {
 	}
 	_, rest := parsers.ParseIdent(v.Id)
 	if strings.TrimSpace(rest) != "" {
-		return fmt.Errorf("Invalid variable format '%s'", v.Id)
+		return fmt.Errorf("Invalid variable id format '%s'", v.Id)
 	}
 	v.Id = strings.TrimSpace(v.Id)
 	if strings.HasPrefix(strings.ToUpper(v.Id), "PREVIOUS_") {
 		return fmt.Errorf("Invalid variable format '%s'. Variable is not allowed to start with '%s'",
 			v.Id, v.Id[:len("PREVIOUS_")])
 	}
+	if v.Scopes == nil || len(v.Scopes) == 0 {
+		v.Scopes = []string{"build", "deploy"}
+	}
+	if variable_types.VariableIdIsReservedType(v.Id) {
+		return fmt.Errorf("The variable name '%s' is reserved", v.Id)
+	}
 	return nil
+}
+
+func (v *Variable) InScope(scope string) bool {
+	for _, s := range v.Scopes {
+		if s == scope {
+			return true
+		}
+	}
+	return false
 }
 
 func (v *Variable) HasDefault() bool {
@@ -99,7 +131,7 @@ func (v *Variable) HasDefault() bool {
 }
 
 func (v *Variable) AskUserInput() interface{} {
-	if v.Default != nil {
+	if v.HasDefault() {
 		return nil
 	}
 	if v.Type == "version" {

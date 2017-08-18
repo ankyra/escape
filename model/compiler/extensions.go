@@ -18,6 +18,7 @@ package compiler
 
 import (
 	"fmt"
+
 	"github.com/ankyra/escape-client/model/paths"
 	"github.com/ankyra/escape-core"
 )
@@ -32,16 +33,16 @@ func compileExtensions(ctx *CompilerContext) error {
 		if err != nil {
 			return err
 		}
-		for _, consume := range metadata.GetConsumes() {
+		for _, consume := range metadata.Consumes {
 			ctx.Metadata.AddConsumes(consume)
 		}
 		for _, provide := range metadata.GetProvides() {
 			ctx.Metadata.AddProvides(provide)
 		}
-		for _, input := range metadata.GetInputs() {
+		for _, input := range metadata.Inputs {
 			ctx.Metadata.AddInputVariable(input)
 		}
-		for _, output := range metadata.GetOutputs() {
+		for _, output := range metadata.Outputs {
 			ctx.Metadata.AddOutputVariable(output)
 		}
 		for name, newErrand := range metadata.GetErrands() {

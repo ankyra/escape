@@ -23,6 +23,17 @@ import (
 type DependencyConfig struct {
 	ReleaseId string                 `json:"release_id" yaml:"release_id"`
 	Mapping   map[string]interface{} `json:"mapping" yaml:"mapping"`
+	Consumes  map[string]string      `json:"consumes" yaml:"consumes"`
+	Scopes    []string               `json:"scopes" yaml:"scopes"`
+}
+
+func NewDependencyConfig(releaseId string) *DependencyConfig {
+	return &DependencyConfig{
+		ReleaseId: releaseId,
+		Mapping:   map[string]interface{}{},
+		Scopes:    []string{"build", "deploy"},
+		Consumes:  map[string]string{},
+	}
 }
 
 func (d *DependencyConfig) Validate(m *ReleaseMetadata) error {
@@ -41,16 +52,11 @@ func (d *DependencyConfig) Validate(m *ReleaseMetadata) error {
 	return nil
 }
 
-func NewDependencyConfig(releaseId string) *DependencyConfig {
-	return &DependencyConfig{
-		ReleaseId: releaseId,
-		Mapping:   map[string]interface{}{},
-	}
-}
-
 func NewDependencyConfigFromMap(dep map[interface{}]interface{}) (*DependencyConfig, error) {
 	var releaseId string
 	mapping := map[string]interface{}{}
+	consumes := map[string]string{}
+	scopes := []string{}
 	for key, val := range dep {
 		keyStr, ok := key.(string)
 		if !ok {
@@ -74,6 +80,28 @@ func NewDependencyConfigFromMap(dep map[interface{}]interface{}) (*DependencyCon
 				}
 				mapping[kStr] = v
 			}
+		} else if key == "consumes" {
+			valMap, ok := val.(map[interface{}]interface{})
+			if !ok {
+				return nil, fmt.Errorf("Expecting dict for dependency 'consumes' got '%T'", val)
+			}
+			for k, v := range valMap {
+				kStr, ok := k.(string)
+				if !ok {
+					return nil, fmt.Errorf("Expecting string key in dependency consumer mapping")
+				}
+				vStr, ok := v.(string)
+				if !ok {
+					return nil, fmt.Errorf("Expecting string value in dependency consumer mapping")
+				}
+				consumes[kStr] = vStr
+			}
+		} else if key == "scopes" {
+			s, err := parseScopesFromInterface(val)
+			if err != nil {
+				return nil, err
+			}
+			scopes = s
 		}
 	}
 	if releaseId == "" {
@@ -81,5 +109,7 @@ func NewDependencyConfigFromMap(dep map[interface{}]interface{}) (*DependencyCon
 	}
 	cfg := NewDependencyConfig(releaseId)
 	cfg.Mapping = mapping
+	cfg.Scopes = scopes
+	cfg.Consumes = consumes
 	return cfg, nil
 }

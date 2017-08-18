@@ -65,7 +65,7 @@ func GetVariableType(typ string) (*VariableType, error) {
 func VariableIdIsReservedType(typ string) bool {
 	for _, varType := range knownTypes {
 		if varType.Type == typ {
-			return !varType.UserCanOverride
+			return true
 		}
 	}
 	return false

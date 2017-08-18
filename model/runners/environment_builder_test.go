@@ -48,7 +48,7 @@ func (s *testSuite) Test_GetInputsForPreStep_calculated_inputs(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(inputs, HasLen, 5)
 	c.Assert(inputs["input_variable"], DeepEquals, "0.0.1")
-	c.Assert(inputs["version"], DeepEquals, "0.0.1")
+	c.Assert(inputs["magic_version"], DeepEquals, "0.0.1")
 	c.Assert(inputs["override"], DeepEquals, "override")
 	c.Assert(inputs["METADATA_key"], DeepEquals, "value")
 	c.Assert(inputs["PREVIOUS_OUTPUT_output_variable"], DeepEquals, "testoutput")
@@ -62,7 +62,7 @@ func (s *testSuite) Test_GetInputsForErrand(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(inputs, HasLen, 4)
 	c.Assert(inputs["input_variable"], DeepEquals, "override")
-	c.Assert(inputs["version"], DeepEquals, "0.0.1")
+	c.Assert(inputs["magic_version"], DeepEquals, "0.0.1")
 	c.Assert(inputs["override"], DeepEquals, "not overridden")
 	c.Assert(inputs["OUTPUT_output_variable"], DeepEquals, "testoutput")
 }
@@ -90,7 +90,7 @@ func (s *testSuite) Test_GetInputsForErrand_extravars_override(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(inputs, HasLen, 4)
 	c.Assert(inputs["input_variable"], DeepEquals, "aight")
-	c.Assert(inputs["version"], DeepEquals, "0.0.1")
+	c.Assert(inputs["magic_version"], DeepEquals, "0.0.1")
 	c.Assert(inputs["override"], DeepEquals, "yo")
 	c.Assert(inputs["OUTPUT_output_variable"], DeepEquals, "testoutput")
 }
@@ -142,13 +142,6 @@ func (s *testSuite) Test_GetOutputs_only_warns_if_unexpected_output_is_given(c *
 func (s *testSuite) Test_GetOutputs_fails_if_outputs_not_set(c *C) {
 	runCtx := getRunContext(c, "testdata/env_state.json", "testdata/env_test_plan.yml")
 	_, err := NewEmptyEnvEnvironmentBuilder().GetOutputs(runCtx, "deploy")
-	c.Assert(err, Not(IsNil))
-	c.Assert(err.Error(), Equals, "Missing value for variable 'output_variable'")
-}
-
-func (s *testSuite) Test_GetOutputs_fails_if_stage_is_wrong(c *C) {
-	runCtx := getRunContext(c, "testdata/env_state.json", "testdata/env_test_plan.yml")
-	_, err := NewEmptyEnvEnvironmentBuilder().GetOutputs(runCtx, "wut")
 	c.Assert(err, Not(IsNil))
 	c.Assert(err.Error(), Equals, "Missing value for variable 'output_variable'")
 }

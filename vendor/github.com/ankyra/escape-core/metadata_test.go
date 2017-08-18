@@ -18,10 +18,11 @@ package core
 
 import (
 	"encoding/json"
-	"github.com/ankyra/escape-core/variables"
-	. "gopkg.in/check.v1"
 	"strconv"
 	"testing"
+
+	"github.com/ankyra/escape-core/variables"
+	. "gopkg.in/check.v1"
 )
 
 type metadataSuite struct{}
@@ -153,25 +154,33 @@ func (s *metadataSuite) Test_VariableContext(c *C) {
 func (s *metadataSuite) Test_InputVariables(c *C) {
 	v1, _ := variables.NewVariableFromString("input_variable1", "string")
 	v2, _ := variables.NewVariableFromString("input_variable2", "string")
+	v2.Scopes = []string{"deploy"}
 	m := NewReleaseMetadata("test-release", "0.1")
 	m.AddInputVariable(v1)
 	m.AddInputVariable(v2)
-	vars := m.GetInputs()
+	vars := m.GetInputs("deploy")
 	c.Assert(vars, HasLen, 2)
 	c.Assert(vars[0], Equals, v1)
 	c.Assert(vars[1], Equals, v2)
+	vars = m.GetInputs("build")
+	c.Assert(vars, HasLen, 1)
+	c.Assert(vars[0], Equals, v1)
 }
 
 func (s *metadataSuite) Test_OutputVariables(c *C) {
 	v1, _ := variables.NewVariableFromString("output_variable1", "string")
 	v2, _ := variables.NewVariableFromString("output_variable2", "string")
+	v2.Scopes = []string{"deploy"}
 	m := NewReleaseMetadata("test-release", "0.1")
 	m.AddOutputVariable(v1)
 	m.AddOutputVariable(v2)
-	vars := m.GetOutputs()
+	vars := m.GetOutputs("deploy")
 	c.Assert(len(vars), Equals, 2)
 	c.Assert(vars[0], Equals, v1)
 	c.Assert(vars[1], Equals, v2)
+	vars = m.GetOutputs("build")
+	c.Assert(len(vars), Equals, 1)
+	c.Assert(vars[0], Equals, v1)
 }
 
 func (s *metadataSuite) Test_GetDirectores(c *C) {
@@ -200,7 +209,7 @@ func (s *metadataSuite) Test_FromJson(c *C) {
         "api_version": 1,
         "project": "my-project",
         "consumes": [{ "Name": "provider1" }, 
-                     { "name" : "provider2" }],
+					 { "name" : "provider2", "scopes": ["deploy"] }],
         "name": "test-release",
         "description": "Test release",
         "version": "0.1",
@@ -216,9 +225,83 @@ func (s *metadataSuite) Test_FromJson(c *C) {
 	c.Assert(m.Name, Equals, "test-release")
 	c.Assert(m.Description, Equals, "Test release")
 	c.Assert(m.Version, Equals, "0.1")
-	c.Assert(m.GetConsumes(), HasLen, 2)
-	c.Assert(m.GetConsumes()[0], Equals, "provider1")
-	c.Assert(m.GetConsumes()[1], Equals, "provider2")
+	c.Assert(m.GetConsumes("deploy"), HasLen, 2)
+	c.Assert(m.GetConsumes("deploy")[0], Equals, "provider1")
+	c.Assert(m.GetConsumes("deploy")[1], Equals, "provider2")
+	c.Assert(m.GetConsumes("build"), HasLen, 1)
+	c.Assert(m.GetConsumes("build")[0], Equals, "provider1")
 	c.Assert(m.GetVariableContext()["base"], Equals, "test-depends-v1")
 	c.Assert(m.GetVariableContext()["test-depends"], Equals, "test-depends-v1")
+}
+
+func (s *metadataSuite) Test_AddInputVariable(c *C) {
+	m := NewReleaseMetadata("test", "1.0")
+	c.Assert(m.GetInputs("build"), HasLen, 0)
+	variable, _ := variables.NewVariableFromString("testing", "string")
+	m.AddInputVariable(variable)
+	c.Assert(m.GetInputs("build"), HasLen, 1)
+	c.Assert(m.GetInputs("deploy"), HasLen, 1)
+	variable2, _ := variables.NewVariableFromString("test", "string")
+	variable2.Scopes = []string{"deploy"}
+	m.AddInputVariable(variable2)
+	c.Assert(m.GetInputs("build"), HasLen, 1)
+	c.Assert(m.GetInputs("deploy"), HasLen, 2)
+	dep, _ := variables.NewVariableFromString("test", "string")
+	dep.Scopes = []string{"build", "deploy"}
+	m.AddInputVariable(dep)
+	c.Assert(m.GetInputs("build"), HasLen, 2)
+	c.Assert(m.GetInputs("deploy"), HasLen, 2)
+	dep2, _ := variables.NewVariableFromString("test", "string")
+	dep2.Scopes = []string{"deploy"}
+	m.AddInputVariable(dep2)
+	c.Assert(m.GetInputs("build"), HasLen, 2, Commentf("Most scopes win"))
+	c.Assert(m.GetInputs("deploy"), HasLen, 2)
+}
+
+func (s *metadataSuite) Test_AddOutputVariable(c *C) {
+	m := NewReleaseMetadata("test", "1.0")
+	c.Assert(m.GetOutputs("build"), HasLen, 0)
+	variable, _ := variables.NewVariableFromString("testing", "string")
+	m.AddOutputVariable(variable)
+	c.Assert(m.GetOutputs("build"), HasLen, 1)
+	c.Assert(m.GetOutputs("deploy"), HasLen, 1)
+	variable2, _ := variables.NewVariableFromString("test", "string")
+	variable2.Scopes = []string{"deploy"}
+	m.AddOutputVariable(variable2)
+	c.Assert(m.GetOutputs("build"), HasLen, 1)
+	c.Assert(m.GetOutputs("deploy"), HasLen, 2)
+	dep, _ := variables.NewVariableFromString("test", "string")
+	dep.Scopes = []string{"build", "deploy"}
+	m.AddOutputVariable(dep)
+	c.Assert(m.GetOutputs("build"), HasLen, 2)
+	c.Assert(m.GetOutputs("deploy"), HasLen, 2)
+	dep2, _ := variables.NewVariableFromString("test", "string")
+	dep2.Scopes = []string{"deploy"}
+	m.AddOutputVariable(dep2)
+	c.Assert(m.GetOutputs("build"), HasLen, 2, Commentf("Most scopes win"))
+	c.Assert(m.GetOutputs("deploy"), HasLen, 2)
+}
+
+func (s *metadataSuite) Test_AddConsumes(c *C) {
+	m := NewReleaseMetadata("test", "1.0")
+	c.Assert(m.GetConsumes("build"), HasLen, 0)
+	consumer := NewConsumerConfig("all-scopes")
+	m.AddConsumes(consumer)
+	c.Assert(m.GetConsumes("build"), HasLen, 1)
+	c.Assert(m.GetConsumes("deploy"), HasLen, 1)
+	consumer2 := NewConsumerConfig("deploy-scope")
+	consumer2.Scopes = []string{"deploy"}
+	m.AddConsumes(consumer2)
+	c.Assert(m.GetConsumes("build"), HasLen, 1)
+	c.Assert(m.GetConsumes("deploy"), HasLen, 2)
+	dep := NewConsumerConfig("deploy-scope")
+	dep.Scopes = []string{"build", "deploy"}
+	m.AddConsumes(dep)
+	c.Assert(m.GetConsumes("build"), HasLen, 2)
+	c.Assert(m.GetConsumes("deploy"), HasLen, 2)
+	dep2 := NewConsumerConfig("deploy-scope")
+	dep2.Scopes = []string{"deploy"}
+	m.AddConsumes(dep2)
+	c.Assert(m.GetConsumes("build"), HasLen, 2, Commentf("Most scopes win"))
+	c.Assert(m.GetConsumes("deploy"), HasLen, 2)
 }

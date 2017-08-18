@@ -18,8 +18,9 @@ package controllers
 
 import (
 	"fmt"
-	. "github.com/ankyra/escape-client/model/interfaces"
 	"strings"
+
+	. "github.com/ankyra/escape-client/model/interfaces"
 )
 
 type StateController struct{}
@@ -68,7 +69,7 @@ func (p StateController) CreateState(context Context, stage string, extraVars, e
 		inputs[key] = val
 		changed = true
 	}
-	for _, i := range metadata.GetInputs() {
+	for _, i := range metadata.GetInputs(stage) {
 		val, ok := inputs[i.Id]
 		if !ok {
 			val = i.AskUserInput()

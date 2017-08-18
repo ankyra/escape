@@ -19,6 +19,7 @@ package core
 import (
 	"errors"
 	"fmt"
+
 	"github.com/ankyra/escape-core/variables"
 )
 
@@ -27,6 +28,16 @@ type Errand struct {
 	Description string                `json:"description"`
 	Script      string                `json:"script"`
 	Inputs      []*variables.Variable `json:"inputs"`
+}
+
+func NewErrand(name, script, description string) *Errand {
+	result := &Errand{
+		Name:        name,
+		Script:      script,
+		Description: description,
+		Inputs:      []*variables.Variable{},
+	}
+	return result
 }
 
 func (e *Errand) GetInputs() []*variables.Variable {
@@ -52,16 +63,6 @@ func (e *Errand) Validate() error {
 		}
 	}
 	return nil
-}
-
-func NewErrand(name, script, description string) *Errand {
-	result := &Errand{
-		Name:        name,
-		Script:      script,
-		Description: description,
-		Inputs:      []*variables.Variable{},
-	}
-	return result
 }
 
 func NewErrandFromDict(name string, dict interface{}) (*Errand, error) {
@@ -92,24 +93,11 @@ func NewErrandFromDict(name string, dict interface{}) (*Errand, error) {
 					case []interface{}:
 						inputDicts := val.([]interface{})
 						for _, inputDict := range inputDicts {
-							switch inputDict.(type) {
-							case map[interface{}]interface{}:
-								dict := inputDict.(map[interface{}]interface{})
-								v, err := variables.NewVariableFromDict(dict)
-								if err != nil {
-									return nil, err
-								}
-								inputs = append(inputs, v)
-							case string:
-								stringVar := inputDict.(string)
-								v, err := variables.NewVariableFromString(stringVar, "string")
-								if err != nil {
-									return nil, errors.New("Not a valid errand variable: " + stringVar)
-								}
-								inputs = append(inputs, v)
-							default:
-								return nil, errors.New("Expecting dict or string type for input item in errand " + name)
+							variable, err := variables.NewVariableFromInterface(inputDict)
+							if err != nil {
+								return nil, fmt.Errorf("%s in errand '%s' input variables", err.Error(), name)
 							}
+							inputs = append(inputs, variable)
 						}
 					default:
 						return nil, errors.New("Expecting list type for inputs key in errand " + name)

@@ -20,29 +20,22 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"path/filepath"
+	"regexp"
+	"strings"
+
 	"github.com/ankyra/escape-core/parsers"
 	"github.com/ankyra/escape-core/script"
 	"github.com/ankyra/escape-core/templates"
 	"github.com/ankyra/escape-core/util"
 	"github.com/ankyra/escape-core/variables"
-	"io/ioutil"
-	"path/filepath"
-	"regexp"
-	"strings"
 )
 
-const CurrentApiVersion = 4
+const CurrentApiVersion = 5
 
 type ExecStage struct {
 	Script string `json:"script"`
-}
-
-type ConsumerConfig struct {
-	Name string `json:"name"`
-}
-
-func NewConsumerConfig(name string) *ConsumerConfig {
-	return &ConsumerConfig{name}
 }
 
 type ProviderConfig struct {
@@ -176,6 +169,11 @@ func validate(m *ReleaseMetadata) error {
 			return err
 		}
 	}
+	for _, c := range m.Consumes {
+		if err := c.ValidateAndFix(); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -236,25 +234,55 @@ func (m *ReleaseMetadata) GetScript(stage string) string {
 	return m.GetStage(stage).Script
 }
 
-func (m *ReleaseMetadata) AddConsumes(c string) {
-	for _, consumer := range m.Consumes {
-		if consumer.Name == c {
+func (m *ReleaseMetadata) AddInputVariable(input *variables.Variable) {
+	for _, i := range m.Inputs {
+		if i.Id == input.Id {
+			i.Default = input.Default
+			if len(i.Scopes) < len(input.Scopes) {
+				i.Scopes = input.Scopes
+			}
 			return
 		}
 	}
-	m.Consumes = append(m.Consumes, NewConsumerConfig(c))
+	m.Inputs = append(m.Inputs, input)
+}
+
+func (m *ReleaseMetadata) AddOutputVariable(output *variables.Variable) {
+	for _, i := range m.Outputs {
+		if i.Id == output.Id {
+			if len(i.Scopes) < len(output.Scopes) {
+				i.Scopes = output.Scopes
+			}
+			return
+		}
+	}
+	m.Outputs = append(m.Outputs, output)
+}
+
+func (m *ReleaseMetadata) AddConsumes(c *ConsumerConfig) {
+	for _, consumer := range m.Consumes {
+		if consumer.Name == c.Name {
+			if len(consumer.Scopes) < len(c.Scopes) {
+				consumer.Scopes = c.Scopes
+			}
+			return
+		}
+	}
+	m.Consumes = append(m.Consumes, c)
 }
 
 func (m *ReleaseMetadata) SetConsumes(c []string) {
 	for _, consumer := range c {
-		m.AddConsumes(consumer)
+		m.AddConsumes(NewConsumerConfig(consumer))
 	}
 }
 
-func (m *ReleaseMetadata) GetConsumes() []string {
+func (m *ReleaseMetadata) GetConsumes(stage string) []string {
 	result := []string{}
 	for _, c := range m.Consumes {
-		result = append(result, c.Name)
+		if c.InScope(stage) {
+			result = append(result, c.Name)
+		}
 	}
 	return result
 }
@@ -267,18 +295,22 @@ func (m *ReleaseMetadata) GetErrands() map[string]*Errand {
 	return result
 }
 
-func (m *ReleaseMetadata) GetInputs() []*variables.Variable {
+func (m *ReleaseMetadata) GetInputs(stage string) []*variables.Variable {
 	result := []*variables.Variable{}
 	for _, i := range m.Inputs {
-		result = append(result, i)
+		if i.InScope(stage) {
+			result = append(result, i)
+		}
 	}
 	return result
 }
 
-func (m *ReleaseMetadata) GetOutputs() []*variables.Variable {
+func (m *ReleaseMetadata) GetOutputs(stage string) []*variables.Variable {
 	result := []*variables.Variable{}
 	for _, i := range m.Outputs {
-		result = append(result, i)
+		if i.InScope(stage) {
+			result = append(result, i)
+		}
 	}
 	return result
 }
@@ -351,25 +383,6 @@ func (m *ReleaseMetadata) GetProject() string {
 
 func (m *ReleaseMetadata) GetVersionlessReleaseId() string {
 	return m.GetProject() + "/" + m.Name
-}
-
-func (m *ReleaseMetadata) AddInputVariable(input *variables.Variable) {
-	for _, i := range m.Inputs {
-		if i.Id == input.Id {
-			i.Default = input.Default
-			return
-		}
-	}
-	m.Inputs = append(m.Inputs, input)
-}
-
-func (m *ReleaseMetadata) AddOutputVariable(output *variables.Variable) {
-	for _, i := range m.Outputs {
-		if i.Id == output.Id {
-			return
-		}
-	}
-	m.Outputs = append(m.Outputs, output)
 }
 
 func (m *ReleaseMetadata) ToJson() string {

@@ -18,6 +18,7 @@ package compiler
 
 import (
 	"fmt"
+
 	"github.com/ankyra/escape-core/templates"
 )
 
@@ -31,10 +32,12 @@ func compileTemplates(ctx *CompilerContext) error {
 			return fmt.Errorf("Missing 'file' field in template")
 		}
 		mapping := template.Mapping
-		for _, i := range ctx.Metadata.GetInputs() {
-			_, exists := mapping[i.Id]
-			if !exists {
-				mapping[i.Id] = "$this.inputs." + i.Id
+		for _, scope := range template.Scopes {
+			for _, i := range ctx.Metadata.GetInputs(scope) {
+				_, exists := mapping[i.Id]
+				if !exists {
+					mapping[i.Id] = "$this.inputs." + i.Id
+				}
 			}
 		}
 		extraVars := []string{"branch", "description", "logo", "name",

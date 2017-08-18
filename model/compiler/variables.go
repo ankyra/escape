@@ -18,6 +18,7 @@ package compiler
 
 import (
 	"fmt"
+
 	"github.com/ankyra/escape-core/script"
 	"github.com/ankyra/escape-core/variables"
 )
@@ -45,19 +46,9 @@ func compileOutputs(ctx *CompilerContext) error {
 }
 
 func compileVariable(ctx *CompilerContext, v interface{}) (result *variables.Variable, err error) {
-	switch v.(type) {
-	case string:
-		result, err = variables.NewVariableFromString(v.(string), "string")
-		if err != nil {
-			return nil, err
-		}
-	case map[interface{}]interface{}:
-		result, err = variables.NewVariableFromDict(v.(map[interface{}]interface{}))
-		if err != nil {
-			return nil, err
-		}
-	default:
-		fmt.Errorf("Unexpected type")
+	result, err = variables.NewVariableFromInterface(v)
+	if err != nil {
+		return nil, err
 	}
 	if result.Default != nil {
 		return compileDefault(ctx, result)

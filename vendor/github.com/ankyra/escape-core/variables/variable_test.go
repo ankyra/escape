@@ -17,9 +17,10 @@ limitations under the License.
 package variables
 
 import (
+	"testing"
+
 	"github.com/ankyra/escape-core/script"
 	. "gopkg.in/check.v1"
-	"testing"
 )
 
 type variableSuite struct{}
@@ -28,7 +29,113 @@ var _ = Suite(&variableSuite{})
 
 func Test(t *testing.T) { TestingT(t) }
 
-func (s *variableSuite) Test_GetValue_fails_with_invalid_id(c *C) {
+func (s *variableSuite) Test_NewVariableFromInterface_String(c *C) {
+	v, err := NewVariableFromInterface("test")
+	c.Assert(err, IsNil)
+	c.Assert(v.Id, Equals, "test")
+}
+
+func (s *variableSuite) Test_NewVariableFromInterface_Map(c *C) {
+	v, err := NewVariableFromInterface(map[interface{}]interface{}{"id": "test"})
+	c.Assert(err, IsNil)
+	c.Assert(v.Id, Equals, "test")
+}
+
+func (s *variableSuite) Test_NewVariableFromInterface_Fails_On_Unknown_Type(c *C) {
+	_, err := NewVariableFromInterface(12)
+	c.Assert(err.Error(), Equals, "Expecting dict or string type")
+}
+
+func (s *variableSuite) Test_NewVariableFromInterface_Fails_On_Invalid_String(c *C) {
+	_, err := NewVariableFromInterface("test oops")
+	c.Assert(err.Error(), Equals, "Invalid variable id format 'test oops'")
+}
+func (s *variableSuite) Test_NewVariableFromInterface_Fails_On_Invalid_Map(c *C) {
+	_, err := NewVariableFromInterface(map[interface{}]interface{}{"id": 12})
+	c.Assert(err.Error(), Equals, "Invalid variable id format '12'")
+}
+
+func (s *variableSuite) Test_NewVariableFromString(c *C) {
+	v, err := NewVariableFromString("test", "string")
+	c.Assert(err, IsNil)
+	c.Assert(v.Id, Equals, "test")
+	c.Assert(v.Type, Equals, "string")
+	c.Assert(v.Visible, Equals, true)
+	c.Assert(v.EvalBeforeDependencies, Equals, true)
+	c.Assert(v.Scopes, DeepEquals, []string{"build", "deploy"})
+}
+
+func (s *variableSuite) Test_NewVariableFromDict(c *C) {
+	dict := map[interface{}]interface{}{
+		"id":     "test",
+		"scopes": []interface{}{"build"},
+	}
+	v, err := NewVariableFromDict(dict)
+	c.Assert(err, IsNil)
+	c.Assert(v.Visible, Equals, true)
+	c.Assert(v.EvalBeforeDependencies, Equals, true)
+	c.Assert(v.Scopes, DeepEquals, []string{"build"})
+}
+
+func (s *variableSuite) Test_NewVariableFromDict_Sets_Default_Scopes_If_Nil(c *C) {
+	dict := map[interface{}]interface{}{
+		"id": "test",
+	}
+	v, err := NewVariableFromDict(dict)
+	c.Assert(err, IsNil)
+	c.Assert(v.Scopes, DeepEquals, []string{"build", "deploy"})
+}
+
+func (s *variableSuite) Test_NewVariable_Default_Visible_and_EvalBeforeDependencies(c *C) {
+	v := NewVariable()
+	c.Assert(v.Visible, Equals, true)
+	c.Assert(v.EvalBeforeDependencies, Equals, true)
+}
+
+func (s *variableSuite) Test_NewVariableFromDict_Sets_Default_Scopes_If_Empty(c *C) {
+	dict := map[interface{}]interface{}{
+		"id":     "test",
+		"scopes": []interface{}{},
+	}
+	v, err := NewVariableFromDict(dict)
+	c.Assert(err, IsNil)
+	c.Assert(v.Scopes, DeepEquals, []string{"build", "deploy"})
+}
+
+func (s *variableSuite) Test_NewVariableFromDict_Default_Visible_and_EvalBeforeDependencies(c *C) {
+	dict := map[interface{}]interface{}{
+		"id": "test",
+	}
+	v, err := NewVariableFromDict(dict)
+	c.Assert(err, IsNil)
+	c.Assert(v.Visible, Equals, true)
+	c.Assert(v.EvalBeforeDependencies, Equals, true)
+}
+
+func (s *variableSuite) Test_NewVariableFromDict_fails_if_missing_id(c *C) {
+	dict := map[interface{}]interface{}{}
+	_, err := NewVariableFromDict(dict)
+	c.Assert(err.Error(), Equals, "Missing 'id' field in variable")
+}
+
+func (s *variableSuite) Test_NewVariableFromDict_fails_if_type_invalid(c *C) {
+	dict := map[interface{}]interface{}{
+		"id":   "test",
+		"type": "unknown",
+	}
+	_, err := NewVariableFromDict(dict)
+	c.Assert(err.Error(), Equals, "Unknown variable type: unknown")
+}
+
+func (s *variableSuite) Test_NewVariableFromDict_fails_if_invalid_structure(c *C) {
+	dict := map[interface{}]interface{}{
+		"id": []interface{}{"test"},
+	}
+	_, err := NewVariableFromDict(dict)
+	c.Assert(err.Error(), Not(IsNil))
+}
+
+func (s *variableSuite) Test_NewVariableFromString_fails_with_invalid_id(c *C) {
 	tbl := []string{"_test", "123123", "//", "", "#"}
 	for _, testCase := range tbl {
 		_, err := NewVariableFromString(testCase, "string")
@@ -36,11 +143,20 @@ func (s *variableSuite) Test_GetValue_fails_with_invalid_id(c *C) {
 	}
 }
 
-func (s *variableSuite) Test_GetValue_fails_with_id_starting_with_previous(c *C) {
+func (s *variableSuite) Test_NewVariableFromString_fails_with_id_starting_with_previous(c *C) {
 	tbl := []string{"previous_test", "PREVIOUS_test", "preVIOUS_test"}
 	for _, testCase := range tbl {
 		_, err := NewVariableFromString(testCase, "string")
 		c.Assert(err, Not(IsNil))
+	}
+}
+
+func (s *variableSuite) Test_NewVariableFromString_fails_if_name_is_reserved(c *C) {
+	tbl := []string{"string", "list", "integer",
+		"deployment", "environment", "version", "client", "project"}
+	for _, testCase := range tbl {
+		_, err := NewVariableFromString(testCase, "string")
+		c.Assert(err, Not(IsNil), Commentf("%s should not be allowed as variable name", testCase))
 	}
 }
 
@@ -218,40 +334,10 @@ func (s *variableSuite) Test_GetValue_List_Variable_Checks_String_Values(c *C) {
 	c.Assert(err.Error(), Equals, "Unexpected 'integer' value in list, expecting 'string' for variable 'test'")
 }
 
-func (s *variableSuite) Test_NewVariable_Default_Visible_and_EvalBeforeDependencies(c *C) {
-	v := NewVariable()
-	c.Assert(v.Visible, Equals, true)
-	c.Assert(v.EvalBeforeDependencies, Equals, true)
-}
-
-func (s *variableSuite) Test_NewVariableFromString_Default_Visible_and_EvalBeforeDependencies(c *C) {
-	v, err := NewVariableFromString("test", "string")
+func (s *variableSuite) Test_Variable_InScope(c *C) {
+	unit, err := NewVariableFromString("test", "string")
 	c.Assert(err, IsNil)
-	c.Assert(v.Visible, Equals, true)
-	c.Assert(v.EvalBeforeDependencies, Equals, true)
-}
-
-func (s *variableSuite) Test_NewVariableFromDict_Default_Visible_and_EvalBeforeDependencies(c *C) {
-	dict := map[interface{}]interface{}{
-		"id": "test",
-	}
-	v, err := NewVariableFromDict(dict)
-	c.Assert(err, IsNil)
-	c.Assert(v.Visible, Equals, true)
-	c.Assert(v.EvalBeforeDependencies, Equals, true)
-}
-
-func (s *variableSuite) Test_NewVariableFromDict_fails_if_missing_id(c *C) {
-	dict := map[interface{}]interface{}{}
-	_, err := NewVariableFromDict(dict)
-	c.Assert(err.Error(), Equals, "Missing 'id' field in variable")
-}
-
-func (s *variableSuite) Test_NewVariableFromDict_fails_if_type_invalid(c *C) {
-	dict := map[interface{}]interface{}{
-		"id":   "test",
-		"type": "unknown",
-	}
-	_, err := NewVariableFromDict(dict)
-	c.Assert(err.Error(), Equals, "Unknown variable type: unknown")
+	c.Assert(unit.InScope("deploy"), Equals, true)
+	c.Assert(unit.InScope("build"), Equals, true)
+	c.Assert(unit.InScope("asdioasjdasodij"), Equals, false)
 }

@@ -32,7 +32,8 @@ func (s *suite) Test_Compile_Basics(c *C) {
 	c.Assert(ctx.Metadata.Name, Equals, "testor")
 	c.Assert(ctx.Metadata.Description, Equals, "trim me\nplease")
 	c.Assert(ctx.Metadata.Project, Equals, "my-project")
-	c.Assert(ctx.Metadata.GetConsumes(), DeepEquals, []string{"consumer1", "consumer2"})
+	c.Assert(ctx.Metadata.GetConsumes("deploy"), DeepEquals, []string{"consumer1", "consumer2"})
+	c.Assert(ctx.Metadata.GetConsumes("build"), DeepEquals, []string{"consumer1", "consumer2"})
 	c.Assert(ctx.Metadata.GetProvides(), DeepEquals, []string{"provider1", "provider2"})
 }
 

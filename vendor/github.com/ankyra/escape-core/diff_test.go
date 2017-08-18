@@ -17,10 +17,11 @@ limitations under the License.
 package core
 
 import (
+	"reflect"
+
 	"github.com/ankyra/escape-core/templates"
 	"github.com/ankyra/escape-core/variables"
 	. "gopkg.in/check.v1"
-	"reflect"
 )
 
 func (s *metadataSuite) Test_Diff_simple_types(c *C) {
@@ -249,7 +250,7 @@ func (s *metadataSuite) Test_Diff_Slices(c *C) {
 	testCases := [][]interface{}{
 		[]interface{}{"Consumes", []string{"test"}, []string{}, `Remove 'test' from Consumes`},
 		[]interface{}{"Consumes", []string{}, []string{"test"}, `Add 'test' to Consumes`},
-		[]interface{}{"Consumes", []string{"test"}, []string{"kubernetes"}, `Change Consumes[0] from 'test' to 'kubernetes'`},
+		[]interface{}{"Consumes", []string{"test"}, []string{"kubernetes"}, `Change Consumes[0].Name from 'test' to 'kubernetes'`},
 
 		[]interface{}{"Provides", []string{"test"}, []string{}, `Remove 'test' from Provides`},
 		[]interface{}{"Provides", []string{}, []string{"test"}, `Add 'test' to Provides`},

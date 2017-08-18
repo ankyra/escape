@@ -18,13 +18,14 @@ package controllers
 
 import (
 	"fmt"
+	"os"
+
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/paths"
 	"github.com/ankyra/escape-client/model/runners"
 	"github.com/ankyra/escape-client/model/runners/deploy"
 	"github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/parsers"
-	"os"
 )
 
 type DeployController struct{}
@@ -35,7 +36,7 @@ func SetExtraProviders(context Context, stage string, extraProviders map[string]
 	metadata := context.GetReleaseMetadata()
 	configuredProviders := deplState.GetProviders(stage)
 	availableProviders := envState.GetProviders()
-	for _, c := range metadata.GetConsumes() {
+	for _, c := range metadata.GetConsumes(stage) {
 		provider, override := extraProviders[c]
 		if override {
 			deplState.SetProvider(stage, c, provider)

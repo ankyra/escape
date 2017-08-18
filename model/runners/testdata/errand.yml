@@ -6,6 +6,7 @@ errands:
     inputs:
     - id: input_variable
       default: $this.version
-    - version
+    - id: magic_version
+      type: version # deprecated
     - id: override
       default: not overridden

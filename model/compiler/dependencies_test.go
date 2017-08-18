@@ -18,6 +18,7 @@ package compiler
 
 import (
 	"fmt"
+
 	"github.com/ankyra/escape-client/model/escape_plan"
 	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/variables"
@@ -106,7 +107,7 @@ func (s *suite) Test_Compile_Dependencies_adds_inputs_without_defaults(c *C) {
 		return nil, fmt.Errorf("Resolve error")
 	}
 	c.Assert(compileDependencies(ctx), IsNil)
-	inputs := ctx.Metadata.GetInputs()
+	inputs := ctx.Metadata.Inputs
 	c.Assert(inputs, HasLen, 1)
 	c.Assert(inputs[0], DeepEquals, v1)
 }
@@ -121,15 +122,21 @@ func (s *suite) Test_Compile_Dependencies_adds_consumers(c *C) {
 	ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
 		if dep.ReleaseId == "_/dependency-v1.0" {
 			m := core.NewReleaseMetadata("dependency", "1.0")
-			m.AddConsumes("test-consumer-1")
-			m.AddConsumes("test-consumer-1")
-			m.AddConsumes("test-consumer-2")
+			m.AddConsumes(core.NewConsumerConfig("test-consumer-1"))
+			m.AddConsumes(core.NewConsumerConfig("test-consumer-1"))
+			consumer := core.NewConsumerConfig("test-consumer-2")
+			consumer.Scopes = []string{"deploy"}
+			m.AddConsumes(consumer)
+			consumer = core.NewConsumerConfig("test-consumer-3")
+			consumer.Scopes = []string{"build"}
+			m.AddConsumes(consumer)
 			return m, nil
 		}
 		return nil, fmt.Errorf("Resolve error")
 	}
 	c.Assert(compileDependencies(ctx), IsNil)
-	c.Assert(ctx.Metadata.GetConsumes(), DeepEquals, []string{"test-consumer-1", "test-consumer-2"})
+	c.Assert(ctx.Metadata.GetConsumes("deploy"), DeepEquals, []string{"test-consumer-1", "test-consumer-2"})
+	c.Assert(ctx.Metadata.GetConsumes("build"), DeepEquals, []string{"test-consumer-1", "test-consumer-3"})
 }
 
 func (s *suite) Test_Compile_Dependencies_nil(c *C) {

@@ -18,6 +18,7 @@ package compiler
 
 import (
 	"fmt"
+
 	"github.com/ankyra/escape-core"
 )
 
@@ -47,10 +48,10 @@ func compileDependencyConfig(ctx *CompilerContext, depend *core.DependencyConfig
 	if err != nil {
 		return nil, err
 	}
-	for _, consume := range metadata.GetConsumes() {
+	for _, consume := range metadata.Consumes {
 		ctx.Metadata.AddConsumes(consume)
 	}
-	for _, input := range metadata.GetInputs() {
+	for _, input := range metadata.Inputs {
 		if !input.HasDefault() {
 			input.EvalBeforeDependencies = true
 			ctx.Metadata.AddInputVariable(input)

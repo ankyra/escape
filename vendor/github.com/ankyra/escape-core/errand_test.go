@@ -68,11 +68,11 @@ func (s *metadataSuite) Test_Diff_NewErrand_invalid(c *C) {
 		[]interface{}{"name", map[interface{}]interface{}{
 			"script": "test.sh",
 			"inputs": []interface{}{"$invalid-var"},
-		}, "Not a valid errand variable: $invalid-var"},
+		}, "Invalid variable id format '$invalid-var' in errand 'name' input variables"},
 		[]interface{}{"name", map[interface{}]interface{}{
 			"script": "test.sh",
 			"inputs": []interface{}{map[interface{}]interface{}{"id": "$invalid-var"}},
-		}, "Invalid variable format '$invalid-var'"},
+		}, "Invalid variable id format '$invalid-var' in errand 'name' input variables"},
 		[]interface{}{"name", map[interface{}]interface{}{
 			"script": "test.sh",
 			"inputs": true,
@@ -80,7 +80,7 @@ func (s *metadataSuite) Test_Diff_NewErrand_invalid(c *C) {
 		[]interface{}{"name", map[interface{}]interface{}{
 			"script": "test.sh",
 			"inputs": []interface{}{true},
-		}, "Expecting dict or string type for input item in errand name"},
+		}, "Expecting dict or string type in errand 'name' input variables"},
 	}
 	for _, test := range testCases {
 		_, err := NewErrandFromDict(test[0].(string), test[1])
@@ -101,7 +101,7 @@ func (s *metadataSuite) Test_Validate_Inputs(c *C) {
 	errand := NewErrand("test", "script.sh", "description")
 	errand.Inputs = append(errand.Inputs, var1)
 	var1.Id = "$test"
-	c.Assert(errand.Validate().Error(), Equals, "Error in errand 'test' variable: Invalid variable format '$test'")
+	c.Assert(errand.Validate().Error(), Equals, "Error in errand 'test' variable: Invalid variable id format '$test'")
 	errand.Inputs = nil
 	c.Assert(errand.Validate(), IsNil)
 }
