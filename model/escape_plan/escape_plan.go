@@ -18,16 +18,17 @@ package escape_plan
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+
 	"github.com/ankyra/escape-client/util"
 	"github.com/ankyra/escape-core"
 	"gopkg.in/yaml.v2"
-	"io/ioutil"
-	"os"
 )
 
 type EscapePlan struct {
 	Build       string                 `yaml:"build,omitempty"`
-	Consumes    []string               `yaml:"consumes,omitempty"`
+	Consumes    []interface{}          `yaml:"consumes,omitempty"`
 	Depends     []interface{}          `yaml:"depends,omitempty"`
 	Deploy      string                 `yaml:"deploy,omitempty"`
 	Destroy     string                 `yaml:"destroy,omitempty"`
@@ -56,7 +57,7 @@ type EscapePlan struct {
 
 func NewEscapePlan() *EscapePlan {
 	return &EscapePlan{
-		Consumes: []string{},
+		Consumes: []interface{}{},
 		Provides: []string{},
 		Depends:  []interface{}{},
 		Includes: []string{},

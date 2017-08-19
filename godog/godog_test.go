@@ -251,13 +251,24 @@ func itProvides(arg1 string) error {
 	return ioutil.WriteFile("escape.yml", plan.ToMinifiedYaml(), 0644)
 }
 
-func itConsumes(arg1 string) error {
+func itConsumes(provider string) error {
+	return itConsumesInTheScope(provider, "")
+}
+
+func itConsumesInTheScope(provider, scope string) error {
+	scopes := []string{"build", "deploy"}
+	if scope != "" {
+		scopes = []string{scope}
+	}
 	plan := escape_plan.NewEscapePlan()
 	err := plan.LoadConfig("escape.yml")
 	if err != nil {
 		return nil
 	}
-	plan.Consumes = append(plan.Consumes, arg1)
+	plan.Consumes = append(plan.Consumes, map[interface{}]interface{}{
+		"name":   provider,
+		"scopes": scopes,
+	})
 	return ioutil.WriteFile("escape.yml", plan.ToMinifiedYaml(), 0644)
 }
 
@@ -356,6 +367,7 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^"([^"]*)" version "([^"]*)" is present in its deployment state$`, versionIsPresentInItsDeploymentState)
 	s.Step(`^it provides "([^"]*)"$`, itProvides)
 	s.Step(`^it consumes "([^"]*)"$`, itConsumes)
+	s.Step(`^it consumes "([^"]*)" in the "([^"]*)" scope$`, itConsumesInTheScope)
 	s.Step(`^"([^"]*)" is the provider for "([^"]*)"$`, isTheProviderFor)
 	s.Step(`^output variable "([^"]*)" with default "([^"]*)"$`, outputVariableWithDefault)
 	s.Step(`^output variable "([^"]*)" with default '([^']*)'$`, outputVariableWithDefault)

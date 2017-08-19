@@ -25,7 +25,7 @@ func (s *suite) Test_Compile_Basics(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Name = "testor"
 	plan.Description = "  trim me\nplease\n"
-	plan.Consumes = []string{"consumer1", "consumer2"}
+	plan.Consumes = []interface{}{"consumer1", "consumer2"}
 	plan.Provides = []string{"provider1", "provider2"}
 	ctx := NewCompilerContext(plan, nil, "my-project")
 	c.Assert(compileBasicFields(ctx), IsNil)

@@ -52,22 +52,14 @@ func NewVariable() *Variable {
 	}
 }
 
-func NewVariableFromInterface(v interface{}) (result *Variable, err error) {
+func NewVariableFromInterface(v interface{}) (*Variable, error) {
 	switch v.(type) {
 	case string:
-		result, err = NewVariableFromString(v.(string), "string")
-		if err != nil {
-			return nil, err
-		}
+		return NewVariableFromString(v.(string), "string")
 	case map[interface{}]interface{}:
-		result, err = NewVariableFromDict(v.(map[interface{}]interface{}))
-		if err != nil {
-			return nil, err
-		}
-	default:
-		return nil, fmt.Errorf("Expecting dict or string type")
+		return NewVariableFromDict(v.(map[interface{}]interface{}))
 	}
-	return result, nil
+	return nil, fmt.Errorf("Expecting dict or string type")
 }
 
 func NewVariableFromString(id, typ string) (*Variable, error) {

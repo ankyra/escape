@@ -42,7 +42,7 @@ func (s *metadataSuite) Test_NewConsumerConfigFromMap_No_Scopes_360_blaze_it(c *
 	})
 	c.Assert(err, IsNil)
 	c.Assert(consumer.Name, Equals, "test")
-	c.Assert(consumer.Scopes, DeepEquals, []string{})
+	c.Assert(consumer.Scopes, DeepEquals, []string{"build", "deploy"})
 }
 
 func (s *metadataSuite) Test_NewConsumerConfigFromMap_limited_scope(c *C) {
@@ -53,6 +53,25 @@ func (s *metadataSuite) Test_NewConsumerConfigFromMap_limited_scope(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(consumer.Name, Equals, "test")
 	c.Assert(consumer.Scopes, DeepEquals, []string{"deploy"})
+}
+
+func (s *metadataSuite) Test_NewConsumerConfigFromInterface_String(c *C) {
+	consumer, err := NewConsumerConfigFromInterface("test")
+	c.Assert(err, IsNil)
+	c.Assert(consumer.Name, Equals, "test")
+	c.Assert(consumer.Scopes, DeepEquals, []string{"build", "deploy"})
+}
+
+func (s *metadataSuite) Test_NewConsumerConfigFromInterface_Map(c *C) {
+	consumer, err := NewConsumerConfigFromInterface(map[interface{}]interface{}{"name": "test"})
+	c.Assert(err, IsNil)
+	c.Assert(consumer.Name, Equals, "test")
+	c.Assert(consumer.Scopes, DeepEquals, []string{"build", "deploy"})
+}
+
+func (s *metadataSuite) Test_NewConsumerConfigFromInterface_fails_on_wrong_type(c *C) {
+	_, err := NewConsumerConfigFromInterface(12)
+	c.Assert(err.Error(), Equals, "Expecting dict or string type")
 }
 
 func (s *metadataSuite) Test_ConsumerConfig_Validate_sets_scopes_if_nil(c *C) {

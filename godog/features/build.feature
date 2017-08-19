@@ -129,3 +129,21 @@ Feature: Running the build phase
        Then "_/my-consumer" version "0.0.0" is present in the build state
         And "_/my-provider3" is the provider for "provider"
         And its calculated input "input_variable" is set to "a"
+
+    Scenario: If a consumer is not in scope no provider is necessary
+      Given a new Escape plan called "my-consumer"
+        And it consumes "provider" in the "deploy" scope
+       When I build the application
+       Then "_/my-consumer" version "0.0.0" is present in the build state
+
+    Scenario: If a consumer is in scope it will be used
+      Given a new Escape plan called "my-provider3"
+        And it provides "provider"
+        And I release the application
+       When I deploy "_/my-provider3-v0.0.0"
+       Then "_/my-provider3" version "0.0.0" is present in the deploy state
+      Given a new Escape plan called "my-consumer"
+        And it consumes "provider" in the "build" scope
+       When I build the application
+       Then "_/my-consumer" version "0.0.0" is present in the build state
+        And "_/my-provider3" is the provider for "provider"

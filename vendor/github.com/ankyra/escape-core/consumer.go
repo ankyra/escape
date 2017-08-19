@@ -30,6 +30,16 @@ func NewConsumerConfig(name string) *ConsumerConfig {
 	}
 }
 
+func NewConsumerConfigFromInterface(v interface{}) (*ConsumerConfig, error) {
+	switch v.(type) {
+	case string:
+		return NewConsumerConfig(v.(string)), nil
+	case map[interface{}]interface{}:
+		return NewConsumerConfigFromMap(v.(map[interface{}]interface{}))
+	}
+	return nil, fmt.Errorf("Expecting dict or string type")
+}
+
 func NewConsumerConfigFromMap(dep map[interface{}]interface{}) (*ConsumerConfig, error) {
 	var name string
 	scopes := []string{}
@@ -57,7 +67,7 @@ func NewConsumerConfigFromMap(dep map[interface{}]interface{}) (*ConsumerConfig,
 	}
 	cfg := NewConsumerConfig(name)
 	cfg.Scopes = scopes
-	return cfg, nil
+	return cfg, cfg.ValidateAndFix()
 }
 
 func parseScopesFromInterface(val interface{}) ([]string, error) {
