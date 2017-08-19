@@ -17,6 +17,15 @@ Feature: Running the build phase
        And its calculated input "input_variable" is set to "test"
        And its calculated input "input_variable2" is set to "test2"
 
+    Scenario: Build with scoped input variables
+      Given a new Escape plan called "my-release"
+        And input variable "input_variable" with default "test" in scope "build"
+        And input variable "input_variable2" with default "test2" in scope "deploy"
+      When I build the application
+      Then "_/my-release" version "0.0.0" is present in the build state
+       And its calculated input "input_variable" is set to "test"
+       And its calculated input "input_variable2" is not set
+
     Scenario: Default input variables update on every build
       Given a new Escape plan called "my-release"
         And input variable "input_variable" with default "test"

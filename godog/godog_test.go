@@ -78,6 +78,20 @@ func inputVariableWithDefault(variableId, defaultValue string) error {
 	return ioutil.WriteFile("escape.yml", plan.ToMinifiedYaml(), 0644)
 }
 
+func inputVariableWithDefaultInScope(variableId, defaultValue, scope string) error {
+	plan := escape_plan.NewEscapePlan()
+	err := plan.LoadConfig("escape.yml")
+	if err != nil {
+		return nil
+	}
+	plan.Inputs = append(plan.Inputs, map[string]interface{}{
+		"id":      variableId,
+		"default": defaultValue,
+		"scopes":  []string{scope},
+	})
+	return ioutil.WriteFile("escape.yml", plan.ToMinifiedYaml(), 0644)
+}
+
 func inputVariableWithDefaultAndItems(variableId, defaultValue, items string) error {
 	plan := escape_plan.NewEscapePlan()
 	err := plan.LoadConfig("escape.yml")
@@ -183,6 +197,15 @@ func itsCalculatedInputIsSetTo(key, value string) error {
 		return fmt.Errorf("Expecting '%s', got '%s'", value, v)
 	}
 	return nil
+}
+
+func itsCalculatedInputIsNotSet(key string) error {
+	inputs := CapturedDeployment.GetCalculatedInputs(CapturedStage)
+	v, found := inputs[key]
+	if !found {
+		return nil
+	}
+	return fmt.Errorf("Found '%s' in calculated inputs with value '%s'", key, v)
 }
 
 func itsCalculatedOutputIsSetTo(key, value string) error {
@@ -358,9 +381,12 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^"([^"]*)" version "([^"]*)" is present in the build state$`, versionIsPresentInTheBuildState)
 	s.Step(`^"([^"]*)" version "([^"]*)" is present in the deploy state$`, versionIsPresentInTheDeployState)
 	s.Step(`^input variable "([^"]*)" with default "([^"]*)"$`, inputVariableWithDefault)
+	s.Step(`^input variable "([^"]*)" with default "([^"]*)" in scope "([^"]*)"$`, inputVariableWithDefaultInScope)
 	s.Step(`^input variable "([^"]*)" with default "([^"]*)" and items "([^"]*)"$`, inputVariableWithDefaultAndItems)
 	s.Step(`^its calculated input "([^"]*)" is set to "([^"]*)"$`, itsCalculatedInputIsSetTo)
+	s.Step(`^its calculated input "([^"]*)" is not set$`, itsCalculatedInputIsNotSet)
 	s.Step(`^its calculated output "([^"]*)" is set to "([^"]*)"$`, itsCalculatedOutputIsSetTo)
+
 	s.Step(`^I release the application$`, iReleaseTheApplication)
 	s.Step(`^it has "([^"]*)" as a dependency$`, itHasAsADependency)
 	s.Step(`^it has "([^"]*)" set to "([^"]*)"$`, itHasSetTo)
