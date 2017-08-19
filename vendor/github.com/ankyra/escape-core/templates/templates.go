@@ -18,10 +18,11 @@ package templates
 
 import (
 	"fmt"
-	"github.com/ankyra/escape-core/script"
-	"github.com/cbroglie/mustache"
 	"io/ioutil"
 	"path/filepath"
+
+	"github.com/ankyra/escape-core/script"
+	"github.com/cbroglie/mustache"
 )
 
 type Template struct {
@@ -215,6 +216,15 @@ func (t *Template) renderToString(env *script.ScriptEnvironment) (string, error)
 	}
 	mustache.AllowMissingVariables = false
 	return mustache.RenderFile(t.File, mapping)
+}
+
+func (t *Template) InScope(scope string) bool {
+	for _, s := range t.Scopes {
+		if s == scope {
+			return true
+		}
+	}
+	return false
 }
 
 func fileWithoutExtension(path string) (root string) {

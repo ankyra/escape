@@ -3,6 +3,11 @@ package godog
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"os/exec"
+	"time"
+
 	"github.com/DATA-DOG/godog"
 	"github.com/ankyra/escape-client/model/escape_plan"
 	"github.com/ankyra/escape-client/model/state"
@@ -10,10 +15,6 @@ import (
 	state_types "github.com/ankyra/escape-core/state"
 	"github.com/ankyra/escape-core/util"
 	"gopkg.in/yaml.v2"
-	"io/ioutil"
-	"os"
-	"os/exec"
-	"time"
 )
 
 var CapturedStdout string
@@ -111,6 +112,48 @@ func outputVariable(typ, variableId, defaultValue string) error {
 
 func outputListVariableWithDefault(variableId, defaultValue string) error {
 	return outputVariable("list[string]", variableId, defaultValue)
+}
+
+func templateContaining(filename, content string) error {
+	return templateContainingWithScope(filename, content, "")
+}
+
+func templateContainingWithScope(filename, content, scope string) error {
+	scopes := []string{"build", "deploy"}
+	if scope != "" {
+		scopes = []string{scope}
+	}
+	plan := escape_plan.NewEscapePlan()
+	if err := plan.LoadConfig("escape.yml"); err != nil {
+		return nil
+	}
+	plan.Templates = append(plan.Templates, map[string]interface{}{
+		"file":   filename,
+		"scopes": scopes,
+	})
+	if err := ioutil.WriteFile(filename, []byte(content), 0644); err != nil {
+		return err
+	}
+	return ioutil.WriteFile("escape.yml", plan.ToMinifiedYaml(), 0644)
+}
+
+func iShouldNotHaveAFile(arg1 string) error {
+	_, err := os.Stat(arg1)
+	if err == nil {
+		return fmt.Errorf("File '%s' exists", arg1)
+	}
+	return nil
+}
+
+func iShouldHaveAFileWithContents(filename, expectedContent string) error {
+	bytes, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+	if string(bytes) != expectedContent {
+		return fmt.Errorf("Expecting '%s' got '%s'", expectedContent, string(bytes))
+	}
+	return nil
 }
 
 func itHasSetTo(arg1, arg2 string) error {
@@ -317,6 +360,10 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^output variable "([^"]*)" with default "([^"]*)"$`, outputVariableWithDefault)
 	s.Step(`^output variable "([^"]*)" with default '([^']*)'$`, outputVariableWithDefault)
 	s.Step(`^list output variable "([^"]*)" with default '([^']*)'$`, outputListVariableWithDefault)
+	s.Step(`^template "([^"]*)" containing "([^"]*)" with "([^"]*)" scope$`, templateContainingWithScope)
+	s.Step(`^I should not have a file "([^"]*)"$`, iShouldNotHaveAFile)
+	s.Step(`^template "([^"]*)" containing "([^"]*)"$`, templateContaining)
+	s.Step(`^I should have a file "([^"]*)" with contents "([^"]*)"$`, iShouldHaveAFileWithContents)
 
 	s.BeforeScenario(func(interface{}) {
 		StartRegistry()

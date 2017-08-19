@@ -28,6 +28,31 @@ Feature: Running the build phase
        Then "_/my-release" version "0.0.0" is present in the build state
         And its calculated input "input_variable" is set to "new default baby"
 
+    Scenario: Build a template
+      Given a new Escape plan called "my-release"
+        And template "test.txt.tpl" containing "Hello World"
+       When I build the application
+       Then I should have a file "test.txt" with contents "Hello World"
+
+    Scenario: Build a template that uses a variable
+      Given a new Escape plan called "my-release"
+        And input variable "input_variable" with default "test"
+        And template "test.txt.tpl" containing "{{{version}}} {{input_variable}}"
+       When I build the application
+       Then I should have a file "test.txt" with contents "0.0.0 test"
+
+    Scenario: Build skips template when not in build scope
+      Given a new Escape plan called "my-release"
+        And template "not_in_scope.txt.tpl" containing "Hello World" with "deploy" scope
+       When I build the application
+       Then I should not have a file "not_in_scope.txt"
+
+    Scenario: Build does not skip template when in build scope
+      Given a new Escape plan called "my-release"
+        And template "inscope.txt.tpl" containing "Hello World" with "build" scope
+       When I build the application
+       Then I should have a file "inscope.txt" with contents "Hello World"
+
     Scenario: Default build with dependencies
       Given a new Escape plan called "my-dependency"
         And I release the application

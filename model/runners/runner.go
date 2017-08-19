@@ -1,10 +1,11 @@
 package runners
 
 import (
+	"os"
+
 	"github.com/ankyra/escape-client/model/paths"
 	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/state"
-	"os"
 )
 
 type Runner interface {

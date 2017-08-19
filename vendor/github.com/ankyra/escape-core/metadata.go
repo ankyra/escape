@@ -315,6 +315,16 @@ func (m *ReleaseMetadata) GetOutputs(stage string) []*variables.Variable {
 	return result
 }
 
+func (m *ReleaseMetadata) GetTemplates(stage string) []*templates.Template {
+	result := []*templates.Template{}
+	for _, t := range m.Templates {
+		if t.InScope(stage) {
+			result = append(result, t)
+		}
+	}
+	return result
+}
+
 func (m *ReleaseMetadata) AddProvides(p string) {
 	for _, provider := range m.Provides {
 		if provider.Name == p {

@@ -19,10 +19,11 @@ package runners
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+
 	"github.com/ankyra/escape-client/model/paths"
 	"github.com/ankyra/escape-client/util"
 	"github.com/ankyra/escape-core/state"
-	"io/ioutil"
 )
 
 type ScriptStep struct {
@@ -108,7 +109,7 @@ func compileTemplates(ctx RunnerContext, stage string) error {
 	if err != nil {
 		return err
 	}
-	templates := ctx.GetReleaseMetadata().Templates
+	templates := ctx.GetReleaseMetadata().GetTemplates(stage)
 	for _, tpl := range templates {
 		if err := tpl.Render(stage, env); err != nil {
 			return err
