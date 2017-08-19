@@ -24,7 +24,7 @@ version: 0.16.@
 description: |
   The Escape Client. This release includes the source and one binary for Linux/AMD64.  For full documentation see http://escape.ankyra.io/
 
-logo: ""
+logo: logo.png
 
 # Dependencies. Reference dependencies by their full release ID or use
 # the '@' symbol to resolve versions at build time.
@@ -153,7 +153,7 @@ errands:
       description: "The target bucket"
     - id: credentials
       description: "Service account credentials"
-    - id: version
+    - id: escape_version
       default: $this.version
     script: scripts/upload_to_gcs.sh
   publish_binaries:
@@ -163,7 +163,7 @@ errands:
       description: "The target bucket"
     - id: credentials
       description: "Service account credentials"
-    - id: version
+    - id: escape_version
       default: $this.version
     script: scripts/publish-binaries.sh
 

@@ -1,12 +1,10 @@
 machine:
   services:
   - docker
-  environment:
-    ESCAPE_PROJECT: "_"
 
 dependencies:
   override:
-  - curl https://storage.googleapis.com/escape-releases-eu/escape-v0.14.5.tgz > /home/ubuntu/bin/escape.tgz
+  - curl https://storage.googleapis.com/escape-releases-eu/escape-v0.15.2.tgz > /home/ubuntu/bin/escape.tgz
   - tar -C /home/ubuntu/bin -xvzf /home/ubuntu/bin/escape.tgz
 
 compile:

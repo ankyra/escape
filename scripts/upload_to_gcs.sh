@@ -2,7 +2,7 @@
 
 set -euf -o pipefail
 
-tarball="escape-v$INPUT_version.tgz"
+tarball="escape-v$INPUT_escape_version.tgz"
 target="gs://$INPUT_bucket/$tarball"
 
 echo "Packing $tarball"
@@ -11,7 +11,7 @@ tar -cvzf "$tarball" escape
 echo "$INPUT_credentials" > service_account.json
 gcloud auth activate-service-account --key-file service_account.json
 
-echo "Uploading $INPUT_version to ${target}"
+echo "Uploading $INPUT_escape_version to ${target}"
 gsutil cp "$tarball" "$target"
 
 echo "Making archive world readable"
