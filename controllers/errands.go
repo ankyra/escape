@@ -34,12 +34,19 @@ func (ErrandsController) List(context Context) error {
 	if metadata.GetErrands() == nil {
 		return nil
 	}
+	fmt.Println()
+	fmt.Println("Errands:\n")
 	for _, errand := range metadata.GetErrands() {
 		description := "No description given."
 		if errand.Description != "" {
 			description = errand.Description
 		}
-		fmt.Println("- " + errand.Name + ": " + description)
+		fmt.Printf("- %s\n\n", errand.Name)
+		fmt.Printf("  %s\n\n", description)
+		for _, input := range errand.Inputs {
+			fmt.Printf("  * %s: %s\n", input.Id, input.Description)
+		}
+		fmt.Println()
 	}
 	return nil
 }
