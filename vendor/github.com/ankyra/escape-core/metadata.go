@@ -32,8 +32,6 @@ import (
 	"github.com/ankyra/escape-core/variables"
 )
 
-const CurrentApiVersion = 5
-
 type ExecStage struct {
 	Script string `json:"script"`
 }
@@ -55,16 +53,20 @@ func NewExtensionConfig(releaseId string) *ExtensionConfig {
 }
 
 type ReleaseMetadata struct {
-	ApiVersion  int               `json:"api_version"`
-	Branch      string            `json:"branch"`
-	Description string            `json:"description"`
-	Files       map[string]string `json:"files", {}`
-	Logo        string            `json:"logo"`
-	Name        string            `json:"name"`
-	Revision    string            `json:"git_revision"`
-	Metadata    map[string]string `json:"metadata"`
-	Version     string            `json:"version"`
-	Repository  string            `json:"repository"`
+	ApiVersion             int               `json:"api_version"`
+	BuiltWithCoreVersion   string            `json:"built_with_core_version"`
+	BuiltWithEscapeVersion string            `json:"built_with_escape_version"`
+	Description            string            `json:"description"`
+	Files                  map[string]string `json:"files", {}`
+	Logo                   string            `json:"logo"`
+	Name                   string            `json:"name"`
+	Repository             string            `json:"repository"`
+	Branch                 string            `json:"branch"`
+	Revision               string            `json:"git_revision"`
+	RevisionMessage        string            `json:"revision_message"`
+	RevisionAuthor         string            `json:"revision_author"`
+	Metadata               map[string]string `json:"metadata"`
+	Version                string            `json:"version"`
 
 	Consumes    []*ConsumerConfig     `json:"consumes"`
 	Depends     []*DependencyConfig   `json:"depends"`
@@ -81,9 +83,10 @@ type ReleaseMetadata struct {
 
 func NewEmptyReleaseMetadata() *ReleaseMetadata {
 	return &ReleaseMetadata{
-		ApiVersion: CurrentApiVersion,
-		Files:      map[string]string{},
-		Metadata:   map[string]string{},
+		ApiVersion:           CurrentApiVersion,
+		BuiltWithCoreVersion: CoreVersion,
+		Files:                map[string]string{},
+		Metadata:             map[string]string{},
 
 		Consumes:    []*ConsumerConfig{},
 		Depends:     []*DependencyConfig{},

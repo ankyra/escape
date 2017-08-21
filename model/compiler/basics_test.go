@@ -18,6 +18,7 @@ package compiler
 
 import (
 	"github.com/ankyra/escape-client/model/escape_plan"
+	"github.com/ankyra/escape-client/util"
 	. "gopkg.in/check.v1"
 )
 
@@ -35,6 +36,7 @@ func (s *suite) Test_Compile_Basics(c *C) {
 	c.Assert(ctx.Metadata.GetConsumes("deploy"), DeepEquals, []string{"consumer1", "consumer2"})
 	c.Assert(ctx.Metadata.GetConsumes("build"), DeepEquals, []string{"consumer1", "consumer2"})
 	c.Assert(ctx.Metadata.GetProvides(), DeepEquals, []string{"provider1", "provider2"})
+	c.Assert(ctx.Metadata.BuiltWithEscapeVersion, Equals, util.EscapeVersion)
 }
 
 func (s *suite) Test_Compile_Basics_fails_if_name_is_not_set(c *C) {

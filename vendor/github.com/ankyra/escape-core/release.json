@@ -8,6 +8,8 @@
       "build.sh": "b0e085c8cc2312f55f0229b8c9c13663",
       "consumer.go": "c81742d72604e3512d69017eb07cc7ec",
       "consumer_test.go": "3ff946e134efa5165c73db7476ffbbb4",
+      "core.go": "c8318ae4bb705208b32b5751052fa76b",
+      "core.go.tpl": "4099a7b2c6c7798799ea2819f8cf5c27",
       "dependency.go": "c2fad1fb08026574389ca4ed44be50e1",
       "dependency_config.go": "2649b30a4ef0adeccd7ce0745caf3207",
       "dependency_config_test.go": "d5e39590f053d20c5c558e40c19e6e0c",
@@ -16,11 +18,11 @@
       "diff_test.go": "6be1dfb2a485a0ad4052db1968b28111",
       "docs/generate_stdlib_docs.go": "15e02f0835b07edb0ecd7e60d6d3f040",
       "docs/scripting_language.md": "79ffa91ba9dad432b9c3810b474036d8",
-      "docs/stdlib.md": "d6250ea4975c3a70ccd4d4fc5be4d031",
+      "docs/stdlib.md": "c7e7e4b016e17fcca42b0cc083f0b0db",
       "errand.go": "22d56084cdd5088790a285196cf909b6",
       "errand_test.go": "2024729f8621ada8cd3699ec18d5d934",
-      "metadata.go": "1d4a8c9a3fb1a3f7e6bfd434f59d637f",
-      "metadata_test.go": "3a646bc75d7a019398a385a5c356eb56",
+      "metadata.go": "a2d4a082f35b463908939f90759a9cdb",
+      "metadata_test.go": "d10f1eaf62e994e8d931a7449b625c16",
       "parsers/dependency.go": "10f44131f05126e0e1677a56ecdc92b1",
       "parsers/dependency_test.go": "ce9d8416e7c35701034ff42f00768e66",
       "parsers/primitives.go": "2a2ada3ac99e6f15899cb9527d128c90",
@@ -61,12 +63,9 @@
       "util/log_consumer.go": "0c48f3364ce07040b0c0221a715a9554",
       "util/log_entry.go": "90c518ce0d4eee951880d06170ef03c9",
       "util/logger.go": "422eab31c3062ace4c83d4a993a420e0",
-      "util/metadata.go": "5eb0022cd59c995bf2165e9627e9a151",
-      "util/metadata.go.tpl": "d0a7c88fba89180e681cba1609cee7ca",
       "util/path.go": "b256d866ccb2c4a155282f1e56c65105",
       "util/process.go": "cef1e12dfcdd4a59c464239e70209275",
       "util/value.go": "7bc9d4f0435b94d3cfa646e04dafbcf9",
-      "variables/.variable_test.go.swp": "adc5e63700ede45f80aef0740e0e4855",
       "variables/variable.go": "807a3db8e3698b899be57162ed1934f6",
       "variables/variable_test.go": "1f9256bc506bd2a372c80bbb685327cb",
       "variables/variable_types/bool.go": "86a7d62e5c0fa851ed6998df3b3c3d4c",
@@ -126,11 +125,11 @@
    },
    "logo": "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",
    "name": "escape-core",
-   "git_revision": "90647374cd833b198cf5e42e8c7a0c5f4a566ab5",
+   "git_revision": "408da69f3fc0c3278dc2a75ba3e6eeefef93a9e9",
    "metadata": {
-      "release_metadata_api_version": "4"
+      "release_metadata_api_version": "6"
    },
-   "version": "0.5.2",
+   "version": "0.6.0",
    "repository": "git@github.com:ankyra/escape-core.git",
    "consumes": [],
    "depends": [],
@@ -169,6 +168,28 @@
          "script": "test.sh"
       }
    },
-   "templates": [],
+   "templates": [
+      {
+         "file": "core.go.tpl",
+         "target": "core.go",
+         "scopes": [
+            "build",
+            "deploy"
+         ],
+         "mapping": {
+            "branch": "$this.branch",
+            "description": "$this.description",
+            "id": "$this.id",
+            "logo": "$this.logo",
+            "metadata_api_version": "$this.metadata.release_metadata_api_version",
+            "name": "$this.name",
+            "release": "$this.release",
+            "repository": "$this.repository",
+            "revision": "$this.revision",
+            "version": "$this.version",
+            "versionless_release": "$this.versionless_release"
+         }
+      }
+   ],
    "variable_context": {}
 }

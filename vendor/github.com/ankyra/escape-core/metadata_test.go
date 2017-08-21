@@ -31,6 +31,14 @@ var _ = Suite(&metadataSuite{})
 
 func Test(t *testing.T) { TestingT(t) }
 
+func (s *metadataSuite) Test_NewReleaseMetadata(c *C) {
+	m := NewReleaseMetadata("test", "1.0")
+	c.Assert(m.Name, Equals, "test")
+	c.Assert(m.Version, Equals, "1.0")
+	c.Assert(m.Project, Equals, "_")
+	c.Assert(m.BuiltWithCoreVersion, Equals, CoreVersion)
+}
+
 func (s *metadataSuite) Test_NewReleaseMetadata_name_check(c *C) {
 	testCases := map[string]bool{
 		"valid":                                   true,

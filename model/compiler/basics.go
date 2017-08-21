@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/ankyra/escape-client/util"
 	core "github.com/ankyra/escape-core"
 )
 
@@ -38,6 +39,7 @@ func compileBasicFields(ctx *CompilerContext) error {
 	if ctx.Metadata.Name == "" {
 		return fmt.Errorf("Missing build name. Add a 'name' field to your Escape plan")
 	}
+	ctx.Metadata.BuiltWithEscapeVersion = util.EscapeVersion
 	ctx.Metadata.Description = strings.TrimSpace(ctx.Plan.Description)
 	ctx.Metadata.SetProvides(ctx.Plan.Provides)
 	for _, consumer := range ctx.Plan.Consumes {
