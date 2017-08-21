@@ -11,7 +11,7 @@ Feature: Listing errands
        When I list the errands in the deployment
        Then I should see "test-errand" in the output
 
-    Scenario: Release should be read from the deployment
+    Scenario: Release should be read from the deployment...
       Given a new Escape plan called "my-release"
         And errand "test-errand" with script "test.sh"
         And I release the application
@@ -19,4 +19,13 @@ Feature: Listing errands
       Given a new Escape plan called "my-release"
         And I release the application
        When I list the errands in the deployment
+       Then I should see "test-errand" in the output
+
+    Scenario: ...unless the --local flag is used
+      Given a new Escape plan called "my-release"
+        And I release the application
+        And I deploy "_/my-provider3-v0.0.0"
+      Given a new Escape plan called "my-release"
+        And errand "test-errand" with script "test.sh"
+       When I list the local errands
        Then I should see "test-errand" in the output

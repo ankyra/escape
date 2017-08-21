@@ -247,6 +247,17 @@ func iListTheErrandsInTheDeployment() error {
 	return err
 }
 
+func iListTheLocalErrands() error {
+	rec := util.NewProcessRecorder()
+	cmd := []string{"escape", "errands", "list", "--local"}
+	stdout, err := rec.Record(cmd, nil, eutil.NewLoggerDummy())
+	CapturedStdout = stdout
+	if err != nil {
+		fmt.Println(stdout)
+	}
+	return err
+}
+
 func iShouldSeeInTheOutput(value string) error {
 	if strings.Index(CapturedStdout, value) == -1 {
 		return fmt.Errorf("'%s' was not found in the output:\n%s", value, CapturedStdout)
@@ -439,6 +450,7 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^errand "([^"]*)" with script "([^"]*)"$`, errandWithScript)
 	s.Step(`^I list the errands in the deployment$`, iListTheErrandsInTheDeployment)
 	s.Step(`^I should see "([^"]*)" in the output$`, iShouldSeeInTheOutput)
+	s.Step(`^I list the local errands$`, iListTheLocalErrands)
 
 	s.BeforeScenario(func(interface{}) {
 		StartRegistry()
