@@ -236,9 +236,9 @@ func itsCalculatedOutputIsSetTo(key, value string) error {
 	return nil
 }
 
-func iListTheErrandsInTheDeployment() error {
+func iListTheErrandsInTheDeployment(deploymentName string) error {
 	rec := util.NewProcessRecorder()
-	cmd := []string{"escape", "errands", "list"}
+	cmd := []string{"escape", "errands", "list", "-d", deploymentName}
 	stdout, err := rec.Record(cmd, nil, eutil.NewLoggerDummy())
 	CapturedStdout = stdout
 	if err != nil {
@@ -448,7 +448,7 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^template "([^"]*)" containing "([^"]*)"$`, templateContaining)
 	s.Step(`^I should have a file "([^"]*)" with contents "([^"]*)"$`, iShouldHaveAFileWithContents)
 	s.Step(`^errand "([^"]*)" with script "([^"]*)"$`, errandWithScript)
-	s.Step(`^I list the errands in the deployment$`, iListTheErrandsInTheDeployment)
+	s.Step(`^I list the errands in the deployment "([^"]*)"$`, iListTheErrandsInTheDeployment)
 	s.Step(`^I should see "([^"]*)" in the output$`, iShouldSeeInTheOutput)
 	s.Step(`^I list the local errands$`, iListTheLocalErrands)
 

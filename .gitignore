@@ -14,3 +14,4 @@ godog/*.txt
 godog/*.tpl
 model/runners/build/testdata/*.json
 model/runners/deploy/testdata/*.json
+godog/*.sh

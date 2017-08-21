@@ -18,9 +18,12 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/ankyra/escape-client/controllers"
 	"github.com/spf13/cobra"
 )
+
+var readLocalErrands bool
 
 var errandsCmd = &cobra.Command{
 	Use:   "errands",
@@ -34,16 +37,51 @@ var errandsCmd = &cobra.Command{
 	},
 }
 
+func ListLocalErrands(state, environment, escapePlanLocation string) error {
+	if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
+		return err
+	}
+	return controllers.ErrandsController{}.List(context)
+}
+
+func ListDeployedErrands(state, environment, deployment string) error {
+	if environment == "" {
+		return fmt.Errorf("Missing 'environment'")
+	}
+	if err := context.LoadLocalState(state, environment); err != nil {
+		return err
+	}
+	context.SetRootDeploymentName(deployment)
+	if deployment != "" {
+		if err := context.LoadLocalState(state, environment); err != nil {
+			return err
+		}
+		deplState, exists := context.GetEnvironmentState().Deployments[deployment]
+		if !exists {
+			return fmt.Errorf("The deployment '%s' could not be found in environment '%s'", deployment, environment)
+		}
+		releaseId := deplState.GetReleaseId("deploy")
+		fmt.Println("Using release id", releaseId)
+		if err := context.InitReleaseMetadataByReleaseId(releaseId); err != nil {
+			return err
+		}
+	} else {
+		return fmt.Errorf("Missing deployment name")
+	}
+	return controllers.ErrandsController{}.List(context)
+}
+
+func ListErrands(cmd *cobra.Command, args []string) error {
+	if readLocalErrands {
+		return ListLocalErrands(state, environment, escapePlanLocation)
+	}
+	return ListDeployedErrands(state, environment, deployment)
+}
+
 var errandsListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List errands",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
-			return err
-		}
-		context.SetRootDeploymentName(deployment)
-		return controllers.ErrandsController{}.List(context)
-	},
+	RunE:  ListErrands,
 }
 
 var errand string
@@ -89,6 +127,7 @@ func init() {
 	errandsCmd.AddCommand(errandsListCmd)
 	errandsCmd.AddCommand(errandsRunCmd)
 	setLocalPlanAndStateFlags(errandsListCmd)
+	errandsListCmd.Flags().BoolVarP(&readLocalErrands, "local", "", false, "Read errands from Escape plan instead of deployment")
 
 	setLocalPlanAndStateFlags(errandsRunCmd)
 	errandsRunCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
