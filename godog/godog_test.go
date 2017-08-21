@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/DATA-DOG/godog"
@@ -108,6 +109,21 @@ func inputVariableWithDefaultAndItems(variableId, defaultValue, items string) er
 
 func outputVariableWithDefault(variableId, defaultValue string) error {
 	return outputVariable("string", variableId, defaultValue)
+}
+
+func errandWithScript(errand, script string) error {
+	plan := escape_plan.NewEscapePlan()
+	err := plan.LoadConfig("escape.yml")
+	if err != nil {
+		return nil
+	}
+	plan.Errands[errand] = map[string]interface{}{
+		"script": script,
+	}
+	if err := ioutil.WriteFile(script, []byte("#!/bin/bash -e\necho hello"), 0644); err != nil {
+		return err
+	}
+	return ioutil.WriteFile("escape.yml", plan.ToMinifiedYaml(), 0644)
 }
 
 func outputVariable(typ, variableId, defaultValue string) error {
@@ -216,6 +232,24 @@ func itsCalculatedOutputIsSetTo(key, value string) error {
 	}
 	if v != value {
 		return fmt.Errorf("Expecting '%s', got '%s'", value, v)
+	}
+	return nil
+}
+
+func iListTheErrandsInTheDeployment() error {
+	rec := util.NewProcessRecorder()
+	cmd := []string{"escape", "errands", "list"}
+	stdout, err := rec.Record(cmd, nil, eutil.NewLoggerDummy())
+	CapturedStdout = stdout
+	if err != nil {
+		fmt.Println(stdout)
+	}
+	return err
+}
+
+func iShouldSeeInTheOutput(value string) error {
+	if strings.Index(CapturedStdout, value) == -1 {
+		return fmt.Errorf("'%s' was not found in the output:\n%s", value, CapturedStdout)
 	}
 	return nil
 }
@@ -402,6 +436,9 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^I should not have a file "([^"]*)"$`, iShouldNotHaveAFile)
 	s.Step(`^template "([^"]*)" containing "([^"]*)"$`, templateContaining)
 	s.Step(`^I should have a file "([^"]*)" with contents "([^"]*)"$`, iShouldHaveAFileWithContents)
+	s.Step(`^errand "([^"]*)" with script "([^"]*)"$`, errandWithScript)
+	s.Step(`^I list the errands in the deployment$`, iListTheErrandsInTheDeployment)
+	s.Step(`^I should see "([^"]*)" in the output$`, iShouldSeeInTheOutput)
 
 	s.BeforeScenario(func(interface{}) {
 		StartRegistry()
