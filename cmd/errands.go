@@ -114,12 +114,10 @@ var errandsRunCmd = &cobra.Command{
 func RunDeployedErrand(deployment, errand string, parsedExtraVars map[string]string) error {
 	deplState := context.GetEnvironmentState().GetOrCreateDeploymentState(deployment)
 	releaseId := deplState.GetReleaseId("deploy")
-	// todo create temp dir?
 	if err := context.InitReleaseMetadataByReleaseId(releaseId); err != nil {
 		return err
 	}
-	// todo: cd into directory
-	return controllers.ErrandsController{}.Run(context, errand, parsedExtraVars)
+	return controllers.ErrandsController{}.RunRemoteErrand(context, errand, parsedExtraVars)
 }
 
 func RunLocalErrand(state, environment, escapePlanLocation, errand string, parsedExtraVars map[string]string) error {

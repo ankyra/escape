@@ -393,6 +393,9 @@ func theMetadataShouldHaveItsSetTo(key, value string) error {
 	}
 	return nil
 }
+func iDeleteTheFile(arg1 string) error {
+	return os.Remove(arg1)
+}
 
 func FeatureContext(s *godog.Suite) {
 	s.Step(`^a new Escape plan called "([^"]*)"$`, aNewEscapePlanCalled)
@@ -431,6 +434,7 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^I should see "([^"]*)" in the output$`, iShouldSeeInTheOutput)
 	s.Step(`^I list the local errands$`, iListTheLocalErrands)
 	s.Step(`^I run the errand "([^"]*)" in "([^"]*)"$`, iRunTheErrandIn)
+	s.Step(`^I delete the file "([^"]*)"$`, iDeleteTheFile)
 
 	s.BeforeScenario(func(interface{}) {
 		StartRegistry()

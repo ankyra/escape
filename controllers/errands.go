@@ -18,8 +18,11 @@ package controllers
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
 
 	. "github.com/ankyra/escape-client/model/interfaces"
+	"github.com/ankyra/escape-client/model/paths"
 	"github.com/ankyra/escape-client/model/runners"
 	"github.com/ankyra/escape-client/model/runners/errand"
 )
@@ -57,4 +60,32 @@ func (ErrandsController) Run(context Context, errandStr string, extraVars map[st
 		return err
 	}
 	return runner.Run(runnerContext)
+}
+
+func (e ErrandsController) RunRemoteErrand(context Context, errandStr string, extraVars map[string]string) error {
+	name, err := ioutil.TempDir("", "escape-errand")
+	if err != nil {
+		return fmt.Errorf("Could not create temporary directory for errand: %s", err.Error())
+	}
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	if err := os.Chdir(name); err != nil {
+		return fmt.Errorf("Could not change to temporary directory %s: %s", name, err.Error())
+	}
+	releaseId := context.GetReleaseMetadata().GetQualifiedReleaseId()
+	if err := (FetchController{}.Fetch(context, []string{releaseId})); err != nil {
+		return err
+	}
+	if err := os.Chdir(paths.NewPath().UnpackedDepDirectoryByReleaseMetadata(context.GetReleaseMetadata())); err != nil {
+		return err
+	}
+	if err := e.Run(context, errandStr, extraVars); err != nil {
+		return err
+	}
+	if err := os.Chdir(currentDir); err != nil {
+		return err
+	}
+	return os.RemoveAll(name)
 }

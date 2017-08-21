@@ -38,13 +38,15 @@ Feature: Errands
        When I run the errand "test-errand" in "_/my-release"
        Then I should see "hello" in the output
 
-    Scenario: Release should be read from deployment when running an errand
+    Scenario: When running an errand a release is fetched based on the release ID found in the deployment state
       Given a new Escape plan called "run-errand-release"
         And errand "test-errand" with script "test.sh"
         And I release the application
       Given a new Escape plan called "run-errand-release"
         And I release the application
         And I deploy "_/run-errand-release-v0.0.0"
+        And I delete the file "test.sh"
+        And I delete the file "escape.yml"
        When I run the errand "test-errand" in "_/run-errand-release"
        Then I should see "hello" in the output
 
