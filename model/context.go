@@ -95,42 +95,54 @@ func (c *Context) InitReleaseMetadataByReleaseId(releaseId string) error {
 func (c *Context) GetLogger() util.Logger {
 	return c.Logger
 }
+
 func (c *Context) Log(key string, values map[string]string) {
 	c.Logger.Log(key, values)
 }
+
 func (c *Context) PushLogSection(section string) {
 	c.Logger.PushSection(section)
 }
+
 func (c *Context) PushLogRelease(release string) {
 	c.Logger.PushRelease(release)
 }
+
 func (c *Context) PopLogSection() {
 	c.Logger.PopSection()
 }
+
 func (c *Context) PopLogRelease() {
 	c.Logger.PopRelease()
 }
+
 func (c *Context) GetRegistry() registry.Registry {
 	return c.EscapeConfig.GetRegistry()
 }
+
 func (c *Context) GetEscapePlan() *escape_plan.EscapePlan {
 	return c.EscapePlan
 }
+
 func (c *Context) GetReleaseMetadata() *core.ReleaseMetadata {
 	return c.ReleaseMetadata
 }
+
 func (c *Context) GetEnvironmentState() *types.EnvironmentState {
 	return c.EnvironmentState
 }
+
 func (c *Context) GetEscapeConfig() *config.EscapeConfig {
 	return c.EscapeConfig
 }
+
 func (c *Context) GetRootDeploymentName() string {
 	if c.RootDeploymentName == "" {
 		return c.ReleaseMetadata.GetVersionlessReleaseId()
 	}
 	return c.RootDeploymentName
 }
+
 func (c *Context) SetRootDeploymentName(name string) {
 	c.RootDeploymentName = name
 }
@@ -161,7 +173,6 @@ func (c *Context) GetDependencyMetadata(depCfg *core.DependencyConfig) (*core.Re
 	}
 	c.DependencyMetadata[depReleaseId] = metadata
 	return metadata, nil
-
 }
 
 func (c *Context) fetchDependencyAndReadMetadata(depCfg *core.DependencyConfig) (*core.ReleaseMetadata, error) {

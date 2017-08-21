@@ -36,6 +36,7 @@ func StartRegistry() {
 			"DATABASE_SETTINGS_PATH=test.db",
 			"STORAGE_BACKEND=local",
 			"STORAGE_SETTINGS_PATH=releases/",
+			"PORT=7777",
 		}
 		ServerProcess = exec.Command("escape-registry")
 		ServerProcess.Env = env
@@ -50,20 +51,29 @@ func StopRegistry() {
 	ServerProcess.Process.Kill()
 }
 
-func aNewEscapePlanCalled(name string) error {
+func runEscape(cmd []string) error {
 	rec := util.NewProcessRecorder()
-	cmd := []string{"escape", "plan", "init", "-f", "-n", name}
-	stdout, err := rec.Record(cmd, nil, eutil.NewLoggerDummy())
+	env := []string{
+		"ESCAPE_API_SERVER=http://localhost:7777",
+	}
+	command := []string{"escape", "-c", "/tmp/godog_escape_config"}
+	for _, c := range cmd {
+		command = append(command, c)
+	}
+	stdout, err := rec.Record(command, env, eutil.NewLoggerDummy())
 	CapturedStdout = stdout
+	if err != nil {
+		fmt.Println(CapturedStdout)
+	}
 	return err
 }
 
+func aNewEscapePlanCalled(name string) error {
+	return runEscape([]string{"plan", "init", "-f", "-n", name})
+}
+
 func iCompileThePlan() error {
-	rec := util.NewProcessRecorder()
-	cmd := []string{"escape", "plan", "compile"}
-	stdout, err := rec.Record(cmd, nil, eutil.NewLoggerDummy())
-	CapturedStdout = stdout
-	return err
+	return runEscape([]string{"plan", "compile"})
 }
 
 func inputVariableWithDefault(variableId, defaultValue string) error {
@@ -237,25 +247,14 @@ func itsCalculatedOutputIsSetTo(key, value string) error {
 }
 
 func iListTheErrandsInTheDeployment(deploymentName string) error {
-	rec := util.NewProcessRecorder()
-	cmd := []string{"escape", "errands", "list", "-d", deploymentName}
-	stdout, err := rec.Record(cmd, nil, eutil.NewLoggerDummy())
-	CapturedStdout = stdout
-	if err != nil {
-		fmt.Println(stdout)
-	}
-	return err
+	return runEscape([]string{"errands", "list", "-d", deploymentName})
 }
 
 func iListTheLocalErrands() error {
-	rec := util.NewProcessRecorder()
-	cmd := []string{"escape", "errands", "list", "--local"}
-	stdout, err := rec.Record(cmd, nil, eutil.NewLoggerDummy())
-	CapturedStdout = stdout
-	if err != nil {
-		fmt.Println(stdout)
-	}
-	return err
+	return runEscape([]string{"errands", "list", "--local"})
+}
+func iRunTheErrandIn(errand, deployment string) error {
+	return runEscape([]string{"errands", "run", "-d", deployment, errand})
 }
 
 func iShouldSeeInTheOutput(value string) error {
@@ -266,37 +265,17 @@ func iShouldSeeInTheOutput(value string) error {
 }
 
 func iBuildTheApplication() error {
-	rec := util.NewProcessRecorder()
-	cmd := []string{"escape", "build"}
-	stdout, err := rec.Record(cmd, nil, eutil.NewLoggerDummy())
-	CapturedStdout = stdout
-	if err != nil {
-		fmt.Println(stdout)
-	}
-	return err
+	return runEscape([]string{"build"})
 }
 
 func iDeploy(arg1 string) error {
-	rec := util.NewProcessRecorder()
-	cmd := []string{"escape", "deploy", arg1}
-	stdout, err := rec.Record(cmd, nil, eutil.NewLoggerDummy())
-	CapturedStdout = stdout
-	if err != nil {
-		fmt.Println(stdout)
-	}
+	err := runEscape([]string{"deploy", arg1})
 	CapturedStage = "deploy"
 	return err
 }
 
 func iReleaseTheApplication() error {
-	rec := util.NewProcessRecorder()
-	cmd := []string{"escape", "release", "-f"}
-	stdout, err := rec.Record(cmd, nil, eutil.NewLoggerDummy())
-	CapturedStdout = stdout
-	if err != nil {
-		fmt.Println(stdout)
-	}
-	return err
+	return runEscape([]string{"release", "-f"})
 }
 
 func itHasAsADependency(dependency string) error {
@@ -451,11 +430,16 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^I list the errands in the deployment "([^"]*)"$`, iListTheErrandsInTheDeployment)
 	s.Step(`^I should see "([^"]*)" in the output$`, iShouldSeeInTheOutput)
 	s.Step(`^I list the local errands$`, iListTheLocalErrands)
+	s.Step(`^I run the errand "([^"]*)" in "([^"]*)"$`, iRunTheErrandIn)
 
 	s.BeforeScenario(func(interface{}) {
 		StartRegistry()
+		os.Remove("escape.yml")
+		os.Remove("test.sh")
 	})
 	s.AfterScenario(func(interface{}, error) {
 		StopRegistry()
+		os.Remove("escape.yml")
+		os.Remove("test.sh")
 	})
 }

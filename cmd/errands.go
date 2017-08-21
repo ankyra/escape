@@ -48,9 +48,6 @@ func ListDeployedErrands(state, environment, deployment string) error {
 	if environment == "" {
 		return fmt.Errorf("Missing 'environment'")
 	}
-	if err := context.LoadLocalState(state, environment); err != nil {
-		return err
-	}
 	context.SetRootDeploymentName(deployment)
 	if deployment != "" {
 		if err := context.LoadLocalState(state, environment); err != nil {
@@ -61,7 +58,6 @@ func ListDeployedErrands(state, environment, deployment string) error {
 			return fmt.Errorf("The deployment '%s' could not be found in environment '%s'", deployment, environment)
 		}
 		releaseId := deplState.GetReleaseId("deploy")
-		fmt.Println("Using release id", releaseId)
 		if err := context.InitReleaseMetadataByReleaseId(releaseId); err != nil {
 			return err
 		}
@@ -96,30 +92,41 @@ var errandsRunCmd = &cobra.Command{
 		if len(args) != 1 {
 			return fmt.Errorf("Expecting errand")
 		}
+		if deployment == "" {
+			return fmt.Errorf("Missing deployment name")
+		}
 		context.SetRootDeploymentName(deployment)
-		if deployment != "" {
-			if err := context.LoadLocalState(state, environment); err != nil {
-				return err
-			}
-			deplState := context.GetEnvironmentState().GetOrCreateDeploymentState(deployment)
-			releaseId := deplState.GetReleaseId("deploy")
-			// todo create temp dir?
-			if err := context.InitReleaseMetadataByReleaseId(releaseId); err != nil {
-				return err
-			}
-			// todo: cd into directory
-		} else {
-			if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
-				return err
-			}
+		if err := context.LoadLocalState(state, environment); err != nil {
+			return err
 		}
 		parsedExtraVars, err := ParseExtraVars(extraVars)
 		if err != nil {
 			return err
 		}
 		errand := args[0]
-		return controllers.ErrandsController{}.Run(context, errand, parsedExtraVars)
+		if readLocalErrands {
+			return RunLocalErrand(state, environment, escapePlanLocation, errand, parsedExtraVars)
+		}
+		return RunDeployedErrand(deployment, errand, parsedExtraVars)
 	},
+}
+
+func RunDeployedErrand(deployment, errand string, parsedExtraVars map[string]string) error {
+	deplState := context.GetEnvironmentState().GetOrCreateDeploymentState(deployment)
+	releaseId := deplState.GetReleaseId("deploy")
+	// todo create temp dir?
+	if err := context.InitReleaseMetadataByReleaseId(releaseId); err != nil {
+		return err
+	}
+	// todo: cd into directory
+	return controllers.ErrandsController{}.Run(context, errand, parsedExtraVars)
+}
+
+func RunLocalErrand(state, environment, escapePlanLocation, errand string, parsedExtraVars map[string]string) error {
+	if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
+		return err
+	}
+	return controllers.ErrandsController{}.Run(context, errand, parsedExtraVars)
 }
 
 func init() {
@@ -131,4 +138,5 @@ func init() {
 
 	setLocalPlanAndStateFlags(errandsRunCmd)
 	errandsRunCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
+	errandsRunCmd.Flags().BoolVarP(&readLocalErrands, "local", "", false, "Read errands from Escape plan instead of deployment")
 }

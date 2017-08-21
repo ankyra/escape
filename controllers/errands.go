@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"fmt"
+
 	. "github.com/ankyra/escape-client/model/interfaces"
 	"github.com/ankyra/escape-client/model/runners"
 	"github.com/ankyra/escape-client/model/runners/errand"
@@ -48,7 +49,7 @@ func (ErrandsController) Run(context Context, errandStr string, extraVars map[st
 	}
 	errandObj, ok := metadata.GetErrands()[errandStr]
 	if !ok {
-		return fmt.Errorf("The errand '%s' does not exist", errandStr)
+		return fmt.Errorf("The errand '%s' could not be found in deployment '%s'. You can use 'escape errands list' to see the available errands.", errandStr, context.GetRootDeploymentName())
 	}
 	runner := errand.NewErrandRunner(errandObj, extraVars)
 	runnerContext, err := runners.NewRunnerContext(context, "deploy")
