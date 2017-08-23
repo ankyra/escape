@@ -21,14 +21,12 @@ import (
 )
 
 func compileMetadata(ctx *CompilerContext) error {
-	result := map[string]string{}
 	for key, val := range ctx.Plan.Metadata {
 		str, err := ctx.RunScriptForCompileStep(val)
 		if err != nil {
 			return fmt.Errorf("%s in metadata field '%s'.", err.Error(), key)
 		}
-		result[key] = str
+		ctx.Metadata.Metadata[key] = str
 	}
-	ctx.Metadata.Metadata = result
 	return nil
 }
