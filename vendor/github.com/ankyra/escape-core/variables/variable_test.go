@@ -151,15 +151,6 @@ func (s *variableSuite) Test_NewVariableFromString_fails_with_id_starting_with_p
 	}
 }
 
-func (s *variableSuite) Test_NewVariableFromString_fails_if_name_is_reserved(c *C) {
-	tbl := []string{"string", "list", "integer",
-		"deployment", "environment", "version", "client", "project"}
-	for _, testCase := range tbl {
-		_, err := NewVariableFromString(testCase, "string")
-		c.Assert(err, Not(IsNil), Commentf("%s should not be allowed as variable name", testCase))
-	}
-}
-
 func (s *variableSuite) Test_GetValue_String_Variable(c *C) {
 	unit, err := NewVariableFromString("test", "string")
 	c.Assert(err, IsNil)

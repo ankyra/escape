@@ -4,7 +4,7 @@ machine:
 
 dependencies:
   override:
-  - curl https://storage.googleapis.com/escape-releases-eu/escape-v0.15.2.tgz > /home/ubuntu/bin/escape.tgz
+  - curl https://storage.googleapis.com/escape-releases-eu/escape-v0.17.1.tgz > /home/ubuntu/bin/escape.tgz
   - tar -C /home/ubuntu/bin -xvzf /home/ubuntu/bin/escape.tgz
 
 compile:

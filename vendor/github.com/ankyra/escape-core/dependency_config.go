@@ -40,16 +40,19 @@ func (d *DependencyConfig) Validate(m *ReleaseMetadata) error {
 	if d.Mapping == nil {
 		d.Mapping = map[string]interface{}{}
 	}
-	for _, input := range m.Inputs {
-		_, alreadySet := d.Mapping[input.Id]
-		if alreadySet {
-			continue
-		}
-		if input.EvalBeforeDependencies {
-			d.Mapping[input.Id] = "$this.inputs." + input.Id
-		}
+	if d.Scopes == nil || len(d.Scopes) == 0 {
+		d.Scopes = []string{"build", "deploy"}
 	}
 	return nil
+}
+
+func (d *DependencyConfig) InScope(scope string) bool {
+	for _, s := range d.Scopes {
+		if s == scope {
+			return true
+		}
+	}
+	return false
 }
 
 func NewDependencyConfigFromMap(dep map[interface{}]interface{}) (*DependencyConfig, error) {

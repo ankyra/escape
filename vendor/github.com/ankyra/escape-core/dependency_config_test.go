@@ -17,7 +17,6 @@ limitations under the License.
 package core
 
 import (
-	"github.com/ankyra/escape-core/variables"
 	. "gopkg.in/check.v1"
 )
 
@@ -51,57 +50,4 @@ func (s *metadataSuite) Test_NewDependencyConfigFromMap(c *C) {
 	c.Assert(dep.Mapping["input_variable1"], Equals, "test")
 	c.Assert(dep.Scopes, DeepEquals, []string{"build"})
 	c.Assert(dep.Consumes, DeepEquals, map[string]string{"test": "whatver"})
-}
-
-func (s *metadataSuite) Test_DependencyConfig_validate_sets_default_mapping(c *C) {
-	metadata := NewReleaseMetadata("name", "1.0")
-	v, err := variables.NewVariableFromString("input_variable1", "string")
-	c.Assert(err, IsNil)
-	v.Default = "test"
-	v.EvalBeforeDependencies = true
-	metadata.AddInputVariable(v)
-	dep, err := NewDependencyConfigFromMap(map[interface{}]interface{}{
-		"release_id": "test-latest",
-		"mapping": map[interface{}]interface{}{
-			"input_variable2": "test",
-		},
-	})
-	c.Assert(err, IsNil)
-	c.Assert(dep.Validate(metadata), IsNil)
-	c.Assert(dep.Mapping, HasLen, 2)
-	c.Assert(dep.Mapping["input_variable1"], Equals, "$this.inputs.input_variable1")
-	c.Assert(dep.Mapping["input_variable2"], Equals, "test")
-	c.Assert(dep.Scopes, DeepEquals, []string{})
-	c.Assert(dep.Consumes, DeepEquals, map[string]string{})
-}
-
-func (s *metadataSuite) Test_DependencyConfig_validate_doesnt_set_mapping_if_not_EvalBeforeDependencies(c *C) {
-	metadata := NewReleaseMetadata("name", "1.0")
-	v, err := variables.NewVariableFromString("input_variable", "string")
-	c.Assert(err, IsNil)
-	v.Default = "test"
-	v.EvalBeforeDependencies = false
-	metadata.AddInputVariable(v)
-	dep := NewDependencyConfig("my-dependency")
-	c.Assert(dep.Validate(metadata), IsNil)
-	c.Assert(dep.Mapping, HasLen, 0)
-}
-
-func (s *metadataSuite) Test_DependencyConfig_validate_doesnt_set_mapping_if_key_already_set(c *C) {
-	metadata := NewReleaseMetadata("name", "1.0")
-	v, err := variables.NewVariableFromString("input_variable", "string")
-	c.Assert(err, IsNil)
-	v.Default = "test"
-	v.EvalBeforeDependencies = true
-	metadata.AddInputVariable(v)
-	dep, err := NewDependencyConfigFromMap(map[interface{}]interface{}{
-		"release_id": "test-latest",
-		"mapping": map[interface{}]interface{}{
-			"input_variable": "test",
-		},
-	})
-	c.Assert(err, IsNil)
-	c.Assert(dep.Validate(metadata), IsNil)
-	c.Assert(dep.Mapping, HasLen, 1)
-	c.Assert(dep.Mapping["input_variable"], Equals, "test")
 }

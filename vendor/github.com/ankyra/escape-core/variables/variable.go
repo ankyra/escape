@@ -104,7 +104,7 @@ func (v *Variable) Validate() error {
 		v.Scopes = []string{"build", "deploy"}
 	}
 	if variable_types.VariableIdIsReservedType(v.Id) {
-		return fmt.Errorf("The variable name '%s' is reserved", v.Id)
+		//fmt.Errorf("The variable name '%s' is reserved", v.Id)
 	}
 	return nil
 }
