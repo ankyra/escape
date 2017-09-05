@@ -10,6 +10,10 @@ depends:
 consumes:
 - provider1
 - provider2
+build_consumes:
+- build_provider1
+deploy_consumes:
+- deploy_provider1
 provides:
 - consumer1
 - consumer2
@@ -18,6 +22,10 @@ inputs:
 - default: $test.outputs.test
   id: input2
   type: string
+build_inputs:
+- build1
+deploy_inputs:
+- deploy1
 outputs:
 - output1
 - default: $test.outputs.test

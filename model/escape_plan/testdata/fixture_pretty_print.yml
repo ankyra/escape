@@ -58,6 +58,16 @@ consumes:
 - provider1
 - provider2
 
+# The release can consume zero or more providers at build time.
+#
+build_consumes:
+- build_provider1
+
+# The release can consume zero or more providers at deploy time.
+#
+deploy_consumes:
+- deploy_provider1
+
 # The release can provide zero or more providers for other releases to 
 # consume at deployment time.
 #
@@ -103,6 +113,12 @@ inputs:
 - default: $test.outputs.test
   id: input2
   type: string
+
+build_inputs:
+- build1
+
+deploy_inputs:
+- deploy1
 
 # Output variables (see input variables for documentation)
 #

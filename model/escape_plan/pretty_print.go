@@ -18,9 +18,10 @@ package escape_plan
 
 import (
 	"bytes"
-	"gopkg.in/yaml.v2"
 	"strings"
 	"text/template"
+
+	"gopkg.in/yaml.v2"
 )
 
 type prettyPrinter struct {
@@ -30,32 +31,36 @@ type prettyPrinter struct {
 }
 
 var templateMap = map[string]string{
-	"name":         keyValTpl,
-	"version":      keyValTpl,
-	"description":  keyValTpl,
-	"logo":         keyValTpl,
-	"path":         keyValTpl,
-	"pre_build":    keyValTpl,
-	"build":        keyValTpl,
-	"post_build":   keyValTpl,
-	"pre_deploy":   keyValTpl,
-	"deploy":       keyValTpl,
-	"post_deploy":  keyValTpl,
-	"pre_destroy":  keyValTpl,
-	"destroy":      keyValTpl,
-	"post_destroy": keyValTpl,
-	"smoke":        keyValTpl,
-	"test":         keyValTpl,
-	"depends":      listValTpl,
-	"extends":      listValTpl,
-	"consumes":     listValTpl,
-	"provides":     listValTpl,
-	"includes":     listValTpl,
-	"inputs":       listValTpl,
-	"outputs":      listValTpl,
-	"templates":    listValTpl,
-	"metadata":     mapValTpl,
-	"errands":      mapValTpl,
+	"name":            keyValTpl,
+	"version":         keyValTpl,
+	"description":     keyValTpl,
+	"logo":            keyValTpl,
+	"path":            keyValTpl,
+	"pre_build":       keyValTpl,
+	"build":           keyValTpl,
+	"post_build":      keyValTpl,
+	"pre_deploy":      keyValTpl,
+	"deploy":          keyValTpl,
+	"post_deploy":     keyValTpl,
+	"pre_destroy":     keyValTpl,
+	"destroy":         keyValTpl,
+	"post_destroy":    keyValTpl,
+	"smoke":           keyValTpl,
+	"test":            keyValTpl,
+	"depends":         listValTpl,
+	"extends":         listValTpl,
+	"consumes":        listValTpl,
+	"deploy_consumes": listValTpl,
+	"build_consumes":  listValTpl,
+	"provides":        listValTpl,
+	"includes":        listValTpl,
+	"inputs":          listValTpl,
+	"build_inputs":    listValTpl,
+	"deploy_inputs":   listValTpl,
+	"outputs":         listValTpl,
+	"templates":       listValTpl,
+	"metadata":        mapValTpl,
+	"errands":         mapValTpl,
 }
 
 type printConf func(*prettyPrinter) *prettyPrinter
@@ -97,8 +102,10 @@ func (e *prettyPrinter) Print(plan *EscapePlan) []byte {
 	yamlMap := plan.ToDict()
 	writer := bytes.NewBuffer([]byte{})
 	ordering := []string{
-		"name", "version", "description", "logo", "extends", "depends", "consumes",
-		"provides", "inputs", "outputs", "metadata", "includes", "errands", "templates", "path",
+		"name", "version", "description", "logo", "extends", "depends",
+		"consumes", "build_consumes", "deploy_consumes",
+		"provides", "inputs", "build_inputs", "deploy_inputs",
+		"outputs", "metadata", "includes", "errands", "templates", "path",
 		"pre_build", "build", "post_build", "test",
 		"pre_deploy", "deploy", "post_deploy", "smoke",
 		"pre_destroy", "destroy", "post_destroy"}

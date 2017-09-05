@@ -17,19 +17,21 @@ limitations under the License.
 package escape_plan
 
 var docMap = map[string]string{
-	"name":        nameDoc,
-	"version":     versionDoc,
-	"description": descriptionDoc,
-	"depends":     dependsDoc,
-	"includes":    includesDoc,
-	"consumes":    consumesDoc,
-	"provides":    providesDoc,
-	"metadata":    metadataDoc,
-	"inputs":      inputsDoc,
-	"outputs":     outputsDoc,
-	"errands":     errandsDoc,
-	"pre_build":   prebuildDoc,
-	"post_build":  postbuildDoc,
+	"name":            nameDoc,
+	"version":         versionDoc,
+	"description":     descriptionDoc,
+	"depends":         dependsDoc,
+	"includes":        includesDoc,
+	"consumes":        consumesDoc,
+	"build_consumes":  buildConsumesDoc,
+	"deploy_consumes": deployConsumesDoc,
+	"provides":        providesDoc,
+	"metadata":        metadataDoc,
+	"inputs":          inputsDoc,
+	"outputs":         outputsDoc,
+	"errands":         errandsDoc,
+	"pre_build":       prebuildDoc,
+	"post_build":      postbuildDoc,
 }
 
 func GetDoc(key string) []byte {
@@ -88,6 +90,12 @@ const includesDoc = `# The files to includes in this release. The files don't ha
 
 const consumesDoc = `# The release can consume zero or more providers from the environment its
 # deployed in.
+#`
+
+const buildConsumesDoc = `# The release can consume zero or more providers at build time.
+#`
+
+const deployConsumesDoc = `# The release can consume zero or more providers at deploy time.
 #`
 
 const providesDoc = `# The release can provide zero or more providers for other releases to 

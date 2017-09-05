@@ -5,6 +5,12 @@ consumes:
 - provider1
 - provider2
 
+build_consumes: 
+- build_provider1
+
+deploy_consumes:
+- deploy_provider1
+
 extends:
 - extends1
 
@@ -37,6 +43,12 @@ inputs:
 - id: input2
   type: string
   default: $test.outputs.test
+
+build_inputs:
+- build1
+
+deploy_inputs:
+- deploy1
 
 logo: logo.png
 
