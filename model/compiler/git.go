@@ -17,8 +17,9 @@ limitations under the License.
 package compiler
 
 import (
-	"github.com/ankyra/escape-client/util"
 	"os"
+
+	"github.com/ankyra/escape-client/util"
 )
 
 func compileGit(ctx *CompilerContext) error {
@@ -28,15 +29,29 @@ func compileGit(ctx *CompilerContext) error {
 		return nil
 	}
 	ctx.Metadata.Revision = result
+
 	result, err = rec.Record([]string{"git", "rev-parse", "--abbrev-ref", "HEAD"}, os.Environ(), util.NewLoggerDummy())
 	if err != nil {
 		return nil
 	}
 	ctx.Metadata.Branch = result
+
 	result, err = rec.Record([]string{"git", "config", "--get", "remote.origin.url"}, os.Environ(), util.NewLoggerDummy())
 	if err != nil {
 		return nil
 	}
 	ctx.Metadata.Repository = result
+
+	result, err = rec.Record([]string{"git", "show", "-s", "--format=%B", "HEAD"}, os.Environ(), util.NewLoggerDummy())
+	if err != nil {
+		return nil
+	}
+	ctx.Metadata.RevisionMessage = result
+
+	result, err = rec.Record([]string{"git", "show", "-s", "--format=%an <%ae>", "HEAD"}, os.Environ(), util.NewLoggerDummy())
+	if err != nil {
+		return nil
+	}
+	ctx.Metadata.RevisionAuthor = result
 	return nil
 }
