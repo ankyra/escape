@@ -65,6 +65,12 @@ outputs:
 templates:
 - template.yml.tpl
 
+build_templates:
+- build.yml.tpl
+
+deploy_templates:
+- deploy.yml.tpl
+
 path: path.txt
 post_build: post_build.sh
 build: build.sh

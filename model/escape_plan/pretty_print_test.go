@@ -17,11 +17,12 @@ limitations under the License.
 package escape_plan
 
 import (
-	. "gopkg.in/check.v1"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"reflect"
 	"strings"
+
+	. "gopkg.in/check.v1"
+	"gopkg.in/yaml.v2"
 )
 
 type printSuite struct{}
@@ -137,7 +138,7 @@ func (s *printSuite) Test_PrettyPrint_includes_all_fields(c *C) {
 		key := strings.Split(name, ",")[0]
 		if key != "-" {
 			_, found := result[key]
-			c.Assert(found, Equals, true)
+			c.Assert(found, Equals, true, Commentf("Field '%s' was not found when pretty printing the Escape plan. Add it to 'templateMap' and 'prettyPrinter.Print'", key))
 		}
 	}
 }

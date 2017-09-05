@@ -184,6 +184,12 @@ errands:
 templates:
 - template.yml.tpl
 
+build_templates:
+- build.yml.tpl
+
+deploy_templates:
+- deploy.yml.tpl
+
 path: path.txt
 
 # A script to run before the build.

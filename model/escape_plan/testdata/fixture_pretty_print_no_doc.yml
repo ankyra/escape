@@ -52,6 +52,10 @@ errands:
     script: path/to/script2.sh
 templates:
 - template.yml.tpl
+build_templates:
+- build.yml.tpl
+deploy_templates:
+- deploy.yml.tpl
 path: path.txt
 pre_build: pre_build.sh
 build: build.sh
