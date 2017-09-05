@@ -31,6 +31,22 @@ func compileInputs(ctx *CompilerContext) error {
 		}
 		ctx.Metadata.AddInputVariable(v)
 	}
+	for _, input := range ctx.Plan.BuildInputs {
+		v, err := compileVariable(ctx, input)
+		if err != nil {
+			return fmt.Errorf("Error compiling 'build_inputs' variable: %s", err.Error())
+		}
+		v.Scopes = []string{"build"}
+		ctx.Metadata.AddInputVariable(v)
+	}
+	for _, input := range ctx.Plan.DeployInputs {
+		v, err := compileVariable(ctx, input)
+		if err != nil {
+			return fmt.Errorf("Error compiling 'deploy_inputs' variable: %s", err.Error())
+		}
+		v.Scopes = []string{"deploy"}
+		ctx.Metadata.AddInputVariable(v)
+	}
 	return nil
 }
 
