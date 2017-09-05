@@ -1,5 +1,5 @@
 name: escape-client
-version: 0.18.@
+version: 0.19.@
 description: |
   The Escape Client. This release includes the source and one binary for
   Linux/AMD64.  For full documentation see http://escape.ankyra.io/
@@ -45,7 +45,7 @@ errands:
       id: escape_version
     script: scripts/upload_to_gcs.sh
 
-templates:
+build_templates:
 - file: util/metadata.go.tpl
   mapping:
     version: $this.version

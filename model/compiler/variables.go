@@ -47,7 +47,7 @@ func compileInputs(ctx *CompilerContext) error {
 		v.Scopes = []string{"deploy"}
 		ctx.Metadata.AddInputVariable(v)
 	}
-	return nil
+	return compileDependencyVariableMapping(ctx)
 }
 
 func compileOutputs(ctx *CompilerContext) error {
@@ -108,4 +108,13 @@ func compileDefault(ctx *CompilerContext, v *variables.Variable) (*variables.Var
 		return v, nil
 	}
 	return nil, fmt.Errorf("Unexpected type '%T' for default field of variable '%s'", v.Default, v.Id)
+}
+
+func compileDependencyVariableMapping(ctx *CompilerContext) error {
+	for _, depend := range ctx.Metadata.Depends {
+		for _, variable := range ctx.Metadata.Inputs {
+			depend.AddVariableMapping(variable.Scopes, variable.Id, "$this.inputs."+variable.Id)
+		}
+	}
+	return nil
 }

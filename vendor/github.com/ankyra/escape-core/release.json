@@ -1,6 +1,6 @@
 {
    "api_version": 6,
-   "built_with_core_version": "0.6.0",
+   "built_with_core_version": "0.6.4",
    "built_with_escape_version": "0.17.0",
    "description": "Core library containing datastructures for working with Release Metadata, State and the Escape Scripting Language.\nPlease see https://escape.ankyra.io for the full documentation.",
    "files": {
@@ -9,17 +9,17 @@
       "build.sh": "59718acf701476b25fdbebc8c76c2b6d",
       "consumer.go": "c81742d72604e3512d69017eb07cc7ec",
       "consumer_test.go": "3ff946e134efa5165c73db7476ffbbb4",
-      "core.go": "5f8c3eb9a0f2ba9620622dcc7ebdcadb",
+      "core.go": "38108c83792c4713bb18eb5927f3a87f",
       "core.go.tpl": "4099a7b2c6c7798799ea2819f8cf5c27",
       "dependency.go": "c2fad1fb08026574389ca4ed44be50e1",
-      "dependency_config.go": "6b1c55224027cb9dc993ab7321d7eee8",
-      "dependency_config_test.go": "c68c93f5d8186aa18b88399a9957dc09",
+      "dependency_config.go": "eb1a32c775f90c67fddaf4fa2654b4f9",
+      "dependency_config_test.go": "86bdbfe3d8f37329845277e69ecee32c",
       "dependency_test.go": "141917507d043eed403cfc1493cf32fd",
       "diff.go": "b3e39db6f0b2b4905b0c23cf468f73eb",
       "diff_test.go": "6be1dfb2a485a0ad4052db1968b28111",
       "docs/generate_stdlib_docs.go": "15e02f0835b07edb0ecd7e60d6d3f040",
       "docs/scripting_language.md": "79ffa91ba9dad432b9c3810b474036d8",
-      "docs/stdlib.md": "5cef8745b9fe107f1ea1c9561e0aba18",
+      "docs/stdlib.md": "9f35276e09ec96eda0019a368e1ab0c8",
       "errand.go": "22d56084cdd5088790a285196cf909b6",
       "errand_test.go": "2024729f8621ada8cd3699ec18d5d934",
       "metadata.go": "a2d4a082f35b463908939f90759a9cdb",
@@ -128,13 +128,13 @@
    "name": "escape-core",
    "repository": "git@github.com:ankyra/escape-core.git",
    "branch": "master",
-   "git_revision": "17c319fdd3c05aa794d7dd3143ed8e9b2999c33f",
-   "revision_message": "",
-   "revision_author": "",
+   "git_revision": "2b5c5a72081a350de2b42489050e9028ee022e0f",
+   "revision_message": "Introduce build_mapping and deploy_mapping in dependency config",
+   "revision_author": "Bart Spaans \u003cbart.spaans@gmail.com\u003e",
    "metadata": {
-      "release_metadata_api_version": "6"
+      "release_metadata_api_version": "7"
    },
-   "version": "0.6.4",
+   "version": "0.7.2",
    "consumes": [],
    "depends": [],
    "errands": {},
@@ -177,8 +177,7 @@
          "file": "core.go.tpl",
          "target": "core.go",
          "scopes": [
-            "build",
-            "deploy"
+            "build"
          ],
          "mapping": {
             "branch": "$this.branch",

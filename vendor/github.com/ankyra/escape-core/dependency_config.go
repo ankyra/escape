@@ -21,24 +21,29 @@ import (
 )
 
 type DependencyConfig struct {
-	ReleaseId string                 `json:"release_id" yaml:"release_id"`
-	Mapping   map[string]interface{} `json:"mapping" yaml:"mapping"`
-	Consumes  map[string]string      `json:"consumes" yaml:"consumes"`
-	Scopes    []string               `json:"scopes" yaml:"scopes"`
+	ReleaseId     string                 `json:"release_id" yaml:"release_id"`
+	BuildMapping  map[string]interface{} `json:"build_mapping" yaml:"build_mapping"`
+	DeployMapping map[string]interface{} `json:"deploy_mapping" yaml:"deploy_mapping"`
+	Consumes      map[string]string      `json:"consumes" yaml:"consumes"`
+	Scopes        []string               `json:"scopes" yaml:"scopes"`
 }
 
 func NewDependencyConfig(releaseId string) *DependencyConfig {
 	return &DependencyConfig{
-		ReleaseId: releaseId,
-		Mapping:   map[string]interface{}{},
-		Scopes:    []string{"build", "deploy"},
-		Consumes:  map[string]string{},
+		ReleaseId:     releaseId,
+		BuildMapping:  map[string]interface{}{},
+		DeployMapping: map[string]interface{}{},
+		Scopes:        []string{"build", "deploy"},
+		Consumes:      map[string]string{},
 	}
 }
 
 func (d *DependencyConfig) Validate(m *ReleaseMetadata) error {
-	if d.Mapping == nil {
-		d.Mapping = map[string]interface{}{}
+	if d.BuildMapping == nil {
+		d.BuildMapping = map[string]interface{}{}
+	}
+	if d.DeployMapping == nil {
+		d.DeployMapping = map[string]interface{}{}
 	}
 	if d.Scopes == nil || len(d.Scopes) == 0 {
 		d.Scopes = []string{"build", "deploy"}
@@ -46,10 +51,34 @@ func (d *DependencyConfig) Validate(m *ReleaseMetadata) error {
 	return nil
 }
 
-func (d *DependencyConfig) InScope(scope string) bool {
+func (d *DependencyConfig) GetMapping(scope string) map[string]interface{} {
+	if scope == "build" {
+		return d.BuildMapping
+	}
+	if scope == "deploy" {
+		return d.DeployMapping
+	}
+	return nil
+}
+
+func (d *DependencyConfig) AddVariableMapping(scopes []string, id, key string) {
+	for _, scope := range scopes {
+		mapping := d.GetMapping(scope)
+		if mapping != nil {
+			_, found := mapping[id]
+			if !found {
+				mapping[id] = key
+			}
+		}
+	}
+}
+
+func (d *DependencyConfig) InScope(scopes ...string) bool {
 	for _, s := range d.Scopes {
-		if s == scope {
-			return true
+		for _, scope := range scopes {
+			if s == scope {
+				return true
+			}
 		}
 	}
 	return false
@@ -57,7 +86,8 @@ func (d *DependencyConfig) InScope(scope string) bool {
 
 func NewDependencyConfigFromMap(dep map[interface{}]interface{}) (*DependencyConfig, error) {
 	var releaseId string
-	mapping := map[string]interface{}{}
+	buildMapping := map[string]interface{}{}
+	deployMapping := map[string]interface{}{}
 	consumes := map[string]string{}
 	scopes := []string{}
 	for key, val := range dep {
@@ -71,7 +101,7 @@ func NewDependencyConfigFromMap(dep map[interface{}]interface{}) (*DependencyCon
 				return nil, fmt.Errorf("Expecting string for dependency 'release_id' got '%T'", val)
 			}
 			releaseId = valString
-		} else if key == "mapping" {
+		} else if key == "mapping" { // backwards compatibility with release metadata <= 6
 			valMap, ok := val.(map[interface{}]interface{})
 			if !ok {
 				return nil, fmt.Errorf("Expecting dict for dependency 'mapping' got '%T'", val)
@@ -79,9 +109,34 @@ func NewDependencyConfigFromMap(dep map[interface{}]interface{}) (*DependencyCon
 			for k, v := range valMap {
 				kStr, ok := k.(string)
 				if !ok {
-					return nil, fmt.Errorf("Expecting string key in dependency mapping")
+					return nil, fmt.Errorf("Expecting string key in dependency 'mapping'")
 				}
-				mapping[kStr] = v
+				buildMapping[kStr] = v
+				deployMapping[kStr] = v
+			}
+		} else if key == "build_mapping" {
+			valMap, ok := val.(map[interface{}]interface{})
+			if !ok {
+				return nil, fmt.Errorf("Expecting dict for dependency 'build_mapping' got '%T'", val)
+			}
+			for k, v := range valMap {
+				kStr, ok := k.(string)
+				if !ok {
+					return nil, fmt.Errorf("Expecting string key in dependency 'build_mapping'")
+				}
+				buildMapping[kStr] = v
+			}
+		} else if key == "deploy_mapping" {
+			valMap, ok := val.(map[interface{}]interface{})
+			if !ok {
+				return nil, fmt.Errorf("Expecting dict for dependency 'deploy_mapping' got '%T'", val)
+			}
+			for k, v := range valMap {
+				kStr, ok := k.(string)
+				if !ok {
+					return nil, fmt.Errorf("Expecting string key in dependency 'deploy_mapping'")
+				}
+				deployMapping[kStr] = v
 			}
 		} else if key == "consumes" {
 			valMap, ok := val.(map[interface{}]interface{})
@@ -111,7 +166,8 @@ func NewDependencyConfigFromMap(dep map[interface{}]interface{}) (*DependencyCon
 		return nil, fmt.Errorf("Missing 'release_id' in dependency")
 	}
 	cfg := NewDependencyConfig(releaseId)
-	cfg.Mapping = mapping
+	cfg.BuildMapping = buildMapping
+	cfg.DeployMapping = deployMapping
 	cfg.Scopes = scopes
 	cfg.Consumes = consumes
 	return cfg, nil

@@ -80,7 +80,8 @@ func (s *suite) Test_Compile_Dependencies_with_mapping(c *C) {
 	}
 	c.Assert(compileDependencies(ctx), IsNil)
 	c.Assert(ctx.Metadata.Depends[0].ReleaseId, Equals, "_/dependency-v1.0")
-	c.Assert(ctx.Metadata.Depends[0].Mapping["input_variable"], Equals, "test")
+	c.Assert(ctx.Metadata.Depends[0].BuildMapping["input_variable"], Equals, "test")
+	c.Assert(ctx.Metadata.Depends[0].DeployMapping["input_variable"], Equals, "test")
 	c.Assert(ctx.Metadata.VariableCtx["dependency"], Equals, "_/dependency-v1.0")
 	c.Assert(ctx.Metadata.VariableCtx["dep"], Equals, "_/dependency-v1.0")
 	c.Assert(ctx.VariableCtx["dependency"].GetQualifiedReleaseId(), Equals, "_/dependency-v1.0")
