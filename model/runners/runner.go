@@ -1,6 +1,7 @@
 package runners
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/ankyra/escape-client/model/paths"
@@ -67,7 +68,11 @@ func runDependency(ctx RunnerContext, depCfg *core.DependencyConfig, logKey, sta
 		"dependency": dependency,
 	})
 	ctx.Logger().PushRelease(dependency)
-	inputs, err := NewEnvironmentBuilder().GetInputsForDependency(ctx, stage, depCfg.Mapping, parentInputs)
+	mapping := depCfg.GetMapping(stage)
+	if mapping == nil {
+		return fmt.Errorf("Invalid stage '%s'", stage)
+	}
+	inputs, err := NewEnvironmentBuilder().GetInputsForDependency(ctx, stage, mapping, parentInputs)
 	if err != nil {
 		return err
 	}
