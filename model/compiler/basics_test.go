@@ -26,15 +26,12 @@ func (s *suite) Test_Compile_Basics(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Name = "testor"
 	plan.Description = "  trim me\nplease\n"
-	plan.Consumes = []interface{}{"consumer1", "consumer2"}
 	plan.Provides = []string{"provider1", "provider2"}
 	ctx := NewCompilerContext(plan, nil, "my-project")
 	c.Assert(compileBasicFields(ctx), IsNil)
 	c.Assert(ctx.Metadata.Name, Equals, "testor")
 	c.Assert(ctx.Metadata.Description, Equals, "trim me\nplease")
 	c.Assert(ctx.Metadata.Project, Equals, "my-project")
-	c.Assert(ctx.Metadata.GetConsumes("deploy"), DeepEquals, []string{"consumer1", "consumer2"})
-	c.Assert(ctx.Metadata.GetConsumes("build"), DeepEquals, []string{"consumer1", "consumer2"})
 	c.Assert(ctx.Metadata.GetProvides(), DeepEquals, []string{"provider1", "provider2"})
 	c.Assert(ctx.Metadata.BuiltWithEscapeVersion, Equals, util.EscapeVersion)
 }

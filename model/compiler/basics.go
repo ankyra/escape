@@ -21,7 +21,6 @@ import (
 	"strings"
 
 	"github.com/ankyra/escape-client/util"
-	core "github.com/ankyra/escape-core"
 )
 
 func compileBasicFields(ctx *CompilerContext) error {
@@ -42,13 +41,6 @@ func compileBasicFields(ctx *CompilerContext) error {
 	ctx.Metadata.BuiltWithEscapeVersion = util.EscapeVersion
 	ctx.Metadata.Description = strings.TrimSpace(ctx.Plan.Description)
 	ctx.Metadata.SetProvides(ctx.Plan.Provides)
-	for _, consumer := range ctx.Plan.Consumes {
-		c, err := core.NewConsumerConfigFromInterface(consumer)
-		if err != nil {
-			return fmt.Errorf("%s in consumers field", err)
-		}
-		ctx.Metadata.AddConsumes(c)
-	}
 	ctx.Metadata.Project = project
 	return nil
 }

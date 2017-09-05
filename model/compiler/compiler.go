@@ -37,6 +37,7 @@ func Compile(plan *escape_plan.EscapePlan,
 	ctx.ReleaseQuery = releaseQuery
 	compilerSteps := []CompilerFunc{
 		compileBasicFields,
+		compileConsumers,
 		compileGit,
 		compileExtensions,
 		compileDependencies,
