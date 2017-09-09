@@ -41,6 +41,6 @@ func NewLocalRegistry() Registry {
 	return local.NewLocalRegistry()
 }
 
-func NewRemoteRegistry(apiServer, authToken string) Registry {
-	return remote.NewRemoteRegistry(apiServer, authToken)
+func NewRemoteRegistry(apiServer, authToken string, insecureSkipVerify bool) Registry {
+	return remote.NewRemoteRegistry(apiServer, authToken, insecureSkipVerify)
 }

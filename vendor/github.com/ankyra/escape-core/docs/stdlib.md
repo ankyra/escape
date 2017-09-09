@@ -45,33 +45,21 @@ Slice a list. Usually accessed implicitly using slice syntax (eg. `list[0:5]`)
 
 # Functions acting on strings
 
-## lower(v :: string)
-
-Returns a copy of the string v with all Unicode characters mapped to their lower case
-
 ## split(sep :: string)
 
 Split slices s into all substrings separated by sep and returns a slice of the substrings between those separators. If sep is empty, Split splits after each UTF-8 sequence.
-
-## title(v :: string)
-
-Returns a copy of the string v with all Unicode characters mapped to their title case
-
-## base64_decode()
-
-Decode string from base64
 
 ## trim()
 
 Returns a slice of the string s, with all leading and trailing white space removed, as defined by Unicode. 
 
-## track_patch_version()
+## concat(v1 :: string, v2 :: string, ...)
 
-Track patch version
+Concatate stringable arguments
 
-## upper(v :: string)
+## lower(v :: string)
 
-Returns a copy of the string v with all Unicode characters mapped to their upper case
+Returns a copy of the string v with all Unicode characters mapped to their lower case
 
 ## replace(old :: string, new :: string, n :: integer)
 
@@ -89,13 +77,25 @@ Read the contents of a file
 
 Track minor version
 
-## concat(v1 :: string, v2 :: string, ...)
+## track_patch_version()
 
-Concatate stringable arguments
+Track patch version
 
 ## track_major_version()
 
 Track major version
+
+## upper(v :: string)
+
+Returns a copy of the string v with all Unicode characters mapped to their upper case
+
+## title(v :: string)
+
+Returns a copy of the string v with all Unicode characters mapped to their title case
+
+## base64_decode()
+
+Decode string from base64
 
 ## track_version()
 

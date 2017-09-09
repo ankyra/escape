@@ -17,22 +17,47 @@ limitations under the License.
 package remote
 
 import (
+	"encoding/json"
 	"fmt"
 
+	"github.com/ankyra/escape-client/model/remote"
 	. "github.com/ankyra/escape-core/state"
 )
 
 type remoteStateProvider struct {
+	client    *remote.RegistryClient
+	endpoints *remote.ServerEndpoints
 }
 
-func NewRemoteStateProvider() *remoteStateProvider {
-	return &remoteStateProvider{}
+func NewRemoteStateProvider(apiServer, escapeToken string, insecureSkipVerify bool) *remoteStateProvider {
+	return &remoteStateProvider{
+		client:    remote.NewRemoteClient(escapeToken, insecureSkipVerify),
+		endpoints: remote.NewServerEndpoints(apiServer),
+	}
 }
 
-func (l *remoteStateProvider) Load(project, env string) (*EnvironmentState, error) {
-	return nil, fmt.Errorf("Not implemented")
+func (r *remoteStateProvider) Load(project, env string) (*EnvironmentState, error) {
+	url := r.endpoints.ProjectEnvironmentState(project, env)
+	resp, err := r.client.GET_with_authentication(url)
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode == 401 {
+		return nil, fmt.Errorf("Unauthorized")
+	} else if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("Couldn't load environment state: %s", resp.Status)
+	}
+	result := EnvironmentState{}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, err
+	}
+	prjState, _ := NewProjectState(project)
+	prjState.Backend = r
+	prjState.Environments[env] = &result
+	result.Project = prjState
+	return &result, prjState.ValidateAndFix()
 }
 
 func (l *remoteStateProvider) Save(depl *DeploymentState) error {
-	return fmt.Errorf("Not implemented")
+	return fmt.Errorf("Saving environment state not implemented")
 }

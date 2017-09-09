@@ -18,6 +18,7 @@ package remote
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"io"
 	"mime/multipart"
@@ -26,17 +27,24 @@ import (
 )
 
 type RegistryClient struct {
-	EscapeToken string
+	InsecureSkipVerify bool
+	EscapeToken        string
 }
 
-func NewRegistryClient(escapeToken string) *RegistryClient {
+func NewRemoteClient(escapeToken string, insecureSkipVerify bool) *RegistryClient {
 	return &RegistryClient{
-		EscapeToken: escapeToken,
+		EscapeToken:        escapeToken,
+		InsecureSkipVerify: insecureSkipVerify,
 	}
 }
 
 func (c *RegistryClient) GetHTTPClient() *http.Client {
-	return &http.Client{}
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: c.InsecureSkipVerify},
+	}
+	return &http.Client{
+		Transport: transport,
+	}
 }
 
 func (c *RegistryClient) POST_json(url string, data interface{}) (*http.Response, error) {

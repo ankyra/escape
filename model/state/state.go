@@ -31,6 +31,6 @@ func NewLocalStateProvider(file string) StateProvider {
 	return local.NewLocalStateProvider(file)
 }
 
-func NewRemoteStateProvider() StateProvider {
-	return remote.NewRemoteStateProvider()
+func NewRemoteStateProvider(apiServer, escapeToken string, insecureSkipVerify bool) StateProvider {
+	return remote.NewRemoteStateProvider(apiServer, escapeToken, insecureSkipVerify)
 }

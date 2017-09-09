@@ -19,9 +19,10 @@ package state
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ankyra/escape-core/util"
 	"io/ioutil"
 	"path/filepath"
+
+	"github.com/ankyra/escape-core/util"
 )
 
 type Backend interface {
@@ -34,7 +35,7 @@ type ProjectState struct {
 	Backend      Backend                      `json:"-"`
 }
 
-func newProjectState(prjName string) (*ProjectState, error) {
+func NewProjectState(prjName string) (*ProjectState, error) {
 	return &ProjectState{
 		Name:         prjName,
 		Environments: map[string]*EnvironmentState{},
@@ -42,14 +43,14 @@ func newProjectState(prjName string) (*ProjectState, error) {
 }
 
 func NewProjectStateFromJsonString(data string, backend Backend) (*ProjectState, error) {
-	prjState, err := newProjectState("")
+	prjState, err := NewProjectState("")
 	if err != nil {
 		return nil, err
 	}
 	if err := json.Unmarshal([]byte(data), prjState); err != nil {
 		return nil, err
 	}
-	if err := prjState.validateAndFix(); err != nil {
+	if err := prjState.ValidateAndFix(); err != nil {
 		return nil, err
 	}
 	prjState.Backend = backend
@@ -65,12 +66,12 @@ func NewProjectStateFromFile(prjName, cfgFile string, backend Backend) (*Project
 		return nil, err
 	}
 	if !util.PathExists(cfgFile) {
-		p, err := newProjectState(prjName)
+		p, err := NewProjectState(prjName)
 		if err != nil {
 			return nil, err
 		}
 		p.Backend = backend
-		return p, p.validateAndFix()
+		return p, p.ValidateAndFix()
 	}
 	data, err := ioutil.ReadFile(cfgFile)
 	if err != nil {
@@ -90,7 +91,7 @@ func (p *ProjectState) Save(d *DeploymentState) error {
 	return p.Backend.Save(d)
 }
 
-func (p *ProjectState) validateAndFix() error {
+func (p *ProjectState) ValidateAndFix() error {
 	if p.Name == "" {
 		return fmt.Errorf("State is missing project name")
 	}

@@ -19,22 +19,24 @@ package remote
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ankyra/escape-client/model/registry/types"
-	core "github.com/ankyra/escape-core"
 	"io"
 	"io/ioutil"
 	"os"
+
+	"github.com/ankyra/escape-client/model/registry/types"
+	"github.com/ankyra/escape-client/model/remote"
+	core "github.com/ankyra/escape-core"
 )
 
 type registry struct {
-	client    *RegistryClient
-	endpoints *ServerEndpoints
+	client    *remote.RegistryClient
+	endpoints *remote.ServerEndpoints
 }
 
-func NewRemoteRegistry(apiServer, escapeToken string) *registry {
+func NewRemoteRegistry(apiServer, escapeToken string, insecureSkipVerify bool) *registry {
 	return &registry{
-		client:    NewRegistryClient(escapeToken),
-		endpoints: NewServerEndpoints(apiServer),
+		client:    remote.NewRemoteClient(escapeToken, insecureSkipVerify),
+		endpoints: remote.NewServerEndpoints(apiServer),
 	}
 }
 

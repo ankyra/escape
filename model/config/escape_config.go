@@ -36,14 +36,15 @@ type EscapeConfig struct {
 }
 
 type EscapeTargetConfig struct {
-	Project        string        `json:"project"`
-	ApiServer      string        `json:"api_server"`
-	Username       string        `json:"username"`
-	Password       string        `json:"password"`
-	AuthToken      string        `json:"escape_auth_token"`
-	StorageBackend string        `json:"storage_backend"`
-	GcsBucketUrl   string        `json:"bucket_url"`
-	parent         *EscapeConfig `json:"-"`
+	Project            string        `json:"project"`
+	ApiServer          string        `json:"api_server"`
+	Username           string        `json:"username"`
+	Password           string        `json:"password"`
+	AuthToken          string        `json:"escape_auth_token"`
+	StorageBackend     string        `json:"storage_backend"`
+	GcsBucketUrl       string        `json:"bucket_url"`
+	InsecureSkipVerify bool          `json:"insecure_skip_verify"`
+	parent             *EscapeConfig `json:"-"`
 }
 
 func NewEscapeConfig() *EscapeConfig {
@@ -150,7 +151,7 @@ func (t *EscapeTargetConfig) ToJson() string {
 
 func (t *EscapeTargetConfig) GetRegistry() registry.Registry {
 	if t.StorageBackend == "escape" {
-		return registry.NewRemoteRegistry(t.ApiServer, t.AuthToken)
+		return registry.NewRemoteRegistry(t.ApiServer, t.AuthToken, t.InsecureSkipVerify)
 	}
 	return registry.NewLocalRegistry()
 }
@@ -182,7 +183,6 @@ func (t *EscapeTargetConfig) GetProject() string {
 	}
 	return t.Project
 }
-
 func (t *EscapeTargetConfig) SetApiServer(v string) {
 	t.ApiServer = v
 }
@@ -200,4 +200,10 @@ func (t *EscapeTargetConfig) SetStorageBackend(v string) {
 }
 func (t *EscapeTargetConfig) SetGcsBucketUrl(v string) {
 	t.GcsBucketUrl = v
+}
+func (t *EscapeTargetConfig) GetInsecureSkipVerify() bool {
+	return t.InsecureSkipVerify
+}
+func (t *EscapeTargetConfig) SetInsecureSkipVerify(v bool) {
+	t.InsecureSkipVerify = v
 }

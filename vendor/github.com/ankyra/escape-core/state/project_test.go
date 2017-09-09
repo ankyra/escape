@@ -17,8 +17,9 @@ limitations under the License.
 package state
 
 import (
-	. "gopkg.in/check.v1"
 	"testing"
+
+	. "gopkg.in/check.v1"
 )
 
 type suite struct{}
@@ -67,7 +68,7 @@ func (s *suite) Test_From_File_With_Empty_File_Fails(c *C) {
 }
 
 func (s *suite) Test_GetEnvironmentStateOrMakeNew(c *C) {
-	p, err := newProjectState("prj")
+	p, err := NewProjectState("prj")
 	c.Assert(err, IsNil)
 	state1 := p.GetEnvironmentStateOrMakeNew("test-env")
 	state2 := p.GetEnvironmentStateOrMakeNew("test-env")

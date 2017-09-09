@@ -34,7 +34,8 @@ import (
 
 type LoginController struct{}
 
-func (LoginController) Login(context Context, url, username, password string) error {
+func (LoginController) Login(context Context, url, username, password string, insecureSkipVerify bool) error {
+	context.GetEscapeConfig().GetCurrentTarget().SetInsecureSkipVerify(insecureSkipVerify)
 	authMethods, err := context.GetRegistry().GetAuthMethods(url)
 	if err != nil {
 		return err

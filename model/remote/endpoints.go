@@ -78,3 +78,6 @@ func (s *ServerEndpoints) AuthMethods(baseUrl string) string {
 	}
 	return baseUrl + "api/v1/auth/login-methods"
 }
+func (s *ServerEndpoints) ProjectEnvironmentState(project, environment string) string {
+	return s.ApiServer() + "api/v1/state/" + project + "/environments/" + environment + "/"
+}

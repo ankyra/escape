@@ -24,6 +24,7 @@ import (
 )
 
 var username, password, url string
+var insecureSkipVerify bool
 
 var loginCmd = &cobra.Command{
 	Use:   "login",
@@ -32,7 +33,7 @@ var loginCmd = &cobra.Command{
 		if url == "" {
 			return fmt.Errorf("Missing Escape server URL")
 		}
-		return controllers.LoginController{}.Login(context, url, username, password)
+		return controllers.LoginController{}.Login(context, url, username, password, insecureSkipVerify)
 	},
 }
 
@@ -41,4 +42,6 @@ func init() {
 	loginCmd.Flags().StringVarP(&username, "username", "u", "", "The username")
 	loginCmd.Flags().StringVarP(&password, "password", "p", "", "The password")
 	loginCmd.Flags().StringVarP(&url, "url", "e", "", "The Escape server URL")
+	loginCmd.Flags().BoolVarP(&insecureSkipVerify, "insecure-skip-verify", "i", false,
+		"Don't verify server's certificate chain and host name.")
 }

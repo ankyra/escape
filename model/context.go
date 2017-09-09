@@ -235,7 +235,10 @@ func (c *Context) LoadLocalState(cfgFile, environment string) error {
 }
 
 func (c *Context) LoadRemoteState(project, environment string) error {
-	envState, err := state.NewRemoteStateProvider().Load(project, environment)
+	apiServer := c.EscapeConfig.GetCurrentTarget().GetApiServer()
+	escapeToken := c.EscapeConfig.GetCurrentTarget().GetAuthToken()
+	insecureSkipVerify := c.EscapeConfig.GetCurrentTarget().GetInsecureSkipVerify()
+	envState, err := state.NewRemoteStateProvider(apiServer, escapeToken, insecureSkipVerify).Load(project, environment)
 	if err != nil {
 		return err
 	}
