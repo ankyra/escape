@@ -27,17 +27,16 @@ var destroyCmd = &cobra.Command{
 	Use:   "destroy",
 	Short: "Destroy the deployment of the current release in the local state file.",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
+		if err := ProcessFlagsForContext(true); err != nil {
 			return err
 		}
-		context.SetRootDeploymentName(deployment)
 		return controllers.DestroyController{}.Destroy(context, !skipBuild, !skipDeployment)
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(destroyCmd)
-	setLocalPlanAndStateFlags(destroyCmd)
+	setPlanAndStateFlags(destroyCmd)
 	destroyCmd.Flags().BoolVarP(&skipDeployment, "skip-deployment", "", false, "Don't destroy the deployment.")
 	destroyCmd.Flags().BoolVarP(&skipBuild, "skip-build", "", false, "Don't destroy the build")
 }

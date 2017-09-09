@@ -56,10 +56,9 @@ var showDeploymentCmd = &cobra.Command{
 		if deployment == "" {
 			return fmt.Errorf("Missing deployment name")
 		}
-		if err := context.LoadLocalState(state, environment); err != nil {
+		if err := ProcessFlagsForContext(false); err != nil {
 			return err
 		}
-		context.SetRootDeploymentName(deployment)
 		return controllers.StateController{}.ShowDeployment(context, deployment)
 	},
 }
@@ -68,7 +67,7 @@ var showProvidersCmd = &cobra.Command{
 	Use:   "show-providers",
 	Short: "Show the providers available in the environment",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := context.LoadLocalState(state, environment); err != nil {
+		if err := ProcessFlagsForContext(false); err != nil {
 			return err
 		}
 		return controllers.StateController{}.ShowProviders(context)
@@ -80,15 +79,8 @@ var createStateCmd = &cobra.Command{
 	Short: "Create state for the given escape plan",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		useEscapePlan := len(args) == 0
-		context.SetRootDeploymentName(deployment)
-		if useEscapePlan {
-			if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
-				return err
-			}
-		} else {
-			if err := context.LoadLocalState(state, environment); err != nil {
-				return err
-			}
+		if err := ProcessFlagsForContext(useEscapePlan); err != nil {
+			return err
 		}
 		stage := "build"
 		if deployStage {
@@ -115,10 +107,9 @@ var showStateCmd = &cobra.Command{
 	Use:   "show",
 	Short: "Show a deployment",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
+		if err := ProcessFlagsForContext(true); err != nil {
 			return err
 		}
-		context.SetRootDeploymentName(deployment)
 		return controllers.StateController{}.ShowDeployment(context, context.GetRootDeploymentName())
 	},
 }
@@ -141,8 +132,8 @@ func init() {
 	setEscapeStateLocationFlag(showProvidersCmd)
 	setEscapeStateEnvironmentFlag(showProvidersCmd)
 
-	setLocalPlanAndStateFlags(showStateCmd)
-	setLocalPlanAndStateFlags(createStateCmd)
+	setPlanAndStateFlags(showStateCmd)
+	setPlanAndStateFlags(createStateCmd)
 	createStateCmd.Flags().BoolVarP(&deployStage, "deploy", "", false, "Use deployment instead of build stage")
 	createStateCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
 	createStateCmd.Flags().StringArrayVarP(&extraProviders, "extra-providers", "p", []string{}, "Extra providers (format: provider=deployment, provider=@deployment.txt, @values.json)")

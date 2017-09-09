@@ -25,17 +25,16 @@ var pushCmd = &cobra.Command{
 	Use:   "push",
 	Short: "Push package to Escape server",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
+		if err := ProcessFlagsForContext(true); err != nil {
 			return err
 		}
-		context.SetRootDeploymentName(deployment)
 		return controllers.PushController{}.Push(context, uber)
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(pushCmd)
-	setLocalPlanAndStateFlags(pushCmd)
+	setPlanAndStateFlags(pushCmd)
 
 	pushCmd.Flags().BoolVarP(&uber, "uber", "u", false, "Build an uber package containing all dependencies")
 }

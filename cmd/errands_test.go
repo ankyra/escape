@@ -71,7 +71,6 @@ func (s *suite) Test_List_Errands_Local_missing_escape_plan(c *C) {
 }
 
 func (s *suite) Test_List_Errands_missing_deployment_name(c *C) {
-	readLocalErrands = false
 	cmd := RootCmd
 	buf := new(bytes.Buffer)
 	cmd.SetOutput(buf)
@@ -80,7 +79,6 @@ func (s *suite) Test_List_Errands_missing_deployment_name(c *C) {
 }
 
 func (s *suite) Test_List_Errands_missing_deployment(c *C) {
-	readLocalErrands = false
 	cmd := RootCmd
 	buf := new(bytes.Buffer)
 	cmd.SetOutput(buf)
@@ -124,7 +122,6 @@ func (s *suite) Test_Run_Errands_Local_missing_errand_name(c *C) {
 }
 
 func (s *suite) Test_Run_Errands_missing_deployment_name(c *C) {
-	readLocalErrands = false
 	cmd := RootCmd
 	buf := new(bytes.Buffer)
 	cmd.SetOutput(buf)

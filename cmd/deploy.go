@@ -25,25 +25,24 @@ var deployCmd = &cobra.Command{
 	Use:   "deploy",
 	Short: "Deploy the last built release using a local state file.",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		context.SetRootDeploymentName(deployment)
+		loadLocalEscapePlan := len(args) == 0
+		if err := ProcessFlagsForContext(loadLocalEscapePlan); err != nil {
+			return err
+		}
+
 		ctrl := controllers.DeployController{}
 		parsedExtraVars, err := ParseExtraVars(extraVars)
 		if err != nil {
 			return err
 		}
+
 		parsedExtraProviders, err := ParseExtraVars(extraProviders)
 		if err != nil {
 			return err
 		}
-		if len(args) == 0 {
-			if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
-				return err
-			}
+		if loadLocalEscapePlan {
 			return ctrl.Deploy(context, parsedExtraVars, parsedExtraProviders)
 		} else {
-			if err := context.LoadLocalState(state, environment); err != nil {
-				return err
-			}
 			for _, arg := range args {
 				if err := ctrl.FetchAndDeploy(context, arg, parsedExtraVars, parsedExtraProviders); err != nil {
 					return err
@@ -56,7 +55,7 @@ var deployCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(deployCmd)
-	setLocalPlanAndStateFlags(deployCmd)
+	setPlanAndStateFlags(deployCmd)
 	deployCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
 	deployCmd.Flags().StringArrayVarP(&extraProviders, "extra-providers", "p", []string{}, "Extra providers (format: provider=deployment, provider=@deployment.txt, @values.json)")
 }

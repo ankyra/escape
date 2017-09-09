@@ -25,7 +25,7 @@ var buildCmd = &cobra.Command{
 	Use:   "build",
 	Short: "Build the Escape plan using a local state file.",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
+		if err := ProcessFlagsForContext(true); err != nil {
 			return err
 		}
 		parsedExtraVars, err := ParseExtraVars(extraVars)
@@ -42,7 +42,7 @@ var buildCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(buildCmd)
-	setLocalPlanAndStateFlags(buildCmd)
+	setPlanAndStateFlags(buildCmd)
 	buildCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
 	buildCmd.Flags().StringArrayVarP(&extraProviders, "extra-providers", "p", []string{}, "Extra providers (format: provider=deployment, provider=@deployment.txt, @values.json)")
 }

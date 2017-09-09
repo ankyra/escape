@@ -25,15 +25,14 @@ var smokeCmd = &cobra.Command{
 	Use:   "smoke",
 	Short: "Run smoke tests using a local state file.",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
+		if err := ProcessFlagsForContext(true); err != nil {
 			return err
 		}
-		context.SetRootDeploymentName(deployment)
 		return controllers.SmokeController{}.Smoke(context)
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(smokeCmd)
-	setLocalPlanAndStateFlags(smokeCmd)
+	setPlanAndStateFlags(smokeCmd)
 }

@@ -38,21 +38,17 @@ var errandsCmd = &cobra.Command{
 }
 
 func ListLocalErrands(state, environment, escapePlanLocation string) error {
-	if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
+	if err := ProcessFlagsForContext(true); err != nil {
 		return err
 	}
 	return controllers.ErrandsController{}.List(context)
 }
 
 func ListDeployedErrands(state, environment, deployment string) error {
-	if environment == "" {
-		return fmt.Errorf("Missing 'environment'")
+	if err := ProcessFlagsForContext(false); err != nil {
+		return err
 	}
-	context.SetRootDeploymentName(deployment)
 	if deployment != "" {
-		if err := context.LoadLocalState(state, environment); err != nil {
-			return err
-		}
 		deplState, exists := context.GetEnvironmentState().Deployments[deployment]
 		if !exists {
 			return fmt.Errorf("The deployment '%s' could not be found in environment '%s'", deployment, environment)
@@ -121,7 +117,7 @@ func RunDeployedErrand(deployment, errand string, parsedExtraVars map[string]str
 }
 
 func RunLocalErrand(state, environment, escapePlanLocation, errand string, parsedExtraVars map[string]string) error {
-	if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
+	if err := ProcessFlagsForContext(true); err != nil {
 		return err
 	}
 	return controllers.ErrandsController{}.Run(context, errand, parsedExtraVars)
@@ -131,10 +127,10 @@ func init() {
 	RootCmd.AddCommand(errandsCmd)
 	errandsCmd.AddCommand(errandsListCmd)
 	errandsCmd.AddCommand(errandsRunCmd)
-	setLocalPlanAndStateFlags(errandsListCmd)
+	setPlanAndStateFlags(errandsListCmd)
 	errandsListCmd.Flags().BoolVarP(&readLocalErrands, "local", "", false, "Read errands from Escape plan instead of deployment")
 
-	setLocalPlanAndStateFlags(errandsRunCmd)
+	setPlanAndStateFlags(errandsRunCmd)
 	errandsRunCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
 	errandsRunCmd.Flags().BoolVarP(&readLocalErrands, "local", "", false, "Read errands from Escape plan instead of deployment")
 }

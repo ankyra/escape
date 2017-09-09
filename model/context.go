@@ -206,7 +206,14 @@ func (c *Context) LoadEscapePlan(cfgFile string) error {
 
 func (c *Context) CompileEscapePlan() error {
 	c.PushLogSection("Compile")
-	metadata, err := compiler.Compile(c.EscapePlan, c.GetRegistry(), c.GetEscapeConfig().GetCurrentTarget().GetProject(), c.GetDependencyMetadata, c.QueryReleaseMetadata, c.Logger)
+	metadata, err := compiler.Compile(
+		c.EscapePlan,
+		c.GetRegistry(),
+		c.GetEscapeConfig().GetCurrentTarget().GetProject(),
+		c.GetDependencyMetadata,
+		c.QueryReleaseMetadata,
+		c.Logger,
+	)
 	if err != nil {
 		return err
 	}
@@ -217,6 +224,18 @@ func (c *Context) CompileEscapePlan() error {
 
 func (c *Context) LoadLocalState(cfgFile, environment string) error {
 	envState, err := state.NewLocalStateProvider(cfgFile).Load("", environment)
+	if err != nil {
+		return err
+	}
+	if envState == nil {
+		return errors.New("Empty environment state")
+	}
+	c.EnvironmentState = envState
+	return nil
+}
+
+func (c *Context) LoadRemoteState(project, environment string) error {
+	envState, err := state.NewRemoteStateProvider().Load(project, environment)
 	if err != nil {
 		return err
 	}

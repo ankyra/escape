@@ -73,12 +73,10 @@ func (d *DependencyConfig) AddVariableMapping(scopes []string, id, key string) {
 	}
 }
 
-func (d *DependencyConfig) InScope(scopes ...string) bool {
+func (d *DependencyConfig) InScope(scope string) bool {
 	for _, s := range d.Scopes {
-		for _, scope := range scopes {
-			if s == scope {
-				return true
-			}
+		if s == scope {
+			return true
 		}
 	}
 	return false

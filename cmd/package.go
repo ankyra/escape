@@ -27,17 +27,16 @@ var packageCmd = &cobra.Command{
 	Use:   "package",
 	Short: "Create a package",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
+		if err := ProcessFlagsForContext(true); err != nil {
 			return err
 		}
-		context.SetRootDeploymentName(deployment)
 		return controllers.PackageController{}.Package(context, force)
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(packageCmd)
-	setLocalPlanAndStateFlags(packageCmd)
+	setPlanAndStateFlags(packageCmd)
 
 	packageCmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite output file if it exists")
 	packageCmd.Flags().BoolVarP(&uber, "uber", "u", false, "Build an uber package containing all dependencies")

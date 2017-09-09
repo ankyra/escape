@@ -19,36 +19,80 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/spf13/cobra"
 	"io/ioutil"
 	"strings"
+
+	"github.com/spf13/cobra"
 )
 
 var state, environment, deployment, escapePlanLocation string
+var remoteState bool
+
+func ProcessFlagsForContext(loadLocalEscapePlan bool) error {
+	if environment == "" {
+		return fmt.Errorf("Missing 'environment'")
+	}
+	if remoteState {
+		if err := context.LoadRemoteState(state, environment); err != nil {
+			return err
+		}
+	} else {
+		if err := context.LoadLocalState(state, environment); err != nil {
+			return err
+		}
+	}
+	if loadLocalEscapePlan {
+		if err := context.LoadEscapePlan(escapePlanLocation); err != nil {
+			return err
+		}
+		if err := context.CompileEscapePlan(); err != nil {
+			return err
+		}
+	}
+	context.SetRootDeploymentName(deployment)
+	return nil
+}
 
 func setEscapePlanLocationFlag(c *cobra.Command) {
-	c.Flags().StringVarP(&escapePlanLocation, "input", "i",
-		"escape.yml", "The location of the Escape plan.")
+	c.Flags().StringVarP(&escapePlanLocation,
+		"input", "i", "escape.yml",
+		"The location of the Escape plan.",
+	)
 }
+
 func setEscapeStateLocationFlag(c *cobra.Command) {
-	c.Flags().StringVarP(&state, "state", "s",
-		"escape_state.json", "Location of the Escape state file")
+	c.Flags().StringVarP(&state,
+		"state", "s", "escape_state.json",
+		"Location of the Escape state file (ignored when --remote-state is set)",
+	)
 }
+
 func setEscapeStateEnvironmentFlag(c *cobra.Command) {
-	c.Flags().StringVarP(&environment, "environment", "e",
-		"dev", "The logical environment to target")
+	c.Flags().StringVarP(&environment,
+		"environment", "e", "dev",
+		"The logical environment to target",
+	)
 }
 
 func setEscapeDeploymentFlag(c *cobra.Command) {
-	c.Flags().StringVarP(&deployment, "deployment", "d",
-		"", "Deployment name (default \"<release name>\")")
+	c.Flags().StringVarP(&deployment,
+		"deployment", "d", "",
+		"Deployment name (default \"<release name>\")",
+	)
 }
 
-func setLocalPlanAndStateFlags(c *cobra.Command) {
+func setEscapeRemoteStateFlag(c *cobra.Command) {
+	c.Flags().BoolVarP(&remoteState,
+		"remote-state", "r", false,
+		"Use remote state.")
+}
+
+func setPlanAndStateFlags(c *cobra.Command) {
 	setEscapePlanLocationFlag(c)
 	setEscapeStateLocationFlag(c)
 	setEscapeStateEnvironmentFlag(c)
 	setEscapeDeploymentFlag(c)
+	setEscapeRemoteStateFlag(c)
 }
 
 func ParseExtraVars(extraVars []string) (result map[string]string, err error) {

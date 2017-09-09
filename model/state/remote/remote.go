@@ -14,25 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cmd
+package remote
 
 import (
-	"github.com/ankyra/escape-client/controllers"
-	"github.com/spf13/cobra"
+	"fmt"
+
+	. "github.com/ankyra/escape-core/state"
 )
 
-var testCmd = &cobra.Command{
-	Use:   "test",
-	Short: "Run tests using a local state file.",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := ProcessFlagsForContext(true); err != nil {
-			return err
-		}
-		return controllers.TestController{}.Test(context)
-	},
+type remoteStateProvider struct {
 }
 
-func init() {
-	RootCmd.AddCommand(testCmd)
-	setPlanAndStateFlags(testCmd)
+func NewRemoteStateProvider() *remoteStateProvider {
+	return &remoteStateProvider{}
+}
+
+func (l *remoteStateProvider) Load(project, env string) (*EnvironmentState, error) {
+	return nil, fmt.Errorf("Not implemented")
+}
+
+func (l *remoteStateProvider) Save(depl *DeploymentState) error {
+	return fmt.Errorf("Not implemented")
 }

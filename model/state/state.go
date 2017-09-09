@@ -18,6 +18,7 @@ package state
 
 import (
 	"github.com/ankyra/escape-client/model/state/local"
+	"github.com/ankyra/escape-client/model/state/remote"
 	"github.com/ankyra/escape-core/state"
 )
 
@@ -28,4 +29,8 @@ type StateProvider interface {
 
 func NewLocalStateProvider(file string) StateProvider {
 	return local.NewLocalStateProvider(file)
+}
+
+func NewRemoteStateProvider() StateProvider {
+	return remote.NewRemoteStateProvider()
 }

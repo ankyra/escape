@@ -27,10 +27,9 @@ var releaseCmd = &cobra.Command{
 	Use:   "release",
 	Short: "Release (build, test, package, push)",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := context.InitFromLocalEscapePlanAndState(state, environment, escapePlanLocation); err != nil {
+		if err := ProcessFlagsForContext(true); err != nil {
 			return err
 		}
-		context.SetRootDeploymentName(deployment)
 		parsedExtraVars, err := ParseExtraVars(extraVars)
 		if err != nil {
 			return err
@@ -46,7 +45,7 @@ var releaseCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(releaseCmd)
-	setLocalPlanAndStateFlags(releaseCmd)
+	setPlanAndStateFlags(releaseCmd)
 
 	releaseCmd.Flags().BoolVarP(&uber, "uber", "u", false, "Build an uber package containing all dependencies")
 	releaseCmd.Flags().BoolVarP(&skipBuild, "skip-build", "", false, "Skip build")
