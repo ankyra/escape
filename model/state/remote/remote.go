@@ -58,6 +58,23 @@ func (r *remoteStateProvider) Load(project, env string) (*EnvironmentState, erro
 	return &result, prjState.ValidateAndFix()
 }
 
-func (l *remoteStateProvider) Save(depl *DeploymentState) error {
-	return fmt.Errorf("Saving environment state not implemented")
+func (r *remoteStateProvider) Save(depl *DeploymentState) error {
+	project := depl.GetEnvironmentState().Project.Name
+	env := depl.GetEnvironmentState().Name
+	rootDeploymentName := depl.GetRootDeploymentName()
+	url := r.endpoints.UpdateDeploymentState(project, env, rootDeploymentName)
+	data := map[string]interface{}{
+		"path":  depl.GetDependencyPath(),
+		"state": depl,
+	}
+	resp, err := r.client.PUT_json_with_authentication(url, data)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode == 401 {
+		return fmt.Errorf("Unauthorized")
+	} else if resp.StatusCode != 200 {
+		return fmt.Errorf("Couldn't update deployment state: %s", resp.Status)
+	}
+	return nil
 }

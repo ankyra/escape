@@ -31,13 +31,27 @@ func (s *suite) SetUpTest(c *C) {
 	p, err := NewProjectStateFromFile("prj", "testdata/project.json", nil)
 	c.Assert(err, IsNil)
 	env := p.GetEnvironmentStateOrMakeNew("dev")
+
 	depl = env.GetOrCreateDeploymentState("archive-release")
 	fullDepl = env.GetOrCreateDeploymentState("archive-full")
+
 	dep := env.GetOrCreateDeploymentState("archive-release-with-deps")
 	deplWithDeps = dep.GetDeploymentOrMakeNew("deploy", "archive-release")
 
 	dep = env.GetOrCreateDeploymentState("archive-release-deployed-deps")
 	deployedDepsDepl = dep.GetDeploymentOrMakeNew("build", "archive-release")
+}
+
+func (s *suite) Test_GetRootDeploymentName(c *C) {
+	c.Assert(depl.GetRootDeploymentName(), Equals, "archive-release")
+	c.Assert(fullDepl.GetRootDeploymentName(), Equals, "archive-full")
+	c.Assert(deplWithDeps.GetRootDeploymentName(), Equals, "archive-release-with-deps")
+}
+
+func (s *suite) Test_GetDependencyPath(c *C) {
+	c.Assert(depl.GetDependencyPath(), Equals, "archive-release")
+	c.Assert(fullDepl.GetDependencyPath(), Equals, "archive-full")
+	c.Assert(deplWithDeps.GetDependencyPath(), Equals, "archive-release-with-deps:archive-release")
 }
 
 func (s *suite) Test_GetDeploymentOrMakeNew(c *C) {

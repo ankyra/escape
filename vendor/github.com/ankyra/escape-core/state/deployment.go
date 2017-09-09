@@ -19,6 +19,8 @@ package state
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	"github.com/ankyra/escape-core"
 )
 
@@ -44,6 +46,30 @@ func NewDeploymentState(env *EnvironmentState, name, release string) *Deployment
 
 func (d *DeploymentState) GetName() string {
 	return d.Name
+}
+
+func (d *DeploymentState) GetRootDeploymentName() string {
+	prev := d
+	p := prev
+	for p != nil {
+		prev = p
+		p = p.parent
+	}
+	return prev.Name
+}
+
+func (d *DeploymentState) GetDependencyPath() string {
+	result := []string{}
+	p := d
+	for p != nil {
+		result = append(result, p.Name)
+		p = p.parent
+	}
+	for i := len(result)/2 - 1; i >= 0; i-- {
+		opp := len(result) - 1 - i
+		result[i], result[opp] = result[opp], result[i]
+	}
+	return strings.Join(result, ":")
 }
 
 func (d *DeploymentState) GetReleaseId(stage string) string {

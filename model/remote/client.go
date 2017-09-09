@@ -100,6 +100,20 @@ func (c *RegistryClient) POST_file_with_authentication(url, path string) (*http.
 	return c.GetHTTPClient().Do(req)
 }
 
+func (c *RegistryClient) PUT_json_with_authentication(url string, data interface{}) (*http.Response, error) {
+	payload, err := json.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest("PUT", url, bytes.NewReader(payload))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("X-Escape-Token", c.EscapeToken)
+	return c.GetHTTPClient().Do(req)
+}
+
 func (c *RegistryClient) GET_with_authentication(url string) (*http.Response, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
