@@ -169,21 +169,31 @@ func addToEnvironmentWithKeyPrefix(env []string, values map[string]interface{}, 
 	return env
 }
 
+func (e *environmentBuilder) GetEscapeEnvironmentVariables() map[string]interface{} {
+	return map[string]interface{}{
+		"ESCAPE_PLATFORM":  runtime.GOOS,
+		"ESCAPE_ARCH":      runtime.GOARCH,
+		"PYTHONUNBUFFERED": "1",
+	}
+}
+
 func (e *environmentBuilder) MergeInputsWithOsEnvironment(ctx RunnerContext) []string {
 	result := e.GetEnviron()
-	result = append(result, "PYTHONUNBUFFERED=1")
-	result = append(result, "ESCAPE_PLATFORM="+runtime.GOOS)
-	result = append(result, "ESCAPE_ARCH="+runtime.GOARCH)
 	inputs := ctx.GetBuildInputs()
-	return addToEnvironmentWithKeyPrefix(result, inputs, "INPUT_")
+	escapeEnv := e.GetEscapeEnvironmentVariables()
+	result = addToEnvironmentWithKeyPrefix(result, inputs, "INPUT_")
+	result = addToEnvironmentWithKeyPrefix(result, escapeEnv, "")
+	return result
 }
 
 func (e *environmentBuilder) MergeInputsAndOutputsWithOsEnvironment(ctx RunnerContext) []string {
 	result := e.GetEnviron()
 	inputs := ctx.GetBuildInputs()
 	outputs := ctx.GetBuildOutputs()
+	escapeEnv := e.GetEscapeEnvironmentVariables()
 	result = addToEnvironmentWithKeyPrefix(result, inputs, "INPUT_")
 	result = addToEnvironmentWithKeyPrefix(result, outputs, "OUTPUT_")
+	result = addToEnvironmentWithKeyPrefix(result, escapeEnv, "")
 	return result
 }
 
