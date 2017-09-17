@@ -19,6 +19,7 @@ package runners
 import (
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/ankyra/escape-client/util"
@@ -170,6 +171,9 @@ func addToEnvironmentWithKeyPrefix(env []string, values map[string]interface{}, 
 
 func (e *environmentBuilder) MergeInputsWithOsEnvironment(ctx RunnerContext) []string {
 	result := e.GetEnviron()
+	result = append(result, "PYTHONUNBUFFERED=1")
+	result = append(result, "ESCAPE_PLATFORM="+runtime.GOOS)
+	result = append(result, "ESCAPE_ARCH="+runtime.GOARCH)
 	inputs := ctx.GetBuildInputs()
 	return addToEnvironmentWithKeyPrefix(result, inputs, "INPUT_")
 }
