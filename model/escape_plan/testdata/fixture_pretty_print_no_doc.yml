@@ -53,6 +53,7 @@ errands:
 downloads:
 - arch: ""
   dest: test
+  if_not_exists: []
   overwrite: false
   platform: ""
   scopes: []

@@ -25,6 +25,7 @@ type DownloadConfig struct {
 	URL                   string   `json:"url"`
 	Dest                  string   `json:"dest"`
 	OverwriteExistingDest bool     `json:"overwrite" yaml:"overwrite"`
+	IfNotExists           []string `json:"if_not_exists" yaml:"if_not_exists"`
 	Unpack                bool     `json:"unpack"`
 	Platform              string   `json:"platform"`
 	Arch                  string   `json:"arch"`

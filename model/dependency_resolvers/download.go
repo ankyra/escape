@@ -54,6 +54,25 @@ func DoDownload(download *core.DownloadConfig) error {
 			return nil
 		}
 	}
+	for _, globPattern := range download.IfNotExists {
+		paths, err := filepath.Glob(globPattern)
+		if err != nil {
+			fmt.Println("Warning: ignoring pattern error: " + err.Error())
+			continue
+		}
+		if paths == nil {
+			continue
+		}
+		for _, path := range paths {
+			if util.PathExists(path) {
+				downloadLogger.Log("download.skip_overwrite", map[string]string{
+					"URL":  download.URL,
+					"dest": path,
+				})
+				return nil
+			}
+		}
+	}
 	if download.Platform != "" && download.Platform != runtime.GOOS {
 		downloadLogger.Log("download.skip_platform", map[string]string{
 			"URL":      download.URL,
