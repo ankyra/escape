@@ -103,8 +103,9 @@ func (s *testSuite) Test_MergeInputsWithOsEnvironment(c *C) {
 	unit := NewEnvironmentBuilderWithEnv([]string{"test=test"})
 	c.Assert(unit.GetEnviron(), DeepEquals, []string{"test=test"})
 	env := unit.MergeInputsWithOsEnvironment(runCtx)
-	c.Assert(env, HasLen, 2)
-	c.Assert(env, DeepEquals, []string{"test=test", "INPUT_input_variable=yo"})
+	c.Assert(env, HasLen, 5)
+	c.Assert(env, HasItem, "test=test")
+	c.Assert(env, HasItem, "INPUT_input_variable=yo")
 }
 
 func (s *testSuite) Test_MergeInputsAndOutputsWithOsEnvironment(c *C) {
@@ -117,8 +118,10 @@ func (s *testSuite) Test_MergeInputsAndOutputsWithOsEnvironment(c *C) {
 	unit := NewEnvironmentBuilderWithEnv([]string{"test=test"})
 	c.Assert(unit.GetEnviron(), DeepEquals, []string{"test=test"})
 	env := unit.MergeInputsAndOutputsWithOsEnvironment(runCtx)
-	c.Assert(env, HasLen, 3)
-	c.Assert(env, DeepEquals, []string{"test=test", "INPUT_input_variable=yo", "OUTPUT_output_variable=yo"})
+	c.Assert(env, HasLen, 6)
+	c.Assert(env, HasItem, "test=test")
+	c.Assert(env, HasItem, "INPUT_input_variable=yo")
+	c.Assert(env, HasItem, "OUTPUT_output_variable=yo")
 }
 
 func (s *testSuite) Test_GetOutputs(c *C) {
@@ -181,4 +184,33 @@ func (s *testSuite) Test_AddToEnvironmentWithKeyPrefix_unsupported_type(c *C) {
 	}
 	c.Assert(func() { addToEnvironmentWithKeyPrefix(nil, values, "PREFIX_") }, PanicMatches,
 		`Type '.*' not supported \(key: 'test'\). This is a bug in Escape.`)
+}
+
+type hasItemChecker struct{}
+
+var HasItem = &hasItemChecker{}
+
+func (*hasItemChecker) Info() *CheckerInfo {
+	return &CheckerInfo{Name: "HasItem", Params: []string{"obtained", "expected to have item"}}
+}
+func (*hasItemChecker) Check(params []interface{}, names []string) (bool, string) {
+	obtained := params[0]
+	expectedItem := params[1]
+	switch obtained.(type) {
+	case []interface{}:
+		for _, v := range obtained.([]interface{}) {
+			if v == expectedItem {
+				return true, ""
+			}
+		}
+	case []string:
+		for _, v := range obtained.([]string) {
+			if v == expectedItem {
+				return true, ""
+			}
+		}
+	default:
+		return false, "Unexpected type."
+	}
+	return false, "Item not found"
 }
