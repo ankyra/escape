@@ -92,7 +92,13 @@ func DoDownload(download *core.DownloadConfig) error {
 	dir, _ := filepath.Split(download.Dest)
 	if dir != "" {
 		if err := util.MkdirRecursively(dir); err != nil {
-			return fmt.Errorf("Failed to make directory '%s' for zip file '%s': %s", dir, download.Dest, err.Error())
+			return fmt.Errorf("Failed to make directory '%s' for file '%s': %s", dir, download.Dest, err.Error())
+		}
+	} else {
+		var err error
+		dir, err = os.Getwd()
+		if err != nil {
+			return fmt.Errorf("Couldn't get working directory: %s", err.Error())
 		}
 	}
 	out, err := os.Create(download.Dest)
