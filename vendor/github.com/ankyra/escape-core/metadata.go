@@ -69,6 +69,7 @@ type ReleaseMetadata struct {
 	Version                string            `json:"version"`
 
 	Consumes    []*ConsumerConfig     `json:"consumes"`
+	Downloads   []*DownloadConfig     `json:"downloads"`
 	Depends     []*DependencyConfig   `json:"depends"`
 	Errands     map[string]*Errand    `json:"errands"`
 	Extends     []*ExtensionConfig    `json:"extends"`
@@ -174,6 +175,11 @@ func validate(m *ReleaseMetadata) error {
 	}
 	for _, c := range m.Consumes {
 		if err := c.ValidateAndFix(); err != nil {
+			return err
+		}
+	}
+	for _, d := range m.Downloads {
+		if err := d.ValidateAndFix(); err != nil {
 			return err
 		}
 	}

@@ -11,6 +11,11 @@ build_consumes:
 deploy_consumes:
 - deploy_provider1
 
+downloads:
+- url: http://www.example.com/
+  dest: test
+  unpack: true
+
 extends:
 - extends1
 

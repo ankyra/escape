@@ -45,37 +45,21 @@ Slice a list. Usually accessed implicitly using slice syntax (eg. `list[0:5]`)
 
 # Functions acting on strings
 
-## lower(v :: string)
-
-Returns a copy of the string v with all Unicode characters mapped to their lower case
-
-## base64_decode()
-
-Decode string from base64
-
 ## trim()
 
 Returns a slice of the string s, with all leading and trailing white space removed, as defined by Unicode. 
 
-## read_file()
+## track_version()
 
-Read the contents of a file
+Track version
 
-## track_minor_version()
+## lower(v :: string)
 
-Track minor version
-
-## track_patch_version()
-
-Track patch version
+Returns a copy of the string v with all Unicode characters mapped to their lower case
 
 ## title(v :: string)
 
 Returns a copy of the string v with all Unicode characters mapped to their title case
-
-## split(sep :: string)
-
-Split slices s into all substrings separated by sep and returns a slice of the substrings between those separators. If sep is empty, Split splits after each UTF-8 sequence.
 
 ## replace(old :: string, new :: string, n :: integer)
 
@@ -85,21 +69,37 @@ Replace returns a copy of the string s with the first n non-overlapping instance
 
 Encode string to base64
 
+## read_file()
+
+Read the contents of a file
+
+## track_patch_version()
+
+Track patch version
+
 ## concat(v1 :: string, v2 :: string, ...)
 
 Concatate stringable arguments
 
-## upper(v :: string)
+## base64_decode()
 
-Returns a copy of the string v with all Unicode characters mapped to their upper case
+Decode string from base64
 
 ## track_major_version()
 
 Track major version
 
-## track_version()
+## upper(v :: string)
 
-Track version
+Returns a copy of the string v with all Unicode characters mapped to their upper case
+
+## split(sep :: string)
+
+Split slices s into all substrings separated by sep and returns a slice of the substrings between those separators. If sep is empty, Split splits after each UTF-8 sequence.
+
+## track_minor_version()
+
+Track minor version
 
 
 # Functions acting on integers

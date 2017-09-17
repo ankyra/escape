@@ -61,6 +61,7 @@ var templateMap = map[string]string{
 	"templates":        listValTpl,
 	"build_templates":  listValTpl,
 	"deploy_templates": listValTpl,
+	"downloads":        listValTpl,
 	"metadata":         mapValTpl,
 	"errands":          mapValTpl,
 }
@@ -107,7 +108,7 @@ func (e *prettyPrinter) Print(plan *EscapePlan) []byte {
 		"name", "version", "description", "logo", "extends", "depends",
 		"consumes", "build_consumes", "deploy_consumes",
 		"provides", "inputs", "build_inputs", "deploy_inputs",
-		"outputs", "metadata", "includes", "errands",
+		"outputs", "metadata", "includes", "errands", "downloads",
 		"templates", "build_templates", "deploy_templates", "path",
 		"pre_build", "build", "post_build", "test",
 		"pre_deploy", "deploy", "post_deploy", "smoke",

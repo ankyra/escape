@@ -39,6 +39,7 @@ type EscapePlan struct {
 	DeployTemplates []interface{}          `yaml:"deploy_templates,omitempty"`
 	Destroy         string                 `yaml:"destroy,omitempty"`
 	Description     string                 `yaml:"description,omitempty"`
+	Downloads       []*core.DownloadConfig `yaml:"downloads,omitempty"`
 	Extends         []string               `yaml:"extends,omitempty"`
 	Errands         map[string]interface{} `yaml:"errands,omitempty"`
 	Includes        []string               `yaml:"includes,omitempty"`

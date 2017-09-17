@@ -50,6 +50,10 @@ errands:
     - input1
     - input2
     script: path/to/script2.sh
+downloads:
+- dest: test
+  unpack: true
+  url: http://www.example.com/
 templates:
 - template.yml.tpl
 build_templates:

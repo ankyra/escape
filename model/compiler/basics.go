@@ -42,5 +42,6 @@ func compileBasicFields(ctx *CompilerContext) error {
 	ctx.Metadata.Description = strings.TrimSpace(ctx.Plan.Description)
 	ctx.Metadata.SetProvides(ctx.Plan.Provides)
 	ctx.Metadata.Project = project
+	ctx.Metadata.Downloads = ctx.Plan.Downloads
 	return nil
 }
