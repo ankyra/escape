@@ -52,6 +52,34 @@ var logMessages = map[string]map[string]string{
 		"msg":   "Started packaging.",
 		"level": "info",
 	},
+	"download.finished": map[string]string{
+		"msg":   "Finished downloading {{ .URL }}",
+		"level": "success",
+	},
+	"download.start": map[string]string{
+		"msg":   "Downloading {{ .URL }} to {{ .dest }}",
+		"level": "info",
+	},
+	"download.skip_arch": map[string]string{
+		"msg":   "Skipping {{ .URL }}, because download requires '{{ .arch }}' architecture (have: '{{ .actual }}')",
+		"level": "debug",
+	},
+	"download.skip_overwrite": map[string]string{
+		"msg":   "Skipping {{ .URL }}, because destination file '{{ .dest }}' already exists.",
+		"level": "success",
+	},
+	"download.skip_platform": map[string]string{
+		"msg":   "Skipping {{ .URL }}, because download requires '{{ .platform }}' platform (have: '{{ .actual}}')",
+		"level": "debug",
+	},
+	"download.unpack": map[string]string{
+		"msg":   "Unpacking {{ .dest }}",
+		"level": "info",
+	},
+	"download.unpack_finished": map[string]string{
+		"msg":   "Finished unpacking {{ .file }}",
+		"level": "success",
+	},
 	"build.build_dependency": map[string]string{
 		"msg":   "Building dependency {{ .dependency }}.",
 		"level": "info",

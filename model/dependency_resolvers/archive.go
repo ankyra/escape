@@ -20,12 +20,14 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"errors"
-	"github.com/ankyra/escape-client/model/paths"
-	"github.com/ankyra/escape-client/util"
-	core "github.com/ankyra/escape-core"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+
+	"github.com/ankyra/escape-client/model/paths"
+	"github.com/ankyra/escape-client/util"
+	core "github.com/ankyra/escape-core"
 )
 
 func FromLocalArchive(path *paths.Path, dep *core.Dependency) (bool, error) {
@@ -39,13 +41,13 @@ func FromLocalArchive(path *paths.Path, dep *core.Dependency) (bool, error) {
 	}
 	fp, err := os.Open(localArchive)
 	if err != nil {
-		return false, errors.New("Couldn't open archive " + localArchive + ": " + err.Error())
+		return false, fmt.Errorf("Couldn't open archive '%s': %s", localArchive, err.Error())
 	}
 	defer fp.Close()
 
 	gzf, err := gzip.NewReader(fp)
 	if err != nil {
-		return false, errors.New("Couldn't read gzip archive " + localArchive + ": " + err.Error())
+		return false, fmt.Errorf("Couldn't read gzip archive '%s': %s", localArchive, err.Error())
 	}
 
 	tarReader := tar.NewReader(gzf)
@@ -60,7 +62,7 @@ func FromLocalArchive(path *paths.Path, dep *core.Dependency) (bool, error) {
 	}
 	err = UnpackTarReader(tarReader, targetDir)
 	if err != nil {
-		return false, errors.New("Failed to unpack " + localArchive + ": " + err.Error())
+		return false, fmt.Errorf("Failed to unpack '%s': %s", localArchive, err.Error())
 	}
 	unpackedDir := filepath.Join(targetDir, dep.GetReleaseId())
 	if !util.PathExists(unpackedDir) {
@@ -90,11 +92,11 @@ func UnpackTarReader(tarReader *tar.Reader, targetDir string) error {
 		case tar.TypeReg, tar.TypeRegA:
 			dir, _ := filepath.Split(name)
 			if err := util.MkdirRecursively(dir); err != nil {
-				return errors.New("Failed to make directory " + dir + ": " + err.Error())
+				return fmt.Errorf("Failed to make directory '%s': %s", dir, err.Error())
 			}
 			out, err := os.Create(name)
 			if err != nil {
-				return errors.New("Couldn't create file: " + name + ": " + err.Error())
+				return fmt.Errorf("Couldn't create file '%s': %s", name, err.Error())
 			}
 			if header.Size != 0 {
 				_, err = io.Copy(out, tarReader)

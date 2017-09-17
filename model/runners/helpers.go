@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/ankyra/escape-client/model/dependency_resolvers"
 	"github.com/ankyra/escape-client/model/paths"
 	"github.com/ankyra/escape-client/util"
 	"github.com/ankyra/escape-core/state"
@@ -28,6 +29,7 @@ import (
 
 type ScriptStep struct {
 	ShouldBeDeployed        bool
+	ShouldDownload          bool
 	ModifiesOutputVariables bool
 	Stage                   string
 	Step                    string
@@ -40,6 +42,7 @@ type ScriptStep struct {
 func NewScriptStep(ctx RunnerContext, stage, step string, shouldBeDeployed bool) *ScriptStep {
 	return &ScriptStep{
 		ShouldBeDeployed:        shouldBeDeployed,
+		ShouldDownload:          false,
 		Stage:                   stage,
 		Step:                    step,
 		Inputs:                  nil,
@@ -70,6 +73,7 @@ func RunOrReportFailure(ctx RunnerContext, stage string, runner Runner, startCod
 func NewPreScriptStepRunner(stage, field string, startCode, errorCode state.StatusCode) Runner {
 	return NewRunner(func(ctx RunnerContext) error {
 		step := NewScriptStep(ctx, stage, field, false)
+		step.ShouldDownload = true
 		step.Inputs = NewEnvironmentBuilder().GetInputsForPreStep
 		step.Commit = preCommit
 		return RunOrReportFailure(ctx, stage, step, startCode, errorCode)
@@ -155,6 +159,9 @@ func (b *ScriptStep) Run(ctx RunnerContext) error {
 	if err != nil {
 		return err
 	}
+	if err := b.handleDownloads(ctx); err != nil {
+		return err
+	}
 	if b.ScriptPath != "" {
 		if err := b.runScript(ctx); err != nil {
 			return err
@@ -212,6 +219,14 @@ func (b *ScriptStep) getEnv(ctx RunnerContext) []string {
 		return NewEnvironmentBuilder().MergeInputsWithOsEnvironment(ctx)
 	}
 	return NewEnvironmentBuilder().MergeInputsAndOutputsWithOsEnvironment(ctx)
+}
+
+func (b *ScriptStep) handleDownloads(ctx RunnerContext) error {
+	if !b.ShouldDownload {
+		return nil
+	}
+	downloads := ctx.GetReleaseMetadata().GetDownloads(b.Stage)
+	return dependency_resolvers.DoDownloads(downloads, ctx.Logger())
 }
 
 func (b *ScriptStep) getCmd(ctx RunnerContext) ([]string, error) {

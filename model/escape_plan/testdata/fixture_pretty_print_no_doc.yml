@@ -51,7 +51,11 @@ errands:
     - input2
     script: path/to/script2.sh
 downloads:
-- dest: test
+- arch: ""
+  dest: test
+  overwrite: false
+  platform: ""
+  scopes: []
   unpack: true
   url: http://www.example.com/
 templates:

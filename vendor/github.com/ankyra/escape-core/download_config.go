@@ -22,20 +22,28 @@ import (
 )
 
 type DownloadConfig struct {
-	URL    string `json:"url"`
-	Dest   string `json:"dest"`
-	Unpack bool   `json:"unpack"`
+	URL                   string   `json:"url"`
+	Dest                  string   `json:"dest"`
+	OverwriteExistingDest bool     `json:"overwrite" yaml:"overwrite"`
+	Unpack                bool     `json:"unpack"`
+	Platform              string   `json:"platform"`
+	Arch                  string   `json:"arch"`
+	Scopes                []string `json:"scopes" yaml:"scopes"`
 }
 
 func NewDownloadConfig(url string) *DownloadConfig {
 	return &DownloadConfig{
-		URL: url,
+		URL:    url,
+		Scopes: []string{"build", "deploy"},
 	}
 }
 
 func (d *DownloadConfig) ValidateAndFix() error {
 	if d.URL == "" {
 		return fmt.Errorf("Missing URL in download config.")
+	}
+	if d.Dest == "" {
+		return fmt.Errorf("Missing 'dest' in download config for '%s'", d.URL)
 	}
 	parsed, err := url.Parse(d.URL)
 	if err != nil {
@@ -44,5 +52,17 @@ func (d *DownloadConfig) ValidateAndFix() error {
 	if parsed.Scheme == "" {
 		return fmt.Errorf("Missing URL scheme in download config '%s'", d.URL)
 	}
+	if d.Scopes == nil || len(d.Scopes) == 0 {
+		d.Scopes = []string{"build", "deploy"}
+	}
 	return nil
+}
+
+func (d *DownloadConfig) InScope(scope string) bool {
+	for _, s := range d.Scopes {
+		if s == scope {
+			return true
+		}
+	}
+	return false
 }

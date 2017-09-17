@@ -296,6 +296,16 @@ func (m *ReleaseMetadata) GetConsumes(stage string) []string {
 	return result
 }
 
+func (m *ReleaseMetadata) GetDownloads(stage string) []*DownloadConfig {
+	result := []*DownloadConfig{}
+	for _, d := range m.Downloads {
+		if d.InScope(stage) {
+			result = append(result, d)
+		}
+	}
+	return result
+}
+
 func (m *ReleaseMetadata) GetErrands() map[string]*Errand {
 	result := map[string]*Errand{}
 	for key, val := range m.Errands {
