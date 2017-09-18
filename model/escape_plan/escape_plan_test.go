@@ -17,10 +17,10 @@ limitations under the License.
 package escape_plan
 
 import (
-	. "gopkg.in/check.v1"
 	"io/ioutil"
-	"os"
 	"testing"
+
+	. "gopkg.in/check.v1"
 )
 
 type planSuite struct{}
@@ -33,14 +33,6 @@ func (s *planSuite) Test_LoadConfig_fails_if_not_exists(c *C) {
 	unit := NewEscapePlan()
 	err := unit.LoadConfig("testdata/doesnt_exist.yml")
 	c.Assert(err.Error(), Equals, "Escape plan 'testdata/doesnt_exist.yml' was not found. Use 'escape plan init' to create it")
-}
-
-func (s *planSuite) Test_LoadConfig_fails_if_read_fails(c *C) {
-	unit := NewEscapePlan()
-	os.Chmod("testdata/cant_read.yml", 0)
-	err := unit.LoadConfig("testdata/cant_read.yml")
-	c.Assert(err.Error(), Equals, "Couldn't read Escape plan 'testdata/cant_read.yml': permission denied")
-	os.Chmod("testdata/cant_read.yml", 0666)
 }
 
 func (s *planSuite) Test_LoadConfig_fails_if_invalid_yaml(c *C) {

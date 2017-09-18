@@ -8,7 +8,15 @@ rm -rf vendor/github.com/ankyra/escape-core
 cp -r deps/_/escape-core/ vendor/github.com/ankyra/escape-core
 rm -rf vendor/github.com/ankyra/escape-core/vendor/
 
+docker rm src || true
+docker create -v /go/src/github.com/ankyra/ --name src golang:1.9.0 /bin/true
+docker cp "$PWD" src:/go/src/github.com/ankyra/tmp
+docker run --rm --volumes-from src \
+    -w /go/src/github.com/ankyra/ \
+    golang:1.9.0 mv tmp escape-client
 docker run --rm \
-    -v "$PWD":/go/src/github.com/ankyra/escape-client \
+    --volumes-from src \
     -w /go/src/github.com/ankyra/escape-client \
-    golang:1.9.0 bash -c "(useradd --uid $user_id builder || true) && su builder -p -c \"/usr/local/go/bin/go build -v -o escape && mkdir -p docs/cmd && /usr/local/go/bin/go run docs/generate_cmd_docs.go\""
+    golang:1.9.0 bash -c "go build -v -o escape && mkdir -p docs/cmd && go run docs/generate_cmd_docs.go"
+docker cp src:/go/src/github.com/ankyra/escape-client/escape escape
+docker rm src

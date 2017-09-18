@@ -18,8 +18,9 @@ package runners
 
 import (
 	"fmt"
-	. "gopkg.in/check.v1"
 	"os"
+
+	. "gopkg.in/check.v1"
 )
 
 func (s *testSuite) Test_NewScriptStep(c *C) {
@@ -143,13 +144,6 @@ func (s *testSuite) Test_ReadOutputsFromFile_empty_if_file_empty(c *C) {
 	outputs, err := readOutputsFromFile("testdata/emptyfile.json")
 	c.Assert(err, IsNil)
 	c.Assert(outputs, HasLen, 0)
-}
-
-func (s *testSuite) Test_ReadOutputsFromFile_fails_if_file_cant_be_read(c *C) {
-	os.Chmod("testdata/cantread.json", 0)
-	_, err := readOutputsFromFile("testdata/cantread.json")
-	c.Assert(err, Not(IsNil))
-	os.Chmod("testdata/cantread.json", 0644)
 }
 
 func (s *testSuite) Test_ReadOutputsFromFile_fails_if_invalid_json(c *C) {
