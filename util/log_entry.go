@@ -221,6 +221,10 @@ var logMessages = map[string]map[string]string{
 		"msg":   "Uploading release to the Escape server.",
 		"level": "info",
 	},
+	"converge": map[string]string{
+		"msg":   "Converging deployment of {{ .release }} for deployment {{ .deployment }}",
+		"level": "info",
+	},
 	"deploy.deploy_dependency": map[string]string{
 		"msg":   "Deploying dependency {{ .dependency }}.",
 		"level": "info",

@@ -23,7 +23,7 @@ import (
 
 var deployCmd = &cobra.Command{
 	Use:   "deploy",
-	Short: "Deploy the last built release using a local state file.",
+	Short: "Deploy a release unit.",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		loadLocalEscapePlan := len(args) == 0
 		if err := ProcessFlagsForContext(loadLocalEscapePlan); err != nil {
