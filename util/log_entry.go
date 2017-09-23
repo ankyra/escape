@@ -225,6 +225,10 @@ var logMessages = map[string]map[string]string{
 		"msg":   "Converging deployment of {{ .release }} for deployment {{ .deployment }}",
 		"level": "info",
 	},
+	"converge.skip_ok": map[string]string{
+		"msg":   "Skipping deployment {{ .deployment }}; already deployed (use --refresh to redeploy)",
+		"level": "info",
+	},
 	"deploy.deploy_dependency": map[string]string{
 		"msg":   "Deploying dependency {{ .dependency }}.",
 		"level": "info",

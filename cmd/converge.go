@@ -21,6 +21,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var refresh bool
+
 var convergeCmd = &cobra.Command{
 	Use:   "converge",
 	Short: "Bring the environment into its desired state",
@@ -28,11 +30,12 @@ var convergeCmd = &cobra.Command{
 		if err := ProcessFlagsForContext(false); err != nil {
 			return err
 		}
-		return controllers.ConvergeController{}.Converge(context)
+		return controllers.ConvergeController{}.Converge(context, refresh)
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(convergeCmd)
 	setPlanAndStateFlags(convergeCmd)
+	convergeCmd.Flags().BoolVarP(&refresh, "refresh", "", false, "Redeploy 'ok' deployments")
 }

@@ -25,26 +25,34 @@ import (
 
 type ConvergeController struct{}
 
-func (ConvergeController) Converge(context Context) error {
+func (ConvergeController) Converge(context Context, refresh bool) error {
 	context.PushLogSection("Converge")
 	dag, err := context.GetEnvironmentState().GetDeploymentStateDAG("deploy")
 	dag.Walk(func(d *state.DeploymentState) {
 		if err != nil {
 			return
 		}
-		err = ConvergeDeployment(context, d)
+		err = ConvergeDeployment(context, d, refresh)
 	})
 	context.PopLogSection()
 	return err
 }
 
-func ConvergeDeployment(context Context, depl *state.DeploymentState) error {
+func ConvergeDeployment(context Context, depl *state.DeploymentState, refresh bool) error {
 	if depl.Release == "" {
 		return fmt.Errorf("No release set for deployment '%s'", depl.Name)
 	}
 	stage := depl.GetStageOrCreateNew("deploy")
 	if stage.Version == "" {
-		return fmt.Errorf("No 'version' set for deployment of '%s' in deployment '%s'", depl.Release, depl.Name)
+		return fmt.Errorf("No 'version' set for deployment of '%s' in deployment '%s'",
+			depl.Release, depl.Name)
+	}
+	if !refresh && stage.Status.Code == state.OK {
+		context.Log("converge.skip_ok", map[string]string{
+			"deployment": depl.Name,
+			"release":    depl.Release + "-v" + stage.Version,
+		})
+		return nil
 	}
 	context.Log("converge", map[string]string{
 		"deployment": depl.Name,
