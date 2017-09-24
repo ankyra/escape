@@ -256,23 +256,31 @@ func (v *Variable) validateOneOfInterface(env *script.ScriptEnvironment, item in
 
 func (v *Variable) validateOneOfList(env *script.ScriptEnvironment, item interface{}, items []interface{}) (interface{}, error) {
 	for _, i := range items {
-		_, isString := i.(string)
-		if isString {
+		switch i.(type) {
+		case string:
 			pv, err := v.parseEvalAndGetValue(i.(string), env)
 			if err != nil {
 				return nil, fmt.Errorf("In items field of variable '%s': %s", v.Id, err.Error())
 			}
 			i = pv
-		}
-		if i == item {
-			return item, nil
+		case float64:
+			_, itemInt := item.(int)
+			if itemInt && int(i.(float64)) == item {
+				return item, nil
+			} else if i == item {
+				return item, nil
+			}
+		default:
+			if i == item {
+				return item, nil
+			}
 		}
 	}
 	oneOfString, err := json.Marshal(items)
 	if err != nil {
 		return nil, err
 	}
-	return nil, fmt.Errorf("Expecting one of %s for variable '%s'", oneOfString, v.Id)
+	return nil, fmt.Errorf("Expecting one of %s for variable '%s', got: %v (%T)", oneOfString, v.Id, item, item)
 }
 
 func (v *Variable) parseType() error {

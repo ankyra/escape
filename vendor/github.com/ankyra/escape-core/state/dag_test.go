@@ -102,7 +102,7 @@ func (s *suite) Test_GetDeploymentStateDAG(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(dag, HasLen, 2)
 
-	var eDag, dDag *DAGNode
+	var bDag, cDag, dDag, eDag *DAGNode
 	if dag[0].Node.Name == "deplD" {
 		dDag = dag[0]
 		eDag = dag[1]
@@ -113,13 +113,20 @@ func (s *suite) Test_GetDeploymentStateDAG(c *C) {
 	c.Assert(dDag.Node, DeepEquals, deplD)
 	c.Assert(dDag.AndThen, HasLen, 2)
 
-	c.Assert(dDag.AndThen[0].Node, DeepEquals, deplB)
-	c.Assert(dDag.AndThen[0].AndThen, HasLen, 1)
-	c.Assert(dDag.AndThen[0].AndThen[0].Node, DeepEquals, deplA)
+	if dDag.AndThen[0].Node.Name == "deplB" {
+		bDag = dDag.AndThen[0]
+		cDag = dDag.AndThen[1]
+	} else {
+		bDag = dDag.AndThen[1]
+		cDag = dDag.AndThen[0]
+	}
+	c.Assert(bDag.Node, DeepEquals, deplB)
+	c.Assert(bDag.AndThen, HasLen, 1)
+	c.Assert(bDag.AndThen[0].Node, DeepEquals, deplA)
 
-	c.Assert(dDag.AndThen[1].Node, DeepEquals, deplC)
-	c.Assert(dDag.AndThen[1].AndThen, HasLen, 1)
-	c.Assert(dDag.AndThen[1].AndThen[0].Node, DeepEquals, deplB)
+	c.Assert(cDag.Node, DeepEquals, deplC)
+	c.Assert(cDag.AndThen, HasLen, 1)
+	c.Assert(cDag.AndThen[0].Node, DeepEquals, deplB)
 
 	c.Assert(eDag.Node, DeepEquals, deplE)
 	c.Assert(eDag.AndThen, HasLen, 1)

@@ -232,7 +232,7 @@ func (s *variableSuite) Test_GetValue_OneOf_Variable_Script_fails(c *C) {
 	globalsDict := map[string]script.Script{}
 	env := script.NewScriptEnvironmentWithGlobals(globalsDict)
 	_, err = unit.GetValue(&variableCtx, env)
-	c.Assert(err.Error(), DeepEquals, "Expecting one of [\"valid\",\"also valid\"] for variable 'test'")
+	c.Assert(err.Error(), DeepEquals, "Expecting one of [\"valid\",\"also valid\"] for variable 'test', got: not valid")
 }
 
 func (s *variableSuite) Test_GetValue_OneOf_Variable_Fails(c *C) {
@@ -244,7 +244,7 @@ func (s *variableSuite) Test_GetValue_OneOf_Variable_Fails(c *C) {
 	}
 	val, err := unit.GetValue(&variableCtx, nil)
 	c.Assert(val, IsNil)
-	c.Assert(err.Error(), DeepEquals, "Expecting one of [\"valid\",\"also valid\"] for variable 'test'")
+	c.Assert(err.Error(), DeepEquals, "Expecting one of [\"valid\",\"also valid\"] for variable 'test', got: not valid")
 }
 
 func (s *variableSuite) Test_GetValue_OneOf_Variable_string(c *C) {
