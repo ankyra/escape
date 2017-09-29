@@ -62,10 +62,12 @@ func (r *remoteStateProvider) Save(depl *DeploymentState) error {
 	project := depl.GetEnvironmentState().Project.Name
 	env := depl.GetEnvironmentState().Name
 	rootDeploymentName := depl.GetRootDeploymentName()
+	rootDeploymentStage := depl.GetRootDeploymentStage()
 	url := r.endpoints.UpdateDeploymentState(project, env, rootDeploymentName)
 	data := map[string]interface{}{
-		"path":  depl.GetDependencyPath(),
-		"state": depl,
+		"path":       depl.GetDependencyPath(),
+		"state":      depl,
+		"root_stage": rootDeploymentStage,
 	}
 	resp, err := r.client.PUT_json_with_authentication(url, data)
 	if err != nil {

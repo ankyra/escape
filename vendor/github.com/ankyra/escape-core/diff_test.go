@@ -48,7 +48,6 @@ func (s *metadataSuite) Test_Diff_simple_types(c *C) {
 
 		changes := Diff(m1, m2)
 		c.Assert(changes, HasLen, 1, Commentf("Field %s", test[0]))
-		c.Assert(changes[0].Field, DeepEquals, test[0])
 		c.Assert(changes[0].ToString(), Equals, test[3], Commentf("Field %s", test[0]))
 	}
 }
@@ -100,7 +99,7 @@ func (s *metadataSuite) Test_Diff_Stages(c *C) {
 		"test": &ExecStage{Script: "test2.sh"},
 	}
 	testCases := [][]interface{}{
-		[]interface{}{oldDict, newDict, `Change Stages["test"] from 'test.sh' to 'test2.sh'`},
+		[]interface{}{oldDict, newDict, `Change Stages["test"].Script from 'test.sh' to 'test2.sh'`},
 		[]interface{}{emptyDict, newDict, `Add 'test' to Stages`},
 		[]interface{}{oldDict, emptyDict, `Remove 'test' from Stages`},
 	}
@@ -254,7 +253,7 @@ func (s *metadataSuite) Test_Diff_Slices(c *C) {
 
 		[]interface{}{"Provides", []string{"test"}, []string{}, `Remove 'test' from Provides`},
 		[]interface{}{"Provides", []string{}, []string{"test"}, `Add 'test' to Provides`},
-		[]interface{}{"Provides", []string{"test"}, []string{"kubernetes"}, `Change Provides[0] from 'test' to 'kubernetes'`},
+		[]interface{}{"Provides", []string{"test"}, []string{"kubernetes"}, `Change Provides[0].Name from 'test' to 'kubernetes'`},
 
 		[]interface{}{"Depends", []string{"test"}, []string{}, `Remove 'test' from Depends`},
 		[]interface{}{"Depends", []string{}, []string{"test"}, `Add 'test' to Depends`},
@@ -262,7 +261,7 @@ func (s *metadataSuite) Test_Diff_Slices(c *C) {
 
 		[]interface{}{"Extends", []string{"test"}, []string{}, `Remove 'test' from Extends`},
 		[]interface{}{"Extends", []string{}, []string{"test"}, `Add 'test' to Extends`},
-		[]interface{}{"Extends", []string{"test"}, []string{"kubernetes"}, `Change Extends[0] from 'test' to 'kubernetes'`},
+		[]interface{}{"Extends", []string{"test"}, []string{"kubernetes"}, `Change Extends[0].ReleaseId from 'test' to 'kubernetes'`},
 	}
 	for _, test := range testCases {
 		m1 := NewReleaseMetadata("test", "1.0")

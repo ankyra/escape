@@ -262,7 +262,9 @@ func (v *Variable) validateOneOfList(env *script.ScriptEnvironment, item interfa
 			if err != nil {
 				return nil, fmt.Errorf("In items field of variable '%s': %s", v.Id, err.Error())
 			}
-			i = pv
+			if pv == item {
+				return item, nil
+			}
 		case float64:
 			_, itemInt := item.(int)
 			if itemInt && int(i.(float64)) == item {

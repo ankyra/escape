@@ -18,85 +18,117 @@ package core
 
 import (
 	"fmt"
-	"github.com/ankyra/escape-core/templates"
-	"github.com/ankyra/escape-core/variables"
 	"reflect"
 	"strconv"
+	"strings"
+
+	"github.com/ankyra/escape-core/templates"
+	"github.com/ankyra/escape-core/variables"
 )
 
 type Change struct {
-	Field         string
+	Path          []string
 	PreviousValue interface{}
 	NewValue      interface{}
 	Added         bool
 	Removed       bool
 }
 
-func NewUpdate(field string, old, new interface{}) Change {
+func NewUpdate(path []string, old, new interface{}) Change {
 	return Change{
-		Field:         field,
+		Path:          path,
 		PreviousValue: old,
 		NewValue:      new,
 	}
 }
 
-func NewAddition(field string, new interface{}) Change {
+func NewAddition(path []string, new interface{}) Change {
 	return Change{
-		Field:    field,
+		Path:     path,
 		NewValue: new,
 		Added:    true,
 	}
 }
 
-func NewRemoval(field string, old interface{}) Change {
+func NewRemoval(path []string, old interface{}) Change {
 	return Change{
-		Field:         field,
+		Path:          path,
 		PreviousValue: old,
 		Removed:       true,
 	}
 }
 
 func (c Change) ToString() string {
+	name := strings.Join(c.Path, "")
 	if !c.Added && !c.Removed {
-		return fmt.Sprintf("Change %s from '%s' to '%s'", c.Field, c.PreviousValue, c.NewValue)
+		return fmt.Sprintf("Change %s from '%s' to '%s'", name, c.PreviousValue, c.NewValue)
 	} else if c.Added {
-		return fmt.Sprintf("Add '%s' to %s", c.NewValue, c.Field)
+		return fmt.Sprintf("Add '%s' to %s", c.NewValue, name)
 	}
-	return fmt.Sprintf("Remove '%s' from %s", c.PreviousValue, c.Field)
+	return fmt.Sprintf("Remove '%s' from %s", c.PreviousValue, name)
+}
+
+func (c Change) GetModification() string {
+	if !c.Added && !c.Removed {
+		return "change"
+	} else if c.Added {
+		return "add"
+	}
+	return "remove"
 }
 
 type Changes []Change
 
-func Diff(this *ReleaseMetadata, other *ReleaseMetadata) Changes {
-	return diff("", this, other)
+func (changes Changes) Collapse() map[string]map[string]Changes {
+	result := map[string]map[string]Changes{}
+	for _, ch := range changes {
+		field, exists := result[ch.Path[0]]
+		if !exists {
+			field = map[string]Changes{}
+		}
+		mod := ch.GetModification()
+		modifications, exists := field[mod]
+		if !exists {
+			modifications = Changes{}
+		}
+		modifications = append(modifications, ch)
+		field[mod] = modifications
+		result[ch.Path[0]] = field
+	}
+	return result
 }
 
-func diff(name string, oldValue, newValue interface{}) Changes {
-	if changes := diffNil(name, oldValue, newValue); len(changes) != 0 || oldValue == nil {
+func Diff(this *ReleaseMetadata, other *ReleaseMetadata) Changes {
+	return diff([]string{}, this, other)
+}
+
+func diff(path []string, oldValue, newValue interface{}) Changes {
+	if changes := diffNil(path, oldValue, newValue); len(changes) != 0 || oldValue == nil {
 		return changes
 	}
 	thisVal := reflect.ValueOf(oldValue)
 	typ := thisVal.Type().String()
 	kind := thisVal.Type().Kind().String()
 	if typ == "int" || typ == "string" || typ == "bool" {
-		if r := diffSimpleType(name, oldValue, newValue); r != nil {
+		if r := diffSimpleType(path, oldValue, newValue); r != nil {
 			return []Change{*r}
 		}
 	} else if kind == "ptr" {
-		return diffPointer(name, oldValue, newValue)
+		return diffPointer(path, oldValue, newValue)
 	} else if kind == "struct" {
-		return diffStruct(name, oldValue, newValue)
+		return diffStruct(path, oldValue, newValue)
 	} else if kind == "map" {
-		return diffMap(name, oldValue, newValue)
+		return diffMap(path, oldValue, newValue)
 	} else if kind == "slice" {
-		return diffSlice(name, oldValue, newValue)
+		return diffSlice(path, oldValue, newValue)
 	} else {
+		name := strings.Join(path, ", ")
 		panic(fmt.Sprintf("WARN: Undiffable type '%s' (%s) for field '%s'\n", typ, kind, name))
 	}
 	return []Change{}
 }
 
-func diffStruct(name string, oldValue, newValue interface{}) Changes {
+func diffStruct(path []string, oldValue, newValue interface{}) Changes {
 	result := []Change{}
 	oldVal := reflect.Indirect(reflect.ValueOf(oldValue))
 	newVal := reflect.Indirect(reflect.ValueOf(newValue))
@@ -105,29 +137,29 @@ func diffStruct(name string, oldValue, newValue interface{}) Changes {
 		field := oldVal.Type().Field(i).Name
 		oldValue := oldVal.Field(i).Interface()
 		newValue := newVal.FieldByName(field).Interface()
-		newName := name + "." + field
-		if name == "" {
+		newName := "." + field
+		if len(path) == 0 {
 			newName = field
 		}
-		if oldVal.NumField() == 1 {
-			newName = name
-		}
-		for _, change := range diff(newName, oldValue, newValue) {
+		structPath := make([]string, len(path)+1)
+		copy(structPath, path)
+		structPath[len(path)] = newName
+		for _, change := range diff(structPath, oldValue, newValue) {
 			result = append(result, change)
 		}
 	}
 	return result
 }
 
-func diffSimpleType(name string, oldValue, newValue interface{}) *Change {
+func diffSimpleType(path []string, oldValue, newValue interface{}) *Change {
 	if !reflect.DeepEqual(oldValue, newValue) {
-		v := NewUpdate(name, diffValue(oldValue), diffValue(newValue))
+		v := NewUpdate(path, diffValue(oldValue), diffValue(newValue))
 		return &v
 	}
 	return nil
 }
 
-func diffMap(name string, oldValue, newValue interface{}) []Change {
+func diffMap(path []string, oldValue, newValue interface{}) []Change {
 	changes := []Change{}
 	if reflect.DeepEqual(oldValue, newValue) {
 		return changes
@@ -139,27 +171,30 @@ func diffMap(name string, oldValue, newValue interface{}) []Change {
 		oldVal := oldMap.MapIndex(key).Interface()
 		newVal := newMap.MapIndex(key)
 		if !newVal.IsValid() {
-			changes = append(changes, NewRemoval(name, key))
+			changes = append(changes, NewRemoval(path, key.String()))
 			continue
 		}
 		newValI := newVal.Interface()
 		if reflect.DeepEqual(oldVal, newValI) {
 			continue
 		}
-		field := fmt.Sprintf(`%s["%s"]`, name, key)
-		for _, c := range diff(field, oldVal, newValI) {
+		field := fmt.Sprintf(`["%s"]`, key)
+		keyPath := make([]string, len(path)+1)
+		copy(keyPath, path)
+		keyPath[len(path)] = field
+		for _, c := range diff(keyPath, oldVal, newValI) {
 			changes = append(changes, c)
 		}
 	}
 	for _, key := range newMap.MapKeys() {
 		oldVal := oldMap.MapIndex(key)
 		if !oldVal.IsValid() {
-			changes = append(changes, NewAddition(name, key))
+			changes = append(changes, NewAddition(path, key.String()))
 		}
 	}
 	return changes
 }
-func diffSlice(name string, oldValue, newValue interface{}) []Change {
+func diffSlice(path []string, oldValue, newValue interface{}) []Change {
 	changes := []Change{}
 	if reflect.DeepEqual(oldValue, newValue) {
 		return nil
@@ -176,17 +211,20 @@ func diffSlice(name string, oldValue, newValue interface{}) []Change {
 		if ix >= oldValLen {
 			if ix < newValLen {
 				val := newVal.Index(ix).Interface()
-				changes = append(changes, NewAddition(name, diffValue(val)))
+				changes = append(changes, NewAddition(path, diffValue(val)))
 			}
 			continue
 		} else if ix >= newValLen {
 			if ix < oldValLen {
 				val := oldVal.Index(ix).Interface()
-				changes = append(changes, NewRemoval(name, diffValue(val)))
+				changes = append(changes, NewRemoval(path, diffValue(val)))
 			}
 			continue
 		} else {
-			for _, change := range diff(name+"["+strconv.Itoa(ix)+"]", oldVal.Index(ix).Interface(), newVal.Index(ix).Interface()) {
+			ixPath := make([]string, len(path)+1)
+			copy(ixPath, path)
+			ixPath[len(path)] = "[" + strconv.Itoa(ix) + "]"
+			for _, change := range diff(ixPath, oldVal.Index(ix).Interface(), newVal.Index(ix).Interface()) {
 				changes = append(changes, change)
 			}
 		}
@@ -194,29 +232,29 @@ func diffSlice(name string, oldValue, newValue interface{}) []Change {
 	return changes
 }
 
-func diffNil(name string, oldValue, newValue interface{}) []Change {
+func diffNil(path []string, oldValue, newValue interface{}) []Change {
 	changes := []Change{}
 	if oldValue == nil {
 		if newValue == nil {
 			return changes
 		} else {
 			v := reflect.Indirect(reflect.ValueOf(newValue)).Interface()
-			changes = append(changes, Change{name, nil, diffValue(v), true, false})
+			changes = append(changes, NewAddition(path, diffValue(v)))
 		}
 	} else if newValue == nil {
 		v := reflect.Indirect(reflect.ValueOf(oldValue)).Interface()
-		changes = append(changes, Change{name, diffValue(v), nil, true, false})
+		changes = append(changes, NewRemoval(path, diffValue(v)))
 	}
 	return changes
 }
 
-func diffPointer(name string, oldValue, newValue interface{}) []Change {
-	if changes := diffNil(name, oldValue, newValue); len(changes) != 0 {
+func diffPointer(path []string, oldValue, newValue interface{}) []Change {
+	if changes := diffNil(path, oldValue, newValue); len(changes) != 0 {
 		return changes
 	}
 	oldVal := reflect.Indirect(reflect.ValueOf(oldValue)).Interface()
 	newVal := reflect.Indirect(reflect.ValueOf(newValue)).Interface()
-	return diff(name, oldVal, newVal)
+	return diff(path, oldVal, newVal)
 }
 
 func diffValue(v interface{}) interface{} {
