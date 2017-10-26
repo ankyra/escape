@@ -1,36 +1,7 @@
 # Escape 
 
-Escape was written to solve common deployment woes. It was originially built to
-support "Infrastructure as Code" platform delivery from start to finish, but
-nowadays it can also be used to version, package and deploy documentation,
-data, applications, or whatever you want really.
-
-Its goal is to replace ad-hoc release engineering, deployment, orchestration
-and operational systems with a cohesive, but otherwise unopinionated model.
-
-## Features
-
-* Compose a platform out of versioned _units of deployment_
-* Separate configuration from code
-* Multi-environment
-* Easy to integrate into CI and CD processes
-* Common release engineering tasks: optional automatic versioning, version
-  control linking, packaging, uploading, downloading, templating
-* Operations as code
-* Extensions to work with Docker, Packer, Kubernetes, Terraform, ...
-
-## Installation
-
-The easiest way to install Escape is to download the binaries from the website. 
-See https://escape.ankyra.io/downloads/
-
-### Build
-
-```
-git clone https://github.com/ankyra/escape-client.git "$GOPATH/src/github.com/ankyra/escape-client"
-go install
-mv "$GOPATH/bin/escape-client" "$GOPATH/bin/escape"
-```
+This is the official Escape client.  Please see the [Escape
+Docs](https://escape.ankyra.io/docs/) for the full documentation.
 
 ## License
 
