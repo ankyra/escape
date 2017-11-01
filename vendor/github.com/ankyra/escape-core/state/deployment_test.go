@@ -24,6 +24,7 @@ import (
 var depl *DeploymentState
 var deplWithDeps *DeploymentState
 var fullDepl *DeploymentState
+var buildRootStage *DeploymentState
 var deployedDepsDepl *DeploymentState
 
 func (s *suite) SetUpTest(c *C) {
@@ -37,6 +38,8 @@ func (s *suite) SetUpTest(c *C) {
 
 	dep := env.GetOrCreateDeploymentState("archive-release-with-deps")
 	deplWithDeps = dep.GetDeploymentOrMakeNew("deploy", "archive-release")
+	dep2 := dep.GetDeploymentOrMakeNew("build", "build-release")
+	buildRootStage = dep2.GetDeploymentOrMakeNew("deploy", "build-root-release")
 
 	dep = env.GetOrCreateDeploymentState("archive-release-deployed-deps")
 	deployedDepsDepl = dep.GetDeploymentOrMakeNew("build", "archive-release")
@@ -46,6 +49,13 @@ func (s *suite) Test_GetRootDeploymentName(c *C) {
 	c.Assert(depl.GetRootDeploymentName(), Equals, "archive-release")
 	c.Assert(fullDepl.GetRootDeploymentName(), Equals, "archive-full")
 	c.Assert(deplWithDeps.GetRootDeploymentName(), Equals, "archive-release-with-deps")
+}
+
+func (s *suite) Test_GetRootDeploymentStage(c *C) {
+	c.Assert(depl.GetRootDeploymentStage(), Equals, "")
+	c.Assert(fullDepl.GetRootDeploymentStage(), Equals, "")
+	c.Assert(deplWithDeps.GetRootDeploymentStage(), Equals, "deploy")
+	c.Assert(buildRootStage.GetRootDeploymentStage(), Equals, "build")
 }
 
 func (s *suite) Test_GetDependencyPath(c *C) {

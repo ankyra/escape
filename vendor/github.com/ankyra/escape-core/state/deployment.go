@@ -58,6 +58,18 @@ func (d *DeploymentState) GetRootDeploymentName() string {
 	return prev.Name
 }
 
+func (d *DeploymentState) GetRootDeploymentStage() string {
+	stage := ""
+	prev := d
+	p := prev
+	for prev.parentStage != nil {
+		stage = prev.parentStage.Name
+		prev = p
+		p = p.parent
+	}
+	return stage
+}
+
 func (d *DeploymentState) GetDependencyPath() string {
 	result := []string{}
 	p := d
