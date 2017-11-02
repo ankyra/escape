@@ -30,6 +30,6 @@ jobs:
             escape errands run upload_to_gcs -v bucket=escape-releases-eu -v credentials=@${HOME}/gcloud-service-key.json -d "latest-client"
 
             # trigger docker-escape-client build
-            curl -f -X POST https://circleci.com/api/v1.1/project/github/ankyra/docker-escape-client/tree/master?circle-token=${CIRCLE_DOCKER_ESCAPE_TOKEN}
+            curl -f -X POST https://circleci.com/api/v1.1/project/github/ankyra/docker-escape/tree/master?circle-token=${CIRCLE_DOCKER_ESCAPE_TOKEN}
           fi
 
