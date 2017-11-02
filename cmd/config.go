@@ -30,7 +30,8 @@ var configCmd = &cobra.Command{
 		if len(args) != 0 {
 			return fmt.Errorf("Unknown command '%s'", args[0])
 		}
-		return fmt.Errorf("Missing command")
+		cmd.UsageFunc()(cmd)
+		return nil
 	},
 }
 
