@@ -22,20 +22,20 @@ import (
 	. "github.com/ankyra/escape/model/interfaces"
 )
 
-type RegistryController struct{}
+type InventoryController struct{}
 
-func (r RegistryController) Query(context Context, project, application, appVersion string) error {
-	registry := context.GetRegistry()
+func (r InventoryController) Query(context Context, project, application, appVersion string) error {
+	inventory := context.GetInventory()
 	var result []string
 	var err error
 	if project == "" {
-		result, err = registry.ListProjects()
+		result, err = inventory.ListProjects()
 	} else if application == "" {
-		result, err = registry.ListApplications(project)
+		result, err = inventory.ListApplications(project)
 	} else if appVersion == "" {
-		result, err = registry.ListVersions(project, application)
+		result, err = inventory.ListVersions(project, application)
 	} else {
-		metadata, err := registry.QueryReleaseMetadata(project, application, appVersion)
+		metadata, err := inventory.QueryReleaseMetadata(project, application, appVersion)
 		if err != nil {
 			return err
 		}
@@ -53,7 +53,7 @@ func (r RegistryController) Query(context Context, project, application, appVers
 		}
 	}
 	if len(result) == 0 {
-		fmt.Println("Registry returned 0 results.")
+		fmt.Println("Inventory returned 0 results.")
 	}
 	return nil
 }

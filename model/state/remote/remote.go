@@ -20,12 +20,12 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/ankyra/escape/model/remote"
 	. "github.com/ankyra/escape-core/state"
+	"github.com/ankyra/escape/model/remote"
 )
 
 type remoteStateProvider struct {
-	client    *remote.RegistryClient
+	client    *remote.InventoryClient
 	endpoints *remote.ServerEndpoints
 }
 

@@ -19,16 +19,17 @@ package compiler
 import (
 	"crypto/md5"
 	"fmt"
-	"github.com/ankyra/escape/model/escape_plan"
-	"github.com/ankyra/escape/model/registry"
-	"github.com/ankyra/escape/util"
-	"github.com/ankyra/escape-core"
-	"github.com/ankyra/escape-core/script"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
+
+	"github.com/ankyra/escape-core"
+	"github.com/ankyra/escape-core/script"
+	"github.com/ankyra/escape/model/escape_plan"
+	"github.com/ankyra/escape/model/inventory"
+	"github.com/ankyra/escape/util"
 )
 
 type CompilerContext struct {
@@ -37,23 +38,23 @@ type CompilerContext struct {
 	VariableCtx       map[string]*core.ReleaseMetadata
 	DependencyFetcher func(*core.DependencyConfig) (*core.ReleaseMetadata, error)
 	ReleaseQuery      func(*core.Dependency) (*core.ReleaseMetadata, error)
-	Registry          registry.Registry
+	Inventory         inventory.Inventory
 	Project           string
 	Logger            util.Logger
 }
 
-func NewCompilerContext(plan *escape_plan.EscapePlan, registry registry.Registry, project string) *CompilerContext {
+func NewCompilerContext(plan *escape_plan.EscapePlan, inventory inventory.Inventory, project string) *CompilerContext {
 	return &CompilerContext{
 		Metadata:    core.NewEmptyReleaseMetadata(),
 		Plan:        plan,
 		VariableCtx: map[string]*core.ReleaseMetadata{},
-		Registry:    registry,
+		Inventory:   inventory,
 		Project:     project,
 	}
 }
 
-func NewCompilerContextWithLogger(plan *escape_plan.EscapePlan, registry registry.Registry, project string, logger util.Logger) *CompilerContext {
-	ctx := NewCompilerContext(plan, registry, project)
+func NewCompilerContextWithLogger(plan *escape_plan.EscapePlan, inventory inventory.Inventory, project string, logger util.Logger) *CompilerContext {
+	ctx := NewCompilerContext(plan, inventory, project)
 	ctx.Logger = logger
 	return ctx
 }

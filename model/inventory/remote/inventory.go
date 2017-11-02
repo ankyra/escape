@@ -23,24 +23,24 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/ankyra/escape/model/registry/types"
-	"github.com/ankyra/escape/model/remote"
 	core "github.com/ankyra/escape-core"
+	"github.com/ankyra/escape/model/inventory/types"
+	"github.com/ankyra/escape/model/remote"
 )
 
-type registry struct {
-	client    *remote.RegistryClient
+type inventory struct {
+	client    *remote.InventoryClient
 	endpoints *remote.ServerEndpoints
 }
 
-func NewRemoteRegistry(apiServer, escapeToken string, insecureSkipVerify bool) *registry {
-	return &registry{
+func NewRemoteInventory(apiServer, escapeToken string, insecureSkipVerify bool) *inventory {
+	return &inventory{
 		client:    remote.NewRemoteClient(escapeToken, insecureSkipVerify),
 		endpoints: remote.NewServerEndpoints(apiServer),
 	}
 }
 
-func (r *registry) QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
+func (r *inventory) QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
 	url := r.endpoints.ReleaseQuery(project, name, version)
 	resp, err := r.client.GET_with_authentication(url)
 	if err != nil {
@@ -62,7 +62,7 @@ func (r *registry) QueryReleaseMetadata(project, name, version string) (*core.Re
 	return result, nil
 }
 
-func (r *registry) QueryPreviousReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
+func (r *inventory) QueryPreviousReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
 	url := r.endpoints.PreviousReleaseQuery(project, name, version)
 	resp, err := r.client.GET_with_authentication(url)
 	if err != nil {
@@ -86,7 +86,7 @@ func (r *registry) QueryPreviousReleaseMetadata(project, name, version string) (
 	return result, nil
 }
 
-func (r *registry) QueryNextVersion(project, name, versionPrefix string) (string, error) {
+func (r *inventory) QueryNextVersion(project, name, versionPrefix string) (string, error) {
 	url := r.endpoints.NextReleaseVersion(project, name, versionPrefix)
 	resp, err := r.client.GET_with_authentication(url)
 	if err != nil {
@@ -114,7 +114,7 @@ func (r *registry) QueryNextVersion(project, name, versionPrefix string) (string
 	return string(result), nil
 }
 
-func (r *registry) DownloadRelease(project, name, version, targetFile string) error {
+func (r *inventory) DownloadRelease(project, name, version, targetFile string) error {
 	url := r.endpoints.DownloadRelease(project, name, version)
 	resp, err := r.client.GET_with_authentication(url)
 	if err != nil {
@@ -141,7 +141,7 @@ func (r *registry) DownloadRelease(project, name, version, targetFile string) er
 	return nil
 }
 
-func (r *registry) UploadRelease(project, releasePath string, metadata *core.ReleaseMetadata) error {
+func (r *inventory) UploadRelease(project, releasePath string, metadata *core.ReleaseMetadata) error {
 	if err := r.register(project, metadata); err != nil {
 		return err
 	}
@@ -162,7 +162,7 @@ func (r *registry) UploadRelease(project, releasePath string, metadata *core.Rel
 	return nil
 }
 
-func (r *registry) register(project string, metadata *core.ReleaseMetadata) error {
+func (r *inventory) register(project string, metadata *core.ReleaseMetadata) error {
 	url := r.endpoints.RegisterPackage(project)
 	fmt.Println(url)
 	resp, err := r.client.POST_json_with_authentication(url, metadata)
@@ -181,7 +181,7 @@ func (r *registry) register(project string, metadata *core.ReleaseMetadata) erro
 	return nil
 }
 
-func (r *registry) GetAuthMethods(url string) (map[string]*types.AuthMethod, error) {
+func (r *inventory) GetAuthMethods(url string) (map[string]*types.AuthMethod, error) {
 	url = r.endpoints.AuthMethods(url)
 	resp, err := r.client.GET(url)
 	if err != nil {
@@ -203,7 +203,7 @@ func (r *registry) GetAuthMethods(url string) (map[string]*types.AuthMethod, err
 	return result, nil
 }
 
-func (r *registry) LoginWithSecretToken(url, username, password string) (string, error) {
+func (r *inventory) LoginWithSecretToken(url, username, password string) (string, error) {
 	payload := map[string]string{
 		"username":     username,
 		"secret_token": password,
@@ -224,7 +224,7 @@ func (r *registry) LoginWithSecretToken(url, username, password string) (string,
 	return resp.Header.Get("X-Escape-Token"), nil
 }
 
-func (r *registry) urlToList(url, doingMessage string) ([]string, error) {
+func (r *inventory) urlToList(url, doingMessage string) ([]string, error) {
 	resp, err := r.client.GET_with_authentication(url)
 	if err != nil {
 		return nil, err
@@ -241,12 +241,12 @@ func (r *registry) urlToList(url, doingMessage string) ([]string, error) {
 	return result, nil
 }
 
-func (r *registry) ListProjects() ([]string, error) {
+func (r *inventory) ListProjects() ([]string, error) {
 	return r.urlToList(r.endpoints.ListProjects(), "list projects")
 }
-func (r *registry) ListApplications(project string) ([]string, error) {
+func (r *inventory) ListApplications(project string) ([]string, error) {
 	return r.urlToList(r.endpoints.ProjectQuery(project), "list applications for project '"+project+"'")
 }
-func (r *registry) ListVersions(project, app string) ([]string, error) {
+func (r *inventory) ListVersions(project, app string) ([]string, error) {
 	return r.urlToList(r.endpoints.ProjectNameQuery(project, app), "list version for project '"+project+"/"+app+"'")
 }

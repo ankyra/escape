@@ -21,7 +21,7 @@ import (
 	"github.com/ankyra/escape-core/state"
 	"github.com/ankyra/escape/model/config"
 	plan "github.com/ankyra/escape/model/escape_plan"
-	"github.com/ankyra/escape/model/registry"
+	"github.com/ankyra/escape/model/inventory"
 	"github.com/ankyra/escape/util"
 )
 
@@ -46,7 +46,7 @@ type Context interface {
 	GetReleaseMetadata() *core.ReleaseMetadata
 	GetEnvironmentState() *state.EnvironmentState
 	GetEscapeConfig() *config.EscapeConfig
-	GetRegistry() registry.Registry
+	GetInventory() inventory.Inventory
 	GetLogger() util.Logger
 	GetRootDeploymentName() string
 	SetRootDeploymentName(string)

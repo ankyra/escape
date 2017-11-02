@@ -18,8 +18,9 @@ package compiler
 
 import (
 	"fmt"
+
 	"github.com/ankyra/escape/model/escape_plan"
-	"github.com/ankyra/escape/model/registry"
+	"github.com/ankyra/escape/model/inventory"
 	. "gopkg.in/check.v1"
 )
 
@@ -31,8 +32,8 @@ func (s *suite) Test_Compile_Version_resolve_version(c *C) {
 		"auto":  "0",
 	}
 	var capturedProject, capturedName *string
-	reg := registry.NewMockRegistry()
-	reg.NextVersion = func(project, name, versionPrefix string) (string, error) {
+	inventory := inventory.NewMockInventory()
+	inventory.NextVersion = func(project, name, versionPrefix string) (string, error) {
 		capturedProject = &project
 		capturedName = &name
 		return versionPrefix + "0", nil
@@ -41,7 +42,7 @@ func (s *suite) Test_Compile_Version_resolve_version(c *C) {
 		plan := escape_plan.NewEscapePlan()
 		plan.Name = "my-build"
 		plan.Version = version
-		ctx := NewCompilerContext(plan, reg, "_")
+		ctx := NewCompilerContext(plan, inventory, "_")
 		ctx.Metadata.Name = "my-build"
 		ctx.Metadata.Project = "cheeky-project"
 		c.Assert(compileVersion(ctx), IsNil)
@@ -69,11 +70,11 @@ func (s *suite) Test_Compile_Version_no_resolve_needed(c *C) {
 func (s *suite) Test_Compile_Version_fails_if_resolve_fails(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Version = "1.@"
-	reg := registry.NewMockRegistry()
-	reg.NextVersion = func(project, name, versionPrefix string) (string, error) {
+	inventory := inventory.NewMockInventory()
+	inventory.NextVersion = func(project, name, versionPrefix string) (string, error) {
 		return "", fmt.Errorf("Resolve error")
 	}
-	ctx := NewCompilerContext(plan, reg, "_")
+	ctx := NewCompilerContext(plan, inventory, "_")
 	c.Assert(compileVersion(ctx).Error(), Equals, "Resolve error")
 }
 

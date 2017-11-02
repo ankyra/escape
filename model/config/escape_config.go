@@ -25,7 +25,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ankyra/escape/model/registry"
+	"github.com/ankyra/escape/model/inventory"
 	"github.com/ankyra/escape/util"
 )
 
@@ -76,8 +76,8 @@ func newEscapeTargetConfig(cfg *EscapeConfig) *EscapeTargetConfig {
 	return target
 }
 
-func (c *EscapeConfig) GetRegistry() registry.Registry {
-	return c.GetCurrentTarget().GetRegistry()
+func (c *EscapeConfig) GetInventory() inventory.Inventory {
+	return c.GetCurrentTarget().GetInventory()
 }
 
 func (e *EscapeConfig) GetCurrentTarget() *EscapeTargetConfig {
@@ -149,11 +149,11 @@ func (t *EscapeTargetConfig) ToJson() string {
 	return string(str)
 }
 
-func (t *EscapeTargetConfig) GetRegistry() registry.Registry {
+func (t *EscapeTargetConfig) GetInventory() inventory.Inventory {
 	if t.StorageBackend == "escape" {
-		return registry.NewRemoteRegistry(t.ApiServer, t.AuthToken, t.InsecureSkipVerify)
+		return inventory.NewRemoteInventory(t.ApiServer, t.AuthToken, t.InsecureSkipVerify)
 	}
-	return registry.NewLocalRegistry()
+	return inventory.NewLocalInventory()
 }
 
 func (t *EscapeTargetConfig) Save() error {

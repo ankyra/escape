@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"os"
 
-	. "github.com/ankyra/escape/model/interfaces"
 	"github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/parsers"
+	. "github.com/ankyra/escape/model/interfaces"
 	"github.com/ankyra/escape/model/paths"
 	"github.com/ankyra/escape/model/runners"
 	"github.com/ankyra/escape/model/runners/deploy"
@@ -104,7 +104,7 @@ func (d DeployController) FetchAndDeploy(context Context, releaseId string, extr
 			return err
 		}
 		parsed.Version = metadata.Version
-		metadata.Project = parsed.Project // registry needs to be updated to latest core
+		metadata.Project = parsed.Project // inventory needs to be updated to latest core
 		releaseId = metadata.GetQualifiedReleaseId()
 	}
 	fetcher := FetchController{}

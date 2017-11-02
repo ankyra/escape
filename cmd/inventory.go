@@ -25,9 +25,9 @@ import (
 
 var project, application, appVersion string
 
-var registryCmd = &cobra.Command{
-	Use:   "registry",
-	Short: "Interact with an Escape Registry",
+var inventoryCmd = &cobra.Command{
+	Use:   "inventory",
+	Short: "Interact with an Escape Inventory",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 0 {
 			return fmt.Errorf("Unknown command '%s'", args[0])
@@ -37,19 +37,19 @@ var registryCmd = &cobra.Command{
 	},
 }
 
-var registryQueryCommand = &cobra.Command{
+var inventoryQueryCommand = &cobra.Command{
 	Use:   "query",
 	Short: "Query projects, applications and releases",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return controllers.RegistryController{}.Query(context, project, application, appVersion)
+		return controllers.InventoryController{}.Query(context, project, application, appVersion)
 	},
 }
 
 func init() {
-	RootCmd.AddCommand(registryCmd)
-	registryCmd.AddCommand(registryQueryCommand)
+	RootCmd.AddCommand(inventoryCmd)
+	inventoryCmd.AddCommand(inventoryQueryCommand)
 
-	registryQueryCommand.Flags().StringVarP(&project, "project", "p", "", "The project")
-	registryQueryCommand.Flags().StringVarP(&application, "application", "a", "", "The application")
-	registryQueryCommand.Flags().StringVarP(&appVersion, "version", "v", "", "The application version")
+	inventoryQueryCommand.Flags().StringVarP(&project, "project", "p", "", "The project")
+	inventoryQueryCommand.Flags().StringVarP(&application, "application", "a", "", "The application")
+	inventoryQueryCommand.Flags().StringVarP(&appVersion, "version", "v", "", "The application version")
 }

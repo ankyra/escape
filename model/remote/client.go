@@ -26,19 +26,19 @@ import (
 	"os"
 )
 
-type RegistryClient struct {
+type InventoryClient struct {
 	InsecureSkipVerify bool
 	EscapeToken        string
 }
 
-func NewRemoteClient(escapeToken string, insecureSkipVerify bool) *RegistryClient {
-	return &RegistryClient{
+func NewRemoteClient(escapeToken string, insecureSkipVerify bool) *InventoryClient {
+	return &InventoryClient{
 		EscapeToken:        escapeToken,
 		InsecureSkipVerify: insecureSkipVerify,
 	}
 }
 
-func (c *RegistryClient) GetHTTPClient() *http.Client {
+func (c *InventoryClient) GetHTTPClient() *http.Client {
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: c.InsecureSkipVerify},
 	}
@@ -47,7 +47,7 @@ func (c *RegistryClient) GetHTTPClient() *http.Client {
 	}
 }
 
-func (c *RegistryClient) POST_json(url string, data interface{}) (*http.Response, error) {
+func (c *InventoryClient) POST_json(url string, data interface{}) (*http.Response, error) {
 	payload, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func (c *RegistryClient) POST_json(url string, data interface{}) (*http.Response
 	return c.GetHTTPClient().Do(req)
 }
 
-func (c *RegistryClient) POST_json_with_authentication(url string, data interface{}) (*http.Response, error) {
+func (c *InventoryClient) POST_json_with_authentication(url string, data interface{}) (*http.Response, error) {
 	payload, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
@@ -74,7 +74,7 @@ func (c *RegistryClient) POST_json_with_authentication(url string, data interfac
 	return c.GetHTTPClient().Do(req)
 }
 
-func (c *RegistryClient) POST_file_with_authentication(url, path string) (*http.Response, error) {
+func (c *InventoryClient) POST_file_with_authentication(url, path string) (*http.Response, error) {
 	bodyBuf := &bytes.Buffer{}
 	bodyWriter := multipart.NewWriter(bodyBuf)
 	fileWriter, err := bodyWriter.CreateFormFile("file", path)
@@ -100,7 +100,7 @@ func (c *RegistryClient) POST_file_with_authentication(url, path string) (*http.
 	return c.GetHTTPClient().Do(req)
 }
 
-func (c *RegistryClient) PUT_json_with_authentication(url string, data interface{}) (*http.Response, error) {
+func (c *InventoryClient) PUT_json_with_authentication(url string, data interface{}) (*http.Response, error) {
 	payload, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
@@ -114,7 +114,7 @@ func (c *RegistryClient) PUT_json_with_authentication(url string, data interface
 	return c.GetHTTPClient().Do(req)
 }
 
-func (c *RegistryClient) GET_with_authentication(url string) (*http.Response, error) {
+func (c *InventoryClient) GET_with_authentication(url string) (*http.Response, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -124,7 +124,7 @@ func (c *RegistryClient) GET_with_authentication(url string) (*http.Response, er
 	return c.GetHTTPClient().Do(req)
 }
 
-func (c *RegistryClient) GET(url string) (*http.Response, error) {
+func (c *InventoryClient) GET(url string) (*http.Response, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err

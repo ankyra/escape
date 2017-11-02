@@ -25,8 +25,8 @@ import (
 	"github.com/ankyra/escape/model/compiler"
 	"github.com/ankyra/escape/model/config"
 	"github.com/ankyra/escape/model/escape_plan"
+	"github.com/ankyra/escape/model/inventory"
 	"github.com/ankyra/escape/model/paths"
-	"github.com/ankyra/escape/model/registry"
 	"github.com/ankyra/escape/model/state"
 	"github.com/ankyra/escape/util"
 )
@@ -116,8 +116,8 @@ func (c *Context) PopLogRelease() {
 	c.Logger.PopRelease()
 }
 
-func (c *Context) GetRegistry() registry.Registry {
-	return c.EscapeConfig.GetRegistry()
+func (c *Context) GetInventory() inventory.Inventory {
+	return c.EscapeConfig.GetInventory()
 }
 
 func (c *Context) GetEscapePlan() *escape_plan.EscapePlan {
@@ -152,7 +152,7 @@ func (c *Context) QueryReleaseMetadata(dep *core.Dependency) (*core.ReleaseMetad
 	if ok {
 		return metadata, nil
 	}
-	metadata, err := c.GetRegistry().QueryReleaseMetadata(dep.Project, dep.Name, dep.GetVersionAsString())
+	metadata, err := c.GetInventory().QueryReleaseMetadata(dep.Project, dep.Name, dep.GetVersionAsString())
 	if err != nil {
 		return nil, err
 	}
@@ -208,7 +208,7 @@ func (c *Context) CompileEscapePlan() error {
 	c.PushLogSection("Compile")
 	metadata, err := compiler.Compile(
 		c.EscapePlan,
-		c.GetRegistry(),
+		c.GetInventory(),
 		c.GetEscapeConfig().GetCurrentTarget().GetProject(),
 		c.GetDependencyMetadata,
 		c.QueryReleaseMetadata,

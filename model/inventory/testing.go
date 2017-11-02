@@ -14,51 +14,51 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package registry
+package inventory
 
 import (
-	"github.com/ankyra/escape/model/registry/types"
 	core "github.com/ankyra/escape-core"
+	"github.com/ankyra/escape/model/inventory/types"
 )
 
-type mockRegistry struct {
+type mockInventory struct {
 	ReleaseMetadata func(string, string, string) (*core.ReleaseMetadata, error)
 	NextVersion     func(string, string, string) (string, error)
 	Download        func(string, string, string, string) error
 	Upload          func(string, string, *core.ReleaseMetadata) error
 }
 
-func NewMockRegistry() *mockRegistry {
-	return &mockRegistry{}
+func NewMockInventory() *mockInventory {
+	return &mockInventory{}
 }
 
-func (m *mockRegistry) QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
+func (m *mockInventory) QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
 	return m.ReleaseMetadata(project, name, version)
 }
-func (m *mockRegistry) QueryPreviousReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
+func (m *mockInventory) QueryPreviousReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
 	return nil, nil
 }
-func (m *mockRegistry) QueryNextVersion(project, name, versionPrefix string) (string, error) {
+func (m *mockInventory) QueryNextVersion(project, name, versionPrefix string) (string, error) {
 	return m.NextVersion(project, name, versionPrefix)
 }
-func (m *mockRegistry) DownloadRelease(project, name, version, targetFile string) error {
+func (m *mockInventory) DownloadRelease(project, name, version, targetFile string) error {
 	return m.Download(project, name, version, targetFile)
 }
-func (m *mockRegistry) UploadRelease(project, releasePath string, metadata *core.ReleaseMetadata) error {
+func (m *mockInventory) UploadRelease(project, releasePath string, metadata *core.ReleaseMetadata) error {
 	return m.Upload(project, releasePath, metadata)
 }
-func (m *mockRegistry) GetAuthMethods(url string) (map[string]*types.AuthMethod, error) {
+func (m *mockInventory) GetAuthMethods(url string) (map[string]*types.AuthMethod, error) {
 	return nil, nil
 }
-func (m *mockRegistry) LoginWithSecretToken(url, username, password string) (string, error) {
+func (m *mockInventory) LoginWithSecretToken(url, username, password string) (string, error) {
 	return "", nil
 }
-func (r *mockRegistry) ListProjects() ([]string, error) {
+func (r *mockInventory) ListProjects() ([]string, error) {
 	return []string{}, nil
 }
-func (r *mockRegistry) ListApplications(project string) ([]string, error) {
+func (r *mockInventory) ListApplications(project string) ([]string, error) {
 	return []string{}, nil
 }
-func (r *mockRegistry) ListVersions(project, app string) ([]string, error) {
+func (r *mockInventory) ListVersions(project, app string) ([]string, error) {
 	return []string{}, nil
 }

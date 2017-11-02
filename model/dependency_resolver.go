@@ -103,9 +103,9 @@ func escapeServerReleaseFetcherStrategy(cfg *config.EscapeConfig, path *paths.Pa
 		return false, err
 	}
 	targetFile := path.DependencyDownloadTarget(dep)
-	registry := cfg.GetRegistry()
+	inventory := cfg.GetInventory()
 
-	if err := registry.DownloadRelease(dep.Project, dep.Name, dep.Version, targetFile); err != nil {
+	if err := inventory.DownloadRelease(dep.Project, dep.Name, dep.Version, targetFile); err != nil {
 		return false, err
 	}
 	return archiveReleaseFetcherStrategy(cfg, path, dep)

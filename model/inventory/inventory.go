@@ -14,16 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package registry
+package inventory
 
 import (
-	"github.com/ankyra/escape/model/registry/local"
-	"github.com/ankyra/escape/model/registry/remote"
-	"github.com/ankyra/escape/model/registry/types"
 	core "github.com/ankyra/escape-core"
+	"github.com/ankyra/escape/model/inventory/local"
+	"github.com/ankyra/escape/model/inventory/remote"
+	"github.com/ankyra/escape/model/inventory/types"
 )
 
-type Registry interface {
+type Inventory interface {
 	QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error)
 	QueryPreviousReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error)
 	QueryNextVersion(project, name, versionPrefix string) (string, error)
@@ -37,10 +37,10 @@ type Registry interface {
 	ListVersions(project, app string) ([]string, error)
 }
 
-func NewLocalRegistry() Registry {
-	return local.NewLocalRegistry()
+func NewLocalInventory() Inventory {
+	return local.NewLocalInventory()
 }
 
-func NewRemoteRegistry(apiServer, authToken string, insecureSkipVerify bool) Registry {
-	return remote.NewRemoteRegistry(apiServer, authToken, insecureSkipVerify)
+func NewRemoteInventory(apiServer, authToken string, insecureSkipVerify bool) Inventory {
+	return remote.NewRemoteInventory(apiServer, authToken, insecureSkipVerify)
 }

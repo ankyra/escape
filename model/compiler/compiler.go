@@ -17,16 +17,16 @@ limitations under the License.
 package compiler
 
 import (
-	"github.com/ankyra/escape/model/escape_plan"
-	"github.com/ankyra/escape/model/registry"
-	"github.com/ankyra/escape/util"
 	core "github.com/ankyra/escape-core"
+	"github.com/ankyra/escape/model/escape_plan"
+	"github.com/ankyra/escape/model/inventory"
+	"github.com/ankyra/escape/util"
 )
 
 type CompilerFunc func(*CompilerContext) error
 
 func Compile(plan *escape_plan.EscapePlan,
-	reg registry.Registry,
+	reg inventory.Inventory,
 	project string,
 	depFetcher func(*core.DependencyConfig) (*core.ReleaseMetadata, error),
 	releaseQuery func(*core.Dependency) (*core.ReleaseMetadata, error),

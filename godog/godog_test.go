@@ -23,7 +23,7 @@ var CapturedDeployment *state_types.DeploymentState
 var CapturedStage string
 var ServerProcess *exec.Cmd
 
-func StartRegistry() {
+func StartInventory() {
 	go func() {
 		os.RemoveAll("test.db")
 		os.RemoveAll("escape_state.json")
@@ -38,7 +38,7 @@ func StartRegistry() {
 			"STORAGE_SETTINGS_PATH=releases/",
 			"PORT=7777",
 		}
-		ServerProcess = exec.Command("escape-registry")
+		ServerProcess = exec.Command("escape-inventory")
 		ServerProcess.Env = env
 		if err := ServerProcess.Start(); err != nil {
 			panic(err)
@@ -47,7 +47,7 @@ func StartRegistry() {
 	time.Sleep(time.Second * 5)
 }
 
-func StopRegistry() {
+func StopInventory() {
 	ServerProcess.Process.Kill()
 }
 
@@ -437,12 +437,12 @@ func FeatureContext(s *godog.Suite) {
 	s.Step(`^I delete the file "([^"]*)"$`, iDeleteTheFile)
 
 	s.BeforeScenario(func(interface{}) {
-		StartRegistry()
+		StartInventory()
 		os.Remove("escape.yml")
 		os.Remove("test.sh")
 	})
 	s.AfterScenario(func(interface{}, error) {
-		StopRegistry()
+		StopInventory()
 		os.Remove("escape.yml")
 		os.Remove("test.sh")
 	})

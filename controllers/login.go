@@ -29,19 +29,19 @@ import (
 	"time"
 
 	. "github.com/ankyra/escape/model/interfaces"
-	"github.com/ankyra/escape/model/registry/types"
+	"github.com/ankyra/escape/model/inventory/types"
 )
 
 type LoginController struct{}
 
 func (LoginController) Login(context Context, url, username, password string, insecureSkipVerify bool) error {
 	context.GetEscapeConfig().GetCurrentTarget().SetInsecureSkipVerify(insecureSkipVerify)
-	authMethods, err := context.GetRegistry().GetAuthMethods(url)
+	authMethods, err := context.GetInventory().GetAuthMethods(url)
 	if err != nil {
 		return err
 	}
 	if authMethods == nil {
-		fmt.Printf("Registry at %s does not implement authentication.", url)
+		fmt.Printf("Inventory at %s does not implement authentication.", url)
 		context.GetEscapeConfig().GetCurrentTarget().SetAuthToken("")
 		context.GetEscapeConfig().GetCurrentTarget().SetApiServer(url)
 		return context.GetEscapeConfig().Save()
@@ -93,7 +93,7 @@ func (LoginController) Login(context Context, url, username, password string, in
 			}
 			password = strings.TrimSpace(password)
 		}
-		authToken, err := context.GetRegistry().LoginWithSecretToken(method.URL, username, password)
+		authToken, err := context.GetInventory().LoginWithSecretToken(method.URL, username, password)
 		if err != nil {
 			return err
 		}
