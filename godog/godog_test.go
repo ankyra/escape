@@ -72,8 +72,8 @@ func aNewEscapePlanCalled(name string) error {
 	return runEscape([]string{"plan", "init", "-f", "-n", name})
 }
 
-func iCompileThePlan() error {
-	return runEscape([]string{"plan", "compile"})
+func iPreviewThePlan() error {
+	return runEscape([]string{"plan", "preview"})
 }
 
 func inputVariableWithDefault(variableId, defaultValue string) error {
@@ -399,7 +399,7 @@ func iDeleteTheFile(arg1 string) error {
 
 func FeatureContext(s *godog.Suite) {
 	s.Step(`^a new Escape plan called "([^"]*)"$`, aNewEscapePlanCalled)
-	s.Step(`^I compile the plan$`, iCompileThePlan)
+	s.Step(`^I preview the plan$`, iPreviewThePlan)
 	s.Step(`^I should have valid release metadata$`, iShouldHaveValidReleaseMetadata)
 	s.Step(`^the metadata should have its "([^"]*)" set to "([^"]*)"$`, theMetadataShouldHaveItsSetTo)
 	s.Step(`^I build the application$`, iBuildTheApplication)

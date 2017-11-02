@@ -85,9 +85,9 @@ var minifyCmd = &cobra.Command{
 	},
 }
 
-var compileCmd = &cobra.Command{
-	Use:   "compile",
-	Short: "Compile the Escape plan",
+var previewCmd = &cobra.Command{
+	Use:   "preview",
+	Short: "Preview the Escape plan",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := ProcessFlagsForContext(true); err != nil {
 			return err
@@ -102,14 +102,14 @@ func init() {
 	planCmd.AddCommand(initCmd)
 	planCmd.AddCommand(fmtCmd)
 	planCmd.AddCommand(minifyCmd)
-	planCmd.AddCommand(compileCmd)
+	planCmd.AddCommand(previewCmd)
 	planCmd.AddCommand(diffCmd)
 
 	initCmd.Flags().StringVarP(&releaseName, "name", "n", "", "The release name (eg. hello-world)")
 	initCmd.Flags().StringVarP(&outputPath, "output", "o", "escape.yml", "The output location")
 	initCmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite output file if it exists")
 
-	setPlanAndStateFlags(compileCmd)
+	setPlanAndStateFlags(previewCmd)
 	setPlanAndStateFlags(diffCmd)
 	setEscapePlanLocationFlag(fmtCmd)
 	setEscapePlanLocationFlag(minifyCmd)
