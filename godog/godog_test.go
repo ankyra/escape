@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"os/exec"
 	"strings"
@@ -44,7 +45,15 @@ func StartInventory() {
 			panic(err)
 		}
 	}()
-	time.Sleep(time.Second * 5)
+
+	status := 0
+	for status != 200 {
+		time.Sleep(time.Second / 2)
+		resp, err := http.Get("http://localhost:7777/health")
+		if err == nil {
+			status = resp.StatusCode
+		}
+	}
 }
 
 func StopInventory() {
@@ -441,6 +450,7 @@ func FeatureContext(s *godog.Suite) {
 		os.Remove("escape.yml")
 		os.Remove("test.sh")
 	})
+
 	s.AfterScenario(func(interface{}, error) {
 		StopInventory()
 		os.Remove("escape.yml")
