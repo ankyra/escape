@@ -18,11 +18,12 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/ankyra/escape-client/model/escape_plan"
-	. "github.com/ankyra/escape-client/model/interfaces"
-	"github.com/ankyra/escape-client/util"
-	"github.com/ankyra/escape-core"
 	"io/ioutil"
+
+	"github.com/ankyra/escape-core"
+	"github.com/ankyra/escape/model/escape_plan"
+	. "github.com/ankyra/escape/model/interfaces"
+	"github.com/ankyra/escape/util"
 )
 
 type PlanController struct{}

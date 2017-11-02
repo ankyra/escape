@@ -1,7 +1,7 @@
-name: escape-client
+name: escape
 version: 0.19.@
 description: |
-  The Escape Client. This release includes the source and one binary for
+  The Escape client. This release includes the source and one binary for
   Linux/AMD64.  For full documentation see http://escape.ankyra.io/
 
 logo: logo.png

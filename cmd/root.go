@@ -19,9 +19,9 @@ package cmd
 import (
 	"os"
 
-	"github.com/ankyra/escape-client/model"
-	. "github.com/ankyra/escape-client/model/interfaces"
-	"github.com/ankyra/escape-client/util"
+	"github.com/ankyra/escape/model"
+	. "github.com/ankyra/escape/model/interfaces"
+	"github.com/ankyra/escape/util"
 	"github.com/spf13/cobra"
 )
 
@@ -30,7 +30,7 @@ var cfgLogCollapse bool
 var context Context
 
 var RootCmd = &cobra.Command{
-	Use:           "escape-client",
+	Use:           "escape",
 	SilenceErrors: true,
 	SilenceUsage:  true,
 	Short:         "Package and deployment manager",

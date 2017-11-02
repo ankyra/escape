@@ -18,7 +18,7 @@ package local
 
 import (
 	"fmt"
-	"github.com/ankyra/escape-client/model/registry/types"
+	"github.com/ankyra/escape/model/registry/types"
 	core "github.com/ankyra/escape-core"
 	"strings"
 )

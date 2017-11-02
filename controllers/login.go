@@ -28,8 +28,8 @@ import (
 	"strings"
 	"time"
 
-	. "github.com/ankyra/escape-client/model/interfaces"
-	"github.com/ankyra/escape-client/model/registry/types"
+	. "github.com/ankyra/escape/model/interfaces"
+	"github.com/ankyra/escape/model/registry/types"
 )
 
 type LoginController struct{}

@@ -23,8 +23,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/ankyra/escape-client/model/registry/types"
-	"github.com/ankyra/escape-client/model/remote"
+	"github.com/ankyra/escape/model/registry/types"
+	"github.com/ankyra/escape/model/remote"
 	core "github.com/ankyra/escape-core"
 )
 

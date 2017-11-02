@@ -19,7 +19,7 @@ package compiler
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/ankyra/escape-client/util"
+	"github.com/ankyra/escape/util"
 	"io/ioutil"
 )
 

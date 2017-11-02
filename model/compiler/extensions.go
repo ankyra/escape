@@ -19,7 +19,7 @@ package compiler
 import (
 	"fmt"
 
-	"github.com/ankyra/escape-client/model/paths"
+	"github.com/ankyra/escape/model/paths"
 	"github.com/ankyra/escape-core"
 )
 

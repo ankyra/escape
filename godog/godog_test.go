@@ -10,11 +10,11 @@ import (
 	"time"
 
 	"github.com/DATA-DOG/godog"
-	"github.com/ankyra/escape-client/model/escape_plan"
-	"github.com/ankyra/escape-client/model/state"
-	eutil "github.com/ankyra/escape-client/util"
 	state_types "github.com/ankyra/escape-core/state"
 	"github.com/ankyra/escape-core/util"
+	"github.com/ankyra/escape/model/escape_plan"
+	"github.com/ankyra/escape/model/state"
+	eutil "github.com/ankyra/escape/util"
 	"gopkg.in/yaml.v2"
 )
 

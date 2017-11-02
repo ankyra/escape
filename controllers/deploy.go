@@ -20,12 +20,12 @@ import (
 	"fmt"
 	"os"
 
-	. "github.com/ankyra/escape-client/model/interfaces"
-	"github.com/ankyra/escape-client/model/paths"
-	"github.com/ankyra/escape-client/model/runners"
-	"github.com/ankyra/escape-client/model/runners/deploy"
+	. "github.com/ankyra/escape/model/interfaces"
 	"github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/parsers"
+	"github.com/ankyra/escape/model/paths"
+	"github.com/ankyra/escape/model/runners"
+	"github.com/ankyra/escape/model/runners/deploy"
 )
 
 type DeployController struct{}

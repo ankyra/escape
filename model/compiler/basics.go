@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ankyra/escape-client/util"
+	"github.com/ankyra/escape/util"
 )
 
 func compileBasicFields(ctx *CompilerContext) error {

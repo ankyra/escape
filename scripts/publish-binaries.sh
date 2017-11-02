@@ -16,8 +16,8 @@ for GOOS in $PLATFORMS; do
     for ARCH in $ARCHS; do
         target="escape-v$INPUT_escape_version-$GOOS-$ARCH.tgz"
         if [ ! -f $target ] ; then
-            docker run --rm -v "$PWD":/go/src/github.com/ankyra/escape-client \
-                            -w /go/src/github.com/ankyra/escape-client \
+            docker run --rm -v "$PWD":/go/src/github.com/ankyra/escape \
+                            -w /go/src/github.com/ankyra/escape \
                             -e GOOS=$GOOS \
                             -e GOARCH=$ARCH \
                             golang:1.8 go build -v -o escape-$GOOS-$ARCH
@@ -27,7 +27,7 @@ for GOOS in $PLATFORMS; do
         else
             echo "File $target already exists"
         fi
-        gcs_target="gs://$INPUT_bucket/escape-client/$INPUT_escape_version/$target"
+        gcs_target="gs://$INPUT_bucket/escape/$INPUT_escape_version/$target"
         gsutil cp "$target" "$gcs_target"
         gsutil acl ch -u AllUsers:R "$gcs_target"
         public_url="https://storage.googleapis.com/$INPUT_bucket/escape-client/$INPUT_escape_version/$target"

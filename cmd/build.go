@@ -17,7 +17,7 @@ limitations under the License.
 package cmd
 
 import (
-	"github.com/ankyra/escape-client/controllers"
+	"github.com/ankyra/escape/controllers"
 	"github.com/spf13/cobra"
 )
 

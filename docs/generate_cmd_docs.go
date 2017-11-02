@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/ankyra/escape-client/cmd"
+	"github.com/ankyra/escape/cmd"
 	"github.com/spf13/cobra/doc"
 	"log"
 	"path"

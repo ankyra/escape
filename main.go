@@ -16,7 +16,7 @@ limitations under the License.
 
 package main
 
-import "github.com/ankyra/escape-client/cmd"
+import "github.com/ankyra/escape/cmd"
 
 func main() {
 	cmd.Execute()

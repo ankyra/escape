@@ -19,9 +19,9 @@ package controllers
 import (
 	"fmt"
 
-	. "github.com/ankyra/escape-client/model/interfaces"
-	"github.com/ankyra/escape-client/model/paths"
-	"github.com/ankyra/escape-client/util"
+	. "github.com/ankyra/escape/model/interfaces"
+	"github.com/ankyra/escape/model/paths"
+	"github.com/ankyra/escape/util"
 )
 
 type ReleaseController struct{}

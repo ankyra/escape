@@ -21,7 +21,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/ankyra/escape-client/util"
+	"github.com/ankyra/escape/util"
 	"github.com/ankyra/escape-core"
 	"gopkg.in/yaml.v2"
 )

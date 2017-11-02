@@ -17,7 +17,7 @@ limitations under the License.
 package destroy
 
 import (
-	. "github.com/ankyra/escape-client/model/runners"
+	. "github.com/ankyra/escape/model/runners"
 	"github.com/ankyra/escape-core/state"
 )
 

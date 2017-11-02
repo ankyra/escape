@@ -25,8 +25,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ankyra/escape-client/model/registry"
-	"github.com/ankyra/escape-client/util"
+	"github.com/ankyra/escape/model/registry"
+	"github.com/ankyra/escape/util"
 )
 
 type EscapeConfig struct {

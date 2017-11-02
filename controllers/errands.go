@@ -21,10 +21,10 @@ import (
 	"io/ioutil"
 	"os"
 
-	. "github.com/ankyra/escape-client/model/interfaces"
-	"github.com/ankyra/escape-client/model/paths"
-	"github.com/ankyra/escape-client/model/runners"
-	"github.com/ankyra/escape-client/model/runners/errand"
+	. "github.com/ankyra/escape/model/interfaces"
+	"github.com/ankyra/escape/model/paths"
+	"github.com/ankyra/escape/model/runners"
+	"github.com/ankyra/escape/model/runners/errand"
 )
 
 type ErrandsController struct{}

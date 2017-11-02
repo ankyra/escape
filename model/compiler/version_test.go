@@ -18,8 +18,8 @@ package compiler
 
 import (
 	"fmt"
-	"github.com/ankyra/escape-client/model/escape_plan"
-	"github.com/ankyra/escape-client/model/registry"
+	"github.com/ankyra/escape/model/escape_plan"
+	"github.com/ankyra/escape/model/registry"
 	. "gopkg.in/check.v1"
 )
 

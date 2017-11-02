@@ -17,8 +17,8 @@ limitations under the License.
 package errand
 
 import (
-	"github.com/ankyra/escape-client/model"
-	"github.com/ankyra/escape-client/model/runners"
+	"github.com/ankyra/escape/model"
+	"github.com/ankyra/escape/model/runners"
 	. "gopkg.in/check.v1"
 	"os"
 	"testing"

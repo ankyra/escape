@@ -18,10 +18,11 @@ package model
 
 import (
 	"errors"
-	"github.com/ankyra/escape-client/model/config"
-	"github.com/ankyra/escape-client/model/dependency_resolvers"
-	"github.com/ankyra/escape-client/model/paths"
+
 	core "github.com/ankyra/escape-core"
+	"github.com/ankyra/escape/model/config"
+	"github.com/ankyra/escape/model/dependency_resolvers"
+	"github.com/ankyra/escape/model/paths"
 )
 
 type DependencyResolver struct{}

@@ -19,7 +19,7 @@ package controllers
 import (
 	"fmt"
 
-	. "github.com/ankyra/escape-client/model/interfaces"
+	. "github.com/ankyra/escape/model/interfaces"
 	"github.com/ankyra/escape-core/state"
 )
 

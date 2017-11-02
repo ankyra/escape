@@ -19,9 +19,9 @@ package compiler
 import (
 	"crypto/md5"
 	"fmt"
-	"github.com/ankyra/escape-client/model/escape_plan"
-	"github.com/ankyra/escape-client/model/registry"
-	"github.com/ankyra/escape-client/util"
+	"github.com/ankyra/escape/model/escape_plan"
+	"github.com/ankyra/escape/model/registry"
+	"github.com/ankyra/escape/util"
 	"github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/script"
 	"io"

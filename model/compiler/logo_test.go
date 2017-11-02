@@ -21,7 +21,7 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/ankyra/escape-client/model/escape_plan"
+	"github.com/ankyra/escape/model/escape_plan"
 	. "gopkg.in/check.v1"
 )
 

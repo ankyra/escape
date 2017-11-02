@@ -17,8 +17,8 @@ limitations under the License.
 package controllers
 
 import (
-	"github.com/ankyra/escape-client/model"
-	. "github.com/ankyra/escape-client/model/interfaces"
+	"github.com/ankyra/escape/model"
+	. "github.com/ankyra/escape/model/interfaces"
 )
 
 type InstallController struct{}

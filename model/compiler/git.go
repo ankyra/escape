@@ -19,7 +19,7 @@ package compiler
 import (
 	"os"
 
-	"github.com/ankyra/escape-client/util"
+	"github.com/ankyra/escape/util"
 )
 
 func compileGit(ctx *CompilerContext) error {

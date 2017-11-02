@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"strings"
 
-	. "github.com/ankyra/escape-client/model/interfaces"
+	. "github.com/ankyra/escape/model/interfaces"
 )
 
 type StateController struct{}

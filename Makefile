@@ -1,6 +1,5 @@
 install:
 	go install
-	cp $$GOPATH/bin/escape-client $$GOPATH/bin/escape
 
 test:
 	escape test

@@ -17,7 +17,7 @@ limitations under the License.
 package runners
 
 import (
-	"github.com/ankyra/escape-client/model"
+	"github.com/ankyra/escape/model"
 	. "gopkg.in/check.v1"
 )
 

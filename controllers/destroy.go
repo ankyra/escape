@@ -17,9 +17,9 @@ limitations under the License.
 package controllers
 
 import (
-	. "github.com/ankyra/escape-client/model/interfaces"
-	"github.com/ankyra/escape-client/model/runners"
-	"github.com/ankyra/escape-client/model/runners/destroy"
+	. "github.com/ankyra/escape/model/interfaces"
+	"github.com/ankyra/escape/model/runners"
+	"github.com/ankyra/escape/model/runners/destroy"
 )
 
 type DestroyController struct{}

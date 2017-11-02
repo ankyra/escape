@@ -22,7 +22,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/ankyra/escape-client/util"
+	"github.com/ankyra/escape/util"
 	"github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/script"
 )

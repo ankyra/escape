@@ -20,7 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/ankyra/escape-client/model/remote"
+	"github.com/ankyra/escape/model/remote"
 	. "github.com/ankyra/escape-core/state"
 )
 

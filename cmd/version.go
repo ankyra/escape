@@ -18,7 +18,8 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/ankyra/escape-client/util"
+
+	"github.com/ankyra/escape/util"
 	"github.com/spf13/cobra"
 )
 

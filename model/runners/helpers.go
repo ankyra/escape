@@ -21,10 +21,10 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/ankyra/escape-client/model/dependency_resolvers"
-	"github.com/ankyra/escape-client/model/paths"
-	"github.com/ankyra/escape-client/util"
 	"github.com/ankyra/escape-core/state"
+	"github.com/ankyra/escape/model/dependency_resolvers"
+	"github.com/ankyra/escape/model/paths"
+	"github.com/ankyra/escape/util"
 )
 
 type ScriptStep struct {

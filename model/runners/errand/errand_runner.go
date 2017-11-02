@@ -17,7 +17,7 @@ limitations under the License.
 package errand
 
 import (
-	. "github.com/ankyra/escape-client/model/runners"
+	. "github.com/ankyra/escape/model/runners"
 	core "github.com/ankyra/escape-core"
 )
 

@@ -17,8 +17,8 @@ limitations under the License.
 package controllers
 
 import (
-	. "github.com/ankyra/escape-client/model/interfaces"
-	"github.com/ankyra/escape-client/model/paths"
+	. "github.com/ankyra/escape/model/interfaces"
+	"github.com/ankyra/escape/model/paths"
 )
 
 type PushController struct{}

@@ -18,7 +18,7 @@ package compiler
 
 import (
 	"fmt"
-	"github.com/ankyra/escape-client/model/escape_plan"
+	"github.com/ankyra/escape/model/escape_plan"
 	core "github.com/ankyra/escape-core"
 	. "gopkg.in/check.v1"
 )

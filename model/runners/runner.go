@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ankyra/escape-client/model/paths"
 	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/state"
+	"github.com/ankyra/escape/model/paths"
 )
 
 type Runner interface {

@@ -17,10 +17,11 @@ limitations under the License.
 package runners
 
 import (
-	"github.com/ankyra/escape-client/model"
-	. "gopkg.in/check.v1"
 	"os"
 	"testing"
+
+	"github.com/ankyra/escape/model"
+	. "gopkg.in/check.v1"
 )
 
 func Test(t *testing.T) { TestingT(t) }

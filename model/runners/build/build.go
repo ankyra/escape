@@ -17,8 +17,8 @@ limitations under the License.
 package build
 
 import (
-	. "github.com/ankyra/escape-client/model/runners"
-	"github.com/ankyra/escape-client/model/runners/deploy"
+	. "github.com/ankyra/escape/model/runners"
+	"github.com/ankyra/escape/model/runners/deploy"
 	"github.com/ankyra/escape-core/state"
 )
 
