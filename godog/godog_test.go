@@ -44,7 +44,7 @@ func StartRegistry() {
 			panic(err)
 		}
 	}()
-	time.Sleep(time.Second / 2)
+	time.Sleep(time.Second * 5)
 }
 
 func StopRegistry() {
