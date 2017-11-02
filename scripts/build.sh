@@ -19,4 +19,5 @@ docker run --rm \
     -w /go/src/github.com/ankyra/escape \
     golang:1.9.0 bash -c "go build -v -o escape && mkdir -p docs/cmd && go run docs/generate_cmd_docs.go"
 docker cp src:/go/src/github.com/ankyra/escape/escape escape
+docker cp src:/go/src/github.com/ankyra/escape/docs/cmd docs/cmd
 docker rm src
