@@ -24,12 +24,7 @@ jobs:
           if [ "$CIRCLE_BRANCH" = "master" ] ; then
             escape release --skip-build
 
-            # publish binary
-            echo $GCLOUD_SERVICE_KEY | base64 --decode -i > ${HOME}/gcloud-service-key.json
-            escape deploy escape-latest -d "latest-client"
-            escape errands run upload_to_gcs -v bucket=escape-releases-eu -v credentials=@${HOME}/gcloud-service-key.json -d "latest-client"
-
-            # trigger docker-escape-client build
-            curl -f -X POST https://circleci.com/api/v1.1/project/github/ankyra/docker-escape/tree/master?circle-token=${CIRCLE_DOCKER_ESCAPE_TOKEN}
+            # trigger integration tests
+            curl -f -X POST https://circleci.com/api/v1.1/project/github/ankyra/escape-integration-tests/tree/master?circle-token=${CIRCLE_INTEGRATION_TEST_TOKEN}
           fi
 
