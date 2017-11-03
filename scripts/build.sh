@@ -2,8 +2,6 @@
 
 set -euf -o pipefail
 
-user_id=$(id -u $(whoami))
-
 rm -rf vendor/github.com/ankyra/escape-core
 cp -r deps/_/escape-core/ vendor/github.com/ankyra/escape-core
 rm -rf vendor/github.com/ankyra/escape-core/vendor/
