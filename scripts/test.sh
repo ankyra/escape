@@ -11,5 +11,5 @@ docker run --rm --volumes-from src \
 docker run --rm \
     --volumes-from src \
     -w /go/src/github.com/ankyra/escape \
-    golang:1.9.0 bash -c "go test -cover -v \$(go list ./... | grep -v -E 'vendor|godog' )"
+    golang:1.9.0 bash -c "go test -cover -v \$(go list ./... | grep -v vendor )"
 docker rm src

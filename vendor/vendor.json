@@ -3,24 +3,6 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "DdY9Kw+VClMSZdjFUTRIxzHL/Mc=",
-			"path": "github.com/DATA-DOG/godog",
-			"revision": "70f777599da0f5de682b8848d356611c1738b695",
-			"revisionTime": "2017-07-02T16:22:23Z"
-		},
-		{
-			"checksumSHA1": "wbBy+PwuadGhTgX7IP05lwIR+Qs=",
-			"path": "github.com/DATA-DOG/godog/colors",
-			"revision": "70f777599da0f5de682b8848d356611c1738b695",
-			"revisionTime": "2017-07-02T16:22:23Z"
-		},
-		{
-			"checksumSHA1": "LCu7pjQ5nMZ505XwUU7tQQ1hBuM=",
-			"path": "github.com/DATA-DOG/godog/gherkin",
-			"revision": "70f777599da0f5de682b8848d356611c1738b695",
-			"revisionTime": "2017-07-02T16:22:23Z"
-		},
-		{
 			"checksumSHA1": "D1DBHcuxjal0g6cGrexlqw90JKs=",
 			"path": "github.com/ankyra/escape-client",
 			"revision": "613e48fc40dcbcf7713094ef27590af54ddacba4",
@@ -255,5 +237,5 @@
 			"revisionTime": "2017-07-13T20:15:20Z"
 		}
 	],
-	"rootPath": "github.com/ankyra/escape-client"
+	"rootPath": "github.com/ankyra/escape"
 }
