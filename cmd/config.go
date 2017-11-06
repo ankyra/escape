@@ -35,9 +35,9 @@ var configCmd = &cobra.Command{
 	},
 }
 
-var configShowCmd = &cobra.Command{
-	Use:   "show",
-	Short: "Show the currently active Escape configuration",
+var configProfileCmd = &cobra.Command{
+	Use:   "profile",
+	Short: "Show the currently active Escape profile",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		controllers.ConfigController{}.List(context)
@@ -46,5 +46,5 @@ var configShowCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(configCmd)
-	configCmd.AddCommand(configShowCmd)
+	configCmd.AddCommand(configProfileCmd)
 }
