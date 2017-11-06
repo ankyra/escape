@@ -24,6 +24,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -46,11 +47,19 @@ func (LoginController) Login(context Context, url, username, password string, in
 		context.GetEscapeConfig().GetCurrentTarget().SetApiServer(url)
 		return context.GetEscapeConfig().Save()
 	}
+
+	sortedKeys := sortAuthMethodMapKeys(authMethods)
+
+	sortedAuthMethods := []*types.AuthMethod{}
+	for _, key := range sortedKeys {
+		sortedAuthMethods = append(sortedAuthMethods, authMethods[key])
+	}
+
 	fmt.Println("Available authentication methods:\n")
 	i := 1
 	methods := []*types.AuthMethod{}
-	for key, authMethod := range authMethods {
-		fmt.Printf(" %d. %s [%s]\n", i, key, authMethod.Type)
+	for key, authMethod := range sortedAuthMethods {
+		fmt.Printf(" %d. %s [%s]\n", i, sortedKeys[key], authMethod.Type)
 		methods = append(methods, authMethod)
 		i += 1
 	}
@@ -169,4 +178,15 @@ func getEscapeTokenWithRedeemToken(context Context, url, redeemToken, redeemURL 
 		}
 	}
 	return nil
+}
+
+func sortAuthMethodMapKeys(authMethods map[string]*types.AuthMethod) []string {
+	sortedKeys := make([]string, len(authMethods))
+	i := 0
+	for k, _ := range authMethods {
+		sortedKeys[i] = k
+		i++
+	}
+	sort.Strings(sortedKeys)
+	return sortedKeys
 }
