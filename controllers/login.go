@@ -41,7 +41,7 @@ func (LoginController) Login(context Context, url, username, password string, in
 		return err
 	}
 	if authMethods == nil {
-		fmt.Printf("Inventory at %s does not implement authentication.", url)
+		fmt.Printf("Authentication not required.\n\nSuccessfully logged in to %s\n", url)
 		context.GetEscapeConfig().GetCurrentTarget().SetAuthToken("")
 		context.GetEscapeConfig().GetCurrentTarget().SetApiServer(url)
 		return context.GetEscapeConfig().Save()
