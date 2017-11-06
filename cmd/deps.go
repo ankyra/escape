@@ -17,23 +17,39 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/ankyra/escape/controllers"
 	"github.com/spf13/cobra"
 )
 
-var installCmd = &cobra.Command{
-	Use:   "install",
+var depsCmd = &cobra.Command{
+	Use:   "deps",
 	Short: "Install dependencies",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 0 {
+			return fmt.Errorf("Unknown command '%s'", args[0])
+		}
+		cmd.UsageFunc()(cmd)
+		return nil
+	},
+}
+
+var depsFetchCmd = &cobra.Command{
+	Use:   "fetch",
+	Short: "Install dependencies",
+	Long:  ``,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		err := context.LoadEscapePlan(escapePlanLocation)
 		if err != nil {
 			return err
 		}
-		return controllers.InstallController{}.Install(context)
+		return controllers.DepsController{}.Fetch(context)
 	},
 }
 
 func init() {
-	RootCmd.AddCommand(installCmd)
-	setEscapePlanLocationFlag(installCmd)
+	RootCmd.AddCommand(depsCmd)
+	depsCmd.AddCommand(depsFetchCmd)
+	setEscapePlanLocationFlag(depsCmd)
 }

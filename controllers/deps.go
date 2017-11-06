@@ -21,12 +21,12 @@ import (
 	. "github.com/ankyra/escape/model/interfaces"
 )
 
-type InstallController struct{}
+type DepsController struct{}
 
-func (InstallController) Install(context Context) error {
+func (DepsController) Fetch(context Context) error {
 	context.PushLogRelease(context.GetEscapePlan().GetReleaseId())
 	context.PushLogSection("Build")
-	context.Log("install.start", nil)
+	context.Log("fetch.start", nil)
 	if len(context.GetEscapePlan().Depends) == 0 {
 		return nil
 	}
@@ -38,7 +38,7 @@ func (InstallController) Install(context Context) error {
 	if err != nil {
 		return err
 	}
-	context.Log("install.finished", nil)
+	context.Log("fetch.finished", nil)
 	context.PopLogRelease()
 	context.PopLogSection()
 	return nil
