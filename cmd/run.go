@@ -122,6 +122,17 @@ var runTestCmd = &cobra.Command{
 	},
 }
 
+var runSmokeCmd = &cobra.Command{
+	Use:   "smoke",
+	Short: "Run smoke tests using a local state file.",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if err := ProcessFlagsForContext(true); err != nil {
+			return err
+		}
+		return controllers.SmokeController{}.Smoke(context)
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(runCmd)
 
@@ -146,4 +157,7 @@ func init() {
 
 	runCmd.AddCommand(runTestCmd)
 	setPlanAndStateFlags(runTestCmd)
+
+	runCmd.AddCommand(runSmokeCmd)
+	setPlanAndStateFlags(runSmokeCmd)
 }
