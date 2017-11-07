@@ -28,3 +28,9 @@ func (ConfigController) CurrentProfile(context Context) {
 	fmt.Println(context.GetEscapeConfig().GetCurrentProfile().ToJson())
 	context.GetEscapeConfig()
 }
+
+func (ConfigController) ListProfiles(context Context) {
+	for profileName, _ := range context.GetEscapeConfig().Profiles {
+		fmt.Println(profileName)
+	}
+}
