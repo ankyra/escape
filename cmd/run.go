@@ -111,6 +111,17 @@ var runDestroyCmd = &cobra.Command{
 	},
 }
 
+var runTestCmd = &cobra.Command{
+	Use:   "test",
+	Short: "Run tests using a local state file.",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if err := ProcessFlagsForContext(true); err != nil {
+			return err
+		}
+		return controllers.TestController{}.Test(context)
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(runCmd)
 
@@ -132,4 +143,7 @@ func init() {
 	setPlanAndStateFlags(runDestroyCmd)
 	runDestroyCmd.Flags().BoolVarP(&skipDeployment, "skip-deployment", "", false, "Don't destroy the deployment.")
 	runDestroyCmd.Flags().BoolVarP(&skipBuild, "skip-build", "", false, "Don't destroy the build")
+
+	runCmd.AddCommand(runTestCmd)
+	setPlanAndStateFlags(runTestCmd)
 }
