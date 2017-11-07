@@ -25,6 +25,7 @@ import (
 
 var refresh bool
 var skipDeployment, skipBuild bool
+var uber bool
 
 var runCmd = &cobra.Command{
 	Use:   "run",
@@ -133,6 +134,17 @@ var runSmokeCmd = &cobra.Command{
 	},
 }
 
+var runPackageCmd = &cobra.Command{
+	Use:   "package",
+	Short: "Create a package",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if err := ProcessFlagsForContext(true); err != nil {
+			return err
+		}
+		return controllers.PackageController{}.Package(context, force)
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(runCmd)
 
@@ -160,4 +172,9 @@ func init() {
 
 	runCmd.AddCommand(runSmokeCmd)
 	setPlanAndStateFlags(runSmokeCmd)
+
+	runCmd.AddCommand(runPackageCmd)
+	setPlanAndStateFlags(runPackageCmd)
+	runPackageCmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite output file if it exists")
+	runPackageCmd.Flags().BoolVarP(&uber, "uber", "u", false, "Build an uber package containing all dependencies")
 }
