@@ -26,6 +26,7 @@ import (
 var refresh bool
 var skipDeployment, skipBuild bool
 var uber bool
+var skipTests, skipCache, skipPush, skipDestroyBuild, skipDeploy, skipSmoke, skipDestroyDeploy, skipDestroy bool
 
 var runCmd = &cobra.Command{
 	Use:   "run",
@@ -145,6 +146,26 @@ var runPackageCmd = &cobra.Command{
 	},
 }
 
+var runReleaseCmd = &cobra.Command{
+	Use:   "release",
+	Short: "Release (build, test, package, push)",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if err := ProcessFlagsForContext(true); err != nil {
+			return err
+		}
+		parsedExtraVars, err := ParseExtraVars(extraVars)
+		if err != nil {
+			return err
+		}
+		parsedExtraProviders, err := ParseExtraVars(extraProviders)
+		if err != nil {
+			return err
+		}
+		return controllers.ReleaseController{}.Release(context, uber, skipBuild, skipTests,
+			skipCache, skipPush, skipDestroyBuild, skipDeploy, skipSmoke, skipDestroyDeploy, skipDestroy, force, parsedExtraVars, parsedExtraProviders)
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(runCmd)
 
@@ -177,4 +198,20 @@ func init() {
 	setPlanAndStateFlags(runPackageCmd)
 	runPackageCmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite output file if it exists")
 	runPackageCmd.Flags().BoolVarP(&uber, "uber", "u", false, "Build an uber package containing all dependencies")
+
+	runCmd.AddCommand(runReleaseCmd)
+	setPlanAndStateFlags(runReleaseCmd)
+	runReleaseCmd.Flags().BoolVarP(&uber, "uber", "u", false, "Build an uber package containing all dependencies")
+	runReleaseCmd.Flags().BoolVarP(&skipBuild, "skip-build", "", false, "Skip build")
+	runReleaseCmd.Flags().BoolVarP(&skipTests, "skip-tests", "", false, "Skip tests")
+	runReleaseCmd.Flags().BoolVarP(&skipCache, "skip-cache", "", false, "Skip caching the release")
+	runReleaseCmd.Flags().BoolVarP(&skipPush, "skip-push", "", false, "Skip push")
+	runReleaseCmd.Flags().BoolVarP(&skipDeploy, "skip-deploy", "", false, "Skip deploy")
+	runReleaseCmd.Flags().BoolVarP(&skipSmoke, "skip-smoke", "", false, "Skip smoke tests")
+	runReleaseCmd.Flags().BoolVarP(&skipDestroy, "skip-destroy", "", false, "Skip destroy steps")
+	runReleaseCmd.Flags().BoolVarP(&skipDestroyBuild, "skip-build-destroy", "", false, "Skip build destroy step")
+	runReleaseCmd.Flags().BoolVarP(&skipDestroyDeploy, "skip-deploy-destroy", "", false, "Skip deploy destroy step")
+	runReleaseCmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite output file if it exists")
+	runReleaseCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
+	runReleaseCmd.Flags().StringArrayVarP(&extraProviders, "extra-providers", "p", []string{}, "Extra providers (format: provider=deployment, provider=@deployment.txt, @values.json)")
 }
