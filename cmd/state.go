@@ -38,14 +38,14 @@ var stateCmd = &cobra.Command{
 	},
 }
 
-var showStateDeploymentsCmd = &cobra.Command{
-	Use:   "show-deployments",
+var listDeploymentsCmd = &cobra.Command{
+	Use:   "list-deployments",
 	Short: "Show the deployments",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := context.LoadLocalState(state, environment); err != nil {
 			return err
 		}
-		return controllers.StateController{}.ShowDeployments(context)
+		return controllers.StateController{}.ListDeployments(context)
 	},
 }
 
@@ -116,14 +116,14 @@ var showStateCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(stateCmd)
-	stateCmd.AddCommand(showStateDeploymentsCmd)
+	stateCmd.AddCommand(listDeploymentsCmd)
 	stateCmd.AddCommand(showDeploymentCmd)
 	stateCmd.AddCommand(showProvidersCmd)
 	stateCmd.AddCommand(createStateCmd)
 	stateCmd.AddCommand(showStateCmd)
 
-	setEscapeStateLocationFlag(showStateDeploymentsCmd)
-	setEscapeStateEnvironmentFlag(showStateDeploymentsCmd)
+	setEscapeStateLocationFlag(listDeploymentsCmd)
+	setEscapeStateEnvironmentFlag(listDeploymentsCmd)
 
 	setEscapeStateLocationFlag(showDeploymentCmd)
 	setEscapeStateEnvironmentFlag(showDeploymentCmd)

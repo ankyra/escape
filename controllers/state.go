@@ -25,7 +25,7 @@ import (
 
 type StateController struct{}
 
-func (p StateController) ShowDeployments(context Context) error {
+func (p StateController) ListDeployments(context Context) error {
 	envState := context.GetEnvironmentState()
 	for _, depl := range envState.GetDeployments() {
 		fmt.Println(depl.GetName())
