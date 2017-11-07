@@ -2,7 +2,7 @@ install:
 	go install
 
 test:
-	escape test
+	escape run test
 
 go-test:
 	go test -cover -v $$(go list ./... | grep -v -E 'vendor' ) | grep -v "no test files"
