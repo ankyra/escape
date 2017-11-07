@@ -17,11 +17,25 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/ankyra/escape/controllers"
 	"github.com/spf13/cobra"
 )
 
-var buildCmd = &cobra.Command{
+var runCmd = &cobra.Command{
+	Use:   "run",
+	Short: "Run Escape steps",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) != 0 {
+			return fmt.Errorf("Unknown command '%s'", args[0])
+		}
+		cmd.UsageFunc()(cmd)
+		return nil
+	},
+}
+
+var runBuildCmd = &cobra.Command{
 	Use:   "build",
 	Short: "Build the Escape plan using a local state file.",
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -41,8 +55,9 @@ var buildCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(buildCmd)
-	setPlanAndStateFlags(buildCmd)
-	buildCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
-	buildCmd.Flags().StringArrayVarP(&extraProviders, "extra-providers", "p", []string{}, "Extra providers (format: provider=deployment, provider=@deployment.txt, @values.json)")
+	RootCmd.AddCommand(runCmd)
+	runCmd.AddCommand(runBuildCmd)
+	setPlanAndStateFlags(runBuildCmd)
+	runBuildCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
+	runBuildCmd.Flags().StringArrayVarP(&extraProviders, "extra-providers", "p", []string{}, "Extra providers (format: provider=deployment, provider=@deployment.txt, @values.json)")
 }
