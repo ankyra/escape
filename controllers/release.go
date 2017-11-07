@@ -19,6 +19,7 @@ package controllers
 import (
 	"fmt"
 
+	core "github.com/ankyra/escape-core"
 	. "github.com/ankyra/escape/model/interfaces"
 	"github.com/ankyra/escape/model/paths"
 	"github.com/ankyra/escape/util"
@@ -26,10 +27,17 @@ import (
 
 type ReleaseController struct{}
 
-func (r ReleaseController) Release(context Context, buildFatPackage, skipBuild, skipTests, skipCache, skipPush, skipDestroyBuild, skipDeploy, skipSmoke, skipDestroyDeploy, skipDestroy, forceOverwrite bool, extraVars, extraProviders map[string]string) error {
+func (r ReleaseController) Release(context Context, buildFatPackage, skipBuild, skipTests, skipCache, skipPush, skipDestroyBuild, skipDeploy, skipSmoke, skipDestroyDeploy, skipDestroy, skipIfExists, forceOverwrite bool, extraVars, extraProviders map[string]string) error {
 	context.PushLogRelease(context.GetReleaseMetadata().GetQualifiedReleaseId())
 	context.PushLogSection("Release")
 	context.Log("release.start", nil)
+	if skipIfExists {
+		pkg := core.NewDependencyFromMetadata(context.GetReleaseMetadata())
+		if _, err := context.QueryReleaseMetadata(pkg); err == nil {
+			context.Log("release.skip_existing", nil)
+			return nil
+		}
+	}
 	if !skipBuild {
 		if err := (BuildController{}).Build(context, buildFatPackage, extraVars, extraProviders); err != nil {
 			return err

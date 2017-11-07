@@ -24,9 +24,14 @@ import (
 )
 
 var refresh bool
-var skipDeployment, skipBuild bool
+var skipDeployment bool
 var uber bool
-var skipTests, skipCache, skipPush, skipDestroyBuild, skipDeploy, skipSmoke, skipDestroyDeploy, skipDestroy bool
+
+var skipBuild, skipTests bool
+var skipCache, skipPush bool
+var skipDeploy, skipSmoke bool
+var skipDestroyBuild, skipDestroyDeploy, skipDestroy bool
+var skipIfExists bool
 
 var runCmd = &cobra.Command{
 	Use:   "run",
@@ -162,7 +167,7 @@ var runReleaseCmd = &cobra.Command{
 			return err
 		}
 		return controllers.ReleaseController{}.Release(context, uber, skipBuild, skipTests,
-			skipCache, skipPush, skipDestroyBuild, skipDeploy, skipSmoke, skipDestroyDeploy, skipDestroy, force, parsedExtraVars, parsedExtraProviders)
+			skipCache, skipPush, skipDestroyBuild, skipDeploy, skipSmoke, skipDestroyDeploy, skipDestroy, skipIfExists, force, parsedExtraVars, parsedExtraProviders)
 	},
 }
 
@@ -211,6 +216,7 @@ func init() {
 	runReleaseCmd.Flags().BoolVarP(&skipDestroy, "skip-destroy", "", false, "Skip destroy steps")
 	runReleaseCmd.Flags().BoolVarP(&skipDestroyBuild, "skip-build-destroy", "", false, "Skip build destroy step")
 	runReleaseCmd.Flags().BoolVarP(&skipDestroyDeploy, "skip-deploy-destroy", "", false, "Skip deploy destroy step")
+	runReleaseCmd.Flags().BoolVarP(&skipIfExists, "skip-if-exists", "", false, "Skip all the steps if the version that would be released already exists in the Inventory")
 	runReleaseCmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite output file if it exists")
 	runReleaseCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
 	runReleaseCmd.Flags().StringArrayVarP(&extraProviders, "extra-providers", "p", []string{}, "Extra providers (format: provider=deployment, provider=@deployment.txt, @values.json)")

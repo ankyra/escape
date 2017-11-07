@@ -385,6 +385,10 @@ var logMessages = map[string]map[string]string{
 		"msg":   "Releasing {{.release}}",
 		"level": "info",
 	},
+	"release.skip_existing": map[string]string{
+		"msg":   "Skipping release, because version v {{.version}} already exists in the Inventory and --skip-if-exists is set.",
+		"level": "success",
+	},
 	"run.finished": map[string]string{
 		"msg":   "Run succeeded.",
 		"level": "success",
