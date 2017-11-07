@@ -43,6 +43,7 @@ func (LoginController) Login(context Context, url, username, password string, in
 	if err != nil {
 		return err
 	}
+
 	if authMethods == nil {
 		fmt.Printf("Authentication not required.\n\nSuccessfully logged in to %s\n", url)
 		context.GetEscapeConfig().GetCurrentTarget().SetAuthToken("")
@@ -50,6 +51,25 @@ func (LoginController) Login(context Context, url, username, password string, in
 		return context.GetEscapeConfig().Save()
 	}
 
+	reader := bufio.NewReader(os.Stdin)
+	if username != "" && authMethods["service-account"] != nil {
+		return secretTokenAuth(reader, context, authMethods["service-account"].URL, username, password)
+	}
+
+	method := authUserSelection(reader, authMethods)
+
+	if method.Type == "oauth" {
+		openBrowser(method.URL)
+		return getEscapeTokenWithRedeemToken(context, url, method.RedeemToken, method.RedeemURL)
+	} else if method.Type == "secret-token" {
+		return secretTokenAuth(reader, context, method.URL, username, password)
+	} else {
+		return fmt.Errorf("Unknown auth method.")
+	}
+	return nil
+}
+
+func authUserSelection(reader *bufio.Reader, authMethods map[string]*types.AuthMethod) *types.AuthMethod {
 	sortedKeys := sortAuthMethodMapKeys(authMethods)
 
 	sortedAuthMethods := []*types.AuthMethod{}
@@ -65,9 +85,10 @@ func (LoginController) Login(context Context, url, username, password string, in
 		methods = append(methods, authMethod)
 		i += 1
 	}
-	reader := bufio.NewReader(os.Stdin)
 
 	ix := -1
+	var err error
+
 	for {
 		fmt.Printf("\nPlease select an authentication method (1-%d): ", i-1)
 		requestedMethod, _ := reader.ReadString('\n')
@@ -83,38 +104,45 @@ func (LoginController) Login(context Context, url, username, password string, in
 			break
 		}
 	}
-	method := methods[ix-1]
-	if method.Type == "oauth" {
-		openBrowser(method.URL)
-		return getEscapeTokenWithRedeemToken(context, url, method.RedeemToken, method.RedeemURL)
-	} else if method.Type == "secret-token" {
-		if username == "" {
-			fmt.Printf("Username: ")
-			username, err = reader.ReadString('\n')
-			if err != nil {
-				return err
-			}
-			username = strings.TrimSpace(username)
-		}
-		if password == "" {
-			fmt.Printf("Password: ")
-			passwordBytes, _ := terminal.ReadPassword(int(syscall.Stdin))
-			if err != nil {
-				return err
-			}
-			password = strings.TrimSpace(string(passwordBytes))
-		}
-		authToken, err := context.GetInventory().LoginWithSecretToken(method.URL, username, password)
+
+	return methods[ix-1]
+}
+
+func secretTokenAuth(reader *bufio.Reader, context Context, url, username, password string) error {
+	err := credentialsUserInput(reader, username, password)
+	if err != nil {
+		return err
+	}
+	authToken, err := context.GetInventory().LoginWithSecretToken(url, username, password)
+	if err != nil {
+		return err
+	}
+	context.GetEscapeConfig().GetCurrentTarget().SetAuthToken(authToken)
+	context.GetEscapeConfig().GetCurrentTarget().SetApiServer(url)
+	context.GetEscapeConfig().Save()
+	fmt.Printf("\nSuccessfully retrieved and stored auth token %s\n", authToken)
+	return nil
+}
+
+func credentialsUserInput(reader *bufio.Reader, username, password string) error {
+	var err error
+	if username == "" {
+		fmt.Printf("Username: ")
+		username, err = reader.ReadString('\n')
 		if err != nil {
 			return err
 		}
-		context.GetEscapeConfig().GetCurrentTarget().SetAuthToken(authToken)
-		context.GetEscapeConfig().GetCurrentTarget().SetApiServer(url)
-		context.GetEscapeConfig().Save()
-		fmt.Printf("\nSuccessfully retrieved and stored auth token %s\n", authToken)
-	} else {
-		return fmt.Errorf("Unknown auth method.")
+		username = strings.TrimSpace(username)
 	}
+	if password == "" {
+		fmt.Printf("Password: ")
+		passwordBytes, _ := terminal.ReadPassword(int(syscall.Stdin))
+		if err != nil {
+			return err
+		}
+		password = strings.TrimSpace(string(passwordBytes))
+	}
+
 	return nil
 }
 
