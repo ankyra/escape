@@ -24,25 +24,24 @@ includes:
 
 errands:
   publish_binaries:
-    description: Create binaries for all platforms and upload to a GCS bucket
-    inputs:
-    - description: The target bucket
-      id: bucket
-    - description: Service account credentials
-      id: credentials
-    - default: $this.version
-      id: escape_version
     script: scripts/publish-binaries.sh
-  upload_to_gcs:
-    description: Upload the produced linux/amd64 binary to a GCS bucket
+    description: Create binaries for all supported platforms and upload to a GCS bucket
     inputs:
-    - description: The target bucket
-      id: bucket
-    - description: Service account credentials
-      id: credentials
-    - default: $this.version
-      id: escape_version
-    script: scripts/upload_to_gcs.sh
+    - id: bucket
+      description: The target bucket
+      default: ""
+    - id: credentials
+      description: Google Cloud Storage service account credentials (json)
+      default: ""
+    - id: escape_version
+      default: $this.version
+      visible: false
+    - id: do_upload
+      type: bool
+      default: true
+      description: |
+        Should this errand upload to GCS? If not, then this errand will only
+        build the binaries.
 
 build_templates:
 - file: util/metadata.go.tpl
