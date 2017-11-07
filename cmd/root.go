@@ -45,10 +45,15 @@ Website: http://escape.ankyra.io/
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		context = model.NewContext()
 		err := context.LoadEscapeConfig(cfgFile, cfgProfile)
-		context.SetLogCollapse(cfgLogCollapse)
 		if err != nil {
 			return err
 		}
+
+		context.SetLogCollapse(cfgLogCollapse)
+		if cfgLogLevel != "" {
+			context.GetLogger().SetLogLevel(cfgLogLevel)
+		}
+
 		return nil
 	},
 }

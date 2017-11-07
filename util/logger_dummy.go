@@ -18,3 +18,6 @@ func (l *LoggerDummy) PushRelease(s string) {
 
 func (l *LoggerDummy) PopRelease() {
 }
+
+func (l *LoggerDummy) SetLogLevel(logLevel string) {
+}

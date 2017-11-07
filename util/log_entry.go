@@ -24,6 +24,20 @@ const (
 	ERROR   = iota
 )
 
+func stringToLogLevel(logLevel string) LogLevel {
+	if logLevel == "debug" {
+		return DEBUG
+	} else if logLevel == "warn" {
+		return WARN
+	} else if logLevel == "success" {
+		return SUCCESS
+	} else if logLevel == "error" {
+		return ERROR
+	}
+
+	return INFO
+}
+
 const EscapeLogo = `
   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   @                                 @

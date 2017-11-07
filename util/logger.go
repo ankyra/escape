@@ -37,18 +37,21 @@ type Logger interface {
 	PopSection()
 	PushRelease(string)
 	PopRelease()
+	SetLogLevel(string)
 }
 
 type logger struct {
 	sections  []string
 	releases  []string
 	consumers []LogConsumer
+	logLevel  LogLevel
 }
 
 func NewLogger(consumers []LogConsumer) Logger {
 	return &logger{
 		sections:  []string{},
 		consumers: consumers,
+		logLevel:  INFO,
 	}
 }
 
@@ -57,6 +60,12 @@ func (l *logger) Log(key string, values map[string]string) {
 	if !ok {
 		panic("Unknown log key: " + key)
 	}
+
+	level := stringToLogLevel(msg["level"])
+	if stringToLogLevel(msg["level"]) < l.logLevel {
+		return
+	}
+
 	tpl, err := template.New("tpl").Parse(msg["msg"])
 	if err != nil {
 		panic(err)
@@ -70,16 +79,6 @@ func (l *logger) Log(key string, values map[string]string) {
 	writer := bytes.NewBuffer([]byte{})
 	if err := tpl.Execute(writer, values); err != nil {
 		panic(err)
-	}
-	level := INFO
-	if msg["level"] == "debug" {
-		level = DEBUG
-	} else if msg["level"] == "warn" {
-		level = WARN
-	} else if msg["level"] == "success" {
-		level = SUCCESS
-	} else if msg["level"] == "error" {
-		level = ERROR
 	}
 	collapse, ok := msg["collapse"]
 	if !ok {
@@ -112,4 +111,8 @@ func (l *logger) PushRelease(s string) {
 
 func (l *logger) PopRelease() {
 	l.releases = l.releases[:len(l.releases)-1]
+}
+
+func (l *logger) SetLogLevel(logLevel string) {
+	l.logLevel = stringToLogLevel(logLevel)
 }
