@@ -23,6 +23,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var refresh bool
+
 var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Run Escape steps",
@@ -54,10 +56,27 @@ var runBuildCmd = &cobra.Command{
 	},
 }
 
+var runConvergeCmd = &cobra.Command{
+	Use:   "converge",
+	Short: "Bring the environment into its desired state",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if err := ProcessFlagsForContext(false); err != nil {
+			return err
+		}
+		return controllers.ConvergeController{}.Converge(context, refresh)
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(runCmd)
+
 	runCmd.AddCommand(runBuildCmd)
 	setPlanAndStateFlags(runBuildCmd)
 	runBuildCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
 	runBuildCmd.Flags().StringArrayVarP(&extraProviders, "extra-providers", "p", []string{}, "Extra providers (format: provider=deployment, provider=@deployment.txt, @values.json)")
+
+	runCmd.AddCommand(runConvergeCmd)
+	setPlanAndStateFlags(runConvergeCmd)
+	runConvergeCmd.Flags().BoolVarP(&refresh, "refresh", "", false, "Redeploy 'ok' deployments")
+
 }
