@@ -24,6 +24,7 @@ import (
 )
 
 var refresh bool
+var skipDeployment, skipBuild bool
 
 var runCmd = &cobra.Command{
 	Use:   "run",
@@ -99,6 +100,17 @@ var runDeployCmd = &cobra.Command{
 	},
 }
 
+var runDestroyCmd = &cobra.Command{
+	Use:   "destroy",
+	Short: "Destroy the deployment of the current release in the local state file.",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if err := ProcessFlagsForContext(true); err != nil {
+			return err
+		}
+		return controllers.DestroyController{}.Destroy(context, !skipBuild, !skipDeployment)
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(runCmd)
 
@@ -115,4 +127,9 @@ func init() {
 	setPlanAndStateFlags(runDeployCmd)
 	runDeployCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
 	runDeployCmd.Flags().StringArrayVarP(&extraProviders, "extra-providers", "p", []string{}, "Extra providers (format: provider=deployment, provider=@deployment.txt, @values.json)")
+
+	runCmd.AddCommand(runDestroyCmd)
+	setPlanAndStateFlags(runDestroyCmd)
+	runDestroyCmd.Flags().BoolVarP(&skipDeployment, "skip-deployment", "", false, "Don't destroy the deployment.")
+	runDestroyCmd.Flags().BoolVarP(&skipBuild, "skip-build", "", false, "Don't destroy the build")
 }
