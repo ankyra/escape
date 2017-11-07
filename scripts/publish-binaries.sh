@@ -7,6 +7,8 @@ ARCHS="386 amd64"
 
 BASE_DIR=$(dirname "$(readlink -f "$0")")
 SRC_DIR=$(readlink -f "${BASE_DIR}/../")
+GOLANG_VERSION=1.9.0
+BUILD_IMAGE="golang:${GOLANG_VERSION}"
 
 echo "$INPUT_credentials" > service_account.json
 
@@ -20,13 +22,21 @@ for GOOS in $PLATFORMS; do
         target="${SRC_DIR}/${filename}"
         if [ ! -f $target ] ; then
             echo "Building for $GOOS-$ARCH from ${SRC_DIR}"
-            docker run --rm -v "$SRC_DIR":/go/src/github.com/ankyra/escape \
-                            -w /go/src/github.com/ankyra/escape \
-                            -e GOOS=$GOOS \
-                            -e GOARCH=$ARCH \
-                            golang:1.8 go build -v -o escape-$GOOS-$ARCH
+            docker rm src || true
+            docker create -v /go/src/github.com/ankyra/ --name src ${BUILD_IMAGE} /bin/true
+            docker cp "$SRC_DIR" src:/go/src/github.com/ankyra/tmp
+            docker run --rm --volumes-from src \
+                -w /go/src/github.com/ankyra/ \
+                ${BUILD_IMAGE} mv tmp escape
+            docker run --rm \
+                --volumes-from src \
+                -w /go/src/github.com/ankyra/escape \
+                -e GOOS=$GOOS \
+                -e GOARCH=$ARCH \
+                ${BUILD_IMAGE} bash -c "go build -v -o escape-$GOOS-$ARCH"
+            docker cp src:/go/src/github.com/ankyra/escape/escape-${GOOS}-${ARCH} ${SRC_DIR}/escape
+            docker rm src
             echo "Creating archive: ${target}"
-            mv "${SRC_DIR}/escape-$GOOS-$ARCH" "${SRC_DIR}/escape"
             tar -C "${SRC_DIR}" -cvzf "${target}" "escape"
             rm -f "${SRC_DIR}/escape"
         else
