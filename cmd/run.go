@@ -35,7 +35,7 @@ var skipIfExists bool
 
 var runCmd = &cobra.Command{
 	Use:   "run",
-	Short: "Run Escape steps",
+	Short: "Run Escape steps: build, converge, deploy, package, release, smoke, test",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 0 {
 			return fmt.Errorf("Unknown command '%s'", args[0])
@@ -118,28 +118,6 @@ var runDestroyCmd = &cobra.Command{
 	},
 }
 
-var runTestCmd = &cobra.Command{
-	Use:   "test",
-	Short: "Run tests using a local state file.",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := ProcessFlagsForContext(true); err != nil {
-			return err
-		}
-		return controllers.TestController{}.Test(context)
-	},
-}
-
-var runSmokeCmd = &cobra.Command{
-	Use:   "smoke",
-	Short: "Run smoke tests using a local state file.",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := ProcessFlagsForContext(true); err != nil {
-			return err
-		}
-		return controllers.SmokeController{}.Smoke(context)
-	},
-}
-
 var runPackageCmd = &cobra.Command{
 	Use:   "package",
 	Short: "Create a package",
@@ -171,6 +149,28 @@ var runReleaseCmd = &cobra.Command{
 	},
 }
 
+var runSmokeCmd = &cobra.Command{
+	Use:   "smoke",
+	Short: "Run smoke tests using a local state file.",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if err := ProcessFlagsForContext(true); err != nil {
+			return err
+		}
+		return controllers.SmokeController{}.Smoke(context)
+	},
+}
+
+var runTestCmd = &cobra.Command{
+	Use:   "test",
+	Short: "Run tests using a local state file.",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if err := ProcessFlagsForContext(true); err != nil {
+			return err
+		}
+		return controllers.TestController{}.Test(context)
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(runCmd)
 
@@ -193,12 +193,6 @@ func init() {
 	runDestroyCmd.Flags().BoolVarP(&skipDeployment, "skip-deployment", "", false, "Don't destroy the deployment.")
 	runDestroyCmd.Flags().BoolVarP(&skipBuild, "skip-build", "", false, "Don't destroy the build")
 
-	runCmd.AddCommand(runTestCmd)
-	setPlanAndStateFlags(runTestCmd)
-
-	runCmd.AddCommand(runSmokeCmd)
-	setPlanAndStateFlags(runSmokeCmd)
-
 	runCmd.AddCommand(runPackageCmd)
 	setPlanAndStateFlags(runPackageCmd)
 	runPackageCmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite output file if it exists")
@@ -220,4 +214,10 @@ func init() {
 	runReleaseCmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite output file if it exists")
 	runReleaseCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
 	runReleaseCmd.Flags().StringArrayVarP(&extraProviders, "extra-providers", "p", []string{}, "Extra providers (format: provider=deployment, provider=@deployment.txt, @values.json)")
+
+	runCmd.AddCommand(runSmokeCmd)
+	setPlanAndStateFlags(runSmokeCmd)
+
+	runCmd.AddCommand(runTestCmd)
+	setPlanAndStateFlags(runTestCmd)
 }
