@@ -26,15 +26,19 @@ for GOOS in $PLATFORMS; do
                             golang:1.8 go build -v -o escape-$GOOS-$ARCH
             mv escape-${GOOS}-${ARCH} "${SRC_DIR}/escape"
             tar -C "${SRC_DIR}" -cvzf "${target}" "escape"
-            rm escape
+            rm "${SRC_DIR}/escape"
         else
             echo "File $target already exists"
         fi
 
         if [ "$INPUT_do_upload" = "1" ] ; then 
             gcs_target="gs://$INPUT_bucket/escape/$INPUT_escape_version/$filename"
+            echo "Copying to $gcs_target"
             gsutil cp "$target" "$gcs_target"
+            echo "Setting ACL on $gcs_target"
             gsutil acl ch -u AllUsers:R "$gcs_target"
         fi
     done
 done
+
+rm service_account.json
