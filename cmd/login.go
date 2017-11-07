@@ -23,7 +23,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var username, password, url string
+var username, password, url, authMethod string
 var insecureSkipVerify bool
 
 var loginCmd = &cobra.Command{
@@ -33,7 +33,7 @@ var loginCmd = &cobra.Command{
 		if url == "" {
 			return fmt.Errorf("Missing Escape server URL")
 		}
-		return controllers.LoginController{}.Login(context, url, username, password, insecureSkipVerify)
+		return controllers.LoginController{}.Login(context, url, authMethod, username, password, insecureSkipVerify)
 	},
 }
 
@@ -44,4 +44,5 @@ func init() {
 	loginCmd.Flags().StringVarP(&url, "url", "e", "", "The Escape server URL")
 	loginCmd.Flags().BoolVarP(&insecureSkipVerify, "insecure-skip-verify", "i", false,
 		"Don't verify server's certificate chain and host name.")
+	loginCmd.Flags().StringVarP(&authMethod, "auth-method", "", "", "If available, use this auth method instead of prompting for user input")
 }

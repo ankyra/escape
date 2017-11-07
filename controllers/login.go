@@ -37,7 +37,7 @@ import (
 
 type LoginController struct{}
 
-func (LoginController) Login(context Context, url, username, password string, insecureSkipVerify bool) error {
+func (LoginController) Login(context Context, url, authMethodRequested, username, password string, insecureSkipVerify bool) error {
 	context.GetEscapeConfig().GetCurrentTarget().SetInsecureSkipVerify(insecureSkipVerify)
 	authMethods, err := context.GetInventory().GetAuthMethods(url)
 	if err != nil {
@@ -56,13 +56,27 @@ func (LoginController) Login(context Context, url, username, password string, in
 		return secretTokenAuth(reader, context, authMethods["service-account"].URL, username, password)
 	}
 
-	method := authUserSelection(reader, authMethods)
+	var authMethod *types.AuthMethod
 
-	if method.Type == "oauth" {
-		openBrowser(method.URL)
-		return getEscapeTokenWithRedeemToken(context, url, method.RedeemToken, method.RedeemURL)
-	} else if method.Type == "secret-token" {
-		return secretTokenAuth(reader, context, method.URL, username, password)
+	if authMethodRequested != "" {
+		authMethod = authMethods[authMethodRequested]
+		if authMethod == nil {
+			for _, availableAuthMethod := range authMethods {
+				if availableAuthMethod.Type == authMethodRequested {
+					authMethod = availableAuthMethod
+				}
+			}
+		}
+	}
+
+	if authMethod == nil {
+		authMethod = authUserSelection(reader, authMethods)
+	}
+	if authMethod.Type == "oauth" {
+		openBrowser(authMethod.URL)
+		return getEscapeTokenWithRedeemToken(context, url, authMethod.RedeemToken, authMethod.RedeemURL)
+	} else if authMethod.Type == "secret-token" {
+		return secretTokenAuth(reader, context, authMethod.URL, username, password)
 	} else {
 		return fmt.Errorf("Unknown auth method.")
 	}
