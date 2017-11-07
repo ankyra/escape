@@ -54,6 +54,9 @@ func (s *ServerEndpoints) NextReleaseVersion(project, name, prefix string) strin
 func (s *ServerEndpoints) ListProjects() string {
 	return s.ApiServer() + "api/v1/registry/"
 }
+func (s *ServerEndpoints) ListApplications(project string) string {
+	return s.ApiServer() + "api/v1/registry/" + project + "/units/"
+}
 func (s *ServerEndpoints) ProjectQuery(project string) string {
 	return s.ApiServer() + "api/v1/registry/" + project + "/"
 }

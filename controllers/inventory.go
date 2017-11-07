@@ -48,7 +48,7 @@ func (r InventoryController) Query(context Context, project, application, appVer
 	for _, line := range result {
 		if application == "" {
 			fmt.Println(line)
-		} else {
+		} else if line != "" {
 			fmt.Printf("v%s\n", line)
 		}
 	}

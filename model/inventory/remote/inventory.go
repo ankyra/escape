@@ -22,6 +22,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape/model/inventory/types"
@@ -41,6 +42,9 @@ func NewRemoteInventory(apiServer, escapeToken string, insecureSkipVerify bool) 
 }
 
 func (r *inventory) QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
+	if !strings.HasPrefix(version, "v") {
+		version = "v" + version
+	}
 	url := r.endpoints.ReleaseQuery(project, name, version)
 	resp, err := r.client.GET_with_authentication(url)
 	if err != nil {
@@ -224,7 +228,7 @@ func (r *inventory) LoginWithSecretToken(url, username, password string) (string
 	return resp.Header.Get("X-Escape-Token"), nil
 }
 
-func (r *inventory) urlToList(url, doingMessage string) ([]string, error) {
+func (r *inventory) urlToList(url, doingMessage string, transformToList func(map[string]interface{}) []string) ([]string, error) {
 	resp, err := r.client.GET_with_authentication(url)
 	if err != nil {
 		return nil, err
@@ -234,19 +238,39 @@ func (r *inventory) urlToList(url, doingMessage string) ([]string, error) {
 	} else if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("Couldn't %s: %s", doingMessage, resp.Status)
 	}
-	result := []string{}
+	result := make(map[string]interface{})
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, err
 	}
-	return result, nil
+
+	return transformToList(result), nil
 }
 
 func (r *inventory) ListProjects() ([]string, error) {
-	return r.urlToList(r.endpoints.ListProjects(), "list projects")
+	return r.urlToList(r.endpoints.ListProjects(), "list projects", func(result map[string]interface{}) []string {
+		projects := []string{}
+		for key, _ := range result {
+			projects = append(projects, key)
+		}
+		return projects
+	})
 }
 func (r *inventory) ListApplications(project string) ([]string, error) {
-	return r.urlToList(r.endpoints.ProjectQuery(project), "list applications for project '"+project+"'")
+	return r.urlToList(r.endpoints.ListApplications(project), "list applications for project '"+project+"'", func(result map[string]interface{}) []string {
+		projects := []string{}
+		for key, _ := range result {
+			projects = append(projects, key)
+		}
+		return projects
+	})
 }
 func (r *inventory) ListVersions(project, app string) ([]string, error) {
-	return r.urlToList(r.endpoints.ProjectNameQuery(project, app), "list version for project '"+project+"/"+app+"'")
+	return r.urlToList(r.endpoints.ProjectNameQuery(project, app), "list version for project '"+project+"/"+app+"'", func(result map[string]interface{}) []string {
+		versions := make([]string, len(result["versions"].([]interface{})))
+		for _, v := range result["versions"].([]interface{}) {
+			versions = append(versions, v.(string))
+		}
+		fmt.Println(versions)
+		return versions
+	})
 }
