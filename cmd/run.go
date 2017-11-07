@@ -67,6 +67,38 @@ var runConvergeCmd = &cobra.Command{
 	},
 }
 
+var runDeployCmd = &cobra.Command{
+	Use:   "deploy",
+	Short: "Deploy a release unit.",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		loadLocalEscapePlan := len(args) == 0
+		if err := ProcessFlagsForContext(loadLocalEscapePlan); err != nil {
+			return err
+		}
+
+		ctrl := controllers.DeployController{}
+		parsedExtraVars, err := ParseExtraVars(extraVars)
+		if err != nil {
+			return err
+		}
+
+		parsedExtraProviders, err := ParseExtraVars(extraProviders)
+		if err != nil {
+			return err
+		}
+		if loadLocalEscapePlan {
+			return ctrl.Deploy(context, parsedExtraVars, parsedExtraProviders)
+		} else {
+			for _, arg := range args {
+				if err := ctrl.FetchAndDeploy(context, arg, parsedExtraVars, parsedExtraProviders); err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(runCmd)
 
@@ -79,4 +111,8 @@ func init() {
 	setPlanAndStateFlags(runConvergeCmd)
 	runConvergeCmd.Flags().BoolVarP(&refresh, "refresh", "", false, "Redeploy 'ok' deployments")
 
+	runCmd.AddCommand(runDeployCmd)
+	setPlanAndStateFlags(runDeployCmd)
+	runDeployCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
+	runDeployCmd.Flags().StringArrayVarP(&extraProviders, "extra-providers", "p", []string{}, "Extra providers (format: provider=deployment, provider=@deployment.txt, @values.json)")
 }
