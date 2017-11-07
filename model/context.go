@@ -209,7 +209,7 @@ func (c *Context) CompileEscapePlan() error {
 	metadata, err := compiler.Compile(
 		c.EscapePlan,
 		c.GetInventory(),
-		c.GetEscapeConfig().GetCurrentTarget().GetProject(),
+		c.GetEscapeConfig().GetCurrentProfile().GetProject(),
 		c.GetDependencyMetadata,
 		c.QueryReleaseMetadata,
 		c.Logger,
@@ -235,9 +235,9 @@ func (c *Context) LoadLocalState(cfgFile, environment string) error {
 }
 
 func (c *Context) LoadRemoteState(project, environment string) error {
-	apiServer := c.EscapeConfig.GetCurrentTarget().GetApiServer()
-	escapeToken := c.EscapeConfig.GetCurrentTarget().GetAuthToken()
-	insecureSkipVerify := c.EscapeConfig.GetCurrentTarget().GetInsecureSkipVerify()
+	apiServer := c.EscapeConfig.GetCurrentProfile().GetApiServer()
+	escapeToken := c.EscapeConfig.GetCurrentProfile().GetAuthToken()
+	insecureSkipVerify := c.EscapeConfig.GetCurrentProfile().GetInsecureSkipVerify()
 	envState, err := state.NewRemoteStateProvider(apiServer, escapeToken, insecureSkipVerify).Load(project, environment)
 	if err != nil {
 		return err

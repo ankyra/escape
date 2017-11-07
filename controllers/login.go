@@ -38,7 +38,7 @@ import (
 type LoginController struct{}
 
 func (LoginController) Login(context Context, url, authMethodRequested, username, password string, insecureSkipVerify bool) error {
-	context.GetEscapeConfig().GetCurrentTarget().SetInsecureSkipVerify(insecureSkipVerify)
+	context.GetEscapeConfig().GetCurrentProfile().SetInsecureSkipVerify(insecureSkipVerify)
 	authMethods, err := context.GetInventory().GetAuthMethods(url)
 	if err != nil {
 		return err
@@ -46,8 +46,8 @@ func (LoginController) Login(context Context, url, authMethodRequested, username
 
 	if authMethods == nil {
 		fmt.Printf("Authentication not required.\n\nSuccessfully logged in to %s\n", url)
-		context.GetEscapeConfig().GetCurrentTarget().SetAuthToken("")
-		context.GetEscapeConfig().GetCurrentTarget().SetApiServer(url)
+		context.GetEscapeConfig().GetCurrentProfile().SetAuthToken("")
+		context.GetEscapeConfig().GetCurrentProfile().SetApiServer(url)
 		return context.GetEscapeConfig().Save()
 	}
 
@@ -131,8 +131,8 @@ func secretTokenAuth(reader *bufio.Reader, context Context, url, username, passw
 	if err != nil {
 		return err
 	}
-	context.GetEscapeConfig().GetCurrentTarget().SetAuthToken(authToken)
-	context.GetEscapeConfig().GetCurrentTarget().SetApiServer(url)
+	context.GetEscapeConfig().GetCurrentProfile().SetAuthToken(authToken)
+	context.GetEscapeConfig().GetCurrentProfile().SetApiServer(url)
 	context.GetEscapeConfig().Save()
 	fmt.Printf("\nSuccessfully retrieved and stored auth token %s\n", authToken)
 	return nil
@@ -203,8 +203,8 @@ func getEscapeTokenWithRedeemToken(context Context, url, redeemToken, redeemURL 
 			if err != nil {
 				return fmt.Errorf("Couldn't read response from server '%s': %s", redeemURL, resp.Status)
 			}
-			context.GetEscapeConfig().GetCurrentTarget().SetAuthToken(string(authToken))
-			context.GetEscapeConfig().GetCurrentTarget().SetApiServer(url)
+			context.GetEscapeConfig().GetCurrentProfile().SetAuthToken(string(authToken))
+			context.GetEscapeConfig().GetCurrentProfile().SetApiServer(url)
 			context.GetEscapeConfig().Save()
 			fmt.Printf("\nSuccessfully retrieved and stored auth token %s\n", authToken)
 			return nil

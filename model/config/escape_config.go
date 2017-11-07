@@ -30,12 +30,12 @@ import (
 )
 
 type EscapeConfig struct {
-	ActiveTarget string                         `json:"current_target"`
-	Targets      map[string]*EscapeTargetConfig `json:"targets"`
-	saveLocation string                         `json:"-"`
+	ActiveProfile string                          `json:"current_profile"`
+	Profiles      map[string]*EscapeProfileConfig `json:"profiles"`
+	saveLocation  string                          `json:"-"`
 }
 
-type EscapeTargetConfig struct {
+type EscapeProfileConfig struct {
 	Project            string        `json:"project"`
 	ApiServer          string        `json:"api_server"`
 	Username           string        `json:"username"`
@@ -49,15 +49,15 @@ type EscapeTargetConfig struct {
 
 func NewEscapeConfig() *EscapeConfig {
 	cfg := &EscapeConfig{}
-	cfg.Targets = map[string]*EscapeTargetConfig{
-		"default": newEscapeTargetConfig(cfg),
+	cfg.Profiles = map[string]*EscapeProfileConfig{
+		"default": newEscapeProfileConfig(cfg),
 	}
-	cfg.ActiveTarget = "default"
+	cfg.ActiveProfile = "default"
 	return cfg
 }
 
-func newEscapeTargetConfig(cfg *EscapeConfig) *EscapeTargetConfig {
-	target := &EscapeTargetConfig{
+func newEscapeProfileConfig(cfg *EscapeConfig) *EscapeProfileConfig {
+	profile := &EscapeProfileConfig{
 		Project:        os.Getenv("ESCAPE_PROJECT"),
 		ApiServer:      os.Getenv("ESCAPE_API_SERVER"),
 		Username:       os.Getenv("ESCAPE_USERNAME"),
@@ -67,21 +67,21 @@ func newEscapeTargetConfig(cfg *EscapeConfig) *EscapeTargetConfig {
 		GcsBucketUrl:   os.Getenv("ESCAPE_BUCKET_URL"),
 		parent:         cfg,
 	}
-	if target.StorageBackend == "" {
-		target.StorageBackend = "escape"
+	if profile.StorageBackend == "" {
+		profile.StorageBackend = "escape"
 	}
-	if target.ApiServer == "" {
-		target.ApiServer = "https://escape.ankyra.io"
+	if profile.ApiServer == "" {
+		profile.ApiServer = "https://escape.ankyra.io"
 	}
-	return target
+	return profile
 }
 
 func (c *EscapeConfig) GetInventory() inventory.Inventory {
-	return c.GetCurrentTarget().GetInventory()
+	return c.GetCurrentProfile().GetInventory()
 }
 
-func (e *EscapeConfig) GetCurrentTarget() *EscapeTargetConfig {
-	return e.Targets[e.ActiveTarget]
+func (e *EscapeConfig) GetCurrentProfile() *EscapeProfileConfig {
+	return e.Profiles[e.ActiveProfile]
 }
 
 func (e *EscapeConfig) LoadConfig(cfgFile, cfgProfile string) error {
@@ -102,12 +102,12 @@ func (e *EscapeConfig) LoadConfig(cfgFile, cfgProfile string) error {
 		}
 	}
 	if cfgProfile != "" {
-		e.ActiveTarget = cfgProfile
+		e.ActiveProfile = cfgProfile
 	}
-	if _, ok := e.Targets[e.ActiveTarget]; !ok {
-		return fmt.Errorf("Referenced target '%s' was not found in the Escape configuration file.", e.ActiveTarget)
+	if _, ok := e.Profiles[e.ActiveProfile]; !ok {
+		return fmt.Errorf("Referenced profile '%s' was not found in the Escape configuration file.", e.ActiveProfile)
 	}
-	for _, t := range e.Targets {
+	for _, t := range e.Profiles {
 		t.parent = e
 	}
 	return nil
@@ -141,7 +141,7 @@ func (e *EscapeConfig) Save() error {
 	return ioutil.WriteFile(e.saveLocation, str, mode)
 }
 
-func (t *EscapeTargetConfig) ToJson() string {
+func (t *EscapeProfileConfig) ToJson() string {
 	str, err := json.MarshalIndent(t, "", "   ")
 	if err != nil {
 		panic(err)
@@ -149,61 +149,61 @@ func (t *EscapeTargetConfig) ToJson() string {
 	return string(str)
 }
 
-func (t *EscapeTargetConfig) GetInventory() inventory.Inventory {
+func (t *EscapeProfileConfig) GetInventory() inventory.Inventory {
 	if t.StorageBackend == "escape" {
 		return inventory.NewRemoteInventory(t.ApiServer, t.AuthToken, t.InsecureSkipVerify)
 	}
 	return inventory.NewLocalInventory()
 }
 
-func (t *EscapeTargetConfig) Save() error {
+func (t *EscapeProfileConfig) Save() error {
 	return t.parent.Save()
 }
-func (t *EscapeTargetConfig) GetApiServer() string {
+func (t *EscapeProfileConfig) GetApiServer() string {
 	return t.ApiServer
 }
-func (t *EscapeTargetConfig) GetUsername() string {
+func (t *EscapeProfileConfig) GetUsername() string {
 	return t.Username
 }
-func (t *EscapeTargetConfig) GetPassword() string {
+func (t *EscapeProfileConfig) GetPassword() string {
 	return t.Password
 }
-func (t *EscapeTargetConfig) GetAuthToken() string {
+func (t *EscapeProfileConfig) GetAuthToken() string {
 	return t.AuthToken
 }
-func (t *EscapeTargetConfig) GetStorageBackend() string {
+func (t *EscapeProfileConfig) GetStorageBackend() string {
 	return t.StorageBackend
 }
-func (t *EscapeTargetConfig) GetGcsBucketUrl() string {
+func (t *EscapeProfileConfig) GetGcsBucketUrl() string {
 	return t.GcsBucketUrl
 }
-func (t *EscapeTargetConfig) GetProject() string {
+func (t *EscapeProfileConfig) GetProject() string {
 	if t.Project == "" {
 		return "_"
 	}
 	return t.Project
 }
-func (t *EscapeTargetConfig) SetApiServer(v string) {
+func (t *EscapeProfileConfig) SetApiServer(v string) {
 	t.ApiServer = v
 }
-func (t *EscapeTargetConfig) SetUsername(v string) {
+func (t *EscapeProfileConfig) SetUsername(v string) {
 	t.Username = v
 }
-func (t *EscapeTargetConfig) SetPassword(v string) {
+func (t *EscapeProfileConfig) SetPassword(v string) {
 	t.Password = v
 }
-func (t *EscapeTargetConfig) SetAuthToken(v string) {
+func (t *EscapeProfileConfig) SetAuthToken(v string) {
 	t.AuthToken = v
 }
-func (t *EscapeTargetConfig) SetStorageBackend(v string) {
+func (t *EscapeProfileConfig) SetStorageBackend(v string) {
 	t.StorageBackend = v
 }
-func (t *EscapeTargetConfig) SetGcsBucketUrl(v string) {
+func (t *EscapeProfileConfig) SetGcsBucketUrl(v string) {
 	t.GcsBucketUrl = v
 }
-func (t *EscapeTargetConfig) GetInsecureSkipVerify() bool {
+func (t *EscapeProfileConfig) GetInsecureSkipVerify() bool {
 	return t.InsecureSkipVerify
 }
-func (t *EscapeTargetConfig) SetInsecureSkipVerify(v bool) {
+func (t *EscapeProfileConfig) SetInsecureSkipVerify(v bool) {
 	t.InsecureSkipVerify = v
 }

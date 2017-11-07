@@ -40,7 +40,7 @@ var configProfileCmd = &cobra.Command{
 	Short: "Show the currently active Escape profile",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		controllers.ConfigController{}.List(context)
+		controllers.ConfigController{}.CurrentProfile(context)
 	},
 }
 

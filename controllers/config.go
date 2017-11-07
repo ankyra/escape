@@ -24,6 +24,7 @@ import (
 
 type ConfigController struct{}
 
-func (ConfigController) List(context Context) {
-	fmt.Println(context.GetEscapeConfig().GetCurrentTarget().ToJson())
+func (ConfigController) CurrentProfile(context Context) {
+	fmt.Println(context.GetEscapeConfig().GetCurrentProfile().ToJson())
+	context.GetEscapeConfig()
 }
