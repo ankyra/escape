@@ -20,11 +20,8 @@ jobs:
     - run: 
         name: Build Escape release
         command: |
-          set -ex
-          escape build && escape test
-          if [ "$CIRCLE_BRANCH" = "master" ] ; then
-            escape release --skip-build
-
+          escape build && escape test && if [ "$CIRCLE_BRANCH" = "master" ] ; then
+            escape release --skip-build && \
             # trigger integration tests
             curl -f -X POST https://circleci.com/api/v1.1/project/github/ankyra/escape-integration-tests/tree/master?circle-token=${CIRCLE_INTEGRATION_TEST_TOKEN}
           fi
