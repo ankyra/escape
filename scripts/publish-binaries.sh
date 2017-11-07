@@ -19,14 +19,16 @@ for GOOS in $PLATFORMS; do
         filename="escape-v$INPUT_escape_version-$GOOS-$ARCH.tgz"
         target="${SRC_DIR}/${filename}"
         if [ ! -f $target ] ; then
+            echo "Building for $GOOS-$ARCH from ${SRC_DIR}"
             docker run --rm -v "$SRC_DIR":/go/src/github.com/ankyra/escape \
                             -w /go/src/github.com/ankyra/escape \
                             -e GOOS=$GOOS \
                             -e GOARCH=$ARCH \
                             golang:1.8 go build -v -o escape-$GOOS-$ARCH
-            mv escape-${GOOS}-${ARCH} "${SRC_DIR}/escape"
+            echo "Creating archive: ${target}"
+            mv "${SRC_DIR}/escape-$GOOS-$ARCH" "${SRC_DIR}/escape"
             tar -C "${SRC_DIR}" -cvzf "${target}" "escape"
-            rm "${SRC_DIR}/escape"
+            rm -f "${SRC_DIR}/escape"
         else
             echo "File $target already exists"
         fi
