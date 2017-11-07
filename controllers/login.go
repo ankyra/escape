@@ -27,10 +27,12 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	. "github.com/ankyra/escape/model/interfaces"
 	"github.com/ankyra/escape/model/inventory/types"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 type LoginController struct{}
@@ -96,11 +98,11 @@ func (LoginController) Login(context Context, url, username, password string, in
 		}
 		if password == "" {
 			fmt.Printf("Password: ")
-			password, _ = reader.ReadString('\n')
+			passwordBytes, _ := terminal.ReadPassword(int(syscall.Stdin))
 			if err != nil {
 				return err
 			}
-			password = strings.TrimSpace(password)
+			password = strings.TrimSpace(string(passwordBytes))
 		}
 		authToken, err := context.GetInventory().LoginWithSecretToken(method.URL, username, password)
 		if err != nil {
