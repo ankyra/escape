@@ -54,7 +54,10 @@ var showDeploymentCmd = &cobra.Command{
 	Short: "Show a deployment",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if deployment == "" {
-			return fmt.Errorf("Missing deployment name")
+			if err := ProcessFlagsForContext(true); err != nil {
+				return err
+			}
+			return controllers.StateController{}.ShowDeployment(context, context.GetRootDeploymentName())
 		}
 		if err := ProcessFlagsForContext(false); err != nil {
 			return err
@@ -103,24 +106,12 @@ var createStateCmd = &cobra.Command{
 	},
 }
 
-var showStateCmd = &cobra.Command{
-	Use:   "show",
-	Short: "Show a deployment",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := ProcessFlagsForContext(true); err != nil {
-			return err
-		}
-		return controllers.StateController{}.ShowDeployment(context, context.GetRootDeploymentName())
-	},
-}
-
 func init() {
 	RootCmd.AddCommand(stateCmd)
 	stateCmd.AddCommand(listDeploymentsCmd)
 	stateCmd.AddCommand(showDeploymentCmd)
 	stateCmd.AddCommand(showProvidersCmd)
 	stateCmd.AddCommand(createStateCmd)
-	stateCmd.AddCommand(showStateCmd)
 
 	setEscapeStateLocationFlag(listDeploymentsCmd)
 	setEscapeStateEnvironmentFlag(listDeploymentsCmd)
@@ -132,7 +123,6 @@ func init() {
 	setEscapeStateLocationFlag(showProvidersCmd)
 	setEscapeStateEnvironmentFlag(showProvidersCmd)
 
-	setPlanAndStateFlags(showStateCmd)
 	setPlanAndStateFlags(createStateCmd)
 	createStateCmd.Flags().BoolVarP(&deployStage, "deploy", "", false, "Use deployment instead of build stage")
 	createStateCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
