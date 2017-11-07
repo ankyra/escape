@@ -11,7 +11,7 @@ jobs:
     - run:
         name: Install Docker client
         command: |
-          set -x
+          set -ex
           VER="17.03.0-ce"
           curl -L -o /tmp/docker-$VER.tgz https://get.docker.com/builds/Linux/x86_64/docker-$VER.tgz
           tar -xz -C /tmp -f /tmp/docker-$VER.tgz
@@ -20,6 +20,7 @@ jobs:
     - run: 
         name: Build Escape release
         command: |
+          set -ex
           escape build && escape test
           if [ "$CIRCLE_BRANCH" = "master" ] ; then
             escape release --skip-build
