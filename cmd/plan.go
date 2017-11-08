@@ -25,7 +25,7 @@ import (
 
 var releaseName string
 var outputPath string
-var force, includeDocs bool
+var force bool
 
 var planCmd = &cobra.Command{
 	Use:   "plan",
@@ -46,7 +46,7 @@ var initCmd = &cobra.Command{
 		if releaseName == "" {
 			return fmt.Errorf("Missing 'name' parameter")
 		}
-		return controllers.PlanController{}.Init(context, releaseName, outputPath, force, includeDocs)
+		return controllers.PlanController{}.Init(context, releaseName, outputPath, force)
 	},
 }
 
@@ -108,7 +108,6 @@ func init() {
 	initCmd.Flags().StringVarP(&releaseName, "name", "n", "", "The release name (eg. hello-world)")
 	initCmd.Flags().StringVarP(&outputPath, "output", "o", "escape.yml", "The output location")
 	initCmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite output file if it exists")
-	initCmd.Flags().BoolVarP(&includeDocs, "include-docs", "", false, "Include all fields and their relevant documentation")
 
 	setPlanAndStateFlags(previewCmd)
 	setPlanAndStateFlags(diffCmd)

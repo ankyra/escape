@@ -21,8 +21,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/ankyra/escape-core"
 	"github.com/ankyra/escape/util"
+	"github.com/ankyra/escape-core"
 	"gopkg.in/yaml.v2"
 )
 
@@ -104,24 +104,11 @@ func (e *EscapePlan) LoadConfig(cfgFile string) error {
 func (e *EscapePlan) Init(name string) *EscapePlan {
 	e.Name = name
 	e.Version = "0.0.@"
-	e.Build = "scripts/build.sh"
-	e.Test = "scripts/test.sh"
 	return e
 }
 
 func (e *EscapePlan) ToYaml() []byte {
-	pr := NewPrettyPrinter(
-		includeEmpty(false),
-		includeDocs(false),
-	)
-	return pr.Print(e)
-}
-
-func (e *EscapePlan) ToMaxifiedYaml() []byte {
-	pr := NewPrettyPrinter(
-		includeEmpty(true),
-		includeDocs(true),
-	)
+	pr := NewPrettyPrinter()
 	return pr.Print(e)
 }
 

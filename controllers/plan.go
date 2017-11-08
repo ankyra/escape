@@ -66,13 +66,10 @@ func (p PlanController) Minify(context Context, outputLocation string) error {
 	return nil
 }
 
-func (p PlanController) Init(context Context, build_id, output_file string, force, includeDocs bool) error {
+func (p PlanController) Init(context Context, build_id, output_file string, force bool) error {
 	plan := escape_plan.NewEscapePlan().Init(build_id)
 	if util.PathExists(output_file) && !force {
 		return fmt.Errorf("'%s' already exists. Use --force / -f to overwrite.", output_file)
-	}
-	if includeDocs {
-		return ioutil.WriteFile(output_file, plan.ToMaxifiedYaml(), 0644)
 	}
 	return ioutil.WriteFile(output_file, plan.ToYaml(), 0644)
 }
