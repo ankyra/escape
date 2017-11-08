@@ -123,7 +123,7 @@ func authUserSelection(reader *bufio.Reader, authMethods map[string]*types.AuthM
 }
 
 func secretTokenAuth(reader *bufio.Reader, context Context, url, username, password string) error {
-	err := credentialsUserInput(reader, username, password)
+	err := credentialsUserInput(reader, &username, &password)
 	if err != nil {
 		return err
 	}
@@ -138,23 +138,24 @@ func secretTokenAuth(reader *bufio.Reader, context Context, url, username, passw
 	return nil
 }
 
-func credentialsUserInput(reader *bufio.Reader, username, password string) error {
+func credentialsUserInput(reader *bufio.Reader, username, password *string) error {
 	var err error
-	if username == "" {
+	if *username == "" {
 		fmt.Printf("Username: ")
-		username, err = reader.ReadString('\n')
+		input, err := reader.ReadString('\n')
 		if err != nil {
 			return err
 		}
-		username = strings.TrimSpace(username)
+		fmt.Println("You inputed, " + input)
+		*username = strings.TrimSpace(input)
 	}
-	if password == "" {
+	if *password == "" {
 		fmt.Printf("Password: ")
 		passwordBytes, _ := terminal.ReadPassword(int(syscall.Stdin))
 		if err != nil {
 			return err
 		}
-		password = strings.TrimSpace(string(passwordBytes))
+		*password = strings.TrimSpace(string(passwordBytes))
 	}
 
 	return nil
