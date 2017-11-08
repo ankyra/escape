@@ -17,9 +17,10 @@ limitations under the License.
 package deploy
 
 import (
+	"os"
+
 	"github.com/ankyra/escape-core/state"
 	. "gopkg.in/check.v1"
-	"os"
 )
 
 func (s *testSuite) Test_SmokeRunner(c *C) {
@@ -46,7 +47,7 @@ func (s *testSuite) Test_SmokeRunner_missing_deployment_state(c *C) {
 	runCtx := getRunContext(c, "testdata/escape_state", "testdata/smoke_plan.yml")
 	err := NewSmokeRunner().Run(runCtx)
 	c.Assert(err, Not(IsNil))
-	c.Assert(err.Error(), Equals, "Deployment state '_/name' for release 'name-v0.0.1' could not be found")
+	c.Assert(err.Error(), Equals, "Deployment state '_/name' for release 'name-v0.0.1' could not be found\n\nYou may need to run `escape run deploy name-v0.0.1` to resolve this issue")
 	checkStatus(c, runCtx, state.TestFailure)
 }
 

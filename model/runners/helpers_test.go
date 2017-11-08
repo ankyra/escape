@@ -80,7 +80,7 @@ func (s *testSuite) Test_NewScriptStep_initDeploymentState_fails_if_should_be_de
 	step := NewScriptStep(runCtx, "deploy", "pre_build", true)
 	state, err := step.initDeploymentState(runCtx)
 	c.Assert(state, IsNil)
-	c.Assert(err.Error(), Equals, "Deployment state '_/name' for release 'name-v0.0.1' could not be found")
+	c.Assert(err.Error(), Equals, "Deployment state '_/name' for release 'name-v0.0.1' could not be found\n\nYou may need to run `escape run deploy name-v0.0.1` to resolve this issue")
 }
 
 func (s *testSuite) Test_NewScriptStep_initDeploymentState_uses_Inputs_function(c *C) {

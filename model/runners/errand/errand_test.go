@@ -17,11 +17,12 @@ limitations under the License.
 package errand
 
 import (
+	"os"
+	"testing"
+
 	"github.com/ankyra/escape/model"
 	"github.com/ankyra/escape/model/runners"
 	. "gopkg.in/check.v1"
-	"os"
-	"testing"
 )
 
 func Test(t *testing.T) { TestingT(t) }
@@ -69,7 +70,7 @@ func (s *testSuite) Test_ErrandRunner_missing_deployment_state(c *C) {
 	errand := runCtx.GetReleaseMetadata().GetErrands()["my-errand"]
 	err := NewErrandRunner(errand, nil).Run(runCtx)
 	c.Assert(err, Not(IsNil))
-	c.Assert(err.Error(), Equals, "Deployment state '_/name' for release 'name-v0.0.1' could not be found")
+	c.Assert(err.Error(), Equals, "Deployment state '_/name' for release 'name-v0.0.1' could not be found\n\nYou may need to run `escape run deploy name-v0.0.1` to resolve this issue")
 }
 
 func (s *testSuite) Test_ErrandRunner_fails_if_errand_variable_is_missing(c *C) {

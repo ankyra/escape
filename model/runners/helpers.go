@@ -190,14 +190,28 @@ func (b *ScriptStep) initScript(ctx RunnerContext) (string, error) {
 
 func (b *ScriptStep) initDeploymentState(ctx RunnerContext) (*state.DeploymentState, error) {
 	deploymentState := ctx.GetDeploymentState()
+
 	metadata := ctx.GetReleaseMetadata()
 	if b.ShouldBeDeployed && !deploymentState.IsDeployed(b.Stage, metadata) {
+		var cmd string
 		stageName := "Build"
+
 		if b.Stage == "deploy" {
 			stageName = "Deployment"
+			if ctx.GetRootDeploymentName() == metadata.GetVersionlessReleaseId() {
+				cmd = fmt.Sprintf("escape run deploy %s", metadata.GetReleaseId())
+			} else {
+				cmd = fmt.Sprintf("escape run deploy -d %s %s", ctx.GetRootDeploymentName(), metadata.GetReleaseId())
+			}
+		} else {
+			if ctx.GetRootDeploymentName() == metadata.GetVersionlessReleaseId() {
+				cmd = "escape run build"
+			} else {
+				cmd = fmt.Sprintf("escape run build -d %s", ctx.GetRootDeploymentName())
+			}
 		}
-		return nil, fmt.Errorf("%s state '%s' for release '%s' could not be found",
-			stageName, ctx.GetRootDeploymentName(), metadata.GetReleaseId())
+		return nil, fmt.Errorf("%s state '%s' for release '%s' could not be found\n\nYou may need to run `%s` to resolve this issue",
+			stageName, ctx.GetRootDeploymentName(), metadata.GetReleaseId(), cmd)
 	}
 	if b.Inputs != nil {
 		inputs, err := b.Inputs(ctx, b.Stage)

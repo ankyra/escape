@@ -17,8 +17,9 @@ limitations under the License.
 package deploy
 
 import (
-	. "gopkg.in/check.v1"
 	"os"
+
+	. "gopkg.in/check.v1"
 )
 
 func (s *testSuite) Test_PostDeployRunner(c *C) {
@@ -44,7 +45,7 @@ func (s *testSuite) Test_PostDeployRunner_missing_deployment_state(c *C) {
 	runCtx := getRunContext(c, "testdata/escape_state", "testdata/post_deploy_plan.yml")
 	err := NewPostDeployRunner().Run(runCtx)
 	c.Assert(err, Not(IsNil))
-	c.Assert(err.Error(), Equals, "Deployment state '_/name' for release 'name-v0.0.1' could not be found")
+	c.Assert(err.Error(), Equals, "Deployment state '_/name' for release 'name-v0.0.1' could not be found\n\nYou may need to run `escape run deploy name-v0.0.1` to resolve this issue")
 }
 
 func (s *testSuite) Test_PostDeployRunner_failing_script(c *C) {
