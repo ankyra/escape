@@ -57,7 +57,7 @@ func (r *inventory) QueryReleaseMetadata(project, name, version string) (*core.R
 		if project == "_" {
 			releaseQuery = name + "-" + version
 		}
-		return nil, fmt.Errorf("Couldn't query release '%s': %s", releaseQuery, resp.Status)
+		return nil, fmt.Errorf(`Dependency "%s" could not be found. It may not exist in the inventory you're using (http://%s) and you need to release it first, or you may not have been given access to it.`, releaseQuery, r.endpoints.ApiServer())
 	}
 	result := core.NewEmptyReleaseMetadata()
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
