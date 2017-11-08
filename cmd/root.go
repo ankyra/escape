@@ -23,6 +23,7 @@ import (
 	. "github.com/ankyra/escape/model/interfaces"
 	"github.com/ankyra/escape/util"
 	"github.com/spf13/cobra"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 var cfgFile, cfgProfile, cfgLogLevel string
@@ -52,6 +53,10 @@ Website: http://escape.ankyra.io/
 		context.SetLogCollapse(cfgLogCollapse)
 		if cfgLogLevel != "" {
 			context.GetLogger().SetLogLevel(cfgLogLevel)
+		}
+
+		if !terminal.IsTerminal(int(os.Stdout.Fd())) {
+			context.SetLogCollapse(false)
 		}
 
 		return nil
