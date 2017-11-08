@@ -104,6 +104,12 @@ func NewPrettyPrinter(cfg ...printConf) *prettyPrinter {
 func (e *prettyPrinter) Print(plan *EscapePlan) []byte {
 	yamlMap := plan.ToDict()
 	writer := bytes.NewBuffer([]byte{})
+
+	writer.Write([]byte("# Auto-generated escape plan\n"))
+	writer.Write([]byte("#\n"))
+	writer.Write([]byte("# More information about Escape plans can be found at:\n"))
+	writer.Write([]byte("# https://escape.ankyra.io/docs/plans\n\n"))
+
 	ordering := []string{
 		"name", "version", "description", "logo", "extends", "depends",
 		"consumes", "build_consumes", "deploy_consumes",
