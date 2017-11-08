@@ -5,27 +5,6 @@ type: "docs"
 toc: true
 ---
 
-# Installation
-
-The following instructions assume 64 bit machines, which is probably what you need, 
-but you can find 32 bit builds on the [Downloads](/downloads/) page.
-
-## Linux
-
-```
-curl https://
-tar -xvzf 
-sudo mv escape /usr/bin/escape
-```
-
-## MacOS
-
-```
-curl https://
-tar -xvzf 
-sudo mv escape /usr/bin/escape
-```
-
 # The Escape Plan
 
 At its core Escape provides abstractions to work with _units of deployments_. A

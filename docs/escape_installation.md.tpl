@@ -62,4 +62,5 @@ escape run test
 ./escape
 ```
 
+[&lt; Back: Installation](/docs/what-is-escape/)
 [&gt; Next: Hello World](/docs/quickstart-hello-world/)
