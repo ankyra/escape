@@ -55,7 +55,7 @@ func ProcessFlagsForContext(loadLocalEscapePlan bool) error {
 
 func setEscapePlanLocationFlag(c *cobra.Command) {
 	c.Flags().StringVarP(&escapePlanLocation,
-		"input", "i", "escape.yml",
+		"plan", "", "escape.yml",
 		"The location of the Escape plan.",
 	)
 }
