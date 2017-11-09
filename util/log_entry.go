@@ -256,7 +256,7 @@ var logMessages = map[string]map[string]string{
 		"level": "info",
 	},
 	"deploy.finished": map[string]string{
-		"msg":   "Successfully deployed {{ .release }} with deployment name {{ .deployment }} in the {{ .environment }} environment",
+		"msg":   "Successfully deployed {{ .release }} with deployment name {{ .deployment }} in the {{ .environment }} environment.",
 		"level": "success",
 	},
 	"deploy.start": map[string]string{

@@ -29,7 +29,7 @@ The output may surprise you:
 $ escape run deploy hello-world-latest  
 Deploy: Running deploy step /home/user/workspace/deps/_/hello-world/hello.sh.
 Deploy: hello.sh: Hello world! 👋
-Deploy: ✔️ Successfully deployed.
+Deploy: ✔️ Successfully deployed hello-world-v0.0.1 with deployment name _/hello-world in the dev environment.
 ```
 
 One of Escape's defining features is the ability to codify configuration inputs
