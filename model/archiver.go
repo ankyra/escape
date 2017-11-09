@@ -20,13 +20,14 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"errors"
-	"github.com/ankyra/escape/model/paths"
-	"github.com/ankyra/escape/util"
-	core "github.com/ankyra/escape-core"
 	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	core "github.com/ankyra/escape-core"
+	"github.com/ankyra/escape/model/paths"
+	"github.com/ankyra/escape/util"
 )
 
 type Archiver struct{}
@@ -35,29 +36,29 @@ func NewReleaseArchiver() *Archiver {
 	return &Archiver{}
 }
 
-func (a *Archiver) Archive(metadata *core.ReleaseMetadata, forceOverwrite bool) error {
+func (a *Archiver) Archive(metadata *core.ReleaseMetadata, forceOverwrite bool) (string, error) {
 	//    applog("archive.start", release=metadata.get_full_build_id())
 	if err := buildReleaseAndTargetDirectories(metadata); err != nil {
-		return err
+		return "", err
 	}
 	path := paths.NewPath()
 	scratchSpace := path.ScratchSpaceDirectory(metadata)
 	releaseJsonPath := path.ScratchSpaceReleaseMetadata(metadata)
 	if err := metadata.WriteJsonFile(releaseJsonPath); err != nil {
-		return err
+		return "", err
 	}
 	for _, dir := range metadata.GetDirectories() {
 		scratchDir := filepath.Join(scratchSpace, dir)
 		util.MkdirRecursively(scratchDir)
 	}
 	if err := copyFiles(scratchSpace, metadata.Files); err != nil {
-		return err
+		return "", err
 	}
 	return a.buildTarArchive(metadata, forceOverwrite)
 	//    applog("archive.finished", release=metadata.get_full_build_id(), path=os.path.realpath(tar))
 }
 
-func (a *Archiver) buildTarArchive(metadata *core.ReleaseMetadata, forceOverwrite bool) error {
+func (a *Archiver) buildTarArchive(metadata *core.ReleaseMetadata, forceOverwrite bool) (string, error) {
 	path := paths.NewPath()
 	scratchSpace := path.ScratchSpaceDirectory(metadata)
 	packageId := metadata.GetReleaseId()
@@ -65,25 +66,25 @@ func (a *Archiver) buildTarArchive(metadata *core.ReleaseMetadata, forceOverwrit
 	target := path.ReleaseLocation(metadata)
 	if util.PathExists(target) {
 		if !forceOverwrite {
-			return errors.New("File '" + target + "' already exists. Use --force / -f to ignore.")
+			return "", errors.New("File '" + target + "' already exists. Use --force / -f to ignore.")
 		}
 		os.Remove(target)
 	}
 	packageCwd, err := filepath.Abs(filepath.Join(scratchSpace, ".."))
 	if err != nil {
-		return err
+		return "", err
 	}
 	currentDir, err := os.Getwd()
 	if err != nil {
-		return err
+		return "", err
 	}
 	os.Chdir(packageCwd)
 	if err := buildGzip(packageId, packageGzip); err != nil {
-		return err
+		return "", err
 	}
 	os.Chdir(currentDir)
 	pkg := filepath.Join(packageCwd, packageGzip)
-	return os.Rename(pkg, target)
+	return target, os.Rename(pkg, target)
 }
 
 func buildReleaseAndTargetDirectories(metadata *core.ReleaseMetadata) error {

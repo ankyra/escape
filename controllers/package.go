@@ -28,11 +28,13 @@ func (PackageController) Package(context Context, forceOverwrite bool) error {
 	context.PushLogSection("Package")
 	context.Log("package.start", nil)
 	archiver := model.NewReleaseArchiver()
-	err := archiver.Archive(context.GetReleaseMetadata(), forceOverwrite)
+	releasePath, err := archiver.Archive(context.GetReleaseMetadata(), forceOverwrite)
 	if err != nil {
 		return err
 	}
-	context.Log("package.finished", nil)
+	context.Log("package.finished", map[string]string{
+		"path": releasePath,
+	})
 	context.PopLogRelease()
 	context.PopLogSection()
 	return nil

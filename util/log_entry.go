@@ -59,7 +59,7 @@ const EscapeLogo = `
 
 var logMessages = map[string]map[string]string{
 	"package.finished": map[string]string{
-		"msg":   "Packaged {{ .release }}",
+		"msg":   "Packaged {{ .release }} at {{ .path }}",
 		"level": "success",
 	},
 	"package.start": map[string]string{
