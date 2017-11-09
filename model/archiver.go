@@ -84,7 +84,16 @@ func (a *Archiver) buildTarArchive(metadata *core.ReleaseMetadata, forceOverwrit
 	}
 	os.Chdir(currentDir)
 	pkg := filepath.Join(packageCwd, packageGzip)
-	return target, os.Rename(pkg, target)
+	err = os.Rename(pkg, target)
+	if err != nil {
+		return "", err
+	}
+	err = os.RemoveAll(filepath.Join(packageCwd, packageId))
+	if err != nil {
+		return "", err
+	}
+
+	return target, nil
 }
 
 func buildReleaseAndTargetDirectories(metadata *core.ReleaseMetadata) error {
