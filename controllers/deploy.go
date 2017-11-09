@@ -83,7 +83,10 @@ func (d DeployController) Deploy(context Context, extraVars, extraProviders map[
 	if err := deploy.NewDeployRunner().Run(runnerContext); err != nil {
 		return err
 	}
-	context.Log("deploy.finished", nil)
+	context.Log("deploy.finished", map[string]string{
+		"deployment":  context.GetRootDeploymentName(),
+		"environment": context.GetEnvironmentState().Name,
+	})
 	context.PopLogRelease()
 	context.PopLogSection()
 	return nil
