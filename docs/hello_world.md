@@ -29,7 +29,6 @@ The output may surprise you:
 $ escape run deploy hello-world-latest  
 Deploy: Running deploy step /home/user/workspace/deps/_/hello-world/hello.sh.
 Deploy: hello.sh: Hello world! 👋
-  Smoke tests: ✔️ Smoke tests passed.
 Deploy: ✔️ Successfully deployed.
 ```
 
