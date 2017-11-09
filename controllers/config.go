@@ -34,3 +34,7 @@ func (ConfigController) ListProfiles(context Context) {
 		fmt.Println(profileName)
 	}
 }
+
+func (ConfigController) SetProfile(context Context) {
+	context.GetEscapeConfig().Save()
+}

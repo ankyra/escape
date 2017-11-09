@@ -53,8 +53,17 @@ var configListProfilesCmd = &cobra.Command{
 	},
 }
 
+var configSetProfileCmd = &cobra.Command{
+	Use:   "set-profile",
+	Short: "Set the active Escape profile",
+	Run: func(cmd *cobra.Command, args []string) {
+		controllers.ConfigController{}.SetProfile(context)
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(configCmd)
 	configCmd.AddCommand(configProfileCmd)
 	configCmd.AddCommand(configListProfilesCmd)
+	configCmd.AddCommand(configSetProfileCmd)
 }
