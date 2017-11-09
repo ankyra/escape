@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/ankyra/escape/cmd"
-	"github.com/spf13/cobra/doc"
 	"log"
 	"path"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/ankyra/escape/cmd"
+	"github.com/spf13/cobra/doc"
 )
 
 const fmTemplate = `---
@@ -16,6 +17,7 @@ date: %s
 title: "%s"
 slug: %s
 type: "docs"
+toc: true
 ---
 `
 
