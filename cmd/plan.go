@@ -25,7 +25,7 @@ import (
 
 var releaseName string
 var outputPath string
-var force bool
+var force, minify bool
 
 var planCmd = &cobra.Command{
 	Use:   "plan",
@@ -46,7 +46,7 @@ var initCmd = &cobra.Command{
 		if releaseName == "" {
 			return fmt.Errorf("Missing 'name' parameter")
 		}
-		return controllers.PlanController{}.Init(context, releaseName, outputPath, force)
+		return controllers.PlanController{}.Init(context, releaseName, outputPath, force, minify)
 	},
 }
 
@@ -108,6 +108,7 @@ func init() {
 	initCmd.Flags().StringVarP(&releaseName, "name", "n", "", "The release name (eg. hello-world)")
 	initCmd.Flags().StringVarP(&outputPath, "output", "o", "escape.yml", "The output location")
 	initCmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite output file if it exists")
+	initCmd.Flags().BoolVarP(&minify, "minify", "m", false, "Minify the generated Escape plan")
 
 	setPlanAndStateFlags(previewCmd)
 	setPlanAndStateFlags(diffCmd)
