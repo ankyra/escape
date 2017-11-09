@@ -5,49 +5,51 @@ type: "docs"
 toc: true
 ---
 
-Escape is a cross-cloud release engineering kit, ....
+Escape is a cross-cloud release engineering kit that aims to reach a few goals:
 
-# Escape tries to solve these problems
+## Goal 1: Managing Multiple Environments
 
-Promoting artifacts from check-in to live
+Whether it's source code. cloud infrastructure, data or documentation; most
+artefacts go through one or several phases before going live.  Often this means
+that there will be at least one <i>environment</i> that is as close to the real
+thing as possible so that the business can develop and test new features, but
+on big projects there may be dozens; some only short-lived. 
 
-Expensive ad-hoc pipelines and processes that are hard to change
+Managing, promoting and changing configuration between these different
+environments can often be quite difficult.  Escape's goal is to make
+managing multiple environments easier and automatable.
 
-Having different deployment processes for different layers of the infrastructure
+## Goal 2: Different Layers, Different Tools, Same Process
 
-Knowing what’s running where. What version is live, what version is in CI, etc.
+Different artefacts are often built and configured using different tools. For
+example: we may be building a Docker image using the `docker` command and
+deploy the image using the `kubectl` command on a Kubernetes cluster that was
+built on AWS using the `terraform` command.
 
-Complexity of configuration management
+Having different tools targetting different layers makes it hard to orchestrate
+the deployment of a complete environment and to verify its consistency.
+Escape's goal is to make it easy to compose packages, potentially containing
+different kind of artefacts, into entire platforms.
 
-Reusability of code and components
+## Goal 3: Enable Best Practices in Modern Release Engineering
 
-Close coupling between configuration and code
+A modern software application stacks consists of many different layers that all
+need to be versioned, configured, deployed and operated differently. The
+integration points between these layers are often bespoke, hard to change, and
+full of technical debt.
 
+Escape's goal is to bring and somewhat standardise the best practices in
+release engineering, but without being overly opinionated. 
 
-Escape makes it possible to ensure that
-Source code
-Cloud infrastructure
-Configuration
-Open Source Components
-Data
-Documentation
+## Goal 4: To Make All Packages Identifiable and Environments Self-Documenting
 
-Is:
-Identifiable
-Reproducible
-Consistent
-Automated
-Operatable
+It can be hard to find out what version is live, what version has passed
+integration tests, what change was deployed, who authored it, etc. 
 
-A good, cohesive CD pipeline can capture a big part of a software business’ processes.
+Escape should enable you to make everything:
 
-# How does Escape work?
+* Identifiable
+* Reproducible
+* Consistent
 
-Escape can build, test and deploy packages targeting any layer of the stack by wrapping around other tools like terraform, packer, kubectl, helm, etc.
-
-Packages are centrally stored in the Escape Inventory
-
-Packages can depend on and extend other packages; making different layers of the stack composable.
-
-Packages can be deployed into environments
-
+[&gt; Next: Get Started](/docs/escape-installation/)

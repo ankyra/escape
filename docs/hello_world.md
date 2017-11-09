@@ -14,8 +14,8 @@ escape version
 ```
 
 If that works then the time has come to have Escape greet the world by 
-deploying the latest `hello-world` package, which will be fetched from the 
-[Public Inventory](https://escape.ankyra.io/app/registry/_/hello-world/latest/).
+[deploying](/docs/escape_run_deploy/) the latest `hello-world` package, which
+will be fetched from the [Public Inventory](https://escape.ankyra.io/app/registry/_/hello-world/latest/).
 
 ```bash
 mkdir workspace
@@ -45,4 +45,4 @@ escape run deploy hello-world-latest -v who=you
 We will learn more about this as we try to [build our own packages](/docs/quickstart-building-a-package/)
 
 [&lt; Back: Installation](/docs/escape-installation/)
-[&gt; Next: Hello World](/docs/quickstart-building-a-package/)
+[&gt; Next: Building a Package](/docs/quickstart-building-a-package/)
