@@ -83,9 +83,6 @@ func (d DeployController) Deploy(context Context, extraVars, extraProviders map[
 	if err := deploy.NewDeployRunner().Run(runnerContext); err != nil {
 		return err
 	}
-	if err := (SmokeController{}).Smoke(context); err != nil {
-		return err
-	}
 	context.Log("deploy.finished", nil)
 	context.PopLogRelease()
 	context.PopLogSection()
