@@ -26,7 +26,6 @@ import (
 type ConfigController struct{}
 
 func (ConfigController) ShowProfile(context Context, json bool) {
-
 	if json {
 		fmt.Println(context.GetEscapeConfig().GetCurrentProfile().ToJson())
 	} else {
@@ -40,7 +39,6 @@ func (ConfigController) ShowProfile(context Context, json bool) {
 }
 
 func (ConfigController) ShowProfileField(context Context, field string) error {
-
 	configMap := util.StructToMapStringInterface(*context.GetEscapeConfig().GetCurrentProfile(), "json")
 	if configMap[field] != nil {
 		fmt.Printf("%s: %v\n", field, configMap[field])
