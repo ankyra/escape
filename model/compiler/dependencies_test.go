@@ -19,9 +19,9 @@ package compiler
 import (
 	"fmt"
 
-	"github.com/ankyra/escape/model/escape_plan"
 	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/variables"
+	"github.com/ankyra/escape/model/escape_plan"
 	. "gopkg.in/check.v1"
 )
 
@@ -32,7 +32,7 @@ func (s *suite) Test_Compile_Dependencies(c *C) {
 		"dependency-latest as dep",
 	}
 	lookupResult := core.NewReleaseMetadata("dependency", "1.0")
-	ctx := NewCompilerContext(plan, nil, "_")
+	ctx := NewCompilerContext(plan, nil)
 	ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
 		if dep.ReleaseId == "_/dependency-v1.0" {
 			return lookupResult, nil
@@ -65,7 +65,7 @@ func (s *suite) Test_Compile_Dependencies_with_mapping(c *C) {
 		},
 	}
 	lookupResult := core.NewReleaseMetadata("dependency", "1.0")
-	ctx := NewCompilerContext(plan, nil, "_")
+	ctx := NewCompilerContext(plan, nil)
 	ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
 		if dep.ReleaseId == "_/dependency-v1.0" {
 			return lookupResult, nil
@@ -97,7 +97,7 @@ func (s *suite) Test_Compile_Dependencies_adds_inputs_without_defaults(c *C) {
 	v1, _ := variables.NewVariableFromString("no-default", "string")
 	v2, _ := variables.NewVariableFromString("with-default", "string")
 	v2.Default = "test"
-	ctx := NewCompilerContext(plan, nil, "_")
+	ctx := NewCompilerContext(plan, nil)
 	ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
 		if dep.ReleaseId == "_/dependency-v1.0" {
 			m := core.NewReleaseMetadata("dependency", "1.0")
@@ -119,7 +119,7 @@ func (s *suite) Test_Compile_Dependencies_adds_consumers(c *C) {
 	plan.Depends = []interface{}{
 		"dependency-v1.0",
 	}
-	ctx := NewCompilerContext(plan, nil, "_")
+	ctx := NewCompilerContext(plan, nil)
 	ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
 		if dep.ReleaseId == "_/dependency-v1.0" {
 			m := core.NewReleaseMetadata("dependency", "1.0")
@@ -143,7 +143,7 @@ func (s *suite) Test_Compile_Dependencies_adds_consumers(c *C) {
 func (s *suite) Test_Compile_Dependencies_nil(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Depends = nil
-	ctx := NewCompilerContext(plan, nil, "_")
+	ctx := NewCompilerContext(plan, nil)
 	c.Assert(compileDependencies(ctx), IsNil)
 	c.Assert(ctx.Metadata.Depends, HasLen, 0)
 }
@@ -153,7 +153,7 @@ func (s *suite) Test_Compile_Dependencies_fails_if_invalid_format(c *C) {
 	plan.Depends = []interface{}{
 		"$invalid_dependency$",
 	}
-	ctx := NewCompilerContext(plan, nil, "_")
+	ctx := NewCompilerContext(plan, nil)
 	c.Assert(compileDependencies(ctx).Error(), Equals, "Invalid release format: $invalid_dependency$")
 }
 
@@ -162,7 +162,7 @@ func (s *suite) Test_Compile_Dependencies_fails_if_resolve_version_fails(c *C) {
 	plan.Depends = []interface{}{
 		"dependency-latest",
 	}
-	ctx := NewCompilerContext(plan, nil, "_")
+	ctx := NewCompilerContext(plan, nil)
 	ctx.ReleaseQuery = func(dep *core.Dependency) (*core.ReleaseMetadata, error) {
 		return nil, fmt.Errorf("Resolve error")
 	}
@@ -177,6 +177,6 @@ func (s *suite) Test_Compile_Dependencies_fails_if_unexpected_type(c *C) {
 	plan.Depends = []interface{}{
 		5,
 	}
-	ctx := NewCompilerContext(plan, nil, "_")
+	ctx := NewCompilerContext(plan, nil)
 	c.Assert(compileDependencies(ctx).Error(), Equals, "Invalid dependency format '5' (expecting dict or string, got 'int')")
 }

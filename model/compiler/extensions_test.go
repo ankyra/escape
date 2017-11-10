@@ -18,8 +18,9 @@ package compiler
 
 import (
 	"fmt"
-	"github.com/ankyra/escape/model/escape_plan"
+
 	core "github.com/ankyra/escape-core"
+	"github.com/ankyra/escape/model/escape_plan"
 	. "gopkg.in/check.v1"
 )
 
@@ -27,7 +28,7 @@ func (s *suite) Test_Compile_Extensions(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Extends = []string{"dependency-v1.0"}
 
-	ctx := NewCompilerContext(plan, nil, "_")
+	ctx := NewCompilerContext(plan, nil)
 	ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
 		if dep.ReleaseId == "_/dependency-v1.0" {
 			m := core.NewReleaseMetadata("dependency", "1.0")
@@ -45,7 +46,7 @@ func (s *suite) Test_Compile_Extensions_adds_dependencies_to_plan(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Extends = []string{"dependency-v1.0"}
 
-	ctx := NewCompilerContext(plan, nil, "_")
+	ctx := NewCompilerContext(plan, nil)
 	ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
 		if dep.ReleaseId == "_/dependency-v1.0" {
 			m := core.NewReleaseMetadata("dependency", "1.0")
@@ -64,7 +65,7 @@ func (s *suite) Test_Compile_Extensions_adds_variable_context(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Extends = []string{"dependency-v1.0"}
 
-	ctx := NewCompilerContext(plan, nil, "_")
+	ctx := NewCompilerContext(plan, nil)
 	ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
 		if dep.ReleaseId == "_/dependency-v1.0" {
 			m := core.NewReleaseMetadata("dependency", "1.0")
@@ -90,7 +91,7 @@ func (s *suite) Test_Compile_Extensions_adds_variable_context(c *C) {
 func (s *suite) Test_Compile_Extensions_nil(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Extends = nil
-	ctx := NewCompilerContext(plan, nil, "_")
+	ctx := NewCompilerContext(plan, nil)
 	c.Assert(compileExtensions(ctx), IsNil)
 	c.Assert(ctx.Metadata.GetExtensions(), DeepEquals, []string{})
 }
@@ -106,7 +107,7 @@ func (s *suite) Test_Compile_Extensions_fails_if_invalid_format(c *C) {
 	for _, test := range cases {
 		plan := escape_plan.NewEscapePlan()
 		plan.Extends = []string{test}
-		ctx := NewCompilerContext(plan, nil, "_")
+		ctx := NewCompilerContext(plan, nil)
 		c.Assert(compileExtensions(ctx), Not(IsNil))
 	}
 }
@@ -114,7 +115,7 @@ func (s *suite) Test_Compile_Extensions_fails_if_invalid_format(c *C) {
 func (s *suite) Test_Compile_Extensions_fails_if_version_cant_be_resolved(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Extends = []string{"test-v1"}
-	ctx := NewCompilerContext(plan, nil, "_")
+	ctx := NewCompilerContext(plan, nil)
 	ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
 		return nil, fmt.Errorf("Resolve error")
 	}
@@ -124,7 +125,7 @@ func (s *suite) Test_Compile_Extensions_fails_if_version_cant_be_resolved(c *C) 
 func (s *suite) Test_Compile_Extensions_fails_if_variable_context_cant_be_parsed(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Extends = []string{"dependency-v1.0"}
-	ctx := NewCompilerContext(plan, nil, "_")
+	ctx := NewCompilerContext(plan, nil)
 	ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
 		if dep.ReleaseId == "_/dependency-v1.0" {
 			m := core.NewReleaseMetadata("dependency", "1.0")
@@ -142,7 +143,7 @@ func (s *suite) Test_Compile_Extensions_fails_if_variable_context_cant_be_resolv
 	plan := escape_plan.NewEscapePlan()
 	plan.Extends = []string{"dependency-v1.0"}
 
-	ctx := NewCompilerContext(plan, nil, "_")
+	ctx := NewCompilerContext(plan, nil)
 	ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
 		if dep.ReleaseId == "_/dependency-v1.0" {
 			m := core.NewReleaseMetadata("dependency", "1.0")

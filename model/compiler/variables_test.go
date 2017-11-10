@@ -17,15 +17,15 @@ limitations under the License.
 package compiler
 
 import (
-	"github.com/ankyra/escape/model/escape_plan"
 	core "github.com/ankyra/escape-core"
+	"github.com/ankyra/escape/model/escape_plan"
 	. "gopkg.in/check.v1"
 )
 
 func (s *suite) Test_Compile_Inputs(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Inputs = []interface{}{"input1"}
-	ctx := NewCompilerContext(plan, nil, "my-project")
+	ctx := NewCompilerContext(plan, nil)
 	c.Assert(compileInputs(ctx), IsNil)
 	c.Assert(ctx.Metadata.GetInputs("deploy"), HasLen, 1)
 	c.Assert(ctx.Metadata.GetInputs("deploy")[0].Id, Equals, "input1")
@@ -36,7 +36,7 @@ func (s *suite) Test_Compile_Inputs(c *C) {
 func (s *suite) Test_Compile_Build_Inputs(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.BuildInputs = []interface{}{"input1"}
-	ctx := NewCompilerContext(plan, nil, "my-project")
+	ctx := NewCompilerContext(plan, nil)
 	c.Assert(compileInputs(ctx), IsNil)
 	c.Assert(ctx.Metadata.GetInputs("deploy"), HasLen, 0)
 	c.Assert(ctx.Metadata.GetInputs("build"), HasLen, 1)
@@ -46,7 +46,7 @@ func (s *suite) Test_Compile_Build_Inputs(c *C) {
 func (s *suite) Test_Compile_Deploy_Inputs(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.DeployInputs = []interface{}{"input1"}
-	ctx := NewCompilerContext(plan, nil, "my-project")
+	ctx := NewCompilerContext(plan, nil)
 	c.Assert(compileInputs(ctx), IsNil)
 	c.Assert(ctx.Metadata.GetInputs("deploy"), HasLen, 1)
 	c.Assert(ctx.Metadata.GetInputs("deploy")[0].Id, Equals, "input1")
@@ -58,7 +58,7 @@ func (s *suite) Test_Compile_Inputs_Dependency_Variable_Mapping(c *C) {
 	plan.Inputs = []interface{}{"input1"}
 	plan.BuildInputs = []interface{}{"build1"}
 	plan.DeployInputs = []interface{}{"deploy1"}
-	ctx := NewCompilerContext(plan, nil, "my-project")
+	ctx := NewCompilerContext(plan, nil)
 	ctx.Metadata.Depends = []*core.DependencyConfig{core.NewDependencyConfig("test/whatever-v1")}
 	c.Assert(compileInputs(ctx), IsNil)
 	c.Assert(ctx.Metadata.Depends[0].BuildMapping, HasLen, 2)

@@ -24,7 +24,7 @@ import (
 func (s *suite) Test_Compile_Consumes(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Consumes = []interface{}{"consumer1", "consumer2"}
-	ctx := NewCompilerContext(plan, nil, "my-project")
+	ctx := NewCompilerContext(plan, nil)
 	c.Assert(compileConsumers(ctx), IsNil)
 	c.Assert(ctx.Metadata.GetConsumes("deploy"), DeepEquals, []string{"consumer1", "consumer2"})
 	c.Assert(ctx.Metadata.GetConsumes("build"), DeepEquals, []string{"consumer1", "consumer2"})
@@ -33,7 +33,7 @@ func (s *suite) Test_Compile_Consumes(c *C) {
 func (s *suite) Test_Compile_Build_Consumes(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.BuildConsumes = []interface{}{"consumer1", "consumer2"}
-	ctx := NewCompilerContext(plan, nil, "my-project")
+	ctx := NewCompilerContext(plan, nil)
 	c.Assert(compileConsumers(ctx), IsNil)
 	c.Assert(ctx.Metadata.GetConsumes("deploy"), DeepEquals, []string{})
 	c.Assert(ctx.Metadata.GetConsumes("build"), DeepEquals, []string{"consumer1", "consumer2"})
@@ -42,7 +42,7 @@ func (s *suite) Test_Compile_Build_Consumes(c *C) {
 func (s *suite) Test_Compile_Deploy_Consumes(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.DeployConsumes = []interface{}{"consumer1", "consumer2"}
-	ctx := NewCompilerContext(plan, nil, "my-project")
+	ctx := NewCompilerContext(plan, nil)
 	c.Assert(compileConsumers(ctx), IsNil)
 	c.Assert(ctx.Metadata.GetConsumes("deploy"), DeepEquals, []string{"consumer1", "consumer2"})
 	c.Assert(ctx.Metadata.GetConsumes("build"), DeepEquals, []string{})

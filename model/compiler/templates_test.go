@@ -24,7 +24,7 @@ import (
 func (s *suite) Test_Compile_Templates(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Templates = []interface{}{"templates.yml.tpl"}
-	ctx := NewCompilerContext(plan, nil, "my-project")
+	ctx := NewCompilerContext(plan, nil)
 	c.Assert(compileTemplates(ctx), IsNil)
 	c.Assert(ctx.Metadata.GetTemplates("deploy"), HasLen, 1)
 	c.Assert(ctx.Metadata.GetTemplates("deploy")[0].File, Equals, "templates.yml.tpl")
@@ -37,7 +37,7 @@ func (s *suite) Test_Compile_Templates(c *C) {
 func (s *suite) Test_Compile_Build_Templates(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.BuildTemplates = []interface{}{"templates.yml.tpl"}
-	ctx := NewCompilerContext(plan, nil, "my-project")
+	ctx := NewCompilerContext(plan, nil)
 	c.Assert(compileTemplates(ctx), IsNil)
 	c.Assert(ctx.Metadata.GetTemplates("deploy"), HasLen, 0)
 	c.Assert(ctx.Metadata.GetTemplates("build"), HasLen, 1)
@@ -48,7 +48,7 @@ func (s *suite) Test_Compile_Build_Templates(c *C) {
 func (s *suite) Test_Compile_Deploy_Templates(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.DeployTemplates = []interface{}{"templates.yml.tpl"}
-	ctx := NewCompilerContext(plan, nil, "my-project")
+	ctx := NewCompilerContext(plan, nil)
 	c.Assert(compileTemplates(ctx), IsNil)
 	c.Assert(ctx.Metadata.GetTemplates("deploy"), HasLen, 1)
 	c.Assert(ctx.Metadata.GetTemplates("deploy")[0].File, Equals, "templates.yml.tpl")

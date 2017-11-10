@@ -42,7 +42,7 @@ func (s *suite) Test_Compile_Version_resolve_version(c *C) {
 		plan := escape_plan.NewEscapePlan()
 		plan.Name = "my-build"
 		plan.Version = version
-		ctx := NewCompilerContext(plan, inventory, "_")
+		ctx := NewCompilerContext(plan, inventory)
 		ctx.Metadata.Name = "my-build"
 		ctx.Metadata.Project = "cheeky-project"
 		c.Assert(compileVersion(ctx), IsNil)
@@ -61,7 +61,7 @@ func (s *suite) Test_Compile_Version_no_resolve_needed(c *C) {
 	for _, version := range versions {
 		plan := escape_plan.NewEscapePlan()
 		plan.Version = version
-		ctx := NewCompilerContext(plan, nil, "_")
+		ctx := NewCompilerContext(plan, nil)
 		c.Assert(compileVersion(ctx), IsNil)
 		c.Assert(ctx.Metadata.Version, Equals, version)
 	}
@@ -74,7 +74,7 @@ func (s *suite) Test_Compile_Version_fails_if_resolve_fails(c *C) {
 	inventory.NextVersion = func(project, name, versionPrefix string) (string, error) {
 		return "", fmt.Errorf("Resolve error")
 	}
-	ctx := NewCompilerContext(plan, inventory, "_")
+	ctx := NewCompilerContext(plan, inventory)
 	c.Assert(compileVersion(ctx).Error(), Equals, "Resolve error")
 }
 
@@ -89,7 +89,7 @@ func (s *suite) Test_Compile_Version_fails_if_version_expression_cant_be_parsed(
 	for _, version := range versions {
 		plan := escape_plan.NewEscapePlan()
 		plan.Version = version
-		ctx := NewCompilerContext(plan, nil, "_")
+		ctx := NewCompilerContext(plan, nil)
 		c.Assert(compileVersion(ctx).Error(), Not(IsNil))
 	}
 }

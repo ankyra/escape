@@ -34,7 +34,7 @@ var _ = Suite(&suite{})
 func (s *suite) Test_Compile_Logo(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Logo = "testdata/logo.png"
-	ctx := NewCompilerContext(plan, nil, "_")
+	ctx := NewCompilerContext(plan, nil)
 	c.Assert(compileLogo(ctx), IsNil)
 	data, err := ioutil.ReadFile(plan.Logo)
 	c.Assert(err, IsNil)
@@ -44,13 +44,13 @@ func (s *suite) Test_Compile_Logo(c *C) {
 
 func (s *suite) Test_Compile_Logo_does_nothing_if_no_logo_is_set(c *C) {
 	plan := escape_plan.NewEscapePlan()
-	ctx := NewCompilerContext(plan, nil, "_")
+	ctx := NewCompilerContext(plan, nil)
 	c.Assert(compileLogo(ctx), IsNil)
 }
 
 func (s *suite) Test_Compile_Logo_fails_if_path_doesnt_exist(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Logo = "testdata/doesnt_exist.png"
-	ctx := NewCompilerContext(plan, nil, "_")
+	ctx := NewCompilerContext(plan, nil)
 	c.Assert(compileLogo(ctx).Error(), Equals, "Referenced logo 'testdata/doesnt_exist.png' does not exist")
 }
