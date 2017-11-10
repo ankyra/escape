@@ -108,7 +108,8 @@ var getCmd = &cobra.Command{
 		}
 
 		if len(args) < 1 {
-			return fmt.Errorf("Cannot query Escape plan without an Escape plan field name.")
+			cmd.UsageFunc()(cmd)
+			return nil
 		}
 
 		return controllers.PlanController{}.Get(context, args[0])
