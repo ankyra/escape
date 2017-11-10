@@ -37,7 +37,7 @@ func (p PlanController) Diff(context Context) error {
 	inventory := context.GetInventory()
 	previous, err := inventory.QueryReleaseMetadata(metadata.Project, metadata.Name, "latest")
 	if err != nil {
-		return fmt.Errorf(`"Can't show differences with previous version of "%s", because no other version of "%[1]s" exists in the Inventory (http://%s)`, context.GetRootDeploymentName(), context.GetEscapeConfig().GetCurrentProfile().ApiServer)
+		return fmt.Errorf(`Can't show differences with previous version of "%s", because no other version of "%[1]s" exists in the Inventory (%s)`, context.GetRootDeploymentName(), context.GetEscapeConfig().GetCurrentProfile().ApiServer)
 	}
 	if previous == nil {
 		return fmt.Errorf("No previous versions found")
