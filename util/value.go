@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
 func InterfaceMapToStringMap(values *map[string]interface{}, keyPrefix string) map[string]string {
@@ -82,7 +83,7 @@ func StructToMapStringInterface(val interface{}, tag string) map[string]interfac
 		// gets us a StructField
 		fi := vType.Field(i)
 		if tagv := fi.Tag.Get(tag); tagv != "" {
-			out[tagv] = v.Field(i).Interface()
+			out[strings.Split(tagv, ",")[0]] = v.Field(i).Interface()
 		}
 	}
 	return out
