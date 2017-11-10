@@ -113,7 +113,7 @@ func (p PlanController) Get(context Context, field string) error {
 	case "post_destroy":
 		output = context.GetEscapePlan().PostDestroy
 	default:
-		return fmt.Errorf("This field is current unsported by this command.")
+		return fmt.Errorf("This field is currently unsupported by this command.")
 	}
 
 	fmt.Println(output)
