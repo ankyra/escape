@@ -17,26 +17,11 @@ limitations under the License.
 package controllers
 
 import (
-	"github.com/ankyra/escape/model"
 	. "github.com/ankyra/escape/model/interfaces"
 )
 
 type DepsController struct{}
 
 func (DepsController) Fetch(context Context) error {
-	context.PushLogRelease(context.GetRootDeploymentName())
-	context.PushLogSection("Build")
-	context.Log("fetch.start", nil)
-	if len(context.GetEscapePlan().Depends) == 0 {
-		return nil
-	}
-	depends := context.GetReleaseMetadata().Depends
-	err := model.DependencyResolver{}.Resolve(context.GetEscapeConfig(), depends)
-	if err != nil {
-		return err
-	}
-	context.Log("fetch.finished", nil)
-	context.PopLogRelease()
-	context.PopLogSection()
 	return nil
 }
