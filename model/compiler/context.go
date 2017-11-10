@@ -39,22 +39,20 @@ type CompilerContext struct {
 	DependencyFetcher func(*core.DependencyConfig) (*core.ReleaseMetadata, error)
 	ReleaseQuery      func(*core.Dependency) (*core.ReleaseMetadata, error)
 	Inventory         inventory.Inventory
-	Project           string
 	Logger            util.Logger
 }
 
-func NewCompilerContext(plan *escape_plan.EscapePlan, inventory inventory.Inventory, project string) *CompilerContext {
+func NewCompilerContext(plan *escape_plan.EscapePlan, inventory inventory.Inventory) *CompilerContext {
 	return &CompilerContext{
 		Metadata:    core.NewEmptyReleaseMetadata(),
 		Plan:        plan,
 		VariableCtx: map[string]*core.ReleaseMetadata{},
 		Inventory:   inventory,
-		Project:     project,
 	}
 }
 
-func NewCompilerContextWithLogger(plan *escape_plan.EscapePlan, inventory inventory.Inventory, project string, logger util.Logger) *CompilerContext {
-	ctx := NewCompilerContext(plan, inventory, project)
+func NewCompilerContextWithLogger(plan *escape_plan.EscapePlan, inventory inventory.Inventory, logger util.Logger) *CompilerContext {
+	ctx := NewCompilerContext(plan, inventory)
 	ctx.Logger = logger
 	return ctx
 }

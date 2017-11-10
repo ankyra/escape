@@ -209,7 +209,6 @@ func (c *Context) CompileEscapePlan() error {
 	metadata, err := compiler.Compile(
 		c.EscapePlan,
 		c.GetInventory(),
-		c.GetEscapeConfig().GetCurrentProfile().GetProject(),
 		c.GetDependencyMetadata,
 		c.QueryReleaseMetadata,
 		c.Logger,

@@ -36,13 +36,10 @@ type EscapeConfig struct {
 }
 
 type EscapeProfileConfig struct {
-	Project            string        `json:"project"`
 	ApiServer          string        `json:"api_server"`
 	Username           string        `json:"username"`
 	Password           string        `json:"password"`
 	AuthToken          string        `json:"escape_auth_token"`
-	StorageBackend     string        `json:"storage_backend"`
-	GcsBucketUrl       string        `json:"bucket_url"`
 	InsecureSkipVerify bool          `json:"insecure_skip_verify"`
 	parent             *EscapeConfig `json:"-"`
 }
@@ -58,17 +55,11 @@ func NewEscapeConfig() *EscapeConfig {
 
 func newEscapeProfileConfig(cfg *EscapeConfig) *EscapeProfileConfig {
 	profile := &EscapeProfileConfig{
-		Project:        os.Getenv("ESCAPE_PROJECT"),
-		ApiServer:      os.Getenv("ESCAPE_API_SERVER"),
-		Username:       os.Getenv("ESCAPE_USERNAME"),
-		Password:       os.Getenv("ESCAPE_PASSWORD"),
-		AuthToken:      os.Getenv("ESCAPE_AUTH_TOKEN"),
-		StorageBackend: os.Getenv("ESCAPE_STORAGE_BACKEND"),
-		GcsBucketUrl:   os.Getenv("ESCAPE_BUCKET_URL"),
-		parent:         cfg,
-	}
-	if profile.StorageBackend == "" {
-		profile.StorageBackend = "escape"
+		ApiServer: os.Getenv("ESCAPE_API_SERVER"),
+		Username:  os.Getenv("ESCAPE_USERNAME"),
+		Password:  os.Getenv("ESCAPE_PASSWORD"),
+		AuthToken: os.Getenv("ESCAPE_AUTH_TOKEN"),
+		parent:    cfg,
 	}
 	if profile.ApiServer == "" {
 		profile.ApiServer = "https://escape.ankyra.io"
@@ -150,10 +141,7 @@ func (t *EscapeProfileConfig) ToJson() string {
 }
 
 func (t *EscapeProfileConfig) GetInventory() inventory.Inventory {
-	if t.StorageBackend == "escape" {
-		return inventory.NewRemoteInventory(t.ApiServer, t.AuthToken, t.InsecureSkipVerify)
-	}
-	return inventory.NewLocalInventory()
+	return inventory.NewRemoteInventory(t.ApiServer, t.AuthToken, t.InsecureSkipVerify)
 }
 
 func (t *EscapeProfileConfig) Save() error {
@@ -171,18 +159,6 @@ func (t *EscapeProfileConfig) GetPassword() string {
 func (t *EscapeProfileConfig) GetAuthToken() string {
 	return t.AuthToken
 }
-func (t *EscapeProfileConfig) GetStorageBackend() string {
-	return t.StorageBackend
-}
-func (t *EscapeProfileConfig) GetGcsBucketUrl() string {
-	return t.GcsBucketUrl
-}
-func (t *EscapeProfileConfig) GetProject() string {
-	if t.Project == "" {
-		return "_"
-	}
-	return t.Project
-}
 func (t *EscapeProfileConfig) SetApiServer(v string) {
 	t.ApiServer = v
 }
@@ -194,12 +170,6 @@ func (t *EscapeProfileConfig) SetPassword(v string) {
 }
 func (t *EscapeProfileConfig) SetAuthToken(v string) {
 	t.AuthToken = v
-}
-func (t *EscapeProfileConfig) SetStorageBackend(v string) {
-	t.StorageBackend = v
-}
-func (t *EscapeProfileConfig) SetGcsBucketUrl(v string) {
-	t.GcsBucketUrl = v
 }
 func (t *EscapeProfileConfig) GetInsecureSkipVerify() bool {
 	return t.InsecureSkipVerify

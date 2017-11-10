@@ -24,10 +24,7 @@ import (
 )
 
 func compileBasicFields(ctx *CompilerContext) error {
-	project := ctx.Project
-	if project == "" {
-		project = "_"
-	}
+	project := "_"
 	ix := strings.Index(ctx.Plan.Name, "/")
 	if ix == -1 {
 		ctx.Metadata.Name = ctx.Plan.Name

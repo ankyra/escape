@@ -95,10 +95,6 @@ func archiveReleaseFetcherStrategy(cfg *config.EscapeConfig, path *paths.Path, d
 }
 
 func escapeServerReleaseFetcherStrategy(cfg *config.EscapeConfig, path *paths.Path, dep *core.Dependency) (bool, error) {
-	backend := cfg.GetCurrentProfile().GetStorageBackend()
-	if backend != "escape" {
-		return false, nil
-	}
 	if err := path.EnsureDependencyCacheDirectoryExists(dep.Project); err != nil {
 		return false, err
 	}
