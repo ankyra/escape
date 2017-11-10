@@ -23,6 +23,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var jsonFlag bool
+
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Manage the escape client configuration",
@@ -40,7 +42,7 @@ var configProfileCmd = &cobra.Command{
 	Short: "Show the currently active Escape profile",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		controllers.ConfigController{}.CurrentProfile(context)
+		controllers.ConfigController{}.CurrentProfile(context, jsonFlag)
 	},
 }
 
@@ -66,4 +68,6 @@ func init() {
 	configCmd.AddCommand(configProfileCmd)
 	configCmd.AddCommand(configListProfilesCmd)
 	configCmd.AddCommand(configSetProfileCmd)
+
+	configProfileCmd.Flags().BoolVarP(&jsonFlag, "json", "", false, "Output profile in JSON format")
 }

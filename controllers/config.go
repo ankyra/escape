@@ -24,9 +24,11 @@ import (
 
 type ConfigController struct{}
 
-func (ConfigController) CurrentProfile(context Context) {
+func (ConfigController) CurrentProfile(context Context, json bool) {
+	if !json {
+		fmt.Printf("Profile: %s\n\n", context.GetEscapeConfig().ActiveProfile)
+	}
 	fmt.Println(context.GetEscapeConfig().GetCurrentProfile().ToJson())
-	context.GetEscapeConfig()
 }
 
 func (ConfigController) ListProfiles(context Context) {
