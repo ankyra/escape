@@ -92,8 +92,26 @@ var previewCmd = &cobra.Command{
 		if err := ProcessFlagsForContext(true); err != nil {
 			return err
 		}
+
 		controllers.PlanController{}.Compile(context)
 		return nil
+	},
+}
+
+var getCmd = &cobra.Command{
+	Use:   "get <escape plan field>",
+	Short: "Get individual fields from the Escape plan",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		err := context.LoadEscapePlan(escapePlanLocation)
+		if err != nil {
+			return err
+		}
+
+		if len(args) < 1 {
+			return fmt.Errorf("Cannot query Escape plan without an Escape plan field name.")
+		}
+
+		return controllers.PlanController{}.Get(context, args[0])
 	},
 }
 
@@ -104,6 +122,7 @@ func init() {
 	planCmd.AddCommand(minifyCmd)
 	planCmd.AddCommand(previewCmd)
 	planCmd.AddCommand(diffCmd)
+	planCmd.AddCommand(getCmd)
 
 	initCmd.Flags().StringVarP(&releaseName, "name", "n", "", "The release name (eg. hello-world)")
 	initCmd.Flags().StringVarP(&outputPath, "output", "o", "escape.yml", "The output location")

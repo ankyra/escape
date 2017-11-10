@@ -76,3 +76,47 @@ func (p PlanController) Init(context Context, build_id, output_file string, forc
 	}
 	return ioutil.WriteFile(output_file, plan.ToYaml(), 0644)
 }
+
+func (p PlanController) Get(context Context, field string) error {
+	var output string
+	switch field {
+	case "name":
+		output = context.GetEscapePlan().Name
+	case "version":
+		output = context.GetEscapePlan().Version
+	case "description":
+		output = context.GetEscapePlan().Description
+	case "logo":
+		output = context.GetEscapePlan().Logo
+	case "path":
+		output = context.GetEscapePlan().Path
+	case "pre_build":
+		output = context.GetEscapePlan().PreBuild
+	case "build":
+		output = context.GetEscapePlan().Build
+	case "post_build":
+		output = context.GetEscapePlan().PostBuild
+	case "test":
+		output = context.GetEscapePlan().Test
+	case "pre_deploy":
+		output = context.GetEscapePlan().PreDeploy
+	case "deploy":
+		output = context.GetEscapePlan().Deploy
+	case "post_deploy":
+		output = context.GetEscapePlan().PostDeploy
+	case "smoke":
+		output = context.GetEscapePlan().Smoke
+	case "pre_destroy":
+		output = context.GetEscapePlan().PreDestroy
+	case "destroy":
+		output = context.GetEscapePlan().Destroy
+	case "post_destroy":
+		output = context.GetEscapePlan().PostDestroy
+	default:
+		return fmt.Errorf("This field is current unsported by this command.")
+	}
+
+	fmt.Println(output)
+	return nil
+
+}
