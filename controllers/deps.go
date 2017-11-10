@@ -24,17 +24,14 @@ import (
 type DepsController struct{}
 
 func (DepsController) Fetch(context Context) error {
-	context.PushLogRelease(context.GetEscapePlan().GetReleaseId())
+	context.PushLogRelease(context.GetRootDeploymentName())
 	context.PushLogSection("Build")
 	context.Log("fetch.start", nil)
 	if len(context.GetEscapePlan().Depends) == 0 {
 		return nil
 	}
-	depends, err := context.GetEscapePlan().GetDependencies()
-	if err != nil {
-		return err
-	}
-	err = model.DependencyResolver{}.Resolve(context.GetEscapeConfig(), depends)
+	depends := context.GetReleaseMetadata().Depends
+	err := model.DependencyResolver{}.Resolve(context.GetEscapeConfig(), depends)
 	if err != nil {
 		return err
 	}

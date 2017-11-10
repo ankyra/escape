@@ -40,10 +40,10 @@ var depsFetchCmd = &cobra.Command{
 	Short: "Install dependencies",
 	Long:  ``,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		err := context.LoadEscapePlan(escapePlanLocation)
-		if err != nil {
+		if err := ProcessFlagsForContext(true); err != nil {
 			return err
 		}
+
 		return controllers.DepsController{}.Fetch(context)
 	},
 }

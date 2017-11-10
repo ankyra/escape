@@ -342,7 +342,7 @@ var logMessages = map[string]map[string]string{
 		"collapse": "false",
 	},
 	"fetch.finished": map[string]string{
-		"msg":   "Fetched dependency {{ .dependency }}",
+		"msg":   "Dependencies have been fetched.",
 		"level": "success",
 	},
 	"fetch.start": map[string]string{
