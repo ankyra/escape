@@ -36,12 +36,12 @@ type EscapeConfig struct {
 }
 
 type EscapeProfileConfig struct {
-	ApiServer          string        `json:"api_server"`
-	Username           string        `json:"username"`
-	Password           string        `json:"password"`
-	AuthToken          string        `json:"escape_auth_token"`
-	InsecureSkipVerify bool          `json:"insecure_skip_verify"`
-	parent             *EscapeConfig `json:"-"`
+	ApiServer          string `json:"api_server"`
+	Username           string `json:"username"`
+	Password           string `json:"password"`
+	AuthToken          string `json:"escape_auth_token"`
+	InsecureSkipVerify bool   `json:"insecure_skip_verify"`
+	parent             *EscapeConfig
 }
 
 func NewEscapeConfig() *EscapeConfig {

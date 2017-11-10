@@ -19,6 +19,7 @@ package util
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strconv"
 )
 
@@ -61,4 +62,28 @@ func InterfaceToString(val interface{}) (string, error) {
 		return "", fmt.Errorf("Type '%T' not supported", val)
 	}
 	return stringVal, nil
+}
+
+func StructToMapStringInterface(val interface{}, tag string) map[string]interface{} {
+	out := make(map[string]interface{})
+
+	v := reflect.ValueOf(val)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+
+	// we only accept structs
+	if v.Kind() != reflect.Struct {
+		panic(fmt.Sprintf("util.StructToMapStringInterface only accepts structs; got %T", v))
+	}
+
+	vType := v.Type()
+	for i := 0; i < v.NumField(); i++ {
+		// gets us a StructField
+		fi := vType.Field(i)
+		if tagv := fi.Tag.Get(tag); tagv != "" {
+			out[tagv] = v.Field(i).Interface()
+		}
+	}
+	return out
 }

@@ -20,15 +20,23 @@ import (
 	"fmt"
 
 	. "github.com/ankyra/escape/model/interfaces"
+	"github.com/ankyra/escape/util"
 )
 
 type ConfigController struct{}
 
 func (ConfigController) CurrentProfile(context Context, json bool) {
-	if !json {
+
+	if json {
+		fmt.Println(context.GetEscapeConfig().GetCurrentProfile().ToJson())
+	} else {
 		fmt.Printf("Profile: %s\n\n", context.GetEscapeConfig().ActiveProfile)
+
+		configMap := util.StructToMapStringInterface(*context.GetEscapeConfig().GetCurrentProfile(), "json")
+		for k, v := range configMap {
+			fmt.Printf("%s: %v\n", k, v)
+		}
 	}
-	fmt.Println(context.GetEscapeConfig().GetCurrentProfile().ToJson())
 }
 
 func (ConfigController) ListProfiles(context Context) {
