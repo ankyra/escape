@@ -42,7 +42,16 @@ var configProfileCmd = &cobra.Command{
 	Short: "Show the currently active Escape profile",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		controllers.ConfigController{}.CurrentProfile(context, jsonFlag)
+		controllers.ConfigController{}.ShowProfile(context, jsonFlag)
+	},
+}
+
+var configActiveProfileCmd = &cobra.Command{
+	Use:   "active-profile",
+	Short: "Show the currently active profile name",
+	Long:  ``,
+	Run: func(cmd *cobra.Command, args []string) {
+		controllers.ConfigController{}.ActiveProfile(context)
 	},
 }
 
@@ -68,6 +77,7 @@ func init() {
 	configCmd.AddCommand(configProfileCmd)
 	configCmd.AddCommand(configListProfilesCmd)
 	configCmd.AddCommand(configSetProfileCmd)
+	configCmd.AddCommand(configActiveProfileCmd)
 
 	configProfileCmd.Flags().BoolVarP(&jsonFlag, "json", "", false, "Output profile in JSON format")
 }
