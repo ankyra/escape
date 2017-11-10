@@ -38,11 +38,17 @@ var configCmd = &cobra.Command{
 }
 
 var configProfileCmd = &cobra.Command{
-	Use:   "profile",
+	Use:   "profile <profile field name>",
 	Short: "Show the currently active Escape profile",
 	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		controllers.ConfigController{}.ShowProfile(context, jsonFlag)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) < 1 {
+			controllers.ConfigController{}.ShowProfile(context, jsonFlag)
+		} else {
+			return controllers.ConfigController{}.ShowProfileField(context, args[0])
+		}
+
+		return nil
 	},
 }
 

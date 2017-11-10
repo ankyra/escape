@@ -39,6 +39,17 @@ func (ConfigController) ShowProfile(context Context, json bool) {
 	}
 }
 
+func (ConfigController) ShowProfileField(context Context, field string) error {
+
+	configMap := util.StructToMapStringInterface(*context.GetEscapeConfig().GetCurrentProfile(), "json")
+	if configMap[field] != nil {
+		fmt.Printf("%s: %v\n", field, configMap[field])
+		return nil
+	}
+
+	return fmt.Errorf(`"%s" is not a valid field name`, field)
+}
+
 func (ConfigController) ActiveProfile(context Context) {
 	fmt.Println(context.GetEscapeConfig().ActiveProfile)
 }
