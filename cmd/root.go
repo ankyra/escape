@@ -78,7 +78,7 @@ func Execute() {
 
 func init() {
 	RootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "~/.escape_config", "Local of the global Escape configuration file")
-	RootCmd.PersistentFlags().StringVar(&cfgProfile, "profile", "default", "Configuration profile")
+	RootCmd.PersistentFlags().StringVar(&cfgProfile, "profile", "", "Configuration profile")
 	RootCmd.PersistentFlags().StringVarP(&cfgLogLevel, "level", "l", "info", "Log level: debug, success, info, warn, error")
 	RootCmd.PersistentFlags().BoolVarP(&cfgLogCollapse, "collapse-logs", "", true, "Collapse log sections.")
 }

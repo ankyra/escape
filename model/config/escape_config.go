@@ -75,7 +75,19 @@ func (e *EscapeConfig) GetCurrentProfile() *EscapeProfileConfig {
 	return e.Profiles[e.ActiveProfile]
 }
 
-func (e *EscapeConfig) LoadConfig(cfgFile, cfgProfile string) error {
+func (e *EscapeConfig) SetActiveProfile(profile string) error {
+	if profile == "" {
+		return nil
+	}
+
+	if e.Profiles[profile] == nil {
+		return fmt.Errorf("Referenced profile '%s' was not found in the Escape configuration file.", e.ActiveProfile)
+	}
+	e.ActiveProfile = profile
+	return nil
+}
+
+func (e *EscapeConfig) LoadConfig(cfgFile string) error {
 	if len(cfgFile) > 2 && cfgFile[:2] == "~/" {
 		usr, _ := user.Current()
 		dir := usr.HomeDir
@@ -91,9 +103,6 @@ func (e *EscapeConfig) LoadConfig(cfgFile, cfgProfile string) error {
 		if err != nil {
 			return fmt.Errorf("Couldn't parse Escape configuration file '%s': %s", cfgFile, err.Error())
 		}
-	}
-	if cfgProfile != "" {
-		e.ActiveProfile = cfgProfile
 	}
 	if _, ok := e.Profiles[e.ActiveProfile]; !ok {
 		return fmt.Errorf("Referenced profile '%s' was not found in the Escape configuration file.", e.ActiveProfile)

@@ -192,7 +192,17 @@ func (c *Context) fetchDependencyAndReadMetadata(depCfg *core.DependencyConfig) 
 }
 
 func (c *Context) LoadEscapeConfig(cfgFile, cfgProfile string) error {
-	return c.EscapeConfig.LoadConfig(cfgFile, cfgProfile)
+	err := c.EscapeConfig.LoadConfig(cfgFile)
+	if err != nil {
+		return err
+	}
+
+	err = c.EscapeConfig.SetActiveProfile(cfgProfile)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *Context) LoadEscapePlan(cfgFile string) error {
