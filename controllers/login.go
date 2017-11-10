@@ -146,7 +146,6 @@ func credentialsUserInput(reader *bufio.Reader, username, password *string) erro
 		if err != nil {
 			return err
 		}
-		fmt.Println("You inputed, " + input)
 		*username = strings.TrimSpace(input)
 	}
 	if *password == "" {
