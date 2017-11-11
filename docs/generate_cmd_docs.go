@@ -84,7 +84,7 @@ func GeneratePlanDocs() {
 		}
 		desc := string(escape_plan.GetDoc(field))
 		desc = strings.TrimSpace(desc)
-		result += "|" + field + "|" + typ + "|"
+		result += "|<a name='" + field + "'></a>" + field + "|" + typ + "|"
 		for _, line := range strings.Split(desc, "\n") {
 			if strings.HasPrefix(line, "#") {
 				line = line[1:]
