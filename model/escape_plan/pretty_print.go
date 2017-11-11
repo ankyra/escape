@@ -30,6 +30,15 @@ type prettyPrinter struct {
 	Spacing      int
 }
 
+var Fields = []string{"name", "version", "description", "logo", "extends", "depends",
+	"consumes", "build_consumes", "deploy_consumes",
+	"provides", "inputs", "build_inputs", "deploy_inputs",
+	"outputs", "metadata", "includes", "errands", "downloads",
+	"templates", "build_templates", "deploy_templates", "path",
+	"pre_build", "build", "post_build", "test",
+	"pre_deploy", "deploy", "post_deploy", "smoke",
+	"pre_destroy", "destroy", "post_destroy"}
+
 var templateMap = map[string]string{
 	"name":             keyValTpl,
 	"version":          keyValTpl,
@@ -104,15 +113,7 @@ func NewPrettyPrinter(cfg ...printConf) *prettyPrinter {
 func (e *prettyPrinter) Print(plan *EscapePlan) []byte {
 	yamlMap := plan.ToDict()
 	writer := bytes.NewBuffer([]byte{})
-	ordering := []string{
-		"name", "version", "description", "logo", "extends", "depends",
-		"consumes", "build_consumes", "deploy_consumes",
-		"provides", "inputs", "build_inputs", "deploy_inputs",
-		"outputs", "metadata", "includes", "errands", "downloads",
-		"templates", "build_templates", "deploy_templates", "path",
-		"pre_build", "build", "post_build", "test",
-		"pre_deploy", "deploy", "post_deploy", "smoke",
-		"pre_destroy", "destroy", "post_destroy"}
+	ordering := Fields
 	for _, key := range ordering {
 		val, ok := yamlMap[key]
 		if !ok {
