@@ -53,7 +53,7 @@ func (LoginController) Login(context Context, url, authMethodRequested, username
 
 	reader := bufio.NewReader(os.Stdin)
 	if username != "" && authMethods["service-account"] != nil {
-		return secretTokenAuth(reader, context, authMethods["service-account"].URL, username, password)
+		return secretTokenAuth(reader, context, url, authMethods["service-account"].URL, username, password)
 	}
 
 	var authMethod *types.AuthMethod
@@ -76,7 +76,7 @@ func (LoginController) Login(context Context, url, authMethodRequested, username
 		openBrowser(authMethod.URL)
 		return getEscapeTokenWithRedeemToken(context, url, authMethod.RedeemToken, authMethod.RedeemURL)
 	} else if authMethod.Type == "secret-token" {
-		return secretTokenAuth(reader, context, authMethod.URL, username, password)
+		return secretTokenAuth(reader, context, url, authMethod.URL, username, password)
 	} else {
 		return fmt.Errorf("Unknown auth method.")
 	}
@@ -122,12 +122,12 @@ func authUserSelection(reader *bufio.Reader, authMethods map[string]*types.AuthM
 	return methods[ix-1]
 }
 
-func secretTokenAuth(reader *bufio.Reader, context Context, url, username, password string) error {
+func secretTokenAuth(reader *bufio.Reader, context Context, url, loginUrl, username, password string) error {
 	err := credentialsUserInput(reader, &username, &password)
 	if err != nil {
 		return err
 	}
-	authToken, err := context.GetInventory().LoginWithSecretToken(url, username, password)
+	authToken, err := context.GetInventory().LoginWithSecretToken(loginUrl, username, password)
 	if err != nil {
 		return err
 	}
