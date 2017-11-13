@@ -77,7 +77,7 @@ func setEscapeStateEnvironmentFlag(c *cobra.Command) {
 func setEscapeDeploymentFlag(c *cobra.Command) {
 	c.Flags().StringVarP(&deployment,
 		"deployment", "d", "",
-		"Deployment name (default \"<release name>\")",
+		"Deployment name (default is the package's \"project/name\")",
 	)
 }
 
