@@ -34,7 +34,9 @@ func (r ReleaseController) Release(context Context, buildFatPackage, skipBuild, 
 	if skipIfExists {
 		pkg := core.NewDependencyFromMetadata(context.GetReleaseMetadata())
 		if _, err := context.QueryReleaseMetadata(pkg); err == nil {
-			context.Log("release.skip_existing", nil)
+			context.Log("release.skip_existing", map[string]string{
+				"version": pkg.Version,
+			})
 			return nil
 		}
 	}
