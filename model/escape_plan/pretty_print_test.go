@@ -30,7 +30,7 @@ type printSuite struct{}
 var _ = Suite(&printSuite{})
 
 func (s *printSuite) Test_PrettyPrint_KeyVal(c *C) {
-	unit := NewPrettyPrinter(includeDocs(false), includeEmpty(true))
+	unit := NewPrettyPrinter(includeEmpty(true))
 	keys := []string{"name", "version", "description", "logo", "path",
 		"pre_build", "build", "post_build", "pre_destroy", "destroy", "post_destroy", "test",
 		"pre_deploy", "deploy", "post_deploy", "smoke"}
@@ -45,7 +45,7 @@ func (s *printSuite) Test_PrettyPrint_KeyVal(c *C) {
 }
 
 func (s *printSuite) Test_PrettyPrint_ListVal(c *C) {
-	unit := NewPrettyPrinter(includeDocs(false), includeEmpty(true))
+	unit := NewPrettyPrinter(includeEmpty(true))
 	keys := []string{"depends", "consumes", "provides", "includes", "inputs", "outputs", "templates"}
 	for _, key := range keys {
 		pretty := unit.prettyPrintValue(key, []string{})
@@ -58,7 +58,7 @@ func (s *printSuite) Test_PrettyPrint_ListVal(c *C) {
 }
 
 func (s *printSuite) Test_PrettyPrint_MapVal(c *C) {
-	unit := NewPrettyPrinter(includeDocs(false), includeEmpty(true))
+	unit := NewPrettyPrinter(includeEmpty(true))
 	keys := []string{"metadata", "errands"}
 	for _, key := range keys {
 		pretty := unit.prettyPrintValue(key, map[string]string{})
@@ -70,9 +70,8 @@ func (s *printSuite) Test_PrettyPrint_MapVal(c *C) {
 }
 
 func (s *printSuite) Test_PrettyPrint_Full_Fixture_No_Doc(c *C) {
-	unit := NewPrettyPrinter(includeDocs(false), spacing(1))
+	unit := NewPrettyPrinter(spacing(1))
 	c.Assert(unit.IncludeEmpty, Equals, true)
-	c.Assert(unit.IncludeDocs, Equals, false)
 	c.Assert(unit.Spacing, Equals, 1)
 	plan := NewEscapePlan()
 	err := plan.LoadConfig("testdata/fixture.yml")
@@ -84,9 +83,8 @@ func (s *printSuite) Test_PrettyPrint_Full_Fixture_No_Doc(c *C) {
 }
 
 func (s *printSuite) Test_PrettyPrint_Minify_Full_Fixture_Same_As_No_Doc(c *C) {
-	unit := NewPrettyPrinter(includeEmpty(false), includeDocs(false), spacing(1))
+	unit := NewPrettyPrinter(includeEmpty(false), spacing(1))
 	c.Assert(unit.IncludeEmpty, Equals, false)
-	c.Assert(unit.IncludeDocs, Equals, false)
 	c.Assert(unit.Spacing, Equals, 1)
 	plan := NewEscapePlan()
 	err := plan.LoadConfig("testdata/fixture.yml")
@@ -100,7 +98,6 @@ func (s *printSuite) Test_PrettyPrint_Minify_Full_Fixture_Same_As_No_Doc(c *C) {
 func (s *printSuite) Test_PrettyPrint_Full_Fixture(c *C) {
 	unit := NewPrettyPrinter()
 	c.Assert(unit.IncludeEmpty, Equals, true)
-	c.Assert(unit.IncludeDocs, Equals, true)
 	c.Assert(unit.Spacing, Equals, 2)
 	plan := NewEscapePlan()
 	err := plan.LoadConfig("testdata/fixture.yml")
@@ -114,7 +111,6 @@ func (s *printSuite) Test_PrettyPrint_Full_Fixture(c *C) {
 func (s *printSuite) Test_PrettyPrint_Minimal_Fixture(c *C) {
 	unit := NewPrettyPrinter(includeEmpty(false))
 	c.Assert(unit.IncludeEmpty, Equals, false)
-	c.Assert(unit.IncludeDocs, Equals, true)
 	c.Assert(unit.Spacing, Equals, 2)
 	plan := NewEscapePlan()
 	err := plan.LoadConfig("testdata/minimal_fixture.yml")
@@ -126,7 +122,7 @@ func (s *printSuite) Test_PrettyPrint_Minimal_Fixture(c *C) {
 }
 
 func (s *printSuite) Test_PrettyPrint_includes_all_fields(c *C) {
-	unit := NewPrettyPrinter(includeEmpty(true), includeDocs(true))
+	unit := NewPrettyPrinter(includeEmpty(true))
 	plan := NewEscapePlan()
 	pretty := unit.Print(plan)
 	result := map[string]interface{}{}

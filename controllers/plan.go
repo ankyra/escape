@@ -67,14 +67,14 @@ func (p PlanController) Minify(context Context, outputLocation string) error {
 }
 
 func (p PlanController) Init(context Context, build_id, output_file string, force, minify bool) error {
-	plan := escape_plan.NewEscapePlan().Init(build_id)
 	if util.PathExists(output_file) && !force {
 		return fmt.Errorf("'%s' already exists. Use --force / -f to overwrite.", output_file)
 	}
+	plan := escape_plan.NewEscapePlan().Init(build_id)
 	if minify {
 		return ioutil.WriteFile(output_file, plan.ToMinifiedYaml(), 0644)
 	}
-	return ioutil.WriteFile(output_file, plan.ToYaml(), 0644)
+	return ioutil.WriteFile(output_file, plan.ToInitTemplate(), 0644)
 }
 
 func (p PlanController) Get(context Context, field string) error {

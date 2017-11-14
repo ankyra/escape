@@ -26,6 +26,19 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const EscapePlanInitTemplate = `name: %s
+version: 0.0.@
+description: 
+logo: 
+
+includes:
+- README.md
+
+build: 
+deploy:
+
+`
+
 // Everything starts with a plan. An Escape plan.
 //
 // The Escape plan gets compiled into release metadata at build time.
@@ -224,6 +237,10 @@ func (e *EscapePlan) Init(name string) *EscapePlan {
 	return e
 }
 
+func (e *EscapePlan) ToInitTemplate() []byte {
+	return []byte(fmt.Sprintf(EscapePlanInitTemplate, e.Name))
+}
+
 func (e *EscapePlan) ToYaml() []byte {
 	pr := NewPrettyPrinter()
 	return pr.Print(e)
@@ -232,7 +249,6 @@ func (e *EscapePlan) ToYaml() []byte {
 func (e *EscapePlan) ToMinifiedYaml() []byte {
 	pr := NewPrettyPrinter(
 		includeEmpty(false),
-		includeDocs(false),
 		spacing(1),
 	)
 	return pr.Print(e)

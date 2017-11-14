@@ -26,7 +26,6 @@ import (
 
 type prettyPrinter struct {
 	IncludeEmpty bool
-	IncludeDocs  bool
 	Spacing      int
 }
 
@@ -84,13 +83,6 @@ func includeEmpty(b bool) printConf {
 	}
 }
 
-func includeDocs(b bool) printConf {
-	return func(p *prettyPrinter) *prettyPrinter {
-		p.IncludeDocs = b
-		return p
-	}
-}
-
 func spacing(i int) printConf {
 	return func(p *prettyPrinter) *prettyPrinter {
 		p.Spacing = i
@@ -100,7 +92,6 @@ func spacing(i int) printConf {
 
 func NewPrettyPrinter(cfg ...printConf) *prettyPrinter {
 	pp := &prettyPrinter{
-		IncludeDocs:  true,
 		IncludeEmpty: true,
 		Spacing:      2,
 	}
@@ -155,13 +146,6 @@ func (e *prettyPrinter) prettyPrintValue(key string, val interface{}) []byte {
 		"value": strings.TrimSpace(string(value)),
 	}
 	doc := []byte("")
-	if e.IncludeDocs {
-		docS := string(GetDoc(key))
-		if docS != "" {
-			docS += "\n"
-		}
-		doc = []byte(docS)
-	}
 	writer := bytes.NewBuffer(doc)
 	if err := tpl.Execute(writer, valueMap); err != nil {
 		panic(err)
