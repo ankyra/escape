@@ -72,6 +72,23 @@ func (h *HumanOutput) AddMap(mapToAdd map[string]interface{}) {
 	}
 }
 
+func (h *HumanOutput) AddStringList(listToAdd []string) {
+	i := 0
+	for _, k := range listToAdd {
+		if i == 0 {
+			if h.addNewLine() {
+				h.value = NewHumanOutput("%s\n\n%v", h.value, k).value
+			} else {
+				h.value = NewHumanOutput("%v", k).value
+			}
+
+		} else {
+			h.value = NewHumanOutput("%s\n%v", h.value, k).value
+		}
+		i++
+	}
+}
+
 func (h *HumanOutput) AddList(listToAdd []interface{}) {
 	i := 0
 	for _, k := range listToAdd {

@@ -24,36 +24,42 @@ import (
 
 type InventoryController struct{}
 
-func (r InventoryController) Query(context Context, project, application, appVersion string) error {
+func (r InventoryController) Query(context Context, project, application, appVersion string) *ControllerResult {
+	result := NewControllerResult()
+
 	inventory := context.GetInventory()
-	var result []string
+	var resultData []string
 	var err error
 	if project == "" {
-		result, err = inventory.ListProjects()
+		resultData, err = inventory.ListProjects()
 	} else if application == "" {
-		result, err = inventory.ListApplications(project)
+		resultData, err = inventory.ListApplications(project)
 	} else if appVersion == "" {
-		result, err = inventory.ListVersions(project, application)
+		resultData, err = inventory.ListVersions(project, application)
+		for i, _ := range resultData {
+			resultData[i] = "v" + resultData[i]
+		}
 	} else {
 		metadata, err := inventory.QueryReleaseMetadata(project, application, appVersion)
 		if err != nil {
-			return err
+			result.Error = err
+			return result
 		}
 		fmt.Println(metadata.ToJson())
 		return nil
 	}
 	if err != nil {
-		return err
+		result.Error = err
+		return result
 	}
-	for _, line := range result {
-		if application == "" {
-			fmt.Println(line)
-		} else if line != "" {
-			fmt.Printf("v%s\n", line)
-		}
+
+	result.MarshalableOutput = resultData
+
+	if len(resultData) == 0 {
+		result.HumanOutput.AddLine("Inventory returned 0 results.")
+		return result
 	}
-	if len(result) == 0 {
-		fmt.Println("Inventory returned 0 results.")
-	}
-	return nil
+
+	result.HumanOutput.AddStringList(resultData)
+	return result
 }

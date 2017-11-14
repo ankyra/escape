@@ -41,7 +41,9 @@ var inventoryQueryCommand = &cobra.Command{
 	Use:   "query",
 	Short: "Query projects, applications and releases",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return controllers.InventoryController{}.Query(context, project, application, appVersion)
+		result := controllers.InventoryController{}.Query(context, project, application, appVersion)
+
+		return result.Print(jsonFlag)
 	},
 }
 
@@ -52,4 +54,5 @@ func init() {
 	inventoryQueryCommand.Flags().StringVarP(&project, "project", "p", "", "The project")
 	inventoryQueryCommand.Flags().StringVarP(&application, "application", "a", "", "The application")
 	inventoryQueryCommand.Flags().StringVarP(&appVersion, "version", "v", "", "The application version")
+	inventoryQueryCommand.PersistentFlags().BoolVarP(&jsonFlag, "json", "", false, "Output profile in JSON format")
 }
