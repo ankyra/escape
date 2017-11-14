@@ -28,7 +28,7 @@ type ConfigController struct{}
 func (ConfigController) ShowProfile(context Context, json bool) *ControllerResult {
 	result := NewControllerResult()
 
-	result.HumanOutput.AddLine("Profile: %s\n", context.GetEscapeConfig().ActiveProfile)
+	result.HumanOutput.AddLine("Profile: %s", context.GetEscapeConfig().ActiveProfile)
 
 	configMap := util.StructToMapStringInterface(*context.GetEscapeConfig().GetCurrentProfile(), "json")
 	result.HumanOutput.AddMap(configMap)
@@ -47,7 +47,7 @@ func (ConfigController) ShowProfileField(context Context, field string) *Control
 		return result
 	}
 
-	result.HumanOutput.AddLine("%s: %v\n", field, configMap[field])
+	result.HumanOutput.AddLine("%s: %v", field, configMap[field])
 	result.MarshalableOutput = configMap[field]
 
 	return result
@@ -56,7 +56,7 @@ func (ConfigController) ShowProfileField(context Context, field string) *Control
 func (ConfigController) ActiveProfile(context Context) *ControllerResult {
 	result := NewControllerResult()
 
-	result.HumanOutput.AddLine("%s", context.GetEscapeConfig().ActiveProfile)
+	result.HumanOutput.AddLine(context.GetEscapeConfig().ActiveProfile)
 	result.MarshalableOutput = context.GetEscapeConfig().ActiveProfile
 
 	return result
@@ -85,7 +85,7 @@ func (ConfigController) SetProfile(context Context, profile string) *ControllerR
 			Error: err,
 		}
 	}
-	result.HumanOutput.AddLine("%s", "Profile has been set")
+	result.HumanOutput.AddLine("Profile has been set")
 	result.MarshalableOutput = "Profile has been set"
 	result.Error = context.GetEscapeConfig().Save()
 
