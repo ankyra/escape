@@ -23,11 +23,41 @@ import (
 	"github.com/ankyra/escape-core/variables"
 )
 
+// Errands are an Escape mechanism that make it easy to run operational and
+// publication tasks against deployed packages. They can be used to implement
+// backup procedures, user management, scalability controls, binary
+// publications, etc. Errands are a good idea whenever a task needs to be aware
+// of Environments.
+//
+// Errands are configured in the Escape Plan under the
+// (`errands`)[/docs/escape-plan/#errands] field.
+//
+// You can inspect and run Errands using the (`escape
+// errands`)[/docs/escape_errands/] command.
+//
 type Errand struct {
-	Name        string                `json:"name"`
-	Description string                `json:"description"`
-	Script      string                `json:"script"`
-	Inputs      []*variables.Variable `json:"inputs"`
+	// The name of the errand. This field is required.
+	Name string `json:"name"`
+
+	// An optional description of the errand.
+	Description string `json:"description"`
+
+	// The location of the script performing the actual work.
+	//
+	// The script has access to the deployment inputs and outputs as enviroment
+	// variables. For example: an input with `"id": "input_variable"` will be
+	// accessible as `INPUT_input_variable`; and an output with `"id":
+	// "output_variable"` as `OUTPUT_output_variable`.
+	//
+	// For example: `my-scripts/backup.sh`
+	Script string `json:"script"`
+
+	// A list of (Variables)[/docs/input-and-output-variables/]. The values
+	// will be made available to the `script` (along with the regular
+	// deployment inputs and outputs) as environment variables. For example: a
+	// variable with `"id": "input_variable"` will be accessible as environment
+	// variable `INPUT_input_variable`
+	Inputs []*variables.Variable `json:"inputs"`
 }
 
 func NewErrand(name, script, description string) *Errand {

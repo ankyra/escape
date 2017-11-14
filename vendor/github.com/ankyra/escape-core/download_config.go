@@ -21,15 +21,43 @@ import (
 	"net/url"
 )
 
+// Downloading files at build or deployment time is one of those common tasks
+// that Escape tries to cover.
+//
+// Downloads are configured in the Escape Plan under the
+// (`downloads`)[/docs/escape-plan/#downloads] field.
+//
 type DownloadConfig struct {
-	URL                   string   `json:"url"`
-	Dest                  string   `json:"dest"`
-	OverwriteExistingDest bool     `json:"overwrite" yaml:"overwrite"`
-	IfNotExists           []string `json:"if_not_exists" yaml:"if_not_exists"`
-	Unpack                bool     `json:"unpack"`
-	Platform              string   `json:"platform"`
-	Arch                  string   `json:"arch"`
-	Scopes                []string `json:"scopes" yaml:"scopes"`
+	// The URL to download from. This field is required.
+	//
+	// Example: `https://www.google.com/`
+	URL string `json:"url"`
+
+	// The destination path.
+	Dest string `json:"dest"`
+
+	// Overwrite the destination path if it already exists.
+	OverwriteExistingDest bool `json:"overwrite" yaml:"overwrite"`
+
+	// Only perform this download if none of the paths in this list exist.
+	// Supports glob patterns (for example: `"*.zip"`)
+	IfNotExists []string `json:"if_not_exists" yaml:"if_not_exists"`
+
+	// Should Escape try and unpack the destination path after download?
+	// Supported extensions: `.zip`, `.tgz`, `.tar.gz`, `.tar`.
+	Unpack bool `json:"unpack"`
+
+	// Only perform this download if the platform matches this value.
+	// Can be used to do platform dependent builds.
+	Platform string `json:"platform"`
+
+	// Only perform this download if the architecture matches this string.
+	// Can be used to do architecture dependent builds.
+	Arch string `json:"arch"`
+
+	// A list of scopes (`build`, `deploy`) that defines during which stage(s)
+	// this download should be performed.
+	Scopes []string `json:"scopes" yaml:"scopes"`
 }
 
 func NewDownloadConfig(url string) *DownloadConfig {

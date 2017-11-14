@@ -10,6 +10,7 @@ lock.json
 manifest.json
 deps/
 docs/cmd/
+docs/generated/
 model/runners/build/testdata/*.json
 model/runners/deploy/testdata/
 model/runners/deploy/testdata/*.json

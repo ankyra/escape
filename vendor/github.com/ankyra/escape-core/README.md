@@ -1,9 +1,10 @@
 # Escape Core
 
-Core library containing datastructures for working with Release Metadata, State
-and the Escape Scripting Language.
+[![Build status](https://circleci.com/gh/ankyra/escape-core.svg?style=shield&circle-token=d7df85c68526fa4db52bf41ba48a05c52ae8f31d)](https://circleci.com/gh/ankyra/escape-core) [![Documentation](https://godoc.org/github.com/ankyra/escape-core?status.svg)](http://godoc.org/github.com/ankyra/escape-core)
 
-Please see https://escape.ankyra.io for the full documentation.
+Core library containing datastructures for working with Release Metadata, State and the Escape Scripting Language.
+
+Please see https://escape.ankyra.io/ for the full documentation.
 
 ## License
 

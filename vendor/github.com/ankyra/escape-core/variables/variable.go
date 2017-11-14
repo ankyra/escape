@@ -28,18 +28,61 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// Variables can be used to defined inputs and outputs for the build and
+// deployment stages. They can also be used to make [Errands](/docs/errands/)
+// configurable.
+//
+// Variables are strongly typed, which is checked at both build and deploy
+// time.  A task can't succeed if the required variables have not been
+// configured correctly.
+//
 type Variable struct {
-	Id                     string                 `json:"id"`
-	Type                   string                 `json:"type"`
-	Default                interface{}            `json:"default,omitempty"`
-	Description            string                 `json:"description,omitempty"`
-	Friendly               string                 `json:"friendly,omitempty"`
-	Visible                bool                   `json:"visible"`
-	Options                map[string]interface{} `json:"options,omitempty"`
-	Sensitive              bool                   `json:"sensitive,omitempty"`
-	Items                  interface{}            `json:"items"`
-	EvalBeforeDependencies bool                   `json:"eval_before_dependencies,omitempty"`
-	Scopes                 []string               `json:"scopes"`
+	// A unique name for this variable. Required field.
+	Id string `json:"id"`
+
+	// The variable type. Before executing any steps Escape will make sure that
+	// all the values match the types that are set on the variables.
+	//
+	// One of: `string`, `list`, `integer`, `bool`.
+	//
+	// Default: `string`
+	Type string `json:"type"`
+
+	// A default value for this variable. This value will be used if no value
+	// has been specified by the user.
+	Default interface{} `json:"default,omitempty"`
+
+	// A description of the variable.
+	Description string `json:"description,omitempty"`
+
+	// A friendly name for this variable for presentational purposes only.
+	Friendly string `json:"friendly,omitempty"`
+
+	// Control whether or not this variable should be visible when deploying
+	// interactively. In other words: should the user be asked to input this
+	// value?  It only really makes sense to set this to `true` if there a
+	// `default` is set.
+	Visible bool `json:"visible"`
+
+	// Options that put more constraints on the type.
+	Options map[string]interface{} `json:"options,omitempty"`
+
+	// Is this sensitive data?
+	Sensitive bool `json:"sensitive,omitempty"`
+
+	// If set, this should contain all the valid values for this variable.
+	Items interface{} `json:"items"`
+
+	// Should the variables be evaluated before the dependencies are deployed?
+	EvalBeforeDependencies bool `json:"eval_before_dependencies,omitempty"`
+
+	// A list of scopes (`build`, `deploy`) that defines during which stage(s)
+	// this variable should be active. You wouldn't usually use this field
+	// directly, but use something like
+	// [`build_inputs`](/docs/escape-plan/#build_inputs) or
+	// [`deploy_inputs`](/docs/escape-plan/#deploy_inputs), which usually
+	// express intent better.
+	Scopes []string `json:"scopes"`
 }
 
 type UntypedVariable map[interface{}]interface{}

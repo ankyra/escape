@@ -63,13 +63,33 @@ Slice a list. Usually accessed implicitly using slice syntax (eg. `list[0:5]`)
 
 Replace returns a copy of the string s with the first n non-overlapping instances of old replaced by new. If old is empty, it matches at the beginning of the string and after each UTF-8 sequence, yielding up to k+1 replacements for a k-rune string. If n < 0, there is no limit on the number of replacements.
 
-## lower(v :: string)
+## track_patch_version()
 
-Returns a copy of the string v with all Unicode characters mapped to their lower case
+Track patch version
+
+## concat(v1 :: string, v2 :: string, ...)
+
+Concatate stringable arguments
+
+## upper(v :: string)
+
+Returns a copy of the string v with all Unicode characters mapped to their upper case
+
+## title(v :: string)
+
+Returns a copy of the string v with all Unicode characters mapped to their title case
 
 ## read_file()
 
 Read the contents of a file
+
+## track_version()
+
+Track version
+
+## base64_decode()
+
+Decode string from base64
 
 ## track_major_version()
 
@@ -79,39 +99,19 @@ Track major version
 
 Track minor version
 
-## track_version()
+## lower(v :: string)
 
-Track version
+Returns a copy of the string v with all Unicode characters mapped to their lower case
 
 ## split(sep :: string)
 
 Split slices s into all substrings separated by sep and returns a slice of the substrings between those separators. If sep is empty, Split splits after each UTF-8 sequence.
 
-## title(v :: string)
-
-Returns a copy of the string v with all Unicode characters mapped to their title case
-
 ## base64_encode()
 
 Encode string to base64
 
-## upper(v :: string)
-
-Returns a copy of the string v with all Unicode characters mapped to their upper case
-
-## base64_decode()
-
-Decode string from base64
-
 ## trim()
 
 Returns a slice of the string s, with all leading and trailing white space removed, as defined by Unicode. 
-
-## track_patch_version()
-
-Track patch version
-
-## concat(v1 :: string, v2 :: string, ...)
-
-Concatate stringable arguments
 

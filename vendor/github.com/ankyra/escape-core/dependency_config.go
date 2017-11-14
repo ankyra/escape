@@ -20,7 +20,18 @@ import (
 	"fmt"
 )
 
+// Dependencies are configured in the (`depends`)[/docs/escape-plan/#depends]
+// field of the Escape plan.
+//
 type DependencyConfig struct {
+	// The release id is required and is resolved at *build* time and then
+	// persisted in the release metadata ensuring that deployments always use
+	// the same versions.
+	//
+	// Examples:
+	// - To always use the latest version: `my-organisation/my-dependency-latest`
+	// - To always use version 0.1.1: `my-organisation/my-dependency-v0.1.1`
+	// - To always use the latest version in the 0.1 series: `my-organisation/my-dependency-v0.1.@`
 	ReleaseId     string                 `json:"release_id" yaml:"release_id"`
 	BuildMapping  map[string]interface{} `json:"build_mapping" yaml:"build_mapping"`
 	DeployMapping map[string]interface{} `json:"deploy_mapping" yaml:"deploy_mapping"`

@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/ankyra/escape-core/script"
 	"io/ioutil"
+	"os"
+
+	"github.com/ankyra/escape-core/script"
 )
 
 type Type struct {
@@ -59,5 +61,6 @@ Standard library functions for the [Escape Scripting Language](../scripting-lang
 			s = fmt.Sprintf("%s## %s\n\n%s\n\n", s, sig, doc)
 		}
 	}
-	ioutil.WriteFile("docs/stdlib.md", []byte(s), 0644)
+	os.Mkdir("docs/generated/", 0755)
+	ioutil.WriteFile("docs/generated/stdlib.md", []byte(s), 0644)
 }

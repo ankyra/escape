@@ -6,68 +6,9 @@ import (
 	"go/parser"
 	"go/token"
 	"io/ioutil"
-	"log"
 	"os"
-	"path"
-	"path/filepath"
 	"strings"
-
-	"github.com/ankyra/escape/cmd"
-	"github.com/spf13/cobra/doc"
 )
-
-const fmTemplate = `---
-date: 2017-11-11 00:00:00
-title: "%s"
-slug: %s
-type: "docs"
-toc: true
----
-`
-
-const planHeader = `---
-date: 2017-11-11 00:00:00
-title: "The Escape Plan"
-slug: escape-plan
-type: "docs"
-toc: true
----
-
-The Escape Plan describes a package. 
-
-Field | Type | Description
-------|------|-------------
-`
-
-var typeMap = map[string][]string{
-	"extends":          []string{"[string]", "Extensions"},
-	"depends":          []string{"[string]", "Dependencies"},
-	"consumes":         []string{"[string]", "Consumers"},
-	"build_consumes":   []string{"[string]", "Consumers"},
-	"deploy_consumes":  []string{"[string]", "Consumers"},
-	"provides":         []string{"[string]", "Consumers"},
-	"inputs":           []string{"[string]", "Variables"},
-	"build_inputs":     []string{"[string]", "Variables"},
-	"deploy_inputs":    []string{"[string]", "Variables"},
-	"outputs":          []string{"[string]", "Variables"},
-	"metadata":         []string{"{}"},
-	"includes":         []string{"[]string"},
-	"errands":          []string{"Errands"},
-	"downloads":        []string{"Downloads"},
-	"templates":        []string{"Templates"},
-	"build_templates":  []string{"Templates"},
-	"deploy_templates": []string{"Templates"},
-}
-
-var typeLinks = map[string]string{
-	"Extensions":   "extensions",
-	"Dependencies": "dependencies",
-	"Consumers":    "providers-and-consumers",
-	"Variables":    "input-and-output-variables",
-	"Errands":      "errands",
-	"Downloads":    "downloads",
-	"Templates":    "templates",
-}
 
 type Page struct {
 	Name       string
@@ -77,7 +18,12 @@ type Page struct {
 }
 
 var Pages = map[string]Page{
-	"escape plan": Page{"The Escape Plan", "escape-plan", "model/escape_plan/escape_plan.go", "EscapePlan"},
+	"consumer":  Page{"Consumers", "providers-and-consumers", "consumer.go", "ConsumerConfig"},
+	"depends":   Page{"Dependencies", "dependencies", "dependency_config.go", "DependencyConfig"},
+	"downloads": Page{"Downloads", "downloads", "download_config.go", "DownloadConfig"},
+	"errands":   Page{"Errands", "errands", "errand.go", "Errand"},
+	"templates": Page{"Templates", "templates", "templates/templates.go", "Template"},
+	"variables": Page{"Input and Output Variables", "input-and-output-variables", "variables/variable.go", "Variable"},
 }
 
 const PageHeader = `---
@@ -95,10 +41,10 @@ Field | Type | Description
 %s
 `
 
-func GetYamlFieldFromTag(tag string) string {
+func GetJsonFieldFromTag(tag string) string {
 	for _, s := range strings.Split(tag, " ") {
 		s = strings.Trim(s, "`")
-		if strings.HasPrefix(s, "yaml:\"") {
+		if strings.HasPrefix(s, "json:\"") {
 			s = s[6 : len(s)-1]
 			parts := strings.Split(s, ",")
 			return parts[0]
@@ -132,7 +78,7 @@ func StructTable(page Page, topLevelDoc string, s *ast.TypeSpec) string {
 	structType := s.Type.(*ast.StructType)
 	result := ""
 	for _, field := range structType.Fields.List {
-		tag := GetYamlFieldFromTag(field.Tag.Value)
+		tag := GetJsonFieldFromTag(field.Tag.Value)
 		typ := ParseType(field.Type)
 		result += "|" + tag + "|`" + typ + "`|"
 		doc := strings.TrimSpace(field.Doc.Text())
@@ -172,7 +118,8 @@ func GenerateStructDocs(f *ast.File, page Page) string {
 	return ""
 }
 
-func GeneratePages() {
+func main() {
+	os.Mkdir("docs/generated/", 0755)
 	for _, page := range Pages {
 		fset := token.NewFileSet()
 		f, err := parser.ParseFile(fset, page.SrcFile, nil, parser.ParseComments)
@@ -184,23 +131,4 @@ func GeneratePages() {
 		fmt.Println("Writing ", filename)
 		ioutil.WriteFile(filename, []byte(str), 0644)
 	}
-}
-
-func main() {
-	os.Mkdir("docs/generated/", 0755)
-	filePrepender := func(filename string) string {
-		name := filepath.Base(filename)
-		base := strings.TrimSuffix(name, path.Ext(name))
-		return fmt.Sprintf(fmTemplate, strings.Replace(base, "_", " ", -1), base)
-	}
-
-	linkHandler := func(name string) string {
-		base := strings.TrimSuffix(name, path.Ext(name))
-		return "../" + strings.ToLower(base) + "/"
-	}
-	err := doc.GenMarkdownTreeCustom(cmd.RootCmd, "./docs/cmd", filePrepender, linkHandler)
-	if err != nil {
-		log.Fatal(err)
-	}
-	GeneratePages()
 }

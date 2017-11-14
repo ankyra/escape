@@ -17,8 +17,9 @@ limitations under the License.
 package core
 
 import (
-	"github.com/ankyra/escape-core/parsers"
 	"strings"
+
+	"github.com/ankyra/escape-core/parsers"
 )
 
 type Dependency struct {

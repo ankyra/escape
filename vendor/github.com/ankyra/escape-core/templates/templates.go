@@ -25,10 +25,30 @@ import (
 	"github.com/cbroglie/mustache"
 )
 
+// Escape provides the Mustache templating language and integrates it with the
+// package's (Variables)[/docs/input-and-output-variables/], making for a quick
+// and easy way to render files at either build or deploy time.
+//
+// Templates are configured in the Escape Plan under the
+// (`templates`)[/docs/escape-plan/#templates] field.
+//
 type Template struct {
-	File    string                 `json:"file"`
-	Target  string                 `json:"target"`
-	Scopes  []string               `json:"scopes"`
+	// The file containing the template. This field is required.
+	File string `json:"file"`
+
+	// The target location for the rendered template. If the source location
+	// specified in `file` has the `.tpl` extension this `target` will default
+	// to source location minus that extension.
+	//
+	// For example: if `file` is `"hello.txt.tpl"` then the default value for
+	// target will be `"hello.txt"`
+	Target string `json:"target"`
+
+	// A list of scopes (`build`, `deploy`) that defines during which stage(s)
+	// the template should be rendered.
+	Scopes []string `json:"scopes"`
+
+	// This mapping can be used to relate template variables to Escape variables.
 	Mapping map[string]interface{} `json:"mapping"`
 }
 
