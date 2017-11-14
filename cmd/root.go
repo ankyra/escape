@@ -55,7 +55,7 @@ Website: http://escape.ankyra.io/
 			context.GetLogger().SetLogLevel(cfgLogLevel)
 		}
 
-		if !terminal.IsTerminal(int(os.Stdout.Fd())) {
+		if !terminal.IsTerminal(int(os.Stdout.Fd())) || os.Getenv("CI") == "true" {
 			context.SetLogCollapse(false)
 		}
 
