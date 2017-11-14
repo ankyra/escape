@@ -198,7 +198,7 @@ func (r *inventory) GetAuthMethods(url string) (map[string]*types.AuthMethod, er
 		if err != nil {
 			return nil, fmt.Errorf("Couldn't get auth methods from server '%s': %s", url, resp.Status)
 		}
-		return nil, fmt.Errorf("Couldn't get auth methods from server '%s': %s", url, resp.Status, result)
+		return nil, fmt.Errorf("Couldn't get auth methods from server '%s': %s\n%s", url, resp.Status, string(result))
 	}
 	result := map[string]*types.AuthMethod{}
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
