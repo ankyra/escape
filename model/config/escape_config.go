@@ -103,6 +103,11 @@ func (e *EscapeConfig) LoadConfig(cfgFile string) error {
 		if err != nil {
 			return fmt.Errorf("Couldn't parse Escape configuration file '%s': %s", cfgFile, err.Error())
 		}
+	} else {
+		err := e.Save()
+		if err != nil {
+			return err
+		}
 	}
 	if _, ok := e.Profiles[e.ActiveProfile]; !ok {
 		return fmt.Errorf("Referenced profile '%s' was not found in the Escape configuration file.", e.ActiveProfile)
