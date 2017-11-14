@@ -39,15 +39,20 @@ version: 0.1
 ```
 
 We can use the [plan preview](/docs/escape_plan_preview) command to make sure 
-that our plan compiles and to have a look at what Escape makes of it. (NB. We don't 
-have to run this command explicitly for any of our build steps as Escape will 
-do it automatically, but it can be handy in some cases)
+that our plan compiles and to have a look at what Escape makes of it. 
+
 
 ```bash
 escape plan preview
 ```
 
 That's looking tidy. 
+
+<div class='docling'>
+We don't have to run the `escape plan preview` command explicitly for any of
+our build steps as Escape will do it automatically, but it can be a handy
+validation step)
+</div>
 
 We now have enough to create an empty package, but usually we do want to
 actually put something inside it. Let's create a file:
