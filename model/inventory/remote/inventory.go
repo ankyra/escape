@@ -133,7 +133,6 @@ func (r *inventory) DownloadRelease(project, name, version, targetFile string) e
 		}
 		return fmt.Errorf("Couldn't download release '%s': %s", releaseId, resp.Status)
 	}
-	fmt.Println("Writing: " + targetFile)
 	fp, err := os.Create(targetFile)
 	if err != nil {
 		return err
@@ -168,7 +167,6 @@ func (r *inventory) UploadRelease(project, releasePath string, metadata *core.Re
 
 func (r *inventory) register(project string, metadata *core.ReleaseMetadata) error {
 	url := r.endpoints.RegisterPackage(project)
-	fmt.Println(url)
 	resp, err := r.client.POST_json_with_authentication(url, metadata)
 	if err != nil {
 		return err
@@ -270,7 +268,6 @@ func (r *inventory) ListVersions(project, app string) ([]string, error) {
 		for _, v := range result["versions"].([]interface{}) {
 			versions = append(versions, v.(string))
 		}
-		fmt.Println(versions)
 		return versions
 	})
 }
