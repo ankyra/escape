@@ -26,69 +26,68 @@ import (
 type ConfigController struct{}
 
 func (ConfigController) ShowProfile(context Context, json bool) *ControllerResult {
-	result := &ControllerResult{
-		HumanOutput:       fmt.Sprintf("Profile: %s\n", context.GetEscapeConfig().ActiveProfile),
-		MarshalableOutput: context.GetEscapeConfig().GetCurrentProfile(),
-	}
+	result := NewControllerResult()
+
+	result.HumanOutput.AddLine("Profile: %s\n", context.GetEscapeConfig().ActiveProfile)
 
 	configMap := util.StructToMapStringInterface(*context.GetEscapeConfig().GetCurrentProfile(), "json")
-	for k, v := range configMap {
-		result.HumanOutput = fmt.Sprintf("%s\n%s: %v", result.HumanOutput, k, v)
-	}
+	result.HumanOutput.AddMap(configMap)
+
+	result.MarshalableOutput = context.GetEscapeConfig().GetCurrentProfile()
 
 	return result
 }
 
 func (ConfigController) ShowProfileField(context Context, field string) *ControllerResult {
+	result := NewControllerResult()
+
 	configMap := util.StructToMapStringInterface(*context.GetEscapeConfig().GetCurrentProfile(), "json")
 	if configMap[field] == nil {
-		return &ControllerResult{
-			Error: fmt.Errorf(`"%s" is not a valid field name`, field),
-		}
+		result.Error = fmt.Errorf(`"%s" is not a valid field name`, field)
+		return result
 	}
 
-	return &ControllerResult{
-		HumanOutput:       fmt.Sprintf("%s: %v\n", field, configMap[field]),
-		MarshalableOutput: configMap[field],
-	}
+	result.HumanOutput.AddLine("%s: %v\n", field, configMap[field])
+	result.MarshalableOutput = configMap[field]
+
+	return result
 }
 
 func (ConfigController) ActiveProfile(context Context) *ControllerResult {
-	return &ControllerResult{
-		HumanOutput:       context.GetEscapeConfig().ActiveProfile,
-		MarshalableOutput: context.GetEscapeConfig().ActiveProfile,
-	}
+	result := NewControllerResult()
+
+	result.HumanOutput.AddLine("%s", context.GetEscapeConfig().ActiveProfile)
+	result.MarshalableOutput = context.GetEscapeConfig().ActiveProfile
+
+	return result
 }
 
 func (ConfigController) ListProfiles(context Context) *ControllerResult {
-	result := &ControllerResult{
-		MarshalableOutput: []string{},
+	result := NewControllerResult()
+
+	profileNames := []interface{}{}
+	for profileName, _ := range context.GetEscapeConfig().Profiles {
+		profileNames = append(profileNames, profileName)
 	}
 
-	i := 0
-	for profileName, _ := range context.GetEscapeConfig().Profiles {
-		if i == 0 {
-			result.HumanOutput = profileName
-		} else {
-			result.HumanOutput = fmt.Sprintf("%s\n%s", result.HumanOutput, profileName)
-		}
-		result.MarshalableOutput = append(result.MarshalableOutput.([]string), profileName)
-		i++
-	}
+	result.HumanOutput.AddList(profileNames)
+	result.MarshalableOutput = profileNames
 
 	return result
 }
 
 func (ConfigController) SetProfile(context Context, profile string) *ControllerResult {
+	result := NewControllerResult()
+
 	err := context.GetEscapeConfig().SetActiveProfile(profile)
 	if err != nil {
 		return &ControllerResult{
 			Error: err,
 		}
 	}
-	return &ControllerResult{
-		HumanOutput:       "Profile has been set",
-		MarshalableOutput: "Profile has been set",
-		Error:             context.GetEscapeConfig().Save(),
-	}
+	result.HumanOutput.AddLine("%s", "Profile has been set")
+	result.MarshalableOutput = "Profile has been set"
+	result.Error = context.GetEscapeConfig().Save()
+
+	return result
 }
