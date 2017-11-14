@@ -25,43 +25,70 @@ import (
 
 type ConfigController struct{}
 
-func (ConfigController) ShowProfile(context Context, json bool) {
-	if json {
-		fmt.Println(context.GetEscapeConfig().GetCurrentProfile().ToJson())
-	} else {
-		fmt.Printf("Profile: %s\n\n", context.GetEscapeConfig().ActiveProfile)
+func (ConfigController) ShowProfile(context Context, json bool) *ControllerResult {
+	result := &ControllerResult{
+		HumanOutput:       fmt.Sprintf("Profile: %s\n", context.GetEscapeConfig().ActiveProfile),
+		MarshalableOutput: context.GetEscapeConfig().GetCurrentProfile(),
+	}
 
-		configMap := util.StructToMapStringInterface(*context.GetEscapeConfig().GetCurrentProfile(), "json")
-		for k, v := range configMap {
-			fmt.Printf("%s: %v\n", k, v)
+	configMap := util.StructToMapStringInterface(*context.GetEscapeConfig().GetCurrentProfile(), "json")
+	for k, v := range configMap {
+		result.HumanOutput = fmt.Sprintf("%s\n%s: %v", result.HumanOutput, k, v)
+	}
+
+	return result
+}
+
+func (ConfigController) ShowProfileField(context Context, field string) *ControllerResult {
+	configMap := util.StructToMapStringInterface(*context.GetEscapeConfig().GetCurrentProfile(), "json")
+	if configMap[field] == nil {
+		return &ControllerResult{
+			Error: fmt.Errorf(`"%s" is not a valid field name`, field),
 		}
 	}
+
+	return &ControllerResult{
+		HumanOutput:       fmt.Sprintf("%s: %v\n", field, configMap[field]),
+		MarshalableOutput: configMap[field],
+	}
 }
 
-func (ConfigController) ShowProfileField(context Context, field string) error {
-	configMap := util.StructToMapStringInterface(*context.GetEscapeConfig().GetCurrentProfile(), "json")
-	if configMap[field] != nil {
-		fmt.Printf("%s: %v\n", field, configMap[field])
-		return nil
+func (ConfigController) ActiveProfile(context Context) *ControllerResult {
+	return &ControllerResult{
+		HumanOutput:       context.GetEscapeConfig().ActiveProfile,
+		MarshalableOutput: context.GetEscapeConfig().ActiveProfile,
+	}
+}
+
+func (ConfigController) ListProfiles(context Context) *ControllerResult {
+	result := &ControllerResult{
+		MarshalableOutput: []string{},
 	}
 
-	return fmt.Errorf(`"%s" is not a valid field name`, field)
-}
-
-func (ConfigController) ActiveProfile(context Context) {
-	fmt.Println(context.GetEscapeConfig().ActiveProfile)
-}
-
-func (ConfigController) ListProfiles(context Context) {
+	i := 0
 	for profileName, _ := range context.GetEscapeConfig().Profiles {
-		fmt.Println(profileName)
+		if i == 0 {
+			result.HumanOutput = profileName
+		} else {
+			result.HumanOutput = fmt.Sprintf("%s\n%s", result.HumanOutput, profileName)
+		}
+		result.MarshalableOutput = append(result.MarshalableOutput.([]string), profileName)
+		i++
 	}
+
+	return result
 }
 
-func (ConfigController) SetProfile(context Context, profile string) error {
+func (ConfigController) SetProfile(context Context, profile string) *ControllerResult {
 	err := context.GetEscapeConfig().SetActiveProfile(profile)
 	if err != nil {
-		return err
+		return &ControllerResult{
+			Error: err,
+		}
 	}
-	return context.GetEscapeConfig().Save()
+	return &ControllerResult{
+		HumanOutput:       "Profile has been set",
+		MarshalableOutput: "Profile has been set",
+		Error:             context.GetEscapeConfig().Save(),
+	}
 }

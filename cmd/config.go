@@ -42,13 +42,14 @@ var configProfileCmd = &cobra.Command{
 	Short: "Show the currently active Escape profile",
 	Long:  ``,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		var result *controllers.ControllerResult
 		if len(args) < 1 {
-			controllers.ConfigController{}.ShowProfile(context, jsonFlag)
+			result = controllers.ConfigController{}.ShowProfile(context, jsonFlag)
 		} else {
-			return controllers.ConfigController{}.ShowProfileField(context, args[0])
+			result = controllers.ConfigController{}.ShowProfileField(context, args[0])
 		}
 
-		return nil
+		return result.Print(jsonFlag)
 	},
 }
 
@@ -57,7 +58,9 @@ var configActiveProfileCmd = &cobra.Command{
 	Short: "Show the currently active profile name",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		controllers.ConfigController{}.ActiveProfile(context)
+		result := controllers.ConfigController{}.ActiveProfile(context)
+
+		result.Print(jsonFlag)
 	},
 }
 
@@ -66,7 +69,9 @@ var configListProfilesCmd = &cobra.Command{
 	Short: "List the currently available Escape profiles",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		controllers.ConfigController{}.ListProfiles(context)
+		result := controllers.ConfigController{}.ListProfiles(context)
+
+		result.Print(jsonFlag)
 	},
 }
 
@@ -74,11 +79,14 @@ var configSetProfileCmd = &cobra.Command{
 	Use:   "set-profile <profile name>",
 	Short: "Set the active Escape profile",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		var result *controllers.ControllerResult
 		if len(args) < 1 {
-			return controllers.ConfigController{}.SetProfile(context, cfgProfile)
+			result = controllers.ConfigController{}.SetProfile(context, cfgProfile)
 		} else {
-			return controllers.ConfigController{}.SetProfile(context, args[0])
+			result = controllers.ConfigController{}.SetProfile(context, args[0])
 		}
+
+		return result.Print(jsonFlag)
 	},
 }
 
@@ -89,5 +97,5 @@ func init() {
 	configCmd.AddCommand(configSetProfileCmd)
 	configCmd.AddCommand(configActiveProfileCmd)
 
-	configProfileCmd.Flags().BoolVarP(&jsonFlag, "json", "", false, "Output profile in JSON format")
+	configCmd.PersistentFlags().BoolVarP(&jsonFlag, "json", "", false, "Output profile in JSON format")
 }
