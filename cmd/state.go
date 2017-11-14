@@ -45,7 +45,9 @@ var listDeploymentsCmd = &cobra.Command{
 		if err := context.LoadLocalState(state, environment); err != nil {
 			return err
 		}
-		return controllers.StateController{}.ListDeployments(context)
+		result := controllers.StateController{}.ListDeployments(context)
+
+		return result.Print(jsonFlag)
 	},
 }
 
@@ -73,7 +75,9 @@ var showProvidersCmd = &cobra.Command{
 		if err := ProcessFlagsForContext(false); err != nil {
 			return err
 		}
-		return controllers.StateController{}.ShowProviders(context)
+		result := controllers.StateController{}.ShowProviders(context)
+
+		return result.Print(jsonFlag)
 	},
 }
 
@@ -115,6 +119,7 @@ func init() {
 
 	setEscapeStateLocationFlag(listDeploymentsCmd)
 	setEscapeStateEnvironmentFlag(listDeploymentsCmd)
+	listDeploymentsCmd.PersistentFlags().BoolVarP(&jsonFlag, "json", "", false, "Output profile in JSON format")
 
 	setEscapeStateLocationFlag(showDeploymentCmd)
 	setEscapeStateEnvironmentFlag(showDeploymentCmd)
@@ -122,6 +127,7 @@ func init() {
 
 	setEscapeStateLocationFlag(showProvidersCmd)
 	setEscapeStateEnvironmentFlag(showProvidersCmd)
+	showProvidersCmd.PersistentFlags().BoolVarP(&jsonFlag, "json", "", false, "Output profile in JSON format")
 
 	setPlanAndStateFlags(createStateCmd)
 	createStateCmd.Flags().BoolVarP(&deployStage, "deploy", "", false, "Use deployment instead of build stage")

@@ -25,12 +25,19 @@ import (
 
 type StateController struct{}
 
-func (p StateController) ListDeployments(context Context) error {
+func (p StateController) ListDeployments(context Context) *ControllerResult {
+	result := NewControllerResult()
 	envState := context.GetEnvironmentState()
+
+	deployments := []interface{}{}
 	for _, depl := range envState.GetDeployments() {
-		fmt.Println(depl.GetName())
+		deployments = append(deployments, depl.GetName())
 	}
-	return nil
+
+	result.HumanOutput.AddList(deployments)
+	result.MarshalableOutput = deployments
+
+	return result
 }
 
 func (p StateController) ShowDeployment(context Context, dep string) error {
@@ -44,18 +51,24 @@ func (p StateController) ShowDeployment(context Context, dep string) error {
 	return fmt.Errorf("Deployment '%s' not found", dep)
 }
 
-func (p StateController) ShowProviders(context Context) error {
+func (p StateController) ShowProviders(context Context) *ControllerResult {
+	result := NewControllerResult()
 	envState := context.GetEnvironmentState()
 	exists := false
+	providers := map[string][]string{}
 	for provider, implementations := range envState.GetProviders() {
 		exists = true
-		fmt.Printf("%s:\n", provider)
-		fmt.Printf("\t%s\n", strings.Join(implementations, ", "))
+		result.HumanOutput.AddLine("%s:", provider)
+		result.HumanOutput.AddLine("\t%s", strings.Join(implementations, ", "))
+		providers[provider] = implementations
 	}
 	if !exists {
-		fmt.Println("No providers found in the environment state. Try deploying one.")
+		result.HumanOutput.AddLine("No providers found in the environment state. Try deploying one.")
+		result.MarshalableOutput = "No providers found in the environment state. Try deploying one."
+		return result
 	}
-	return nil
+	result.MarshalableOutput = providers
+	return result
 }
 
 func (p StateController) CreateState(context Context, stage string, extraVars, extraProviders map[string]string) error {

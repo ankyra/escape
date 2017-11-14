@@ -23,8 +23,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var jsonFlag bool
-
 var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Manage the escape client configuration",

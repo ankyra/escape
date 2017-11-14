@@ -27,7 +27,7 @@ import (
 )
 
 var cfgFile, cfgProfile, cfgLogLevel string
-var cfgLogCollapse bool
+var cfgLogCollapse, jsonFlag bool
 var context Context
 
 var RootCmd = &cobra.Command{
