@@ -34,7 +34,7 @@ var Fields = []string{"name", "version", "description", "logo", "extends", "depe
 	"consumes", "build_consumes", "deploy_consumes",
 	"provides", "inputs", "build_inputs", "deploy_inputs",
 	"outputs", "metadata", "includes", "errands", "downloads",
-	"templates", "build_templates", "deploy_templates", "path",
+	"templates", "build_templates", "deploy_templates",
 	"pre_build", "build", "post_build", "test",
 	"pre_deploy", "deploy", "post_deploy", "smoke",
 	"pre_destroy", "destroy", "post_destroy"}

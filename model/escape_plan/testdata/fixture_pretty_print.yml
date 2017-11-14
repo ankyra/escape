@@ -200,8 +200,6 @@ build_templates:
 deploy_templates:
 - deploy.yml.tpl
 
-path: path.txt
-
 # A script to run before the build.
 #
 # The script has access to the input variables (prepended with INPUT_)

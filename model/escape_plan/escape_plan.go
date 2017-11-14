@@ -177,8 +177,6 @@ type EscapePlan struct {
 
 	// Downloads.
 	Downloads []*core.DownloadConfig `yaml:"downloads,omitempty"`
-
-	Path string `yaml:"path,omitempty"`
 }
 
 func NewEscapePlan() *EscapePlan {

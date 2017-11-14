@@ -88,8 +88,6 @@ func (p PlanController) Get(context Context, field string) error {
 		output = context.GetEscapePlan().Description
 	case "logo":
 		output = context.GetEscapePlan().Logo
-	case "path":
-		output = context.GetEscapePlan().Path
 	case "pre_build":
 		output = context.GetEscapePlan().PreBuild
 	case "build":

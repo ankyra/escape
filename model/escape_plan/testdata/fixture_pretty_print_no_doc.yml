@@ -65,7 +65,6 @@ build_templates:
 - build.yml.tpl
 deploy_templates:
 - deploy.yml.tpl
-path: path.txt
 pre_build: pre_build.sh
 build: build.sh
 post_build: post_build.sh
