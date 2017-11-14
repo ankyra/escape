@@ -39,34 +39,22 @@ Field | Type | Description
 ------|------|-------------
 `
 
-var typeMap = map[string][]string{
-	"extends":          []string{"[string]", "Extensions"},
-	"depends":          []string{"[string]", "Dependencies"},
-	"consumes":         []string{"[string]", "Consumers"},
-	"build_consumes":   []string{"[string]", "Consumers"},
-	"deploy_consumes":  []string{"[string]", "Consumers"},
-	"provides":         []string{"[string]", "Consumers"},
-	"inputs":           []string{"[string]", "Variables"},
-	"build_inputs":     []string{"[string]", "Variables"},
-	"deploy_inputs":    []string{"[string]", "Variables"},
-	"outputs":          []string{"[string]", "Variables"},
-	"metadata":         []string{"{}"},
-	"includes":         []string{"[]string"},
-	"errands":          []string{"Errands"},
-	"downloads":        []string{"Downloads"},
-	"templates":        []string{"Templates"},
-	"build_templates":  []string{"Templates"},
-	"deploy_templates": []string{"Templates"},
-}
-
-var typeLinks = map[string]string{
-	"Extensions":   "extensions",
-	"Dependencies": "dependencies",
-	"Consumers":    "providers-and-consumers",
-	"Variables":    "input-and-output-variables",
-	"Errands":      "errands",
-	"Downloads":    "downloads",
-	"Templates":    "templates",
+var TypeMap = map[string]string{
+	"extends":          "`[string]`, [Extensions](/docs/extensions/)",
+	"depends":          "`[string]`, [Dependencies](/docs/dependencies/)",
+	"consumes":         "`[string]`, [Consumers](/docs/providers-and-consumers/)",
+	"build_consumes":   "`[string]`, [Consumers](/docs/providers-and-consumers/)",
+	"deploy_consumes":  "`[string]`, [Consumers](/docs/providers-and-consumers/)",
+	"provides":         "`[string]`, [Consumers](/docs/providers-and-consumers/)",
+	"inputs":           "`[string]`, [Variables](/docs/input-and-output-variables/)",
+	"build_inputs":     "`[string]`, [Variables](/docs/input-and-output-variables/)",
+	"deploy_inputs":    "`[string]`, [Variables](/docs/input-and-output-variables/)",
+	"outputs":          "`[string]`, [Variables](/docs/input-and-output-variables/)",
+	"errands":          "[Errands](/docs/errands/)",
+	"downloads":        "[Downloads](/docs/downloads/)",
+	"templates":        "[Templates](/docs/templates/)",
+	"build_templates":  "[Templates](/docs/templates/)",
+	"deploy_templates": "[Templates](/docs/templates/)",
 }
 
 type Page struct {
@@ -74,10 +62,11 @@ type Page struct {
 	Slug       string
 	SrcFile    string
 	StructName string
+	TypeMap    map[string]string
 }
 
 var Pages = map[string]Page{
-	"escape plan": Page{"The Escape Plan", "escape-plan", "model/escape_plan/escape_plan.go", "EscapePlan"},
+	"escape plan": Page{"The Escape Plan", "escape-plan", "model/escape_plan/escape_plan.go", "EscapePlan", TypeMap},
 }
 
 const PageHeader = `---
@@ -133,8 +122,11 @@ func StructTable(page Page, topLevelDoc string, s *ast.TypeSpec) string {
 	result := ""
 	for _, field := range structType.Fields.List {
 		tag := GetYamlFieldFromTag(field.Tag.Value)
-		typ := ParseType(field.Type)
-		result += "|" + tag + "|`" + typ + "`|"
+		typ, ok := page.TypeMap[tag]
+		if !ok {
+			typ = "`" + ParseType(field.Type) + "`"
+		}
+		result += "|<a name='" + tag + "'></a>" + tag + "|" + typ + "|"
 		doc := strings.TrimSpace(field.Doc.Text())
 		if doc != "" {
 			for _, line := range strings.Split(doc, "\n") {
