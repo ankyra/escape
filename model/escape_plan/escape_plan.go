@@ -21,45 +21,164 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/ankyra/escape/util"
 	"github.com/ankyra/escape-core"
+	"github.com/ankyra/escape/util"
 	"gopkg.in/yaml.v2"
 )
 
+// Everything starts with a plan. An Escape plan.
+//
+// The Escape plan gets compiled into release metadata at build time.
+//
 type EscapePlan struct {
-	Build           string                 `yaml:"build,omitempty"`
-	BuildConsumes   []interface{}          `yaml:"build_consumes,omitempty"`
-	BuildInputs     []interface{}          `yaml:"build_inputs,omitempty"`
-	BuildTemplates  []interface{}          `yaml:"build_templates,omitempty"`
-	Consumes        []interface{}          `yaml:"consumes,omitempty"`
-	Depends         []interface{}          `yaml:"depends,omitempty"`
-	Deploy          string                 `yaml:"deploy,omitempty"`
-	DeployInputs    []interface{}          `yaml:"deploy_inputs,omitempty"`
-	DeployConsumes  []interface{}          `yaml:"deploy_consumes,omitempty"`
-	DeployTemplates []interface{}          `yaml:"deploy_templates,omitempty"`
-	Destroy         string                 `yaml:"destroy,omitempty"`
-	Description     string                 `yaml:"description,omitempty"`
-	Downloads       []*core.DownloadConfig `yaml:"downloads,omitempty"`
-	Extends         []string               `yaml:"extends,omitempty"`
-	Errands         map[string]interface{} `yaml:"errands,omitempty"`
-	Includes        []string               `yaml:"includes,omitempty"`
-	Inputs          []interface{}          `yaml:"inputs,omitempty"`
-	Logo            string                 `yaml:"logo,omitempty"`
-	Metadata        map[string]string      `yaml:"metadata,omitempty"`
-	Name            string                 `yaml:"name"`
-	Outputs         []interface{}          `yaml:"outputs,omitempty"`
-	Path            string                 `yaml:"path,omitempty"`
-	PostBuild       string                 `yaml:"post_build,omitempty"`
-	PostDeploy      string                 `yaml:"post_deploy,omitempty"`
-	PostDestroy     string                 `yaml:"post_destroy,omitempty"`
-	PreBuild        string                 `yaml:"pre_build,omitempty"`
-	PreDeploy       string                 `yaml:"pre_deploy,omitempty"`
-	PreDestroy      string                 `yaml:"pre_destroy,omitempty"`
-	Smoke           string                 `yaml:"smoke,omitempty"`
-	Provides        []string               `yaml:"provides,omitempty"`
-	Templates       []interface{}          `yaml:"templates,omitempty"`
-	Test            string                 `yaml:"test,omitempty"`
-	Version         string                 `yaml:"version"`
+	// The package name. The name can be qualified by a project name; if no
+	// project is specified then the default project `_` will be used.
+	//
+	// Format: `/([a-za-z]+[a-za-z0-9-]*\/)?[a-za-z]+[a-za-z0-9-]*/`
+	//
+	// Examples:
+	//
+	// * Fully qualified: `name: my-project/my-package`
+	//
+	// * Default project: `name: my-package`
+	//
+	Name string `yaml:"name"`
+
+	// Escape uses semantic versioning to version packages. This field is
+	// required; either specify the full version or use the '@' symbol to let
+	// Escape pick the next version at build time.
+	//
+	// Format: `/[0-9]+(\.[0-9]+)*(\.@)?/`
+	//
+	// Examples:
+	//
+	// * Build version 1.5: `version: 1.5`
+	//
+	// * Build the next minor release in the 1.* series: `version: 1.@`
+	//
+	// Build the next path release in the 1.1.* series: `version: 1.1.@`
+	//
+	Version string `yaml:"version"`
+
+	// An optional description for this package. Only used for presentation
+	// purposes.
+	Description string `yaml:"description,omitempty"`
+
+	// An optional path to an image. Only used for presentation purposes.
+	Logo string `yaml:"logo,omitempty"`
+
+	// Metadata key value pairs.
+	//
+	// Escape script can be used as values, but note that the metadata is
+	// compiled at build time before dependencies are deployed; so dependency
+	// inputs and outputs can't be referenced.
+	//
+	// Example:
+	//
+	//   metadata:
+	//     author: Fictional Character
+	//     co_author: $dependency.metadata.author
+	//
+	Metadata map[string]string `yaml:"metadata,omitempty"`
+
+	// Reference depedencies by their full ID or use the `@` symbol to resolve
+	// versions at build time.
+	Depends []interface{} `yaml:"depends,omitempty"`
+
+	Extends []string `yaml:"extends,omitempty"`
+
+	// The files to includes in this release. The files don't have to exist, but can
+	// be produced during build time. Globbing patterns are supported.
+	//
+	Includes []string `yaml:"includes,omitempty"`
+
+	// The release can declare zero or more providers so that consumers
+	// can loosely depend on it at deploy time.
+	Provides []string `yaml:"provides,omitempty"`
+
+	// At deploy time a package can consume zero or more providers from the
+	// target environment.
+	Consumes []interface{} `yaml:"consumes,omitempty"`
+
+	// Same as `consumes`, but scoped to the build stage (ie. the consumer is
+	// not required/available at deploy time).
+	BuildConsumes []interface{} `yaml:"build_consumes,omitempty"`
+
+	// Same as `consumes`, but scoped to the deploy stage (ie. the consumer is
+	// not required/available at build time).
+	DeployConsumes []interface{} `yaml:"deploy_consumes,omitempty"`
+
+	// Input variables.
+	Inputs []interface{} `yaml:"inputs,omitempty"`
+
+	// Same as `inputs`, but all variables are scoped to the build phase (ie. the
+	// variables won't be required/available at deploy time).
+	BuildInputs []interface{} `yaml:"build_inputs,omitempty"`
+
+	// Same as `inputs`, but all variables are scoped to the deployment phase (ie. the
+	// variables won't be required/available at build time).
+	DeployInputs []interface{} `yaml:"deploy_inputs,omitempty"`
+
+	// Output variables.
+	Outputs []interface{} `yaml:"outputs,omitempty"`
+
+	// Build script.
+	Build string `yaml:"build,omitempty"`
+
+	// Pre-build script. The script has access to all the build scoped input
+	// variables.
+	PreBuild string `yaml:"pre_build,omitempty"`
+
+	// Post-build script. The script has access to all the build scoped input
+	// and output variables.
+	PostBuild string `yaml:"post_build,omitempty"`
+
+	// Test script.
+	Test string `yaml:"test,omitempty"`
+
+	// Deploy script.
+	Deploy string `yaml:"deploy,omitempty"`
+
+	// Pre-deploy script. The script has access to all the deploy scoped input
+	// variables.
+	PreDeploy string `yaml:"pre_deploy,omitempty"`
+
+	// Post-deploy script. The script has access to all the deploy scoped input
+	// and output variables.
+	PostDeploy string `yaml:"post_deploy,omitempty"`
+
+	// Smoke script.
+	Smoke string `yaml:"smoke,omitempty"`
+
+	// Destroy script.
+	Destroy string `yaml:"destroy,omitempty"`
+
+	// Pre-destroy script.
+	PreDestroy string `yaml:"pre_destroy,omitempty"`
+
+	// Post-destroy script.
+	PostDestroy string `yaml:"post_destroy,omitempty"`
+
+	// Errands are scripts that can be run against the deployment of this release.
+	// The scripts receive the deployment's inputs and outputs as environment
+	// variables.
+	Errands map[string]interface{} `yaml:"errands,omitempty"`
+
+	// Templates.
+	Templates []interface{} `yaml:"templates,omitempty"`
+
+	// Same as `templates`, but all the templates are scoped to the build stage
+	// (ie. templates won't be rendered at deploy time).
+	BuildTemplates []interface{} `yaml:"build_templates,omitempty"`
+
+	// Same as `templates`, but all the templates are scoped to the deploy stage
+	// (ie. templates won't be rendered at deploy time).
+	DeployTemplates []interface{} `yaml:"deploy_templates,omitempty"`
+
+	// Downloads.
+	Downloads []*core.DownloadConfig `yaml:"downloads,omitempty"`
+
+	Path string `yaml:"path,omitempty"`
 }
 
 func NewEscapePlan() *EscapePlan {
