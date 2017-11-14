@@ -58,6 +58,10 @@ func (ConfigController) ListProfiles(context Context) {
 	}
 }
 
-func (ConfigController) SetProfile(context Context) {
-	context.GetEscapeConfig().Save()
+func (ConfigController) SetProfile(context Context, profile string) error {
+	err := context.GetEscapeConfig().SetActiveProfile(profile)
+	if err != nil {
+		return err
+	}
+	return context.GetEscapeConfig().Save()
 }

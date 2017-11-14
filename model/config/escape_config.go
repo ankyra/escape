@@ -81,7 +81,7 @@ func (e *EscapeConfig) SetActiveProfile(profile string) error {
 	}
 
 	if e.Profiles[profile] == nil {
-		return fmt.Errorf("Referenced profile '%s' was not found in the Escape configuration file.", e.ActiveProfile)
+		return fmt.Errorf("Referenced profile '%s' was not found in the Escape configuration file.", profile)
 	}
 	e.ActiveProfile = profile
 	return nil

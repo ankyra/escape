@@ -71,10 +71,14 @@ var configListProfilesCmd = &cobra.Command{
 }
 
 var configSetProfileCmd = &cobra.Command{
-	Use:   "set-profile",
+	Use:   "set-profile <profile name>",
 	Short: "Set the active Escape profile",
-	Run: func(cmd *cobra.Command, args []string) {
-		controllers.ConfigController{}.SetProfile(context)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) < 1 {
+			return controllers.ConfigController{}.SetProfile(context, cfgProfile)
+		} else {
+			return controllers.ConfigController{}.SetProfile(context, args[0])
+		}
 	},
 }
 
