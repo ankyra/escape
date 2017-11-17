@@ -64,7 +64,7 @@ func (p StateController) ShowProviders(context Context) *ControllerResult {
 	}
 	if !exists {
 		result.HumanOutput.AddLine("No providers found in the environment state. Try deploying one.")
-		result.MarshalableOutput = "No providers found in the environment state. Try deploying one."
+		result.MarshalableOutput = providers
 		return result
 	}
 	result.MarshalableOutput = providers
