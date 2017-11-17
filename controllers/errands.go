@@ -29,26 +29,29 @@ import (
 
 type ErrandsController struct{}
 
-func (ErrandsController) List(context Context) error {
+func (ErrandsController) List(context Context) *ControllerResult {
+	result := NewControllerResult()
+
 	metadata := context.GetReleaseMetadata()
+	errands := metadata.GetErrands()
+	result.MarshalableOutput = errands
 	if metadata.GetErrands() == nil {
-		return nil
+		result.HumanOutput.AddLine("No errands on the deployment")
+		return result
 	}
-	fmt.Println()
-	fmt.Println("Errands:\n")
-	for _, errand := range metadata.GetErrands() {
+	result.HumanOutput.AddLine("Errands:")
+	for _, errand := range errands {
 		description := "No description given."
 		if errand.Description != "" {
 			description = errand.Description
 		}
-		fmt.Printf("- %s\n\n", errand.Name)
-		fmt.Printf("  %s\n\n", description)
+		result.HumanOutput.AddLine("- %s\n\n", errand.Name)
+		result.HumanOutput.AddLine("  %s\n\n", description)
 		for _, input := range errand.Inputs {
-			fmt.Printf("  * %s: %s\n", input.Id, input.Description)
+			result.HumanOutput.AddLine("  * %s: %s\n", input.Id, input.Description)
 		}
-		fmt.Println()
 	}
-	return nil
+	return result
 }
 
 func (ErrandsController) Run(context Context, errandStr string, extraVars map[string]string) error {

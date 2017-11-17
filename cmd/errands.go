@@ -41,7 +41,7 @@ func ListLocalErrands(state, environment, escapePlanLocation string) error {
 	if err := ProcessFlagsForContext(true); err != nil {
 		return err
 	}
-	return controllers.ErrandsController{}.List(context)
+	return controllers.ErrandsController{}.List(context).Print(jsonFlag)
 }
 
 func ListDeployedErrands(state, environment, deployment string) error {
@@ -60,7 +60,7 @@ func ListDeployedErrands(state, environment, deployment string) error {
 	} else {
 		return fmt.Errorf("Missing deployment name")
 	}
-	return controllers.ErrandsController{}.List(context)
+	return controllers.ErrandsController{}.List(context).Print(jsonFlag)
 }
 
 func ListErrands(cmd *cobra.Command, args []string) error {
@@ -129,6 +129,7 @@ func init() {
 	errandsCmd.AddCommand(errandsRunCmd)
 	setPlanAndStateFlags(errandsListCmd)
 	errandsListCmd.Flags().BoolVarP(&readLocalErrands, "local", "", false, "Read errands from Escape plan instead of deployment")
+	errandsListCmd.PersistentFlags().BoolVarP(&jsonFlag, "json", "", false, "Output profile in JSON format")
 
 	setPlanAndStateFlags(errandsRunCmd)
 	errandsRunCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
