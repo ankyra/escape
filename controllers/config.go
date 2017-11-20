@@ -100,7 +100,10 @@ func (ConfigController) CreateProfile(context Context, targetName string) *Contr
 		return result
 	}
 
-	context.GetEscapeConfig().NewProfile(targetName)
+	result.Error = context.GetEscapeConfig().NewProfile(targetName)
+	if result.Error != nil {
+		return result
+	}
 
 	result.HumanOutput.AddLine("Profile `%s` has been created", targetName)
 	result.MarshalableOutput = "Profile `" + targetName + "` has been created"

@@ -40,7 +40,10 @@ type LoginController struct{}
 func (LoginController) Login(context Context, url, authMethodRequested, username, password string, insecureSkipVerify bool, targetProfile string) error {
 
 	if targetProfile != "" {
-		context.GetEscapeConfig().NewProfile(targetProfile)
+		err := context.GetEscapeConfig().NewProfile(targetProfile)
+		if err != nil {
+			return err
+		}
 		context.GetEscapeConfig().SetActiveProfile(targetProfile)
 	}
 

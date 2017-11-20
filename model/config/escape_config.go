@@ -63,8 +63,12 @@ func newEscapeProfileConfig(cfg *EscapeConfig) *EscapeProfileConfig {
 	return profile
 }
 
-func (c *EscapeConfig) NewProfile(profileName string) {
+func (c *EscapeConfig) NewProfile(profileName string) error {
+	if c.Profiles[profileName] != nil {
+		return fmt.Errorf("Profile already exists")
+	}
 	c.Profiles[profileName] = newEscapeProfileConfig(c)
+	return nil
 }
 
 func (c *EscapeConfig) GetInventory() inventory.Inventory {
