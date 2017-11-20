@@ -3,6 +3,12 @@ title: "Installation"
 slug: escape-installation 
 type: "docs"
 toc: true
+
+back: /downloads/
+backLabel: Downloads
+next: /docs/quickstart-configure-inventory
+nextLabel: Configuring an Inventory
+contributeLink: https://example.com/
 ---
 
 There are a few ways to install the Escape command line tool onto your own
@@ -63,6 +69,3 @@ escape run build
 escape run test
 ./escape
 ```
-
-[&lt; Back: Installation](/docs/what-is-escape/)
-[&gt; Next: Hello World](/docs/quickstart-hello-world/)

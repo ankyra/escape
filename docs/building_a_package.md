@@ -3,6 +3,12 @@ title: "Building a Package"
 slug: quickstart-building-a-package
 type: "docs"
 toc: true
+
+back: /docs/escape-installation/
+backLabel: Installation
+next: /docs/quickstart-the-release-cycle/
+nextLabel: The Release Cycle
+contributeLink: https://example.com/
 ---
 
 At its core Escape provides abstractions to work with _packages_. A _package_
@@ -96,9 +102,7 @@ Release: Releasing my-project/my-package-v0.1
 Release: ✔️ Successfully released my-project/my-package-v0.1%          
 ```
 
-Voila, we've built our package and made it available in the Inventory.  There
+We've built our package and made it available in the Inventory.  There
 is a lot going on here as Escape runs through all the different phases, but
 hopefully all becomes clear in the next section:
 
-[&lt; Back: Hello World](/docs/quickstart-hello-world/)
-[&gt; Next: The Release Cycle](/docs/quickstart-the-release-cycle/)

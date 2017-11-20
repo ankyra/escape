@@ -22,21 +22,8 @@ title: "%s"
 slug: %s
 type: "docs"
 toc: true
+wip: true
 ---
-`
-
-const planHeader = `---
-date: 2017-11-11 00:00:00
-title: "The Escape Plan"
-slug: escape-plan
-type: "docs"
-toc: true
----
-
-The Escape Plan describes a package. 
-
-Field | Type | Description
-------|------|-------------
 `
 
 var TypeMap = map[string]string{
@@ -75,6 +62,7 @@ title: "%s"
 slug: %s
 type: "docs"
 toc: true
+wip: true
 ---
 
 %s
