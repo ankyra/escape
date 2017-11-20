@@ -27,8 +27,8 @@ sudo mv escape /usr/bin/escape
 ## MacOS
 
 ```bash
-curl -O https://storage.googleapis.com/escape-releases-eu/escape-client/{{version}}/escape-v{{ version }}-linux-darwin.tgz
-tar -xvzf escape-v{{version}}-linux-amd64.tgz
+curl -O https://storage.googleapis.com/escape-releases-eu/escape-client/{{version}}/escape-v{{ version }}-darwin-amd64.tgz
+tar -xvzf escape-v{{version}}-darwin-amd64.tgz
 sudo mv escape /usr/bin/escape
 ```
 
