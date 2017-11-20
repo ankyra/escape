@@ -6,8 +6,8 @@ toc: true
 
 back: /docs/quickstart-building-a-package/
 backLabel: Building a Package
-next: /docs/quickstart-inputs-and-outputs/
-nextLabel: Inputs and Outputs
+next: /docs/quickstart-input-variables/
+nextLabel: Input Variables
 ---
 
 Our Hello World package from the previous section contains a single file, 
@@ -114,7 +114,7 @@ $ escape run deploy
 We haven't specified a deployment script however. We can re-use our "Hello
 World" script from before:
 
-```
+```yaml
 name: quickstart/hello-world
 version: 0.0.@
 description: 

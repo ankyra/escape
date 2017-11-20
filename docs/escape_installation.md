@@ -25,16 +25,16 @@ you have. You can find 32 bit builds on the <a href='/downloads/'>Downloads</a> 
 ## Linux
 
 ```bash
-curl -O https://storage.googleapis.com/escape-releases-eu/escape-client/0.20.5/escape-v0.20.5-linux-amd64.tgz
-tar -xvzf escape-v0.20.5-linux-amd64.tgz
+curl -O https://storage.googleapis.com/escape-releases-eu/escape-client/0.20.14/escape-v0.20.14-linux-amd64.tgz
+tar -xvzf escape-v0.20.14-linux-amd64.tgz
 sudo mv escape /usr/bin/escape
 ```
 
 ## MacOS
 
 ```bash
-curl -O https://storage.googleapis.com/escape-releases-eu/escape-client/0.20.5/escape-v0.20.5-darwin-amd64.tgz
-tar -xvzf escape-v0.20.5-darwin-amd64.tgz
+curl -O https://storage.googleapis.com/escape-releases-eu/escape-client/0.20.14/escape-v0.20.14-darwin-amd64.tgz
+tar -xvzf escape-v0.20.14-darwin-amd64.tgz
 sudo mv escape /usr/bin/escape
 ```
 
@@ -43,7 +43,7 @@ sudo mv escape /usr/bin/escape
 Ankyra publishes images for Escape into the central Docker hub. 
 
 ```bash
-docker run -it ankyra/escape:v0.20.5 
+docker run -it ankyra/escape:v0.20.14 
 ```
 
 # From Source
