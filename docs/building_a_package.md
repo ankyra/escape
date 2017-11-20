@@ -22,64 +22,56 @@ a new Escape plan using the [plan init](/docs/escape_plan_init) command.
 
 ```bash
 mkdir workspace
-escape plan init --minify --name my-project/my-package
+escape plan init --name quickstart/hello-world
 ```
 
-This should create an Escape plan in the default location `escape.yml`;
-minified for education purposes, looking a little something like this:
+This should create an Escape plan in the default location `escape.yml`; looking
+a little something like this:
 
 ```yaml
-name: my-project/my-package
+name: quickstart/hello-world
 version: 0.0.@
+description: 
+logo: 
+
+includes:
+- README.md
+
+build: 
+deploy:
 ```
 
-The `.@` at the end of our version signals to Escape that it should start
-auto-versioning from there. This is great, and covered in depth
-[here](/docs/versioning/), but it requires an Escape Inventory, which
-we'll skip for now. Let's version our package explicitly instead, by changing
-`escape.yml` to: 
-
-```yaml
-name: my-project/my-package
-version: 0.1
-```
+<div class='docling'>
+The `.@` at the end of our version signals to Escape that it should
+auto-version from there. Versioning is covered in depth
+[here](/docs/versioning/), 
+</div>
 
 We can use the [plan preview](/docs/escape_plan_preview) command to make sure 
-that our plan compiles and to have a look at what Escape makes of it. 
+that our plan compiles and to have a look at what Escape makes of it:
 
 
 ```bash
 escape plan preview
 ```
 
-That's looking tidy. 
-
-<div class='docling'>
-We don't have to run the `escape plan preview` command explicitly for any of
-our build steps as Escape will do it automatically, but it can be a handy
-validation step)
-</div>
+That's looking tidy. We don't have to run the `escape plan preview` command
+explicitly for any of our build steps as Escape will do it automatically, but
+it can be a handy validation step)
 
 We now have enough to create an empty package, but usually we do want to
-actually put something inside it. Let's create a file:
+actually put something inside it. Our Escape plan includes a reference to
+`README.md`, but the file doesnae exist! Let's create it:
 
 ```bash
-echo "Hello world" > hello.txt
+echo "Thanks for reading" > README.md
 ```
 
-Next we'll need to tell Escape to put these files in our package:
-
-```yaml
-name: my-project/my-package
-version: 0.1
-
-includes:
-- hello.txt
-```
-
-We can also use [globbing patterns and add whole
-directories](/docs/escape-plan/#includes) using this `includes` field, but for
-now we can keep it simple. 
+<div class='docling'>
+In our Escape Plan we've only told Escape to include `README.md`, but we can
+also use <a href='/docs/escape-plan/#includes'>globbing patterns and add whole
+directories</a>
+</div>
 
 We are ready to create our first package!
 
@@ -90,17 +82,20 @@ escape run release
 Which outputs:
 
 ```
-Release: Releasing my-project/my-package-v0.1
+Release: Releasing quickstart/hello-world-v0.0.0
   Build: ✔️ Completed build
   Test: ✔️ Tests passed.
   Destroy: ✔️ Destruction complete
-  Deploy: ✔️ Successfully deployed my-project/my-package-v0.1 with deployment name my-project/my-package in the dev environment.
+  Deploy: ✔️ Successfully deployed hello-world-v0.0.0 with deployment name quickstart/hello-world in the dev environment.
   Smoke tests: ✔️ Smoke tests passed.
   Destroy: ✔️ Destruction complete
-  Package: ✔️ Packaged my-project/my-package-v0.1 at /home/user/workspace/.escape/target/hello-v0.1.tgz
+  Package: ✔️ Packaged quickstart/hello-world-v0.0.0 at /home/user/workspace/.escape/target/hello-world-v0.0.0.tgz
   Push: ✔️ Push successful.
-Release: ✔️ Successfully released my-project/my-package-v0.1%          
+Release: ✔️ Successfully released quickstart/hello-world-v0.0.0
 ```
+
+We can keep running `escape run release` and see the version number increase
+for each successful push.
 
 We've built our package and made it available in the Inventory.  There
 is a lot going on here as Escape runs through all the different phases, but
