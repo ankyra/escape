@@ -37,7 +37,13 @@ import (
 
 type LoginController struct{}
 
-func (LoginController) Login(context Context, url, authMethodRequested, username, password string, insecureSkipVerify bool) error {
+func (LoginController) Login(context Context, url, authMethodRequested, username, password string, insecureSkipVerify bool, targetProfile string) error {
+
+	if targetProfile != "" {
+		context.GetEscapeConfig().NewProfile(targetProfile)
+		context.GetEscapeConfig().SetActiveProfile(targetProfile)
+	}
+
 	context.GetEscapeConfig().GetCurrentProfile().SetInsecureSkipVerify(insecureSkipVerify)
 	authMethods, err := context.GetInventory().GetAuthMethods(url)
 	if err != nil {
