@@ -37,8 +37,6 @@ type EscapeConfig struct {
 
 type EscapeProfileConfig struct {
 	ApiServer          string `json:"api_server"`
-	Username           string `json:"username"`
-	Password           string `json:"password"`
 	AuthToken          string `json:"escape_auth_token"`
 	InsecureSkipVerify bool   `json:"insecure_skip_verify"`
 	parent             *EscapeConfig
@@ -56,8 +54,6 @@ func NewEscapeConfig() *EscapeConfig {
 func newEscapeProfileConfig(cfg *EscapeConfig) *EscapeProfileConfig {
 	profile := &EscapeProfileConfig{
 		ApiServer: os.Getenv("ESCAPE_API_SERVER"),
-		Username:  os.Getenv("ESCAPE_USERNAME"),
-		Password:  os.Getenv("ESCAPE_PASSWORD"),
 		AuthToken: os.Getenv("ESCAPE_AUTH_TOKEN"),
 		parent:    cfg,
 	}
@@ -164,23 +160,11 @@ func (t *EscapeProfileConfig) Save() error {
 func (t *EscapeProfileConfig) GetApiServer() string {
 	return t.ApiServer
 }
-func (t *EscapeProfileConfig) GetUsername() string {
-	return t.Username
-}
-func (t *EscapeProfileConfig) GetPassword() string {
-	return t.Password
-}
 func (t *EscapeProfileConfig) GetAuthToken() string {
 	return t.AuthToken
 }
 func (t *EscapeProfileConfig) SetApiServer(v string) {
 	t.ApiServer = v
-}
-func (t *EscapeProfileConfig) SetUsername(v string) {
-	t.Username = v
-}
-func (t *EscapeProfileConfig) SetPassword(v string) {
-	t.Password = v
 }
 func (t *EscapeProfileConfig) SetAuthToken(v string) {
 	t.AuthToken = v
