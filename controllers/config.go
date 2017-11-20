@@ -91,3 +91,20 @@ func (ConfigController) SetProfile(context Context, profile string) *ControllerR
 
 	return result
 }
+
+func (ConfigController) CreateProfile(context Context, targetName string) *ControllerResult {
+	result := NewControllerResult()
+
+	if targetName == "" {
+		result.Error = fmt.Errorf("Missing profile name")
+		return result
+	}
+
+	context.GetEscapeConfig().NewProfile(targetName)
+
+	result.HumanOutput.AddLine("Profile `%s` has been created", targetName)
+	result.MarshalableOutput = "Profile `" + targetName + "` has been created"
+	result.Error = context.GetEscapeConfig().Save()
+
+	return result
+}

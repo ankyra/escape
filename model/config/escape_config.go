@@ -64,9 +64,7 @@ func newEscapeProfileConfig(cfg *EscapeConfig) *EscapeProfileConfig {
 }
 
 func (c *EscapeConfig) NewProfile(profileName string) {
-	c.Profiles[profileName] = &EscapeProfileConfig{
-		parent: c,
-	}
+	c.Profiles[profileName] = newEscapeProfileConfig(c)
 }
 
 func (c *EscapeConfig) GetInventory() inventory.Inventory {

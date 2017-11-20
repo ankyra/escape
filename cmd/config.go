@@ -88,12 +88,26 @@ var configSetProfileCmd = &cobra.Command{
 	},
 }
 
+var configCreateProfileCmd = &cobra.Command{
+	Use:   "create-profile <profile name>",
+	Short: "Set the active Escape profile",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 0 {
+			args = []string{""}
+		}
+		result := controllers.ConfigController{}.CreateProfile(context, args[0])
+
+		return result.Print(jsonFlag)
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(configCmd)
 	configCmd.AddCommand(configProfileCmd)
 	configCmd.AddCommand(configListProfilesCmd)
 	configCmd.AddCommand(configSetProfileCmd)
 	configCmd.AddCommand(configActiveProfileCmd)
+	configCmd.AddCommand(configCreateProfileCmd)
 
 	configCmd.PersistentFlags().BoolVarP(&jsonFlag, "json", "", false, "Output profile in JSON format")
 }
