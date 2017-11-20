@@ -4,13 +4,17 @@ title: "Downloads"
 slug: downloads
 type: "docs"
 toc: true
+wip: true
+contributeLink: https://github.com/ankyra/escape-core/blob/master/download_config.go
 ---
 
 Downloading files at build or deployment time is one of those common tasks
 that Escape tries to cover.
 
+## Escape Plan
+
 Downloads are configured in the Escape Plan under the
-(`downloads`)[/docs/escape-plan/#downloads] field.
+[`downloads`](/docs/escape-plan/#downloads) field.
 
 
 Field | Type | Description

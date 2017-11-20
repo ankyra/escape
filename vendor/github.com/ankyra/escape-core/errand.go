@@ -23,18 +23,22 @@ import (
 	"github.com/ankyra/escape-core/variables"
 )
 
-// Errands are an Escape mechanism that make it easy to run operational and
-// publication tasks against deployed packages. They can be used to implement
-// backup procedures, user management, scalability controls, binary
-// publications, etc. Errands are a good idea whenever a task needs to be aware
-// of Environments.
-//
-// Errands are configured in the Escape Plan under the
-// (`errands`)[/docs/escape-plan/#errands] field.
-//
-// You can inspect and run Errands using the (`escape
-// errands`)[/docs/escape_errands/] command.
-//
+/*
+Errands are an Escape mechanism that make it easy to run operational and
+publication tasks against deployed packages. They can be used to implement
+backup procedures, user management, scalability controls, binary
+publications, etc. Errands are a good idea whenever a task needs to be aware
+of Environments.
+
+You can inspect and run Errands using the [`escape
+errands`](/docs/escape_errands/) command.
+
+## Escape Plan
+
+Errands are configured in the Escape Plan under the
+[`errands`](/docs/escape-plan/#errands) field.
+
+*/
 type Errand struct {
 	// The name of the errand. This field is required.
 	Name string `json:"name"`
@@ -48,11 +52,9 @@ type Errand struct {
 	// variables. For example: an input with `"id": "input_variable"` will be
 	// accessible as `INPUT_input_variable`; and an output with `"id":
 	// "output_variable"` as `OUTPUT_output_variable`.
-	//
-	// For example: `my-scripts/backup.sh`
 	Script string `json:"script"`
 
-	// A list of (Variables)[/docs/input-and-output-variables/]. The values
+	// A list of [Variables](/docs/input-and-output-variables/_. The values
 	// will be made available to the `script` (along with the regular
 	// deployment inputs and outputs) as environment variables. For example: a
 	// variable with `"id": "input_variable"` will be accessible as environment

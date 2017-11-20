@@ -21,12 +21,16 @@ import (
 	"net/url"
 )
 
-// Downloading files at build or deployment time is one of those common tasks
-// that Escape tries to cover.
-//
-// Downloads are configured in the Escape Plan under the
-// (`downloads`)[/docs/escape-plan/#downloads] field.
-//
+/*
+Downloading files at build or deployment time is one of those common tasks
+that Escape tries to cover.
+
+## Escape Plan
+
+Downloads are configured in the Escape Plan under the
+[`downloads`](/docs/escape-plan/#downloads) field.
+
+*/
 type DownloadConfig struct {
 	// The URL to download from. This field is required.
 	//

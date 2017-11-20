@@ -18,6 +18,21 @@ package core
 
 import "fmt"
 
+/*
+
+Unlike Dependencies, which are resolved at build time and provide tight
+coupling, we can use Consumers and Providers to resolve and loosely couple
+dependencies at deployment time.
+
+## Escape Plan
+
+Consumers are configured in the [`consumes`](/docs/escape-plan/#consumes)
+field of the Escape Plan.
+
+Providers are configured in the [`provides`](/docs/escape-plan/#provides)
+field of the Escape Plan.
+
+*/
 type ConsumerConfig struct {
 	Name   string   `json:"name" yaml:"name"`
 	Scopes []string `json:"scopes" yaml:"scopes"`

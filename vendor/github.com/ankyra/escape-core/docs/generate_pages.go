@@ -18,10 +18,11 @@ type Page struct {
 }
 
 var Pages = map[string]Page{
-	"consumer":  Page{"Consumers", "providers-and-consumers", "consumer.go", "ConsumerConfig"},
+	"consumer":  Page{"Providers and Consumers", "providers-and-consumers", "consumer.go", "ConsumerConfig"},
 	"depends":   Page{"Dependencies", "dependencies", "dependency_config.go", "DependencyConfig"},
 	"downloads": Page{"Downloads", "downloads", "download_config.go", "DownloadConfig"},
 	"errands":   Page{"Errands", "errands", "errand.go", "Errand"},
+	"extends":   Page{"Extensions", "extensions", "extension_config.go", "ExtensionConfig"},
 	"templates": Page{"Templates", "templates", "templates/templates.go", "Template"},
 	"variables": Page{"Input and Output Variables", "input-and-output-variables", "variables/variable.go", "Variable"},
 }
@@ -32,6 +33,8 @@ title: "%s"
 slug: %s
 type: "docs"
 toc: true
+wip: true
+contributeLink: https://github.com/ankyra/escape-core/blob/master/%s
 ---
 
 %s
@@ -97,7 +100,7 @@ func StructTable(page Page, topLevelDoc string, s *ast.TypeSpec) string {
 		}
 		result += "\n"
 	}
-	return fmt.Sprintf(PageHeader, page.Name, page.Slug, topLevelDoc, result)
+	return fmt.Sprintf(PageHeader, page.Name, page.Slug, page.SrcFile, topLevelDoc, result)
 }
 
 func GenerateStructDocs(f *ast.File, page Page) string {

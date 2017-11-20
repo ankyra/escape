@@ -4,9 +4,13 @@ title: "Dependencies"
 slug: dependencies
 type: "docs"
 toc: true
+wip: true
+contributeLink: https://github.com/ankyra/escape-core/blob/master/dependency_config.go
 ---
 
-Dependencies are configured in the (`depends`)[/docs/escape-plan/#depends]
+## Escape Plan
+
+Dependencies are configured in the [`depends`](/docs/escape-plan/#depends)
 field of the Escape plan.
 
 
@@ -17,5 +21,5 @@ Field | Type | Description
 |build_mapping|`{string:any}`|
 |deploy_mapping|`{string:any}`|
 |consumes|`{string:string}`|
-|scopes|`[string]`|
+|scopes|`[string]`|A list of scopes (`build`, `deploy`) that defines during which stage(s) this dependency should be fetched and deployed. *Currently not implemented!* 
 

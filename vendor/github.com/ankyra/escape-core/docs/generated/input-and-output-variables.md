@@ -4,6 +4,8 @@ title: "Input and Output Variables"
 slug: input-and-output-variables
 type: "docs"
 toc: true
+wip: true
+contributeLink: https://github.com/ankyra/escape-core/blob/master/variables/variable.go
 ---
 
 Variables can be used to defined inputs and outputs for the build and
@@ -13,6 +15,14 @@ configurable.
 Variables are strongly typed, which is checked at both build and deploy
 time.  A task can't succeed if the required variables have not been
 configured correctly.
+
+## Escape Plan
+
+Variables can be configured in the Escape Plan under the
+[`inputs`](/docs/escape-plan/#inputs),
+[`build_inputs`](/docs/escape-plan/#build_inputs),
+[`deploy_inputs`](/docs/escape-plan/#deploy_inputs) and
+[`outputs`](/docs/escape-plan/#outputs) fields.
 
 
 Field | Type | Description

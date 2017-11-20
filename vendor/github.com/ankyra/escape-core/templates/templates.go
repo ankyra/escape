@@ -25,13 +25,17 @@ import (
 	"github.com/cbroglie/mustache"
 )
 
-// Escape provides the Mustache templating language and integrates it with the
-// package's (Variables)[/docs/input-and-output-variables/], making for a quick
-// and easy way to render files at either build or deploy time.
-//
-// Templates are configured in the Escape Plan under the
-// (`templates`)[/docs/escape-plan/#templates] field.
-//
+/*
+Escape provides the Mustache templating language and integrates it with the
+package's [Variables](/docs/input-and-output-variables/), making for a quick
+and easy way to render files at either build or deploy time.
+
+## Escape Plan
+
+Templates are configured in the Escape Plan under the
+[`templates`](/docs/escape-plan/#templates) field.
+
+*/
 type Template struct {
 	// The file containing the template. This field is required.
 	File string `json:"file"`

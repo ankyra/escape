@@ -28,14 +28,25 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// Variables can be used to defined inputs and outputs for the build and
-// deployment stages. They can also be used to make [Errands](/docs/errands/)
-// configurable.
-//
-// Variables are strongly typed, which is checked at both build and deploy
-// time.  A task can't succeed if the required variables have not been
-// configured correctly.
-//
+/*
+
+Variables can be used to defined inputs and outputs for the build and
+deployment stages. They can also be used to make [Errands](/docs/errands/)
+configurable.
+
+Variables are strongly typed, which is checked at both build and deploy
+time.  A task can't succeed if the required variables have not been
+configured correctly.
+
+## Escape Plan
+
+Variables can be configured in the Escape Plan under the
+[`inputs`](/docs/escape-plan/#inputs),
+[`build_inputs`](/docs/escape-plan/#build_inputs),
+[`deploy_inputs`](/docs/escape-plan/#deploy_inputs) and
+[`outputs`](/docs/escape-plan/#outputs) fields.
+
+*/
 type Variable struct {
 	// A unique name for this variable. Required field.
 	Id string `json:"id"`

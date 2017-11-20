@@ -44,14 +44,6 @@ func NewProviderConfig(name string) *ProviderConfig {
 	return &ProviderConfig{name}
 }
 
-type ExtensionConfig struct {
-	ReleaseId string `json:"release_id"`
-}
-
-func NewExtensionConfig(releaseId string) *ExtensionConfig {
-	return &ExtensionConfig{releaseId}
-}
-
 type ReleaseMetadata struct {
 	ApiVersion             int               `json:"api_version"`
 	BuiltWithCoreVersion   string            `json:"built_with_core_version"`
