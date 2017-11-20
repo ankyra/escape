@@ -4,9 +4,9 @@ slug: quickstart-building-a-package
 type: "docs"
 toc: true
 
-back: /docs/escape-installation/
-backLabel: Installation
-next: /docs/quickstart-the-release-cycle/
+back: /docs/quickstart-configure-inventory
+backLabel: Configuring an Inventory
+next: /docs/quickstart-release-cycle/
 nextLabel: The Release Cycle
 contributeLink: https://example.com/
 ---
