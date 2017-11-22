@@ -32,6 +32,7 @@ var skipCache, skipPush bool
 var skipDeploy, skipSmoke bool
 var skipDestroyBuild, skipDestroyDeploy, skipDestroy bool
 var skipIfExists bool
+var toEnv, toDeployment string
 
 var runCmd = &cobra.Command{
 	Use:   "run",
@@ -171,6 +172,28 @@ var runTestCmd = &cobra.Command{
 	},
 }
 
+var runPromoteCmd = &cobra.Command{
+	Use:   "promote",
+	Short: "Run a promotion of package from one environment to another",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if remoteState {
+			return fmt.Errorf("Currently not supported with remote state")
+		}
+
+		parsedExtraVars, err := ParseExtraVars(extraVars)
+		if err != nil {
+			return err
+		}
+
+		parsedExtraProviders, err := ParseExtraVars(extraProviders)
+		if err != nil {
+			return err
+		}
+
+		return controllers.PromoteController{}.Promote(context, state, toEnv, toDeployment, environment, deployment, parsedExtraVars, parsedExtraProviders, force)
+	},
+}
+
 func init() {
 	RootCmd.AddCommand(runCmd)
 
@@ -220,4 +243,10 @@ func init() {
 
 	runCmd.AddCommand(runTestCmd)
 	setPlanAndStateFlags(runTestCmd)
+
+	runCmd.AddCommand(runPromoteCmd)
+	setPlanAndStateFlags(runPromoteCmd)
+	runPromoteCmd.Flags().StringVarP(&toEnv, "to", "", "", "The logical environment to promote to")
+	runPromoteCmd.Flags().StringVarP(&toDeployment, "to-deployment", "", "", "The deployment name to promote to (default is the package's \"project/name\")")
+	runPromoteCmd.Flags().BoolVarP(&force, "force", "f", false, "Skip confirmation")
 }
