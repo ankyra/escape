@@ -44,8 +44,9 @@ deploy:
 // The Escape plan gets compiled into release metadata at build time.
 //
 type EscapePlan struct {
-	// The package name. The name can be qualified by a project name; if no
-	// project is specified then the default project `_` will be used.
+	// The package name is a required field. The name can be qualified by a
+	// project name, but if no project is specified then the default project `_`
+	// will be used.
 	//
 	// Format: `/([a-za-z]+[a-za-z0-9-]*\/)?[a-za-z]+[a-za-z0-9-]*/`
 	//
@@ -57,9 +58,10 @@ type EscapePlan struct {
 	//
 	Name string `yaml:"name"`
 
-	// Escape uses semantic versioning to version packages. This field is
-	// required; either specify the full version or use the '@' symbol to let
-	// Escape pick the next version at build time.
+	// The version is a required field. Escape uses semantic versioning to
+	// version packages.  Either specify the full version or use the '@' symbol
+	// to let Escape pick the next version at build time. See
+	// [here](/docs/versioning/) for more versioning approaches.
 	//
 	// Format: `/[0-9]+(\.[0-9]+)*(\.@)?/`
 	//
@@ -69,22 +71,21 @@ type EscapePlan struct {
 	//
 	// * Build the next minor release in the 1.* series: `version: 1.@`
 	//
-	// Build the next path release in the 1.1.* series: `version: 1.1.@`
+	// * Build the next patch release in the 1.1.* series: `version: 1.1.@`
 	//
 	Version string `yaml:"version"`
 
-	// An optional description for this package. Only used for presentation
-	// purposes.
+	// A description for this package. Only used for presentation purposes.
 	Description string `yaml:"description,omitempty"`
 
-	// An optional path to an image. Only used for presentation purposes.
+	// A path to an image. Only used for presentation purposes.
 	Logo string `yaml:"logo,omitempty"`
 
 	// Metadata key value pairs.
 	//
-	// Escape script can be used as values, but note that the metadata is
-	// compiled at build time before dependencies are deployed; so dependency
-	// inputs and outputs can't be referenced.
+	// [Escape Script](/docs/scripting-language/) can be used to
+	// programmatically set values using the [default
+	// context](/docs/scripting-language/#context).
 	//
 	// Example:
 	//
@@ -100,8 +101,9 @@ type EscapePlan struct {
 
 	Extends []string `yaml:"extends,omitempty"`
 
-	// The files to includes in this release. The files don't have to exist, but can
-	// be produced during build time. Globbing patterns are supported.
+	// The files to includes in this release. The files don't have to exist and can
+	// be produced during build time. Globbing patterns are supported. Directories
+	// will be added recursively.
 	//
 	Includes []string `yaml:"includes,omitempty"`
 
