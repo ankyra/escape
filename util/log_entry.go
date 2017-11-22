@@ -365,6 +365,18 @@ var logMessages = map[string]map[string]string{
 		"msg":   "Written {{ .path }}.",
 		"level": "success",
 	},
+	"promote.state_info": map[string]string{
+		"msg":   "Deployment {{ .deployment }} in environment {{ .environment }} has {{ .releaseId }}.",
+		"level": "info",
+	},
+	"promote.state_info_missing": map[string]string{
+		"msg":   "Deployment {{ .deployment }} in environment {{ .environment }} is not present.",
+		"level": "info",
+	},
+	"promote.promoting": map[string]string{
+		"msg":   "Promoting {{ .releaseId }} from {{ .fromEnvironment }} to {{ .toEnvironment }}.",
+		"level": "info",
+	},
 	"push.finished": map[string]string{
 		"msg":   "Push successful.",
 		"level": "success",
