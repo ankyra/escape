@@ -3,7 +3,6 @@ title: "Input Variables"
 slug: quickstart-input-variables
 type: "docs"
 toc: true
-wip: true
 
 back: /docs/quickstart-releast-cycle/
 backLabel: The Release Cycle
