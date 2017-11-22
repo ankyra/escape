@@ -4,7 +4,7 @@ slug: quickstart-building-a-package
 type: "docs"
 toc: true
 
-back: /docs/quickstart-configure-inventory
+back: /docs/quickstart-configure-inventory/
 backLabel: Configuring an Inventory
 next: /docs/quickstart-release-cycle/
 nextLabel: The Release Cycle
@@ -18,7 +18,7 @@ operate the unit.
 
 Metadata doesn't have to be written by hand, but can be compiled from an
 [Escape plan](/docs/escape-plan/).  Let's create a new workspace and initialise
-a new Escape plan using the [plan init](/docs/escape_plan_init) command.
+a new Escape plan using the [plan init](/docs/escape_plan_init/) command.
 
 ```bash
 mkdir workspace
@@ -48,7 +48,7 @@ auto-version from there. Versioning is covered in depth
 [here](/docs/versioning/), 
 </div>
 
-We can use the [plan preview](/docs/escape_plan_preview) command to make sure 
+We can use the [plan preview](/docs/escape_plan_preview/) command to make sure 
 that our plan compiles and to have a look at what Escape makes of it:
 
 
@@ -58,23 +58,21 @@ escape plan preview
 
 That's looking tidy. We don't have to run the `escape plan preview` command
 explicitly for any of our build steps as Escape will do it automatically, but
-it can be a handy validation step)
+it can be a handy validation step). NB. If you're getting an "Unauthorized"
+error here, you need to configure your
+[Inventory](/docs/quickstart-configure-inventory/).
 
-We now have enough to create an empty package, but usually we do want to
-actually put something inside it. Our Escape plan includes a reference to
-`README.md`, but the file doesnae exist! Let's create it:
+We now have enough to create an empty package, but usually we do want to put
+something inside it. Our Escape plan includes a reference to `README.md`, but
+the file doesnae exist! Let's create it:
 
 ```bash
 echo "Thanks for reading" > README.md
 ```
 
-<div class='docling'>
-In our Escape Plan we've only told Escape to include `README.md`, but we can
-also use <a href='/docs/escape-plan/#includes'>globbing patterns and add whole
-directories</a>
-</div>
-
-We are ready to create our first package!
+We've only told Escape to include `README.md`, but we can also add [globbing
+patterns and whole directories](/docs/escape-plan/#includes).  In anyway, we
+are ready to create our first package!
 
 ```bash
 escape run release

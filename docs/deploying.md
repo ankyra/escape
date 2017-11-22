@@ -55,3 +55,7 @@ escape run deploy quickstart/hello-world-latest -v who=You -e testing
 escape run deploy quickstart/hello-world-latest -v who=World -e staging
 escape run deploy quickstart/hello-world-latest -v who=Universe -e production
 ```
+
+```bash
+escape run converge
+```

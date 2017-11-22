@@ -33,7 +33,7 @@ generally only run on developer's workstations and CI servers to make sure all
 the artefacts that are necessary at deployment time are part of the package.
 
 We can trigger the build step of an Escape plan using the [escape run
-build](/docs/escape_run_build) command:
+build](/docs/escape_run_build/) command:
 
 ```bash
 escape run build
@@ -65,9 +65,13 @@ Compile: Error: File 'hello_world.sh' was referenced in the escape plan, but it 
 Let's do Escape a favour and create the `hello_world.sh` file:
 
 ```bash
-#!/bin/bash -e
+cat > hello_world.sh <<EOF
+#!/bin/bash
+
+set -euf
 
 echo "Hello World!"
+EOF
 ```
 
 And try that again:
@@ -105,14 +109,14 @@ and then test them. Next, we want to be able to _deploy_ these files into
 separate _environments_. 
 
 We can trigger the deploy step of an Escape plan using the [escape run
-deploy](/docs/escape_run_deploy) command:
+deploy](/docs/escape_run_deploy/) command:
 
 ```
 $ escape run deploy
 ```
 
-We haven't specified a deployment script however. We can re-use our "Hello
-World" script from before:
+We haven't specified a deployment script however so this completes very quickly
+for us, but let's re-use our "Hello World" script from before:
 
 ```yaml
 name: quickstart/hello-world
@@ -140,7 +144,7 @@ Deploy: ✔️ Successfully deployed hello-world-v0.0.1 with deployment name qui
 Running the release step will run the build, test, deploy, smoke, destroy,
 package and push steps in succession to make sure the unit is working
 end-to-end (although parts can be skipped see [`escape run
-release`](/docs/escape_run_release))
+release`](/docs/escape_run_release/))
 
 ```bash
 $ escape run release

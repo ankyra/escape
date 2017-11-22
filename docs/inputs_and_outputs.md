@@ -5,8 +5,8 @@ type: "docs"
 toc: true
 wip: true
 
-back: /docs/quickstart-building-a-package/
-backLabel: Building a Package
+back: /docs/quickstart-releast-cycle/
+backLabel: The Release Cycle
 next: /docs/quickstart-deploying/
 nextLabel: Deploying Environments
 ---
@@ -99,12 +99,16 @@ Build: ✔️ Completed build
 The next step is to update our `hello_world.sh` script to use the new variable.
 Variables are passed into build scripts by their `id` (in this case "who" -- we
 know it should be "whom", don't email in) and receive the `INPUT_` prefix. This
-is a complicated way to say that we should update our script to:
+is a complicated way to say that we should update our script:
 
 ```bash
-#!/bin/bash -e
+cat > hello_world.sh <<EOF
+#!/bin/bash
 
-echo "Hello ${INPUT_who}!"
+set -euf
+
+echo "Hello \${INPUT_who}!"
+EOF
 ```
 
 And just like that we've made our build and deployment configurable:
