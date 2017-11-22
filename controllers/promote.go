@@ -48,7 +48,6 @@ func (PromoteController) Promote(context Context, state, toEnv, toDeployment, fr
 		"environment": context.GetEnvironmentState().Name,
 		"releaseId":   releaseId,
 	})
-	context.PopLogSection()
 
 	if toDeployment == "" {
 		toDeployment = fromDeployment
@@ -64,13 +63,11 @@ func (PromoteController) Promote(context Context, state, toEnv, toDeployment, fr
 		logKey = "promote.state_info_missing"
 	}
 
-	context.PushLogSection("Promote")
 	context.Log(logKey, map[string]string{
 		"deployment":  context.GetRootDeploymentName(),
 		"environment": context.GetEnvironmentState().Name,
 		"releaseId":   toReleaseId,
 	})
-	context.PopLogSection()
 
 	if !force {
 		response, err := confirmationUserInput(getUserInputReader(), fmt.Sprintf("Promote %s from %s (%s) to %s (%s)? [Yn]", releaseId, fromEnv, fromDeployment, toEnv, toDeployment))
@@ -83,13 +80,11 @@ func (PromoteController) Promote(context Context, state, toEnv, toDeployment, fr
 		}
 	}
 
-	context.PushLogSection("Promote")
 	context.Log("promote.promoting", map[string]string{
 		"releaseId":       releaseId,
 		"fromEnvironment": fromEnv,
 		"toEnvironment":   context.GetEnvironmentState().Name,
 	})
-	context.PopLogSection()
 
 	return DeployController{}.FetchAndDeploy(context, releaseId, extraVars, extraProviders)
 }
