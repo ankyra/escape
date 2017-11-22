@@ -22,6 +22,7 @@ a new Escape plan using the [plan init](/docs/escape_plan_init) command.
 
 ```bash
 mkdir workspace
+cd workspace
 escape plan init --name quickstart/hello-world
 ```
 
