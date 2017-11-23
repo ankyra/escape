@@ -77,7 +77,8 @@ var configSetProfileCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var result *controllers.ControllerResult
 		if len(args) < 1 {
-			result = controllers.ConfigController{}.SetProfile(context, cfgProfile)
+			cmd.UsageFunc()(cmd)
+			return nil
 		} else {
 			result = controllers.ConfigController{}.SetProfile(context, args[0])
 		}
@@ -90,8 +91,9 @@ var configCreateProfileCmd = &cobra.Command{
 	Use:   "create-profile <profile name>",
 	Short: "Set the active Escape profile",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) == 0 {
-			args = []string{""}
+		if len(args) < 1 {
+			cmd.UsageFunc()(cmd)
+			return nil
 		}
 		result := controllers.ConfigController{}.CreateProfile(context, args[0])
 

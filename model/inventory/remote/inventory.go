@@ -184,19 +184,19 @@ func (r *inventory) register(project string, metadata *core.ReleaseMetadata) err
 }
 
 func (r *inventory) GetAuthMethods(url string) (map[string]*types.AuthMethod, error) {
-	url = r.endpoints.AuthMethods(url)
-	resp, err := r.client.GET(url)
+	authUrl := r.endpoints.AuthMethods(url)
+	resp, err := r.client.GET(authUrl)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Couldn't get auth methods from server '%s'", url)
 	}
 	if resp.StatusCode == 404 {
 		return nil, nil
 	} else if resp.StatusCode != 200 {
 		result, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return nil, fmt.Errorf("Couldn't get auth methods from server '%s': %s", url, resp.Status)
+			return nil, fmt.Errorf("Couldn't get auth methods from server '%s': %s", authUrl, resp.Status)
 		}
-		return nil, fmt.Errorf("Couldn't get auth methods from server '%s': %s\n%s", url, resp.Status, string(result))
+		return nil, fmt.Errorf("Couldn't get auth methods from server '%s': %s\n%s", authUrl, resp.Status, string(result))
 	}
 	result := map[string]*types.AuthMethod{}
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {

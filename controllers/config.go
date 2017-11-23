@@ -43,7 +43,7 @@ func (ConfigController) ShowProfileField(context Context, field string) *Control
 
 	configMap := util.StructToMapStringInterface(*context.GetEscapeConfig().GetCurrentProfile(), "json")
 	if configMap[field] == nil {
-		result.Error = fmt.Errorf(`"%s" is not a valid field name`, field)
+		result.Error = fmt.Errorf(`'%s' is not a valid field name`, field)
 		return result
 	}
 
@@ -105,8 +105,8 @@ func (ConfigController) CreateProfile(context Context, targetName string) *Contr
 		return result
 	}
 
-	result.HumanOutput.AddLine("Profile `%s` has been created", targetName)
-	result.MarshalableOutput = "Profile `" + targetName + "` has been created"
+	result.HumanOutput.AddLine("Profile '%s' has been created.", targetName)
+	result.MarshalableOutput = "Profile '" + targetName + "' has been created."
 	result.Error = context.GetEscapeConfig().Save()
 
 	return result

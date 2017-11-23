@@ -17,8 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/ankyra/escape/controllers"
 	"github.com/spf13/cobra"
 )
@@ -32,7 +30,8 @@ var loginCmd = &cobra.Command{
 	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if url == "" {
-			return fmt.Errorf("Missing Escape server URL")
+			cmd.UsageFunc()(cmd)
+			return nil
 		}
 		return controllers.LoginController{}.Login(context, url, authMethod, username, password, insecureSkipVerify, targetProfile)
 	},
