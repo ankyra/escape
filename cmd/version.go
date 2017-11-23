@@ -24,8 +24,9 @@ import (
 )
 
 var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Output the current version",
+	Use:     "version",
+	Short:   "Output the current version",
+	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Printf("Escape v%s\n", util.EscapeVersion)
 		return nil

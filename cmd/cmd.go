@@ -143,3 +143,10 @@ func ParseExtraVars(extraVars []string) (result map[string]string, err error) {
 	}
 	return result, nil
 }
+
+func NoExtraArgsPreRunE(cmd *cobra.Command, args []string) error {
+	if len(args) != 0 {
+		return fmt.Errorf("Unknown command '%s'", args[0])
+	}
+	return nil
+}

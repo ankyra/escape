@@ -17,28 +17,25 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/ankyra/escape/controllers"
 	"github.com/spf13/cobra"
 )
 
 var depsCmd = &cobra.Command{
-	Use:   "deps",
-	Short: "Install dependencies",
+	Use:     "deps",
+	Short:   "Install dependencies",
+	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 0 {
-			return fmt.Errorf("Unknown command '%s'", args[0])
-		}
 		cmd.UsageFunc()(cmd)
 		return nil
 	},
 }
 
 var depsFetchCmd = &cobra.Command{
-	Use:   "fetch",
-	Short: "Install dependencies",
-	Long:  ``,
+	Use:     "fetch",
+	Short:   "Install dependencies",
+	Long:    ``,
+	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := ProcessFlagsForContext(true); err != nil {
 			return err

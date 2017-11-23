@@ -17,19 +17,15 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/ankyra/escape/controllers"
 	"github.com/spf13/cobra"
 )
 
 var configCmd = &cobra.Command{
-	Use:   "config",
-	Short: "Manage the escape client configuration",
+	Use:     "config",
+	Short:   "Manage the escape client configuration",
+	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 0 {
-			return fmt.Errorf("Unknown command '%s'", args[0])
-		}
 		cmd.UsageFunc()(cmd)
 		return nil
 	},
@@ -52,9 +48,10 @@ var configProfileCmd = &cobra.Command{
 }
 
 var configActiveProfileCmd = &cobra.Command{
-	Use:   "active-profile",
-	Short: "Show the currently active profile name",
-	Long:  ``,
+	Use:     "active-profile",
+	Short:   "Show the currently active profile name",
+	Long:    ``,
+	PreRunE: NoExtraArgsPreRunE,
 	Run: func(cmd *cobra.Command, args []string) {
 		result := controllers.ConfigController{}.ActiveProfile(context)
 
@@ -63,9 +60,10 @@ var configActiveProfileCmd = &cobra.Command{
 }
 
 var configListProfilesCmd = &cobra.Command{
-	Use:   "list-profiles",
-	Short: "List the currently available Escape profiles",
-	Long:  ``,
+	Use:     "list-profiles",
+	Short:   "List the currently available Escape profiles",
+	Long:    ``,
+	PreRunE: NoExtraArgsPreRunE,
 	Run: func(cmd *cobra.Command, args []string) {
 		result := controllers.ConfigController{}.ListProfiles(context)
 

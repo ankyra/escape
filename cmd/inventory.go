@@ -17,8 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/ankyra/escape/controllers"
 	"github.com/spf13/cobra"
 )
@@ -26,20 +24,19 @@ import (
 var project, application, appVersion string
 
 var inventoryCmd = &cobra.Command{
-	Use:   "inventory",
-	Short: "Interact with an Escape Inventory",
+	Use:     "inventory",
+	Short:   "Interact with an Escape Inventory",
+	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 0 {
-			return fmt.Errorf("Unknown command '%s'", args[0])
-		}
 		cmd.UsageFunc()(cmd)
 		return nil
 	},
 }
 
 var inventoryQueryCommand = &cobra.Command{
-	Use:   "query",
-	Short: "Query projects, applications and releases",
+	Use:     "query",
+	Short:   "Query projects, applications and releases",
+	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		result := controllers.InventoryController{}.Query(context, project, application, appVersion)
 

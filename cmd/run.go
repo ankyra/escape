@@ -35,20 +35,19 @@ var skipIfExists bool
 var toEnv, toDeployment string
 
 var runCmd = &cobra.Command{
-	Use:   "run",
-	Short: "Run Escape steps: build, converge, deploy, package, release, smoke, test",
+	Use:     "run",
+	Short:   "Run Escape steps: build, converge, deploy, package, release, smoke, test",
+	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 0 {
-			return fmt.Errorf("Unknown command '%s'", args[0])
-		}
 		cmd.UsageFunc()(cmd)
 		return nil
 	},
 }
 
 var runBuildCmd = &cobra.Command{
-	Use:   "build",
-	Short: "Build the Escape plan using a local state file.",
+	Use:     "build",
+	Short:   "Build the Escape plan using a local state file.",
+	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := ProcessFlagsForContext(true); err != nil {
 			return err
@@ -66,8 +65,9 @@ var runBuildCmd = &cobra.Command{
 }
 
 var runConvergeCmd = &cobra.Command{
-	Use:   "converge",
-	Short: "Bring the environment into its desired state",
+	Use:     "converge",
+	Short:   "Bring the environment into its desired state",
+	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := ProcessFlagsForContext(false); err != nil {
 			return err
@@ -109,8 +109,9 @@ var runDeployCmd = &cobra.Command{
 }
 
 var runDestroyCmd = &cobra.Command{
-	Use:   "destroy",
-	Short: "Destroy the deployment of the current release in the local state file.",
+	Use:     "destroy",
+	Short:   "Destroy the deployment of the current release in the local state file.",
+	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := ProcessFlagsForContext(true); err != nil {
 			return err
@@ -120,8 +121,9 @@ var runDestroyCmd = &cobra.Command{
 }
 
 var runPackageCmd = &cobra.Command{
-	Use:   "package",
-	Short: "Create a package",
+	Use:     "package",
+	Short:   "Create a package",
+	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := ProcessFlagsForContext(true); err != nil {
 			return err
@@ -131,8 +133,9 @@ var runPackageCmd = &cobra.Command{
 }
 
 var runReleaseCmd = &cobra.Command{
-	Use:   "release",
-	Short: "Release (build, test, package, push)",
+	Use:     "release",
+	Short:   "Release (build, test, package, push)",
+	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := ProcessFlagsForContext(true); err != nil {
 			return err
@@ -151,8 +154,9 @@ var runReleaseCmd = &cobra.Command{
 }
 
 var runSmokeCmd = &cobra.Command{
-	Use:   "smoke",
-	Short: "Run smoke tests using a local state file.",
+	Use:     "smoke",
+	Short:   "Run smoke tests using a local state file.",
+	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := ProcessFlagsForContext(true); err != nil {
 			return err
@@ -162,8 +166,9 @@ var runSmokeCmd = &cobra.Command{
 }
 
 var runTestCmd = &cobra.Command{
-	Use:   "test",
-	Short: "Run tests using a local state file.",
+	Use:     "test",
+	Short:   "Run tests using a local state file.",
+	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := ProcessFlagsForContext(true); err != nil {
 			return err
@@ -173,8 +178,9 @@ var runTestCmd = &cobra.Command{
 }
 
 var runPromoteCmd = &cobra.Command{
-	Use:   "promote",
-	Short: "Run a promotion of package from one environment to another",
+	Use:     "promote",
+	Short:   "Run a promotion of package from one environment to another",
+	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if remoteState {
 			return fmt.Errorf("Currently not supported with remote state")

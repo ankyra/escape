@@ -26,12 +26,10 @@ import (
 var readLocalErrands bool
 
 var errandsCmd = &cobra.Command{
-	Use:   "errands",
-	Short: "List and run errands",
+	Use:     "errands",
+	Short:   "List and run errands",
+	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 0 {
-			return fmt.Errorf("Unknown command '%s'", args[0])
-		}
 		cmd.UsageFunc()(cmd)
 		return nil
 	},
@@ -71,9 +69,10 @@ func ListErrands(cmd *cobra.Command, args []string) error {
 }
 
 var errandsListCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List errands",
-	RunE:  ListErrands,
+	Use:     "list",
+	Short:   "List errands",
+	PreRunE: NoExtraArgsPreRunE,
+	RunE:    ListErrands,
 }
 
 var errand string

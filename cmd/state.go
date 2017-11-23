@@ -17,8 +17,6 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/ankyra/escape/controllers"
 	"github.com/spf13/cobra"
 )
@@ -27,20 +25,19 @@ var deployStage bool
 var extraVars, extraProviders []string
 
 var stateCmd = &cobra.Command{
-	Use:   "state",
-	Short: "Manage the Escape state file",
+	Use:     "state",
+	Short:   "Manage the Escape state file",
+	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 0 {
-			return fmt.Errorf("Unknown command " + args[0])
-		}
 		cmd.UsageFunc()(cmd)
 		return nil
 	},
 }
 
 var listDeploymentsCmd = &cobra.Command{
-	Use:   "list-deployments",
-	Short: "Show the deployments",
+	Use:     "list-deployments",
+	Short:   "Show the deployments",
+	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := context.LoadLocalState(state, environment); err != nil {
 			return err
@@ -52,8 +49,9 @@ var listDeploymentsCmd = &cobra.Command{
 }
 
 var showDeploymentCmd = &cobra.Command{
-	Use:   "show-deployment",
-	Short: "Show a deployment",
+	Use:     "show-deployment",
+	Short:   "Show a deployment",
+	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if deployment == "" {
 			if err := ProcessFlagsForContext(true); err != nil {
@@ -69,8 +67,9 @@ var showDeploymentCmd = &cobra.Command{
 }
 
 var showProvidersCmd = &cobra.Command{
-	Use:   "show-providers",
-	Short: "Show the providers available in the environment",
+	Use:     "show-providers",
+	Short:   "Show the providers available in the environment",
+	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := ProcessFlagsForContext(false); err != nil {
 			return err

@@ -27,8 +27,9 @@ var username, password, url, authMethod, targetProfile string
 var insecureSkipVerify bool
 
 var loginCmd = &cobra.Command{
-	Use:   "login",
-	Short: "Authenticate with an Escape server",
+	Use:     "login",
+	Short:   "Authenticate with an Escape server",
+	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if url == "" {
 			return fmt.Errorf("Missing Escape server URL")
