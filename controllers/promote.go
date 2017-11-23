@@ -30,6 +30,9 @@ import (
 type PromoteController struct{}
 
 func (PromoteController) Promote(context Context, state, toEnv, toDeployment, fromEnv, fromDeployment string, extraVars, extraProviders map[string]string, force bool) error {
+	if fromDeployment == "" {
+		return fmt.Errorf("Missing deployment name")
+	}
 	if err := context.LoadLocalState(state, fromEnv); err != nil {
 		return err
 	}
@@ -113,7 +116,7 @@ func confirmationUserInput(reader *bufio.Reader, message string) (bool, error) {
 func buildReleaseId(env *state.EnvironmentState, deploymentName string) (string, error) {
 	deployment := env.Deployments[deploymentName]
 	if deployment == nil {
-		return "", fmt.Errorf("Deployment %s was not found in environment %s.", deploymentName, env.Name)
+		return "", fmt.Errorf("Deployment %s was not found in the environment %s.", deploymentName, env.Name)
 	}
 
 	if deployStage := deployment.Stages["deploy"]; deployStage == nil {
