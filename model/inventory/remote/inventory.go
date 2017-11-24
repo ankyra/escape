@@ -57,7 +57,7 @@ func (r *inventory) QueryReleaseMetadata(project, name, version string) (*core.R
 		if project == "_" {
 			releaseQuery = name + "-" + version
 		}
-		return nil, fmt.Errorf(`Dependency "%s" could not be found. It may not exist in the inventory you're using (%s) and you need to release it first, or you may not have been given access to it.`, releaseQuery, r.endpoints.ApiServer())
+		return nil, fmt.Errorf(`Dependency '%s' could not be found. It may not exist in the inventory you're using (%s) and you need to release it first, or you may not have been given access to it.`, releaseQuery, r.endpoints.ApiServer())
 	}
 	result := core.NewEmptyReleaseMetadata()
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
@@ -232,9 +232,9 @@ func (r *inventory) urlToList(url, doingMessage string, transformToList func(map
 		return nil, err
 	}
 	if resp.StatusCode == 401 {
-		return nil, fmt.Errorf("Unauthorized")
+		return nil, fmt.Errorf(doingMessage)
 	} else if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("Couldn't %s: %s", doingMessage, resp.Status)
+		return nil, fmt.Errorf(doingMessage)
 	}
 	result := make(map[string]interface{})
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
@@ -243,6 +243,8 @@ func (r *inventory) urlToList(url, doingMessage string, transformToList func(map
 
 	return transformToList(result), nil
 }
+
+var helpText = "It may not exist in the inventory you're using (%s) and you need to release it first, or you may not have been given access to it."
 
 func (r *inventory) ListProjects() ([]string, error) {
 	return r.urlToList(r.endpoints.ListProjects(), "list projects", func(result map[string]interface{}) []string {
@@ -254,7 +256,7 @@ func (r *inventory) ListProjects() ([]string, error) {
 	})
 }
 func (r *inventory) ListApplications(project string) ([]string, error) {
-	return r.urlToList(r.endpoints.ListApplications(project), "list applications for project '"+project+"'", func(result map[string]interface{}) []string {
+	return r.urlToList(r.endpoints.ListApplications(project), fmt.Sprintf("Project '%s' could not be found. "+helpText, project, r.endpoints.ApiServer()), func(result map[string]interface{}) []string {
 		projects := []string{}
 		for key, _ := range result {
 			projects = append(projects, key)
@@ -263,7 +265,7 @@ func (r *inventory) ListApplications(project string) ([]string, error) {
 	})
 }
 func (r *inventory) ListVersions(project, app string) ([]string, error) {
-	return r.urlToList(r.endpoints.ProjectNameQuery(project, app), "list version for project '"+project+"/"+app+"'", func(result map[string]interface{}) []string {
+	return r.urlToList(r.endpoints.ProjectNameQuery(project, app), fmt.Sprintf("Application '%s' could not be found. "+helpText, app, r.endpoints.ApiServer()), func(result map[string]interface{}) []string {
 		versions := make([]string, len(result["versions"].([]interface{})))
 		for _, v := range result["versions"].([]interface{}) {
 			versions = append(versions, v.(string))
