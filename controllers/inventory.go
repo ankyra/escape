@@ -17,8 +17,6 @@ limitations under the License.
 package controllers
 
 import (
-	"fmt"
-
 	. "github.com/ankyra/escape/model/interfaces"
 )
 
@@ -45,8 +43,9 @@ func (r InventoryController) Query(context Context, project, application, appVer
 			result.Error = err
 			return result
 		}
-		fmt.Println(metadata.ToJson())
-		return nil
+		result.HumanOutput.AddLine(metadata.ToJson())
+		result.MarshalableOutput = metadata
+		return result
 	}
 	if err != nil {
 		result.Error = err
