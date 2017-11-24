@@ -19,6 +19,7 @@ package cmd
 import (
 	"fmt"
 
+	corestate "github.com/ankyra/escape-core/state"
 	"github.com/ankyra/escape/controllers"
 	"github.com/spf13/cobra"
 )
@@ -46,17 +47,13 @@ func ListDeployedErrands(state, environment, deployment string) error {
 	if err := ProcessFlagsForContext(false); err != nil {
 		return err
 	}
-	if deployment != "" {
-		deplState, exists := context.GetEnvironmentState().Deployments[deployment]
-		if !exists {
-			return fmt.Errorf("The deployment '%s' could not be found in environment '%s'", deployment, environment)
-		}
-		releaseId := deplState.GetReleaseId("deploy")
-		if err := context.InitReleaseMetadataByReleaseId(releaseId); err != nil {
-			return err
-		}
-	} else {
-		return fmt.Errorf("Missing deployment name")
+	deplState, exists := context.GetEnvironmentState().Deployments[deployment]
+	if !exists {
+		return fmt.Errorf("The deployment '%s' could not be found in environment '%s'", deployment, environment)
+	}
+	releaseId := deplState.GetReleaseId("deploy")
+	if err := context.InitReleaseMetadataByReleaseId(releaseId); err != nil {
+		return err
 	}
 	return controllers.ErrandsController{}.List(context).Print(jsonFlag)
 }
@@ -64,6 +61,10 @@ func ListDeployedErrands(state, environment, deployment string) error {
 func ListErrands(cmd *cobra.Command, args []string) error {
 	if readLocalErrands {
 		return ListLocalErrands(state, environment, escapePlanLocation)
+	}
+	if len(deployment) == 0 {
+		cmd.UsageFunc()(cmd)
+		return nil
 	}
 	return ListDeployedErrands(state, environment, deployment)
 }
@@ -78,14 +79,15 @@ var errandsListCmd = &cobra.Command{
 var errand string
 
 var errandsRunCmd = &cobra.Command{
-	Use:   "run",
+	Use:   "run <errand>",
 	Short: "Run an errand",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if environment == "" {
 			return fmt.Errorf("Missing 'environment'")
 		}
 		if len(args) != 1 {
-			return fmt.Errorf("Expecting errand")
+			cmd.UsageFunc()(cmd)
+			return nil
 		}
 		if deployment == "" {
 			return fmt.Errorf("Missing deployment name")
@@ -99,6 +101,7 @@ var errandsRunCmd = &cobra.Command{
 			return err
 		}
 		errand := args[0]
+
 		if readLocalErrands {
 			return RunLocalErrand(state, environment, escapePlanLocation, errand, parsedExtraVars)
 		}
@@ -107,7 +110,14 @@ var errandsRunCmd = &cobra.Command{
 }
 
 func RunDeployedErrand(deployment, errand string, parsedExtraVars map[string]string) error {
-	deplState := context.GetEnvironmentState().GetOrCreateDeploymentState(deployment)
+	deplState := context.GetEnvironmentState().Deployments[deployment]
+	if deplState == nil {
+		return fmt.Errorf("The deployment '%s' could not be found in environment '%s'.", deployment, context.GetEnvironmentState().Name)
+	}
+
+	if deplState.GetStageOrCreateNew("deploy").Status.Code != corestate.OK {
+		return fmt.Errorf("'%s' has not been deployed in the environment '%s'.", deployment, context.GetEnvironmentState().Name)
+	}
 	releaseId := deplState.GetReleaseId("deploy")
 	if err := context.InitReleaseMetadataByReleaseId(releaseId); err != nil {
 		return err
@@ -119,6 +129,16 @@ func RunLocalErrand(state, environment, escapePlanLocation, errand string, parse
 	if err := ProcessFlagsForContext(true); err != nil {
 		return err
 	}
+
+	deplState := context.GetEnvironmentState().Deployments[deployment]
+	if deplState == nil {
+		return fmt.Errorf("The deployment '%s' could not be found in environment '%s'.", deployment, context.GetEnvironmentState().Name)
+	}
+
+	if deplState.GetStageOrCreateNew("deploy").Status.Code != corestate.OK {
+		return fmt.Errorf("'%s' has not been deployed in the environment '%s'. Use 'escape run deploy' to deploy it.", deployment, context.GetEnvironmentState().Name)
+	}
+
 	return controllers.ErrandsController{}.Run(context, errand, parsedExtraVars)
 }
 

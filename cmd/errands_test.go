@@ -70,55 +70,12 @@ func (s *suite) Test_List_Errands_Local_missing_escape_plan(c *C) {
 		"Escape plan 'escape.yml' was not found. Use 'escape plan init' to create it")
 }
 
-func (s *suite) Test_List_Errands_missing_deployment_name(c *C) {
-	cmd := RootCmd
-	buf := new(bytes.Buffer)
-	cmd.SetOutput(buf)
-	cmd.SetArgs([]string{"errands", "list"})
-	c.Assert(cmd.Execute().Error(), Equals, "Missing deployment name")
-}
-
 func (s *suite) Test_List_Errands_missing_deployment(c *C) {
 	cmd := RootCmd
 	buf := new(bytes.Buffer)
 	cmd.SetOutput(buf)
 	cmd.SetArgs([]string{"errands", "list", "-d", "test-deployment"})
 	c.Assert(cmd.Execute().Error(), Equals, "The deployment 'test-deployment' could not be found in environment 'dev'")
-}
-
-func (s *suite) Test_Run_Errands_Local_no_such_errand(c *C) {
-	cmd := RootCmd
-	buf := new(bytes.Buffer)
-	cmd.SetOutput(buf)
-	cmd.SetArgs([]string{"errands", "run", "--local", "-d", "deployment-name", "no-existos"})
-
-	plan := escape_plan.NewEscapePlan()
-	plan.Name = "test"
-	plan.Version = "1"
-	c.Assert(ioutil.WriteFile("escape.yml", plan.ToYaml(), 0644), IsNil)
-	c.Assert(cmd.Execute().Error(), Equals, "The errand 'no-existos' could not be found in deployment 'deployment-name'. You can use 'escape errands list' to see the available errands.")
-	os.Remove("escape.yml")
-}
-
-func (s *suite) Test_Run_Errands_Local_missing_escape_plan(c *C) {
-	cmd := RootCmd
-	buf := new(bytes.Buffer)
-	cmd.SetOutput(buf)
-	cmd.SetArgs([]string{"errands", "run", "-d", "deployment-name", "--local", "errand"})
-	c.Assert(cmd.Execute().Error(), Equals,
-		"Escape plan 'escape.yml' was not found. Use 'escape plan init' to create it")
-}
-
-func (s *suite) Test_Run_Errands_Local_missing_errand_name(c *C) {
-	cmd := RootCmd
-	buf := new(bytes.Buffer)
-	cmd.SetOutput(buf)
-	cmd.SetArgs([]string{"errands", "run", "--local"})
-	plan := escape_plan.NewEscapePlan()
-	plan.Name = "test"
-	plan.Version = "1"
-	c.Assert(ioutil.WriteFile("escape.yml", plan.ToYaml(), 0644), IsNil)
-	c.Assert(cmd.Execute().Error(), Equals, "Expecting errand")
 }
 
 func (s *suite) Test_Run_Errands_missing_deployment_name(c *C) {
