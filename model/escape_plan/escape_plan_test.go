@@ -32,7 +32,7 @@ var _ = Suite(&planSuite{})
 func (s *planSuite) Test_LoadConfig_fails_if_not_exists(c *C) {
 	unit := NewEscapePlan()
 	err := unit.LoadConfig("testdata/doesnt_exist.yml")
-	c.Assert(err.Error(), Equals, "Escape plan 'testdata/doesnt_exist.yml' was not found. Use 'escape plan init' to create it")
+	c.Assert(err.Error(), Equals, "Escape plan 'testdata/doesnt_exist.yml' was not found. Use 'escape plan init' to create it.")
 }
 
 func (s *planSuite) Test_LoadConfig_fails_if_invalid_yaml(c *C) {

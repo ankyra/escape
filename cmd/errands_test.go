@@ -67,7 +67,7 @@ func (s *suite) Test_List_Errands_Local_missing_escape_plan(c *C) {
 	cmd.SetOutput(buf)
 	cmd.SetArgs([]string{"errands", "list", "--local"})
 	c.Assert(cmd.Execute().Error(), Equals,
-		"Escape plan 'escape.yml' was not found. Use 'escape plan init' to create it")
+		"Escape plan 'escape.yml' was not found. Use 'escape plan init' to create it.")
 }
 
 func (s *suite) Test_List_Errands_missing_deployment(c *C) {

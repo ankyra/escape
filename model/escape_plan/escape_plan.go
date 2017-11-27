@@ -215,7 +215,7 @@ func (e *EscapePlan) GetVersionlessReleaseId() string {
 
 func (e *EscapePlan) LoadConfig(cfgFile string) error {
 	if !util.PathExists(cfgFile) {
-		return fmt.Errorf("Escape plan '%s' was not found. Use 'escape plan init' to create it", cfgFile)
+		return fmt.Errorf("Escape plan '%s' was not found. Use 'escape plan init' to create it.", cfgFile)
 	}
 	data, err := ioutil.ReadFile(cfgFile)
 	if err != nil {
