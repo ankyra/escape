@@ -7,8 +7,8 @@ wip: true
 
 back: /docs/quickstart-input-variables/
 backLabel: Input Variables
-next: /docs/quickstart-errands/
-nextLabel: Errands
+next: /docs/quickstart-dependencies/
+nextLabel: Dependencies
 ---
 
 In the previous section we've built a package that can greet a configurable
@@ -50,7 +50,7 @@ and once approved things might make it to "Stage" and then "Live". It is
 likely, or at least possible, that we'll have different versions running in
 each of our environments.
 
-<img src='envs.png'>
+<img src='/img/envs.png'>
 
 There are a few ways we can control these deployments.
 
