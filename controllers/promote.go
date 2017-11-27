@@ -31,8 +31,12 @@ type PromoteController struct{}
 
 func (PromoteController) Promote(context Context, state, toEnv, toDeployment, fromEnv, fromDeployment string, extraVars, extraProviders map[string]string, force bool) error {
 	if fromDeployment == "" {
-		return fmt.Errorf("Missing deployment name")
+		return fmt.Errorf("Missing deployment name.")
 	}
+	if toEnv == "" {
+		return fmt.Errorf("Missing target environment. Use '--to' to define your target environment.")
+	}
+
 	if err := context.LoadLocalState(state, fromEnv); err != nil {
 		return err
 	}
