@@ -37,11 +37,10 @@ var RootCmd = &cobra.Command{
 	Short:         "Package and deployment manager",
 	Long: `Escape v` + util.EscapeVersion + ` 
 
-Escape is a tool that can be used to version, package, build, release, 
-deploy and operate software in the large and the small. Software of all sizes. 
-Everyone welcome.
+Escape is a tool to help with the release engineering, life-cycle management
+and Continuous Delivery of software platforms and their artefacts.
     
-Website: http://escape.ankyra.io/
+See the documentation at https://escape.ankyra.io/docs/
 `,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		context = model.NewContext()
