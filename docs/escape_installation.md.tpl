@@ -6,8 +6,8 @@ toc: true
 
 back: /downloads/
 backLabel: Downloads
-next: /docs/quickstart-configure-inventory/
-nextLabel: Configuring an Inventory
+next: /docs/inventory-installation/
+nextLabel: Installing Inventory
 contributeLink: https://example.com/
 ---
 
