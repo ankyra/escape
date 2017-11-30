@@ -15,12 +15,12 @@ publications, etc. Errands are a good idea whenever a task needs to be aware
 of Environments.
 
 You can inspect and run Errands using the [`escape
-errands`](/docs/escape_errands/) command.
+errands`](/docs/reference/escape_errands/) command.
 
 ## Escape Plan
 
 Errands are configured in the Escape Plan under the
-[`errands`](/docs/escape-plan/#errands) field.
+[`errands`](/docs/reference/escape-plan/#errands) field.
 
 
 Field | Type | Description
@@ -29,5 +29,5 @@ Field | Type | Description
 |description|`string`|An optional description of the errand. 
 |script|`string`|The location of the script performing the actual work. 
 |||The script has access to the deployment inputs and outputs as enviroment variables. For example: an input with `"id": "input_variable"` will be accessible as `INPUT_input_variable`; and an output with `"id": "output_variable"` as `OUTPUT_output_variable`. 
-|inputs|`[variables.Variable]`|A list of [Variables](/docs/input-and-output-variables/_. The values will be made available to the `script` (along with the regular deployment inputs and outputs) as environment variables. For example: a variable with `"id": "input_variable"` will be accessible as environment variable `INPUT_input_variable` 
+|inputs|`[variables.Variable]`|A list of [Variables](/docs/reference/input-and-output-variables/). The values will be made available to the `script` (along with the regular deployment inputs and outputs) as environment variables. For example: a variable with `"id": "input_variable"` will be accessible as environment variable `INPUT_input_variable` 
 

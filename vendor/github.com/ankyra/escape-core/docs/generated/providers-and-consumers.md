@@ -14,10 +14,10 @@ dependencies at deployment time.
 
 ## Escape Plan
 
-Consumers are configured in the [`consumes`](/docs/escape-plan/#consumes)
+Consumers are configured in the [`consumes`](/docs/reference/escape-plan/#consumes)
 field of the Escape Plan.
 
-Providers are configured in the [`provides`](/docs/escape-plan/#provides)
+Providers are configured in the [`provides`](/docs/reference/escape-plan/#provides)
 field of the Escape Plan.
 
 

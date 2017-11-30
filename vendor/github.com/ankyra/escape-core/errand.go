@@ -31,12 +31,12 @@ publications, etc. Errands are a good idea whenever a task needs to be aware
 of Environments.
 
 You can inspect and run Errands using the [`escape
-errands`](/docs/escape_errands/) command.
+errands`](/docs/reference/escape_errands/) command.
 
 ## Escape Plan
 
 Errands are configured in the Escape Plan under the
-[`errands`](/docs/escape-plan/#errands) field.
+[`errands`](/docs/reference/escape-plan/#errands) field.
 
 */
 type Errand struct {
@@ -54,7 +54,7 @@ type Errand struct {
 	// "output_variable"` as `OUTPUT_output_variable`.
 	Script string `json:"script"`
 
-	// A list of [Variables](/docs/input-and-output-variables/_. The values
+	// A list of [Variables](/docs/reference/input-and-output-variables/). The values
 	// will be made available to the `script` (along with the regular
 	// deployment inputs and outputs) as environment variables. For example: a
 	// variable with `"id": "input_variable"` will be accessible as environment

@@ -31,7 +31,7 @@ import (
 /*
 
 Variables can be used to defined inputs and outputs for the build and
-deployment stages. They can also be used to make [Errands](/docs/errands/)
+deployment stages. They can also be used to make [Errands](/docs/reference/errands/)
 configurable.
 
 Variables are strongly typed, which is checked at both build and deploy
@@ -41,10 +41,10 @@ configured correctly.
 ## Escape Plan
 
 Variables can be configured in the Escape Plan under the
-[`inputs`](/docs/escape-plan/#inputs),
-[`build_inputs`](/docs/escape-plan/#build_inputs),
-[`deploy_inputs`](/docs/escape-plan/#deploy_inputs) and
-[`outputs`](/docs/escape-plan/#outputs) fields.
+[`inputs`](/docs/reference/escape-plan/#inputs),
+[`build_inputs`](/docs/reference/escape-plan/#build_inputs),
+[`deploy_inputs`](/docs/reference/escape-plan/#deploy_inputs) and
+[`outputs`](/docs/reference/escape-plan/#outputs) fields.
 
 */
 type Variable struct {

@@ -10,7 +10,7 @@ contributeLink: https://github.com/ankyra/escape-core/blob/master/dependency_con
 
 ## Escape Plan
 
-Dependencies are configured in the [`depends`](/docs/escape-plan/#depends)
+Dependencies are configured in the [`depends`](/docs/reference/escape-plan/#depends)
 field of the Escape plan.
 
 

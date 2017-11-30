@@ -24,7 +24,7 @@ import (
 
 ## Escape Plan
 
-Dependencies are configured in the [`depends`](/docs/escape-plan/#depends)
+Dependencies are configured in the [`depends`](/docs/reference/escape-plan/#depends)
 field of the Escape plan.
 
 */

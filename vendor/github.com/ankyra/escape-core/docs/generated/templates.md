@@ -9,13 +9,13 @@ contributeLink: https://github.com/ankyra/escape-core/blob/master/templates/temp
 ---
 
 Escape provides the Mustache templating language and integrates it with the
-package's [Variables](/docs/input-and-output-variables/), making for a quick
+package's [Variables](/docs/reference/input-and-output-variables/), making for a quick
 and easy way to render files at either build or deploy time.
 
 ## Escape Plan
 
 Templates are configured in the Escape Plan under the
-[`templates`](/docs/escape-plan/#templates) field.
+[`templates`](/docs/reference/escape-plan/#templates) field.
 
 
 Field | Type | Description

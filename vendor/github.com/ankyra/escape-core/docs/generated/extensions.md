@@ -22,7 +22,7 @@ patterns.
 
 ## Escape Plan
 
-Extensions are configured in the [`extends`](/docs/escape-plan/#extends)
+Extensions are configured in the [`extends`](/docs/reference/escape-plan/#extends)
 field of the Escape Plan.
 
 

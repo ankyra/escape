@@ -28,7 +28,7 @@ that Escape tries to cover.
 ## Escape Plan
 
 Downloads are configured in the Escape Plan under the
-[`downloads`](/docs/escape-plan/#downloads) field.
+[`downloads`](/docs/reference/escape-plan/#downloads) field.
 
 */
 type DownloadConfig struct {
