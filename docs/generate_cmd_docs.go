@@ -27,21 +27,21 @@ wip: true
 `
 
 var TypeMap = map[string]string{
-	"extends":          "`[string]`, [Extensions](/docs/extensions/)",
-	"depends":          "`[string]`, [Dependencies](/docs/dependencies/)",
-	"consumes":         "`[string]`, [Consumers](/docs/providers-and-consumers/)",
-	"build_consumes":   "`[string]`, [Consumers](/docs/providers-and-consumers/)",
-	"deploy_consumes":  "`[string]`, [Consumers](/docs/providers-and-consumers/)",
-	"provides":         "`[string]`, [Consumers](/docs/providers-and-consumers/)",
-	"inputs":           "`[string]`, [Variables](/docs/input-and-output-variables/)",
-	"build_inputs":     "`[string]`, [Variables](/docs/input-and-output-variables/)",
-	"deploy_inputs":    "`[string]`, [Variables](/docs/input-and-output-variables/)",
-	"outputs":          "`[string]`, [Variables](/docs/input-and-output-variables/)",
-	"errands":          "[Errands](/docs/errands/)",
-	"downloads":        "[Downloads](/docs/downloads/)",
-	"templates":        "[Templates](/docs/templates/)",
-	"build_templates":  "[Templates](/docs/templates/)",
-	"deploy_templates": "[Templates](/docs/templates/)",
+	"extends":          "`[string]`, [Extensions](/docs/reference/extensions/)",
+	"depends":          "`[string]`, [Dependencies](/docs/reference/dependencies/)",
+	"consumes":         "`[string]`, [Consumers](/docs/reference/providers-and-consumers/)",
+	"build_consumes":   "`[string]`, [Consumers](/docs/reference/providers-and-consumers/)",
+	"deploy_consumes":  "`[string]`, [Consumers](/docs/reference/providers-and-consumers/)",
+	"provides":         "`[string]`, [Consumers](/docs/reference/providers-and-consumers/)",
+	"inputs":           "`[string]`, [Variables](/docs/reference/input-and-output-variables/)",
+	"build_inputs":     "`[string]`, [Variables](/docs/reference/input-and-output-variables/)",
+	"deploy_inputs":    "`[string]`, [Variables](/docs/reference/input-and-output-variables/)",
+	"outputs":          "`[string]`, [Variables](/docs/reference/input-and-output-variables/)",
+	"errands":          "[Errands](/docs/reference/errands/)",
+	"downloads":        "[Downloads](/docs/reference/downloads/)",
+	"templates":        "[Templates](/docs/reference/templates/)",
+	"build_templates":  "[Templates](/docs/reference/templates/)",
+	"deploy_templates": "[Templates](/docs/reference/templates/)",
 }
 
 type Page struct {

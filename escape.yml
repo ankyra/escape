@@ -47,9 +47,6 @@ build_templates:
 - file: util/metadata.go.tpl
   mapping:
     version: $this.version
-- file: docs/escape_installation.md.tpl
-  mapping:
-    version: $this.version
 
 build: scripts/build.sh
 test: scripts/test.sh
