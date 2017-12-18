@@ -85,7 +85,7 @@ type Variable struct {
 	Items interface{} `json:"items"`
 
 	// Should the variables be evaluated before the dependencies are deployed?
-	EvalBeforeDependencies bool `json:"eval_before_dependencies,omitempty"`
+	EvalBeforeDependencies bool `json:"eval_before_dependencies" yaml:"eval_before_dependencies"`
 
 	// A list of scopes (`build`, `deploy`) that defines during which stage(s)
 	// this variable should be active. You wouldn't usually use this field

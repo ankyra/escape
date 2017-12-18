@@ -8,7 +8,7 @@
       "README.md": "157ef9ed335beff9ccd5d85185921004",
       "consumer.go": "0764ac299e09e0d8bff0fefef732cead",
       "consumer_test.go": "3ff946e134efa5165c73db7476ffbbb4",
-      "core.go": "c46ecab41883f26b14db7fc8c0c3ddbd",
+      "core.go": "0b616429368284c85311039200d8ca9c",
       "core.go.tpl": "4099a7b2c6c7798799ea2819f8cf5c27",
       "dependency.go": "c2fad1fb08026574389ca4ed44be50e1",
       "dependency_config.go": "dbc69caec4d1362fad474ae258af0413",
@@ -24,7 +24,7 @@
       "docs/generated/extensions.md": "8fbf06d246023679e41159a4041ced0d",
       "docs/generated/input-and-output-variables.md": "9a626703807de0628458e4262d883320",
       "docs/generated/providers-and-consumers.md": "c832124b77fbc430362020cc0eed1667",
-      "docs/generated/stdlib.md": "acb05042199e3dafd6f54bb075ce8f42",
+      "docs/generated/stdlib.md": "581ab6a169252a425a6f1fb89799de98",
       "docs/generated/templates.md": "fffaa52cdb246bc5dd9471c3e425f894",
       "docs/scripting_language.md": "79ffa91ba9dad432b9c3810b474036d8",
       "download_config.go": "c568124df0f362c79ba4b559b31cbfd5",
@@ -79,8 +79,10 @@
       "util/process.go": "cef1e12dfcdd4a59c464239e70209275",
       "util/random.go": "aaa8b9be6f38129e3d38fdc7245479c4",
       "util/value.go": "7bc9d4f0435b94d3cfa646e04dafbcf9",
-      "variables/variable.go": "4ddcc7b334edecab7e4fc12ae374f30b",
-      "variables/variable_test.go": "c771e4af61350db4ca30aa53a262681b",
+      "variables/.variable.go.swp": "2e38af7edd21ea53ce344e376ca87fe9",
+      "variables/.variable_test.go.swp": "37a05759a875a1f4436d8a0b02748db6",
+      "variables/variable.go": "08e00debfc5cd1457b64a9f913d16da9",
+      "variables/variable_test.go": "b7f73a20688fcb5d3c959f666b07dda4",
       "variables/variable_types/bool.go": "86a7d62e5c0fa851ed6998df3b3c3d4c",
       "variables/variable_types/bool_test.go": "313fb37e9f9461b132bf7141d7cba66d",
       "variables/variable_types/integer.go": "3368784a605c866501be7717e642a019",
@@ -140,20 +142,20 @@
    "name": "escape-core",
    "repository": "git@github.com:ankyra/escape-core.git",
    "branch": "master",
-   "git_revision": "c76d451ea8fa924e442fac7927be3c72475ea115",
-   "revision_message": "Update links in documentation",
+   "git_revision": "b38756f04b394a69cc1460febdf3fb31f069fe1e",
+   "revision_message": "Fix eval_before_dependencies parsing bug.",
    "revision_author": "Bart Spaans \u003cbart.spaans@gmail.com\u003e",
    "metadata": {
       "release_metadata_api_version": "8"
    },
-   "version": "0.8.14",
+   "version": "0.8.15",
    "consumes": [],
    "downloads": null,
    "depends": [],
    "errands": {},
    "extends": [
       {
-         "release_id": "_/extension-golang-binary-v0.0.16"
+         "release_id": "_/extension-golang-binary-v0.0.21"
       }
    ],
    "inputs": [
@@ -217,6 +219,19 @@
          ],
          "description": "\"Copy these files after build. Example:\n- README.md:file_in_root.txt\"\n",
          "visible": false,
+         "items": null,
+         "eval_before_dependencies": true,
+         "scopes": [
+            "build",
+            "deploy"
+         ]
+      },
+      {
+         "id": "go_vendor_path",
+         "type": "string",
+         "default": "vendor/",
+         "description": "The location of the vendor directory (used for escape_go_dependencies)",
+         "visible": true,
          "items": null,
          "eval_before_dependencies": true,
          "scopes": [
@@ -290,6 +305,7 @@
             "copy_files_after_build": "$this.inputs.copy_files_after_build",
             "description": "$this.description",
             "escape_go_dependencies": "$this.inputs.escape_go_dependencies",
+            "go_vendor_path": "$this.inputs.go_vendor_path",
             "id": "$this.id",
             "logo": "$this.logo",
             "metadata_api_version": "$this.metadata.release_metadata_api_version",
@@ -305,6 +321,6 @@
       }
    ],
    "variable_context": {
-      "extension-golang-binary": "_/extension-golang-binary-v0.0.16"
+      "extension-golang-binary": "_/extension-golang-binary-v0.0.21"
    }
 }

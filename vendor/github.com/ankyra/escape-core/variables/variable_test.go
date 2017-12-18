@@ -67,13 +67,17 @@ func (s *variableSuite) Test_NewVariableFromString(c *C) {
 
 func (s *variableSuite) Test_NewVariableFromDict(c *C) {
 	dict := map[interface{}]interface{}{
-		"id":     "test",
-		"scopes": []interface{}{"build"},
+		"id":                       "test",
+		"scopes":                   []interface{}{"build"},
+		"eval_before_dependencies": false,
+		"visible":                  false,
+		"type":                     "list[string]",
 	}
 	v, err := NewVariableFromDict(dict)
 	c.Assert(err, IsNil)
-	c.Assert(v.Visible, Equals, true)
-	c.Assert(v.EvalBeforeDependencies, Equals, true)
+	c.Assert(v.EvalBeforeDependencies, Equals, false)
+	c.Assert(v.Visible, Equals, false)
+	c.Assert(v.Type, Equals, "list")
 	c.Assert(v.Scopes, DeepEquals, []string{"build"})
 }
 
