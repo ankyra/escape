@@ -56,6 +56,11 @@ const error_InventoryUnknownStatus = ", because the Inventory at '%s' responded 
 const error_Unauthorized = "You don't have a valid authentication token for the Inventory at %s. Use `escape login --url %s` to login."
 
 const error_QueryNextVersion = "Couldn't resolve next version for '%s'"
+const error_ListProjects = "Couldn't list projects"
+const error_ListApplications = "Couldn't list applications for project '%s'"
+const error_ListApplicationsNotFound = ", because the project '%s' could not be found in the Inventory at '%s'."
+const error_ListVersions = "Couldn't list versions for application '%s' in project '%s'"
+const error_ListVersionsNotFound = ", because the project '%s' or application '%s' could not be found in the Inventory at '%s'."
 
 func (r *inventory) QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
 	if !strings.HasPrefix(version, "v") && version != "latest" {
@@ -123,21 +128,21 @@ func (r *inventory) QueryNextVersion(project, name, versionPrefix string) (strin
 }
 
 func (r *inventory) ListProjects() ([]string, error) {
-	return r.urlToList(r.endpoints.ListProjects(), "Couldn't list projects", "", func(result map[string]interface{}) []string {
-		projects := []string{}
-		for key, _ := range result {
-			projects = append(projects, key)
-		}
-		sort.Strings(projects)
-		return projects
-	})
+	return r.urlToList(r.endpoints.ListProjects(), error_ListProjects, "",
+		func(result map[string]interface{}) []string {
+			projects := []string{}
+			for key, _ := range result {
+				projects = append(projects, key)
+			}
+			sort.Strings(projects)
+			return projects
+		})
 }
 
 func (r *inventory) ListApplications(project string) ([]string, error) {
 	return r.urlToList(r.endpoints.ListApplications(project),
-		fmt.Sprintf("Couldn't list applications for project '%s'", project),
-		fmt.Sprintf(", because the project '%s' could not be found in the Inventory at '%s'.", project,
-			r.apiServer),
+		fmt.Sprintf(error_ListApplications, project),
+		fmt.Sprintf(error_ListApplicationsNotFound, project, r.apiServer),
 		func(result map[string]interface{}) []string {
 			apps := []string{}
 			for key, _ := range result {
@@ -150,8 +155,9 @@ func (r *inventory) ListApplications(project string) ([]string, error) {
 
 func (r *inventory) ListVersions(project, app string) ([]string, error) {
 	return r.urlToList(r.endpoints.ProjectNameQuery(project, app),
-		fmt.Sprintf("Couldn't list versions for application '%s' in project '%s'", app, project),
-		fmt.Sprintf(", because the project '%s' or application '%s' could not be found in the Inventory at '%s'.", project, app, r.apiServer), func(result map[string]interface{}) []string {
+		fmt.Sprintf(error_ListVersions, app, project),
+		fmt.Sprintf(error_ListVersionsNotFound, project, app, r.apiServer),
+		func(result map[string]interface{}) []string {
 			versions := make([]string, len(result["versions"].([]interface{})))
 			for i, v := range result["versions"].([]interface{}) {
 				versions[i] = v.(string)
@@ -185,8 +191,6 @@ func (r *inventory) urlToList(url, baseErrorMessage, notFoundMessage string, tra
 	}
 	return transformToList(result), nil
 }
-
-var helpText = "It may not exist in the inventory you're using (%s) and you need to release it first, or you may not have been given access to it."
 
 func (r *inventory) DownloadRelease(project, name, version, targetFile string) error {
 	url := r.endpoints.DownloadRelease(project, name, version)

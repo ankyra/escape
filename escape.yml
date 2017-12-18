@@ -47,6 +47,7 @@ includes:
 - util/
 - vendor/
 - docs/
+- testing/
 
 errands:
   publish_binaries:
