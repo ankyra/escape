@@ -23,6 +23,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"sort"
 	"strings"
 
 	core "github.com/ankyra/escape-core"
@@ -31,15 +32,18 @@ import (
 )
 
 type inventory struct {
+	apiServer string
 	client    *remote.InventoryClient
 	endpoints *remote.ServerEndpoints
 }
 
 func NewRemoteInventory(apiServer, escapeToken string, insecureSkipVerify bool) *inventory {
-	return &inventory{
+	inv := &inventory{
 		client:    remote.NewRemoteClient(escapeToken, insecureSkipVerify),
 		endpoints: remote.NewServerEndpoints(apiServer),
 	}
+	inv.apiServer = inv.endpoints.ApiServer()
+	return inv
 }
 
 const error_QueryReleaseMetadata = "Couldn't get release metadata for '%s'"
@@ -63,27 +67,26 @@ func (r *inventory) QueryReleaseMetadata(project, name, version string) (*core.R
 	}
 
 	url := r.endpoints.ReleaseQuery(project, name, version)
-	apiServer := r.endpoints.ApiServer()
 	resp, err := r.client.GET_with_authentication(url)
 	if err != nil {
-		return nil, fmt.Errorf(error_QueryReleaseMetadata+error_InventoryConnection, releaseQuery, apiServer, err.Error())
+		return nil, fmt.Errorf(error_QueryReleaseMetadata+error_InventoryConnection, releaseQuery, r.apiServer, err.Error())
 	}
 
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(resp.Body)
 	body := buf.String()
 	if resp.StatusCode == 400 {
-		return nil, fmt.Errorf(error_QueryReleaseMetadata+error_InventoryUserSide, releaseQuery, apiServer, body)
+		return nil, fmt.Errorf(error_QueryReleaseMetadata+error_InventoryUserSide, releaseQuery, r.apiServer, body)
 	} else if resp.StatusCode == 401 {
-		return nil, fmt.Errorf(error_Unauthorized, apiServer, apiServer)
+		return nil, fmt.Errorf(error_Unauthorized, r.apiServer, r.apiServer)
 	} else if resp.StatusCode == 403 {
-		return nil, fmt.Errorf(error_QueryReleaseMetadata+error_QueryReleaseMetadataForbidden, releaseQuery, releaseQuery, apiServer)
+		return nil, fmt.Errorf(error_QueryReleaseMetadata+error_QueryReleaseMetadataForbidden, releaseQuery, releaseQuery, r.apiServer)
 	} else if resp.StatusCode == 404 {
-		return nil, fmt.Errorf(error_QueryReleaseMetadata+error_QueryReleaseMetadataNotFound, releaseQuery, apiServer, releaseQuery)
+		return nil, fmt.Errorf(error_QueryReleaseMetadata+error_QueryReleaseMetadataNotFound, releaseQuery, r.apiServer, releaseQuery)
 	} else if resp.StatusCode == 500 {
-		return nil, fmt.Errorf(error_QueryReleaseMetadata+error_InventoryServerSide, releaseQuery, apiServer)
+		return nil, fmt.Errorf(error_QueryReleaseMetadata+error_InventoryServerSide, releaseQuery, r.apiServer)
 	} else if resp.StatusCode != 200 {
-		return nil, fmt.Errorf(error_QueryReleaseMetadata+error_InventoryUnknownStatus, releaseQuery, apiServer, resp.StatusCode, body)
+		return nil, fmt.Errorf(error_QueryReleaseMetadata+error_InventoryUnknownStatus, releaseQuery, r.apiServer, resp.StatusCode, body)
 	}
 	metadata, err := core.NewReleaseMetadataFromJsonString(body)
 	if err != nil {
@@ -93,7 +96,6 @@ func (r *inventory) QueryReleaseMetadata(project, name, version string) (*core.R
 }
 
 func (r *inventory) QueryNextVersion(project, name, versionPrefix string) (string, error) {
-	apiServer := r.endpoints.ApiServer()
 	url := r.endpoints.NextReleaseVersion(project, name, versionPrefix)
 	releaseQuery := project + "/" + name + "-v" + versionPrefix
 	if project == "_" {
@@ -101,68 +103,86 @@ func (r *inventory) QueryNextVersion(project, name, versionPrefix string) (strin
 	}
 	resp, err := r.client.GET_with_authentication(url)
 	if err != nil {
-		return "", fmt.Errorf(error_QueryNextVersion+error_InventoryConnection, releaseQuery, apiServer, err.Error())
+		return "", fmt.Errorf(error_QueryNextVersion+error_InventoryConnection, releaseQuery, r.apiServer, err.Error())
 	}
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(resp.Body)
 	body := buf.String()
 	if resp.StatusCode == 400 {
-		return "", fmt.Errorf(error_QueryNextVersion+error_InventoryUserSide, releaseQuery, apiServer, body)
+		return "", fmt.Errorf(error_QueryNextVersion+error_InventoryUserSide, releaseQuery, r.apiServer, body)
 	} else if resp.StatusCode == 401 {
-		return "", fmt.Errorf(error_Unauthorized, apiServer, apiServer)
+		return "", fmt.Errorf(error_Unauthorized, r.apiServer, r.apiServer)
 	} else if resp.StatusCode == 403 {
-		return "", fmt.Errorf(error_QueryNextVersion+error_QueryReleaseMetadataForbidden, releaseQuery, releaseQuery, apiServer)
+		return "", fmt.Errorf(error_QueryNextVersion+error_QueryReleaseMetadataForbidden, releaseQuery, releaseQuery, r.apiServer)
 	} else if resp.StatusCode == 500 {
-		return "", fmt.Errorf(error_QueryNextVersion+error_InventoryServerSide, releaseQuery, apiServer)
+		return "", fmt.Errorf(error_QueryNextVersion+error_InventoryServerSide, releaseQuery, r.apiServer)
 	} else if resp.StatusCode != 200 {
-		return "", fmt.Errorf(error_QueryNextVersion+error_InventoryUnknownStatus, releaseQuery, apiServer, resp.StatusCode, body)
+		return "", fmt.Errorf(error_QueryNextVersion+error_InventoryUnknownStatus, releaseQuery, r.apiServer, resp.StatusCode, body)
 	}
 	return body, nil
 }
 
 func (r *inventory) ListProjects() ([]string, error) {
-	return r.urlToList(r.endpoints.ListProjects(), "list projects", func(result map[string]interface{}) []string {
+	return r.urlToList(r.endpoints.ListProjects(), "Couldn't list projects", "", func(result map[string]interface{}) []string {
 		projects := []string{}
 		for key, _ := range result {
 			projects = append(projects, key)
 		}
+		sort.Strings(projects)
 		return projects
-	})
-}
-func (r *inventory) ListApplications(project string) ([]string, error) {
-	return r.urlToList(r.endpoints.ListApplications(project), fmt.Sprintf("Project '%s' could not be found. "+helpText, project, r.endpoints.ApiServer()), func(result map[string]interface{}) []string {
-		projects := []string{}
-		for key, _ := range result {
-			projects = append(projects, key)
-		}
-		return projects
-	})
-}
-func (r *inventory) ListVersions(project, app string) ([]string, error) {
-	return r.urlToList(r.endpoints.ProjectNameQuery(project, app), fmt.Sprintf("Application '%s' could not be found. "+helpText, app, r.endpoints.ApiServer()), func(result map[string]interface{}) []string {
-		versions := make([]string, len(result["versions"].([]interface{})))
-		for _, v := range result["versions"].([]interface{}) {
-			versions = append(versions, v.(string))
-		}
-		return versions
 	})
 }
 
-func (r *inventory) urlToList(url, doingMessage string, transformToList func(map[string]interface{}) []string) ([]string, error) {
+func (r *inventory) ListApplications(project string) ([]string, error) {
+	return r.urlToList(r.endpoints.ListApplications(project),
+		fmt.Sprintf("Couldn't list applications for project '%s'", project),
+		fmt.Sprintf(", because the project '%s' could not be found in the Inventory at '%s'.", project,
+			r.apiServer),
+		func(result map[string]interface{}) []string {
+			apps := []string{}
+			for key, _ := range result {
+				apps = append(apps, key)
+			}
+			sort.Strings(apps)
+			return apps
+		})
+}
+
+func (r *inventory) ListVersions(project, app string) ([]string, error) {
+	return r.urlToList(r.endpoints.ProjectNameQuery(project, app),
+		fmt.Sprintf("Couldn't list versions for application '%s' in project '%s'", app, project),
+		fmt.Sprintf(", because the project '%s' or application '%s' could not be found in the Inventory at '%s'.", project, app, r.apiServer), func(result map[string]interface{}) []string {
+			versions := make([]string, len(result["versions"].([]interface{})))
+			for i, v := range result["versions"].([]interface{}) {
+				versions[i] = v.(string)
+			}
+			return versions
+		})
+}
+
+func (r *inventory) urlToList(url, baseErrorMessage, notFoundMessage string, transformToList func(map[string]interface{}) []string) ([]string, error) {
 	resp, err := r.client.GET_with_authentication(url)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf(baseErrorMessage+error_InventoryConnection, r.apiServer, err.Error())
 	}
-	if resp.StatusCode == 401 {
-		return nil, fmt.Errorf(doingMessage)
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(resp.Body)
+	body := buf.String()
+	if resp.StatusCode == 400 {
+		return nil, fmt.Errorf(baseErrorMessage+error_InventoryUserSide, r.apiServer, body)
+	} else if resp.StatusCode == 401 {
+		return nil, fmt.Errorf(error_Unauthorized, r.apiServer, r.apiServer)
+	} else if resp.StatusCode == 404 && notFoundMessage != "" {
+		return nil, fmt.Errorf(baseErrorMessage + notFoundMessage)
+	} else if resp.StatusCode == 500 {
+		return nil, fmt.Errorf(baseErrorMessage+error_InventoryServerSide, r.apiServer)
 	} else if resp.StatusCode != 200 {
-		return nil, fmt.Errorf(doingMessage)
+		return nil, fmt.Errorf(baseErrorMessage+error_InventoryUnknownStatus, r.apiServer, resp.StatusCode, body)
 	}
 	result := make(map[string]interface{})
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+	if err := json.Unmarshal([]byte(body), &result); err != nil {
 		return nil, err
 	}
-
 	return transformToList(result), nil
 }
 

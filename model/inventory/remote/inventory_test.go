@@ -315,3 +315,159 @@ func (s *suite) Test_QueryNextVersion_fails_if_server_doesnt_respond(c *C) {
 	_, err := unit.QueryNextVersion("query-project", "name", "1.@")
 	c.Assert(err.Error(), Equals, fmt.Sprintf("Couldn't resolve next version for 'query-project/name-v1.@', because the Inventory at '%s/' could not be reached: Get %s/api/v1/registry/query-project/units/name/next-version?prefix=1.%%40: dial tcp %s: getsockopt: connection refused", server.URL, server.URL, server.URL[7:]))
 }
+
+/*
+
+	LIST PROJECTS
+
+*/
+
+func (s *suite) Test_ListProjects_happy_path(c *C) {
+	server := NewMockServer().WithBody(`{"prj": {}, "prj2": {}}`).Start(c)
+	defer server.Stop()
+
+	unit := NewRemoteInventory(server.URL, "token", false)
+	projects, err := unit.ListProjects()
+	server.ExpectCalled(c, true, "/api/v1/registry/")
+	c.Assert(err, IsNil)
+	c.Assert(projects, HasLen, 2)
+	c.Assert(projects[0], Equals, "prj")
+	c.Assert(projects[1], Equals, "prj2")
+}
+
+func (s *suite) Test_ListProjects_fails_if_unauthorized(c *C) {
+	server := NewMockServer().WithResponseCode(401).Start(c)
+	defer server.Stop()
+
+	unit := NewRemoteInventory(server.URL, "token", false)
+	_, err := unit.ListProjects()
+	server.ExpectCalled(c, true, "/api/v1/registry/")
+	c.Assert(err.Error(), Equals, fmt.Sprintf("You don't have a valid authentication token for the Inventory at %s/. Use `escape login --url %s/` to login.", server.URL, server.URL))
+}
+
+func (s *suite) Test_ListProjects_fails_with_other_statuses(c *C) {
+	server := NewMockServer().WithResponseCode(416).WithBody("Yo").Start(c)
+	defer server.Stop()
+
+	unit := NewRemoteInventory(server.URL, "token", false)
+	_, err := unit.ListProjects()
+	server.ExpectCalled(c, true, "/api/v1/registry/")
+	c.Assert(err.Error(), Equals, fmt.Sprintf("Couldn't list projects, because the Inventory at '%s/' responded with status code 416: Yo", server.URL))
+}
+func (s *suite) Test_ListProjects_fails_on_server_side_error(c *C) {
+	server := NewMockServer().WithResponseCode(500).WithBody("Yo").Start(c)
+	defer server.Stop()
+
+	unit := NewRemoteInventory(server.URL, "token", false)
+	_, err := unit.ListProjects()
+	server.ExpectCalled(c, true, "/api/v1/registry/")
+	c.Assert(err.Error(), Equals, fmt.Sprintf("Couldn't list projects, because the Inventory at '%s/' responded with a server-side error code. Please try again or contact an administrator if the problem persists.", server.URL))
+}
+
+/*
+
+	LIST APPLICATIONS
+
+*/
+
+func (s *suite) Test_ListApplications_happy_path(c *C) {
+	server := NewMockServer().WithBody(`{"prj": {}, "prj2": {}}`).Start(c)
+	defer server.Stop()
+
+	unit := NewRemoteInventory(server.URL, "token", false)
+	apps, err := unit.ListApplications("test")
+	server.ExpectCalled(c, true, "/api/v1/registry/test/units/")
+	c.Assert(err, IsNil)
+	c.Assert(apps, HasLen, 2)
+	c.Assert(apps[0], Equals, "prj")
+	c.Assert(apps[1], Equals, "prj2")
+}
+
+func (s *suite) Test_ListApplications_fails_if_unauthorized(c *C) {
+	server := NewMockServer().WithResponseCode(401).Start(c)
+	defer server.Stop()
+
+	unit := NewRemoteInventory(server.URL, "token", false)
+	_, err := unit.ListApplications("test")
+	server.ExpectCalled(c, true, "/api/v1/registry/test/units/")
+	c.Assert(err.Error(), Equals, fmt.Sprintf("You don't have a valid authentication token for the Inventory at %s/. Use `escape login --url %s/` to login.", server.URL, server.URL))
+}
+
+func (s *suite) Test_ListApplications_fails_if_not_found(c *C) {
+	server := NewMockServer().WithResponseCode(404).Start(c)
+	defer server.Stop()
+
+	unit := NewRemoteInventory(server.URL, "token", false)
+	_, err := unit.ListApplications("test")
+	server.ExpectCalled(c, true, "/api/v1/registry/test/units/")
+	c.Assert(err.Error(), Equals, fmt.Sprintf("Couldn't list applications for project 'test', because the project 'test' could not be found in the Inventory at '%s/'.", server.URL))
+}
+
+func (s *suite) Test_ListApplications_fails_on_user_side_error(c *C) {
+	server := NewMockServer().WithResponseCode(400).WithBody("Invalid project").Start(c)
+	defer server.Stop()
+
+	unit := NewRemoteInventory(server.URL, "token", false)
+	_, err := unit.ListApplications("test")
+	server.ExpectCalled(c, true, "/api/v1/registry/test/units/")
+	c.Assert(err.Error(), Equals, fmt.Sprintf("Couldn't list applications for project 'test', because the Inventory at '%s/' says there's a problem with the request: Invalid project", server.URL))
+}
+
+func (s *suite) Test_ListApplications_fails_on_server_side_error(c *C) {
+	server := NewMockServer().WithResponseCode(500).WithBody("Yo").Start(c)
+	defer server.Stop()
+
+	unit := NewRemoteInventory(server.URL, "token", false)
+	_, err := unit.ListApplications("test")
+	server.ExpectCalled(c, true, "/api/v1/registry/test/units/")
+	c.Assert(err.Error(), Equals, fmt.Sprintf("Couldn't list applications for project 'test', because the Inventory at '%s/' responded with a server-side error code. Please try again or contact an administrator if the problem persists.", server.URL))
+}
+
+func (s *suite) Test_ListApplications_fails_with_other_statuses(c *C) {
+	server := NewMockServer().WithResponseCode(416).WithBody("Yo").Start(c)
+	defer server.Stop()
+
+	unit := NewRemoteInventory(server.URL, "token", false)
+	_, err := unit.ListApplications("test")
+	server.ExpectCalled(c, true, "/api/v1/registry/test/units/")
+	c.Assert(err.Error(), Equals, fmt.Sprintf("Couldn't list applications for project 'test', because the Inventory at '%s/' responded with status code 416: Yo", server.URL))
+}
+
+/*
+
+	LIST VERSIONS
+
+*/
+
+func (s *suite) Test_ListVersions_happy_path(c *C) {
+	server := NewMockServer().WithBody(`{"versions": ["1.0", "1.1"]}`).Start(c)
+	defer server.Stop()
+
+	unit := NewRemoteInventory(server.URL, "token", false)
+	versions, err := unit.ListVersions("test", "app")
+	server.ExpectCalled(c, true, "/api/v1/registry/test/units/app/")
+	c.Assert(err, IsNil)
+	c.Assert(versions, HasLen, 2)
+	c.Assert(versions[0], Equals, "1.0")
+	c.Assert(versions[1], Equals, "1.1")
+}
+
+func (s *suite) Test_ListVersions_fails_if_unauthorized(c *C) {
+	server := NewMockServer().WithResponseCode(401).Start(c)
+	defer server.Stop()
+
+	unit := NewRemoteInventory(server.URL, "token", false)
+	_, err := unit.ListVersions("test", "app")
+	server.ExpectCalled(c, true, "/api/v1/registry/test/units/app/")
+	c.Assert(err.Error(), Equals, fmt.Sprintf("You don't have a valid authentication token for the Inventory at %s/. Use `escape login --url %s/` to login.", server.URL, server.URL))
+}
+
+func (s *suite) Test_ListVersions_fails_if_not_found(c *C) {
+	server := NewMockServer().WithResponseCode(404).Start(c)
+	defer server.Stop()
+
+	unit := NewRemoteInventory(server.URL, "token", false)
+	_, err := unit.ListVersions("test", "app")
+	server.ExpectCalled(c, true, "/api/v1/registry/test/units/app/")
+	c.Assert(err.Error(), Equals, fmt.Sprintf("Couldn't list versions for application 'app' in project 'test', because the project 'test' or application 'app' could not be found in the Inventory at '%s/'.", server.URL))
+}
