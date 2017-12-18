@@ -113,7 +113,9 @@ func compileDefault(ctx *CompilerContext, v *variables.Variable) (*variables.Var
 func compileDependencyVariableMapping(ctx *CompilerContext) error {
 	for _, depend := range ctx.Metadata.Depends {
 		for _, variable := range ctx.Metadata.Inputs {
-			depend.AddVariableMapping(variable.Scopes, variable.Id, "$this.inputs."+variable.Id)
+			if variable.EvalBeforeDependencies {
+				depend.AddVariableMapping(variable.Scopes, variable.Id, "$this.inputs."+variable.Id)
+			}
 		}
 	}
 	return nil
