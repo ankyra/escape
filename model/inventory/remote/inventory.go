@@ -17,6 +17,7 @@ limitations under the License.
 package remote
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -42,28 +43,40 @@ func NewRemoteInventory(apiServer, escapeToken string, insecureSkipVerify bool) 
 }
 
 func (r *inventory) QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
-	if !strings.HasPrefix(version, "v") {
+	if !strings.HasPrefix(version, "v") && version != "latest" {
 		version = "v" + version
 	}
+	releaseQuery := project + "/" + name + "-" + version
+	if project == "_" {
+		releaseQuery = name + "-" + version
+	}
+
 	url := r.endpoints.ReleaseQuery(project, name, version)
+	apiServer := r.endpoints.ApiServer()
 	resp, err := r.client.GET_with_authentication(url)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Couldn't get release metadata for '%s', because the Inventory at '%s' could not be reached: %s", releaseQuery, apiServer, err.Error())
 	}
+
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(resp.Body)
+	body := buf.String()
 	if resp.StatusCode == 401 {
-		return nil, fmt.Errorf("Unauthorized")
+		return nil, fmt.Errorf("You don't have a valid authentication token for the Inventory at %s. Use `escape login --url %s` to login.", apiServer, apiServer)
+	} else if resp.StatusCode == 403 {
+		return nil, fmt.Errorf(`You don't have permissions to view the '%s' release in the Inventory at %s. Please ask an administrator for access.`, releaseQuery, apiServer)
+	} else if resp.StatusCode == 404 {
+		return nil, fmt.Errorf(`Dependency '%s' could not be found. It may not exist in the Inventory you're using (%s) and you need to release it first, or you may not have been given access to it.`, releaseQuery, apiServer)
+	} else if resp.StatusCode == 500 {
+		return nil, fmt.Errorf(`Couldn't get release metadata for '%s', because the Inventory at %s responded with a server-side error code. Please try again or contact an administrator if the problem persists.`, releaseQuery, apiServer)
 	} else if resp.StatusCode != 200 {
-		releaseQuery := project + "/" + name + "-" + version
-		if project == "_" {
-			releaseQuery = name + "-" + version
-		}
-		return nil, fmt.Errorf(`Dependency '%s' could not be found. It may not exist in the inventory you're using (%s) and you need to release it first, or you may not have been given access to it.`, releaseQuery, r.endpoints.ApiServer())
+		return nil, fmt.Errorf(`Couldn't get release metadata for '%s', because the Inventory at '%s' responded with status code %d: %s`, releaseQuery, apiServer, resp.StatusCode, body)
 	}
-	result := core.NewEmptyReleaseMetadata()
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, err
+	metadata, err := core.NewReleaseMetadataFromJsonString(body)
+	if err != nil {
+		return nil, fmt.Errorf(`The Inventory returned release metadata for '%s/%s-%s' that could not be understood: %s`, project, name, version, err.Error())
 	}
-	return result, nil
+	return metadata, nil
 }
 
 func (r *inventory) QueryPreviousReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
