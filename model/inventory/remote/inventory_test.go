@@ -179,7 +179,7 @@ func (s *suite) Test_QueryReleaseMetadata_fails_if_release_metadata_cant_be_foun
 	unit := NewRemoteInventory(server.URL, "token", false)
 	_, err := unit.QueryReleaseMetadata("query-project", "name", "1.0.0")
 	server.ExpectCalled(c, true, "/api/v1/registry/query-project/units/name/versions/v1.0.0/")
-	c.Assert(err.Error(), Equals, fmt.Sprintf("Dependency 'query-project/name-v1.0.0' could not be found. It may not exist in the Inventory you're using (%s/) and you need to release it first, or you may not have been given access to it.", server.URL))
+	c.Assert(err.Error(), Equals, fmt.Sprintf("Couldn't get release metadata for 'query-project/name-v1.0.0', because the release metadata could not be found in the Inventory at '%s/'. You probably need to release the 'query-project/name-v1.0.0' package first.", server.URL))
 }
 
 func (s *suite) Test_QueryReleaseMetadata_fails_if_unauthorized(c *C) {
@@ -199,7 +199,7 @@ func (s *suite) Test_QueryReleaseMetadata_fails_if_forbidden(c *C) {
 	unit := NewRemoteInventory(server.URL, "token", false)
 	_, err := unit.QueryReleaseMetadata("query-project", "name", "1.0.0")
 	server.ExpectCalled(c, true, "/api/v1/registry/query-project/units/name/versions/v1.0.0/")
-	c.Assert(err.Error(), Equals, fmt.Sprintf("You don't have permissions to view the 'query-project/name-v1.0.0' release in the Inventory at %s/. Please ask an administrator for access.", server.URL))
+	c.Assert(err.Error(), Equals, fmt.Sprintf("Couldn't get release metadata for 'query-project/name-v1.0.0', because you don't have permission to view the 'query-project/name-v1.0.0' release in the Inventory at '%s/'. Please ask an administrator for access.", server.URL))
 }
 
 func (s *suite) Test_QueryReleaseMetadata_fails_if_server_error(c *C) {
@@ -209,7 +209,7 @@ func (s *suite) Test_QueryReleaseMetadata_fails_if_server_error(c *C) {
 	unit := NewRemoteInventory(server.URL, "token", false)
 	_, err := unit.QueryReleaseMetadata("query-project", "name", "1.0.0")
 	server.ExpectCalled(c, true, "/api/v1/registry/query-project/units/name/versions/v1.0.0/")
-	c.Assert(err.Error(), Equals, fmt.Sprintf("Couldn't get release metadata for 'query-project/name-v1.0.0', because the Inventory at %s/ responded with a server-side error code. Please try again or contact an administrator if the problem persists.", server.URL))
+	c.Assert(err.Error(), Equals, fmt.Sprintf("Couldn't get release metadata for 'query-project/name-v1.0.0', because the Inventory at '%s/' responded with a server-side error code. Please try again or contact an administrator if the problem persists.", server.URL))
 }
 
 func (s *suite) Test_QueryReleaseMetadata_fails_on_other_statuses(c *C) {

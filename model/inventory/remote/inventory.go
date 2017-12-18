@@ -42,6 +42,14 @@ func NewRemoteInventory(apiServer, escapeToken string, insecureSkipVerify bool) 
 	}
 }
 
+const error_QueryReleaseMetadata = "Couldn't get release metadata for '%s'"
+const error_QueryReleaseMetadataNotFound = ", because the release metadata could not be found in the Inventory at '%s'. You probably need to release the '%s' package first."
+const error_QueryReleaseMetadataForbidden = ", because you don't have permission to view the '%s' release in the Inventory at '%s'. Please ask an administrator for access."
+const error_InventoryConnection = ", because the Inventory at '%s' could not be reached: %s"
+const error_InventoryServerSide = ", because the Inventory at '%s' responded with a server-side error code. Please try again or contact an administrator if the problem persists."
+const error_InventoryUnknownStatus = ", because the Inventory at '%s' responded with status code %d: %s"
+const error_Unauthorized = "You don't have a valid authentication token for the Inventory at %s. Use `escape login --url %s` to login."
+
 func (r *inventory) QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
 	if !strings.HasPrefix(version, "v") && version != "latest" {
 		version = "v" + version
@@ -55,22 +63,22 @@ func (r *inventory) QueryReleaseMetadata(project, name, version string) (*core.R
 	apiServer := r.endpoints.ApiServer()
 	resp, err := r.client.GET_with_authentication(url)
 	if err != nil {
-		return nil, fmt.Errorf("Couldn't get release metadata for '%s', because the Inventory at '%s' could not be reached: %s", releaseQuery, apiServer, err.Error())
+		return nil, fmt.Errorf(error_QueryReleaseMetadata+error_InventoryConnection, releaseQuery, apiServer, err.Error())
 	}
 
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(resp.Body)
 	body := buf.String()
 	if resp.StatusCode == 401 {
-		return nil, fmt.Errorf("You don't have a valid authentication token for the Inventory at %s. Use `escape login --url %s` to login.", apiServer, apiServer)
+		return nil, fmt.Errorf(error_Unauthorized, apiServer, apiServer)
 	} else if resp.StatusCode == 403 {
-		return nil, fmt.Errorf(`You don't have permissions to view the '%s' release in the Inventory at %s. Please ask an administrator for access.`, releaseQuery, apiServer)
+		return nil, fmt.Errorf(error_QueryReleaseMetadata+error_QueryReleaseMetadataForbidden, releaseQuery, releaseQuery, apiServer)
 	} else if resp.StatusCode == 404 {
-		return nil, fmt.Errorf(`Dependency '%s' could not be found. It may not exist in the Inventory you're using (%s) and you need to release it first, or you may not have been given access to it.`, releaseQuery, apiServer)
+		return nil, fmt.Errorf(error_QueryReleaseMetadata+error_QueryReleaseMetadataNotFound, releaseQuery, apiServer, releaseQuery)
 	} else if resp.StatusCode == 500 {
-		return nil, fmt.Errorf(`Couldn't get release metadata for '%s', because the Inventory at %s responded with a server-side error code. Please try again or contact an administrator if the problem persists.`, releaseQuery, apiServer)
+		return nil, fmt.Errorf(error_QueryReleaseMetadata+error_InventoryServerSide, releaseQuery, apiServer)
 	} else if resp.StatusCode != 200 {
-		return nil, fmt.Errorf(`Couldn't get release metadata for '%s', because the Inventory at '%s' responded with status code %d: %s`, releaseQuery, apiServer, resp.StatusCode, body)
+		return nil, fmt.Errorf(error_QueryReleaseMetadata+error_InventoryUnknownStatus, releaseQuery, apiServer, resp.StatusCode, body)
 	}
 	metadata, err := core.NewReleaseMetadataFromJsonString(body)
 	if err != nil {
