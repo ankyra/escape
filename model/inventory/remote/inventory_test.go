@@ -172,6 +172,16 @@ func (s *suite) Test_QueryReleaseMetadata_fails_if_invalid_metadata_is_returned(
 	c.Assert(err.Error(), Equals, "The Inventory returned release metadata for 'query-project/name-v1.0.0' that could not be understood: Missing version field in release metadata")
 }
 
+func (s *suite) Test_QueryReleaseMetadata_fails_if_user_error(c *C) {
+	server := NewMockServer().WithResponseCode(400).WithBody("User error").Start(c)
+	defer server.Stop()
+
+	unit := NewRemoteInventory(server.URL, "token", false)
+	_, err := unit.QueryReleaseMetadata("query-project", "name", "1.0.0")
+	server.ExpectCalled(c, true, "/api/v1/registry/query-project/units/name/versions/v1.0.0/")
+	c.Assert(err.Error(), Equals, fmt.Sprintf("Couldn't get release metadata for 'query-project/name-v1.0.0', because the Inventory at '%s/' says there's a problem with the request: User error", server.URL))
+}
+
 func (s *suite) Test_QueryReleaseMetadata_fails_if_release_metadata_cant_be_found(c *C) {
 	server := NewMockServer().WithResponseCode(404).Start(c)
 	defer server.Stop()
@@ -223,10 +233,85 @@ func (s *suite) Test_QueryReleaseMetadata_fails_on_other_statuses(c *C) {
 }
 
 func (s *suite) Test_QueryReleaseMetadata_fails_if_server_doesnt_respond(c *C) {
-	server := NewMockServer().WithResponseCode(416).WithBody("Yo").Start(c)
+	server := NewMockServer().Start(c)
 	server.Stop()
 
 	unit := NewRemoteInventory(server.URL, "token", false)
 	_, err := unit.QueryReleaseMetadata("query-project", "name", "1.0.0")
 	c.Assert(err.Error(), Equals, fmt.Sprintf("Couldn't get release metadata for 'query-project/name-v1.0.0', because the Inventory at '%s/' could not be reached: Get %s/api/v1/registry/query-project/units/name/versions/v1.0.0/: dial tcp %s: getsockopt: connection refused", server.URL, server.URL, server.URL[7:]))
+}
+
+/*
+
+	QUERY NEXT VERSION
+
+*/
+
+func (s *suite) Test_QueryNextVersion_happy_path(c *C) {
+	server := NewMockServer().WithBody(`1.0`).Start(c)
+	defer server.Stop()
+
+	unit := NewRemoteInventory(server.URL, "token", false)
+	version, err := unit.QueryNextVersion("query-project", "name", "1.@")
+	server.ExpectCalled(c, true, "/api/v1/registry/query-project/units/name/next-version")
+	c.Assert(err, IsNil)
+	c.Assert(version, Equals, "1.0")
+}
+
+func (s *suite) Test_QueryNextVersion_fails_if_user_error(c *C) {
+	server := NewMockServer().WithResponseCode(400).WithBody("User error").Start(c)
+	defer server.Stop()
+
+	unit := NewRemoteInventory(server.URL, "token", false)
+	_, err := unit.QueryNextVersion("query-project", "name", "1.0.@")
+	server.ExpectCalled(c, true, "/api/v1/registry/query-project/units/name/next-version")
+	c.Assert(err.Error(), Equals, fmt.Sprintf("Couldn't resolve next version for 'query-project/name-v1.0.@', because the Inventory at '%s/' says there's a problem with the request: User error", server.URL))
+}
+
+func (s *suite) Test_QueryNextVersion_fails_if_unauthorized(c *C) {
+	server := NewMockServer().WithResponseCode(401).Start(c)
+	defer server.Stop()
+
+	unit := NewRemoteInventory(server.URL, "token", false)
+	_, err := unit.QueryNextVersion("query-project", "name", "1.0.1")
+	server.ExpectCalled(c, true, "/api/v1/registry/query-project/units/name/next-version")
+	c.Assert(err.Error(), Equals, fmt.Sprintf("You don't have a valid authentication token for the Inventory at %s/. Use `escape login --url %s/` to login.", server.URL, server.URL))
+}
+
+func (s *suite) Test_QueryNextVersion_fails_if_forbidden(c *C) {
+	server := NewMockServer().WithResponseCode(403).Start(c)
+	defer server.Stop()
+
+	unit := NewRemoteInventory(server.URL, "token", false)
+	_, err := unit.QueryNextVersion("query-project", "name", "1.0.@")
+	server.ExpectCalled(c, true, "/api/v1/registry/query-project/units/name/next-version")
+	c.Assert(err.Error(), Equals, fmt.Sprintf("Couldn't resolve next version for 'query-project/name-v1.0.@', because you don't have permission to view the 'query-project/name-v1.0.@' release in the Inventory at '%s/'. Please ask an administrator for access.", server.URL))
+}
+
+func (s *suite) Test_QueryNextVersion_fails_if_server_error(c *C) {
+	server := NewMockServer().WithResponseCode(500).Start(c)
+	defer server.Stop()
+
+	unit := NewRemoteInventory(server.URL, "token", false)
+	_, err := unit.QueryNextVersion("query-project", "name", "1.0.@")
+	server.ExpectCalled(c, true, "/api/v1/registry/query-project/units/name/next-version")
+	c.Assert(err.Error(), Equals, fmt.Sprintf("Couldn't resolve next version for 'query-project/name-v1.0.@', because the Inventory at '%s/' responded with a server-side error code. Please try again or contact an administrator if the problem persists.", server.URL))
+}
+
+func (s *suite) Test_QueryNextVersion_fails_on_other_statuses(c *C) {
+	server := NewMockServer().WithResponseCode(416).WithBody("Yo").Start(c)
+	defer server.Stop()
+
+	unit := NewRemoteInventory(server.URL, "token", false)
+	_, err := unit.QueryNextVersion("query-project", "name", "1.@")
+	c.Assert(err.Error(), Equals, fmt.Sprintf("Couldn't resolve next version for 'query-project/name-v1.@', because the Inventory at '%s/' responded with status code 416: Yo", server.URL))
+}
+
+func (s *suite) Test_QueryNextVersion_fails_if_server_doesnt_respond(c *C) {
+	server := NewMockServer().Start(c)
+	server.Stop()
+
+	unit := NewRemoteInventory(server.URL, "token", false)
+	_, err := unit.QueryNextVersion("query-project", "name", "1.@")
+	c.Assert(err.Error(), Equals, fmt.Sprintf("Couldn't resolve next version for 'query-project/name-v1.@', because the Inventory at '%s/' could not be reached: Get %s/api/v1/registry/query-project/units/name/next-version?prefix=1.%%40: dial tcp %s: getsockopt: connection refused", server.URL, server.URL, server.URL[7:]))
 }
