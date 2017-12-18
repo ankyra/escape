@@ -4,12 +4,11 @@
    "built_with_escape_version": "0.19.5",
    "description": "Core library containing datastructures for working with Release Metadata, State and the Escape Scripting Language.\nPlease see https://escape.ankyra.io for the full documentation.",
    "files": {
-      "LICENSE": "2a944942e1496af1886903d274dedb13",
+      "LICENSE": "c77b77015c6347d179d1d9bc1db93d87",
       "README.md": "157ef9ed335beff9ccd5d85185921004",
-      "build.sh": "f90bc77595918535d7e064b202aa6997",
       "consumer.go": "0764ac299e09e0d8bff0fefef732cead",
       "consumer_test.go": "3ff946e134efa5165c73db7476ffbbb4",
-      "core.go": "ab6982b9a09e74f013d06e1712882c05",
+      "core.go": "c46ecab41883f26b14db7fc8c0c3ddbd",
       "core.go.tpl": "4099a7b2c6c7798799ea2819f8cf5c27",
       "dependency.go": "c2fad1fb08026574389ca4ed44be50e1",
       "dependency_config.go": "dbc69caec4d1362fad474ae258af0413",
@@ -25,7 +24,7 @@
       "docs/generated/extensions.md": "8fbf06d246023679e41159a4041ced0d",
       "docs/generated/input-and-output-variables.md": "9a626703807de0628458e4262d883320",
       "docs/generated/providers-and-consumers.md": "c832124b77fbc430362020cc0eed1667",
-      "docs/generated/stdlib.md": "d86a3d789b936d09d36cd3d28e200951",
+      "docs/generated/stdlib.md": "acb05042199e3dafd6f54bb075ce8f42",
       "docs/generated/templates.md": "fffaa52cdb246bc5dd9471c3e425f894",
       "docs/scripting_language.md": "79ffa91ba9dad432b9c3810b474036d8",
       "download_config.go": "c568124df0f362c79ba4b559b31cbfd5",
@@ -44,6 +43,7 @@
       "parsers/variable_options_test.go": "77ad025d0b82740eecaa2860147162cd",
       "parsers/variable_type.go": "6ed21d4ecca0ef7bbef0cd82ba5cfc3c",
       "parsers/variable_type_test.go": "783f80da3dc08ff3c28285c486e313df",
+      "prebuild.sh": "737350b73e015d3311e5a25a2210e73b",
       "script/builtins.go": "2e5e881f711e61daa5a91f1fe04117b3",
       "script/builtins_test.go": "75d5d7b22b6e13254eb3a33792b5caa5",
       "script/env.go": "40483f4088ac2a5c0af9bd9a602cceb2",
@@ -71,7 +71,6 @@
       "templates/templates.go": "98cddae139dbf454ca6de7c7a51cf26f",
       "templates/templates_test.go": "fae5a964597f811a079dd5eb35574404",
       "templates/testdata/helloworld.mustache": "73106d5bfa7b0736ebcf86b8ba7d0820",
-      "test.sh": "d958d2697b1268c1975c2cd12bc66bf0",
       "util/errors.go": "bfe0c2898e5502afae76b9b8bca85e63",
       "util/log_consumer.go": "0c48f3364ce07040b0c0221a715a9554",
       "util/log_entry.go": "90c518ce0d4eee951880d06170ef03c9",
@@ -141,37 +140,140 @@
    "name": "escape-core",
    "repository": "git@github.com:ankyra/escape-core.git",
    "branch": "master",
-   "git_revision": "4483e653d1aba7be0ca4e0dea8b8497000e57f90",
-   "revision_message": "Document all structs in the Escape plan.",
+   "git_revision": "c76d451ea8fa924e442fac7927be3c72475ea115",
+   "revision_message": "Update links in documentation",
    "revision_author": "Bart Spaans \u003cbart.spaans@gmail.com\u003e",
    "metadata": {
       "release_metadata_api_version": "8"
    },
-   "version": "0.8.10",
+   "version": "0.8.14",
    "consumes": [],
    "downloads": null,
    "depends": [],
    "errands": {},
-   "extends": [],
-   "inputs": [],
+   "extends": [
+      {
+         "release_id": "_/extension-golang-binary-v0.0.16"
+      }
+   ],
+   "inputs": [
+      {
+         "id": "package_name",
+         "type": "string",
+         "default": "github.com/ankyra/escape-core",
+         "description": "The name of the Go package we're building",
+         "visible": false,
+         "items": null,
+         "eval_before_dependencies": true,
+         "scopes": [
+            "build",
+            "deploy"
+         ]
+      },
+      {
+         "id": "binary_name",
+         "type": "string",
+         "default": "",
+         "description": "The name of the produced binary.",
+         "visible": false,
+         "items": null,
+         "eval_before_dependencies": true,
+         "scopes": [
+            "build",
+            "deploy"
+         ]
+      },
+      {
+         "id": "build_command",
+         "type": "string",
+         "default": "go build \u0026\u0026 go run docs/generate_stdlib_docs.go \u0026\u0026 go run docs/generate_pages.go",
+         "description": "Override the build command.",
+         "visible": false,
+         "items": null,
+         "eval_before_dependencies": true,
+         "scopes": [
+            "build",
+            "deploy"
+         ]
+      },
+      {
+         "id": "test_command",
+         "type": "string",
+         "default": "go test -cover -v $(/usr/local/go/bin/go list ./... | grep -v docs )",
+         "description": "Override the test command.",
+         "visible": false,
+         "items": null,
+         "eval_before_dependencies": true,
+         "scopes": [
+            "build",
+            "deploy"
+         ]
+      },
+      {
+         "id": "copy_files_after_build",
+         "type": "string",
+         "default": [
+            "docs/generated:docs/"
+         ],
+         "description": "\"Copy these files after build. Example:\n- README.md:file_in_root.txt\"\n",
+         "visible": false,
+         "items": null,
+         "eval_before_dependencies": true,
+         "scopes": [
+            "build",
+            "deploy"
+         ]
+      },
+      {
+         "id": "escape_go_dependencies",
+         "type": "list",
+         "default": [],
+         "description": "\"Copy these Escape dependencies into vendor/ on build. Example:\n- heist/escape-middleware:github.com/ankyra/escape-middleware\"\n",
+         "visible": false,
+         "options": {
+            "string": true
+         },
+         "items": null,
+         "eval_before_dependencies": true,
+         "scopes": [
+            "build",
+            "deploy"
+         ]
+      }
+   ],
    "outputs": [],
    "project": "_",
    "provides": [],
    "stages": {
       "build": {
-         "script": "build.sh"
+         "script": "deps/_/extension-golang-binary/build.sh"
+      },
+      "deploy": {
+         "script": ""
       },
       "destroy": {
+         "script": ""
+      },
+      "post_deploy": {
          "script": ""
       },
       "post_destroy": {
          "script": ""
       },
+      "pre_build": {
+         "script": "prebuild.sh"
+      },
+      "pre_deploy": {
+         "script": ""
+      },
       "pre_destroy": {
          "script": ""
       },
+      "smoke": {
+         "script": ""
+      },
       "test": {
-         "script": "test.sh"
+         "script": "deps/_/extension-golang-binary/test.sh"
       }
    },
    "templates": [
@@ -182,19 +284,27 @@
             "build"
          ],
          "mapping": {
+            "binary_name": "$this.inputs.binary_name",
             "branch": "$this.branch",
+            "build_command": "$this.inputs.build_command",
+            "copy_files_after_build": "$this.inputs.copy_files_after_build",
             "description": "$this.description",
+            "escape_go_dependencies": "$this.inputs.escape_go_dependencies",
             "id": "$this.id",
             "logo": "$this.logo",
             "metadata_api_version": "$this.metadata.release_metadata_api_version",
             "name": "$this.name",
+            "package_name": "$this.inputs.package_name",
             "release": "$this.release",
             "repository": "$this.repository",
             "revision": "$this.revision",
+            "test_command": "$this.inputs.test_command",
             "version": "$this.version",
             "versionless_release": "$this.versionless_release"
          }
       }
    ],
-   "variable_context": {}
+   "variable_context": {
+      "extension-golang-binary": "_/extension-golang-binary-v0.0.16"
+   }
 }

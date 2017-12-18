@@ -9,6 +9,32 @@ logo: logo.png
 depends:
 - escape-core-latest as core
 
+extends:
+- extension-golang-binary-latest
+
+inputs:
+- id: package_name
+  default: "github.com/ankyra/escape"
+  visible: false
+- id: binary_name
+  default: "escape"
+  visible: false
+- id: escape_go_dependencies
+  type: list[string]
+  default: 
+  - _/escape-core:github.com/ankyra/escape-core
+- id: build_command
+  default: "go build -v -o escape && mkdir -p docs/cmd && go run docs/generate_cmd_docs.go"
+  visible: false
+- id: test_command
+  default: "go test -cover -v $(/usr/local/go/bin/go list ./... | grep -v docs )"
+  visible: false
+- id: copy_files_after_build
+  visible: false
+  default:
+  - "docs/cmd:docs/cmd"
+  - "docs/generated:docs/generated"
+
 includes:
 - escape
 - LICENSE
@@ -48,5 +74,4 @@ build_templates:
   mapping:
     version: $this.version
 
-build: scripts/build.sh
-test: scripts/test.sh
+pre_build: scripts/clean.sh
