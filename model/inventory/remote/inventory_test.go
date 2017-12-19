@@ -235,6 +235,9 @@ func (s *suite) Test_ListProjects_Errors(c *C) {
 		401: func(url string) string {
 			return fmt.Sprintf(error_Unauthorized, url+"/", url+"/")
 		},
+		403: func(url string) string {
+			return fmt.Sprintf(baseError+error_ListProjectForbidden, url+"/")
+		},
 		500: func(url string) string {
 			return fmt.Sprintf(baseError+error_InventoryServerSide, url+"/")
 		},
@@ -242,6 +245,13 @@ func (s *suite) Test_ListProjects_Errors(c *C) {
 			return fmt.Sprintf(baseError+error_InventoryUnknownStatus, url+"/", 404, "Server Error")
 		},
 	}, listProjectsURL, s.listProjects)
+}
+
+func (s *suite) Test_ListProjects_fails_if_server_doesnt_respond(c *C) {
+	s.test_ConnectionError(c, s.listProjects, func(url string) string {
+		err := fmt.Sprintf("Get %s%s: dial tcp %s: getsockopt: connection refused", url, listProjectsURL, url[7:])
+		return fmt.Sprintf(error_ListProjects+error_InventoryConnection, url+"/", err)
+	})
 }
 
 /*
@@ -278,6 +288,9 @@ func (s *suite) Test_ListApplications_Errors(c *C) {
 		401: func(url string) string {
 			return fmt.Sprintf(error_Unauthorized, url+"/", url+"/")
 		},
+		403: func(url string) string {
+			return fmt.Sprintf(baseError+error_ListProjectForbidden, url+"/")
+		},
 		404: func(url string) string {
 			return fmt.Sprintf(baseError+error_ListApplicationsNotFound, "test", url+"/")
 		},
@@ -288,6 +301,13 @@ func (s *suite) Test_ListApplications_Errors(c *C) {
 			return fmt.Sprintf(baseError+error_InventoryUnknownStatus, url+"/", 416, "Server Error")
 		},
 	}, listApplicationsURL, s.listApplications)
+}
+
+func (s *suite) Test_ListApplications_fails_if_server_doesnt_respond(c *C) {
+	s.test_ConnectionError(c, s.listApplications, func(url string) string {
+		err := fmt.Sprintf("Get %s%s: dial tcp %s: getsockopt: connection refused", url, listApplicationsURL, url[7:])
+		return fmt.Sprintf(error_ListApplications+error_InventoryConnection, "test", url+"/", err)
+	})
 }
 
 /*
@@ -324,6 +344,9 @@ func (s *suite) Test_ListVersions_Errors(c *C) {
 		401: func(url string) string {
 			return fmt.Sprintf(error_Unauthorized, url+"/", url+"/")
 		},
+		403: func(url string) string {
+			return fmt.Sprintf(baseError+error_ListProjectForbidden, url+"/")
+		},
 		404: func(url string) string {
 			return fmt.Sprintf(baseError+error_ListVersionsNotFound, "test", "app", url+"/")
 		},
@@ -336,25 +359,22 @@ func (s *suite) Test_ListVersions_Errors(c *C) {
 	}, listVersionsURL, s.listVersions)
 }
 
+func (s *suite) Test_ListVersions_fails_if_server_doesnt_respond(c *C) {
+	s.test_ConnectionError(c, s.listVersions, func(url string) string {
+		err := fmt.Sprintf("Get %s%s: dial tcp %s: getsockopt: connection refused", url, listVersionsURL, url[7:])
+		return fmt.Sprintf(error_ListVersions+error_InventoryConnection, "app", "test", url+"/", err)
+	})
+}
+
 /*
 
 	HELPER FUNCTIONS
 
 */
 
-func (s *suite) test_Unauthorized(c *C, url string, do func(string) error) {
-	server := NewMockServer().WithResponseCode(401).Start(c)
-	defer server.Stop()
-
-	err := do(server.URL)
-	expectError := fmt.Sprintf(error_Unauthorized, server.URL+"/", server.URL+"/")
-	server.ExpectError(c, err, url, expectError)
-}
-
 func (s *suite) test_Error(c *C, url string, do func(string) error, expectCode int, errorFunc func(string) string) {
 	server := NewMockServer().WithResponseCode(expectCode).WithBody("Server Error").Start(c)
 	defer server.Stop()
-
 	err := do(server.URL)
 	server.ExpectError(c, err, url, errorFunc(server.URL))
 }
@@ -362,7 +382,6 @@ func (s *suite) test_Error(c *C, url string, do func(string) error, expectCode i
 func (s *suite) test_ConnectionError(c *C, do func(string) error, errorFunc func(string) string) {
 	server := NewMockServer().Start(c)
 	server.Stop()
-
 	err := do(server.URL)
 	c.Assert(err.Error(), Equals, errorFunc(server.URL))
 }

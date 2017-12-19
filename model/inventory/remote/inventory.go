@@ -61,6 +61,7 @@ const error_ListApplications = "Couldn't list applications for project '%s'"
 const error_ListApplicationsNotFound = ", because the project '%s' could not be found in the Inventory at '%s'."
 const error_ListVersions = "Couldn't list versions for application '%s' in project '%s'"
 const error_ListVersionsNotFound = ", because the project '%s' or application '%s' could not be found in the Inventory at '%s'."
+const error_ListProjectForbidden = ", because you don't have permissions to view this project in the Inventory at '%s'. Please ask an administrator for access."
 
 func (r *inventory) QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
 	if !strings.HasPrefix(version, "v") && version != "latest" {
@@ -178,6 +179,8 @@ func (r *inventory) urlToList(url, baseErrorMessage, notFoundMessage string, tra
 		return nil, fmt.Errorf(baseErrorMessage+error_InventoryUserSide, r.apiServer, body)
 	} else if resp.StatusCode == 401 {
 		return nil, fmt.Errorf(error_Unauthorized, r.apiServer, r.apiServer)
+	} else if resp.StatusCode == 403 {
+		return nil, fmt.Errorf(baseErrorMessage+error_ListProjectForbidden, r.apiServer)
 	} else if resp.StatusCode == 404 && notFoundMessage != "" {
 		return nil, fmt.Errorf(baseErrorMessage + notFoundMessage)
 	} else if resp.StatusCode == 500 {
