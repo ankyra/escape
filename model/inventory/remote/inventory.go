@@ -65,6 +65,8 @@ const error_ListProjectForbidden = ", because you don't have permissions to view
 const error_AuthMethods = "Couldn't get authentication methods from server"
 const error_Login = "Couldn't login to the Inventory"
 const error_LoginCredentials = ", because the username or password was incorrect."
+const error_Download = "Couldn't download release '%s'"
+const error_DownloadNotFound = ", because the package could not be found in the Inventory at '%s'"
 
 func (r *inventory) QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
 	if !strings.HasPrefix(version, "v") && version != "latest" {
@@ -250,19 +252,34 @@ func (r *inventory) Login(url, username, password string) (string, error) {
 }
 
 func (r *inventory) DownloadRelease(project, name, version, targetFile string) error {
+	releaseQuery := project + "/" + name + "-v" + version
+	if project == "_" {
+		releaseQuery = name + "-v" + version
+	}
 	url := r.endpoints.DownloadRelease(project, name, version)
 	resp, err := r.client.GET_with_authentication(url)
 	if err != nil {
-		return err
+		return fmt.Errorf(error_Download+error_InventoryConnection, releaseQuery, r.apiServer, err.Error())
 	}
-	if resp.StatusCode == 401 {
-		return fmt.Errorf("Unauthorized")
+
+	if resp.StatusCode == 400 {
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(resp.Body)
+		body := buf.String()
+		return fmt.Errorf(error_Download+error_InventoryUserSide, releaseQuery, r.apiServer, body)
+	} else if resp.StatusCode == 401 {
+		return fmt.Errorf(error_Unauthorized, r.apiServer, r.apiServer)
+	} else if resp.StatusCode == 403 {
+		return fmt.Errorf(error_Download+error_ListProjectForbidden, releaseQuery, r.apiServer)
+	} else if resp.StatusCode == 404 {
+		return fmt.Errorf(error_Download+error_DownloadNotFound, releaseQuery, r.apiServer)
+	} else if resp.StatusCode == 500 {
+		return fmt.Errorf(error_Download+error_InventoryServerSide, releaseQuery, r.apiServer)
 	} else if resp.StatusCode != 200 {
-		releaseId := project + "/" + name + "-v" + version
-		if project == "_" {
-			releaseId = name + "-v" + version
-		}
-		return fmt.Errorf("Couldn't download release '%s': %s", releaseId, resp.Status)
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(resp.Body)
+		body := buf.String()
+		return fmt.Errorf(error_Download+error_InventoryUnknownStatus, releaseQuery, r.apiServer, resp.StatusCode, body)
 	}
 	fp, err := os.Create(targetFile)
 	if err != nil {

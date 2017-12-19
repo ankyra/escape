@@ -18,6 +18,8 @@ package remote
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
 	"testing"
 
 	. "github.com/ankyra/escape/testing"
@@ -37,6 +39,7 @@ const listProjectsURL = "/api/v1/registry/"
 const listApplicationsURL = "/api/v1/registry/test/units/"
 const listVersionsURL = "/api/v1/registry/test/units/app/"
 const authMethodsURL = "/api/v1/auth/login-methods"
+const downloadURL = "/api/v1/registry/prj/units/name/versions/v1.0/download"
 
 /*
 
@@ -482,6 +485,63 @@ func (s *suite) Test_Login_fails_if_server_doesnt_respond(c *C) {
 	s.test_ConnectionError(c, s.login, func(url string) string {
 		err := fmt.Sprintf("Post %s: dial tcp %s: getsockopt: connection refused", url, url[7:])
 		return fmt.Sprintf(error_Login+error_InventoryConnection, url, err)
+	})
+}
+
+/*
+
+	DOWNLOAD
+
+*/
+
+func (s *suite) Test_Download_happy_path(c *C) {
+	os.RemoveAll("testdata.txt")
+	server := NewMockServer().WithBody(`abcdef`).Start(c)
+	defer server.Stop()
+
+	unit := NewRemoteInventory(server.URL, "token", false)
+	err := unit.DownloadRelease("prj", "name", "1.0", "testdata.txt")
+	server.ExpectCalled(c, true, downloadURL)
+	c.Assert(err, IsNil)
+	content, err := ioutil.ReadFile("testdata.txt")
+	c.Assert(err, IsNil)
+	c.Assert(string(content), Equals, "abcdef")
+	os.RemoveAll("testdata.txt")
+}
+
+func (s *suite) download(url string) error {
+	unit := NewRemoteInventory(url, "token", false)
+	return unit.DownloadRelease("prj", "name", "1.0", "testdata.txt")
+}
+
+func (s *suite) Test_Download_Errors(c *C) {
+	baseError := fmt.Sprintf(error_Download, "prj/name-v1.0")
+	s.test_RemoteErrorHandling(c, map[int]func(string) string{
+		400: func(url string) string {
+			return fmt.Sprintf(baseError+error_InventoryUserSide, url+"/", "Server Error")
+		},
+		401: func(url string) string {
+			return fmt.Sprintf(error_Unauthorized, url+"/", url+"/")
+		},
+		403: func(url string) string {
+			return fmt.Sprintf(baseError+error_ListProjectForbidden, url+"/")
+		},
+		404: func(url string) string {
+			return fmt.Sprintf(baseError+error_DownloadNotFound, url+"/")
+		},
+		500: func(url string) string {
+			return fmt.Sprintf(baseError+error_InventoryServerSide, url+"/")
+		},
+		416: func(url string) string {
+			return fmt.Sprintf(baseError+error_InventoryUnknownStatus, url+"/", 416, "Server Error")
+		},
+	}, downloadURL, s.download)
+}
+
+func (s *suite) Test_Download_fails_if_server_doesnt_respond(c *C) {
+	s.test_ConnectionError(c, s.download, func(url string) string {
+		err := fmt.Sprintf("Get %s%s: dial tcp %s: getsockopt: connection refused", url, downloadURL, url[7:])
+		return fmt.Sprintf(error_Download+error_InventoryConnection, "prj/name-v1.0", url+"/", err)
 	})
 }
 
