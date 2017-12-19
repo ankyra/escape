@@ -29,7 +29,7 @@ type Inventory interface {
 	DownloadRelease(project, name, version, targetFile string) error
 	UploadRelease(project, releasePath string, metadata *core.ReleaseMetadata) error
 	GetAuthMethods(url string) (map[string]*types.AuthMethod, error)
-	LoginWithSecretToken(url, username, password string) (string, error)
+	Login(url, username, password string) (string, error)
 
 	ListProjects() ([]string, error)
 	ListApplications(project string) ([]string, error)

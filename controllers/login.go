@@ -133,7 +133,7 @@ func secretTokenAuth(reader *bufio.Reader, context Context, url, loginUrl, usern
 	if err != nil {
 		return err
 	}
-	authToken, err := context.GetInventory().LoginWithSecretToken(loginUrl, username, password)
+	authToken, err := context.GetInventory().Login(loginUrl, username, password)
 	if err != nil {
 		return err
 	}

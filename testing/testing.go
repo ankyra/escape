@@ -31,12 +31,14 @@ type MockServer struct {
 	Server        *httptest.Server
 	URL           string
 	CapturedPath  string
+	Headers       map[string]string
 }
 
 func NewMockServer() *MockServer {
 	return &MockServer{
 		HandlerCalled: false,
 		ResponseCode:  200,
+		Headers:       map[string]string{},
 	}
 }
 
@@ -44,6 +46,9 @@ func (m *MockServer) Start(c *C) *MockServer {
 	m.HandlerCalled = false
 	m.Server = httptest.NewServer(
 		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			for key, value := range m.Headers {
+				w.Header().Set(key, value)
+			}
 			w.WriteHeader(m.ResponseCode)
 			w.Write([]byte(m.Body))
 			m.CapturedPath = r.URL.Path
@@ -72,6 +77,11 @@ func (m *MockServer) WithBody(body string) *MockServer {
 
 func (m *MockServer) WithResponseCode(code int) *MockServer {
 	m.ResponseCode = code
+	return m
+}
+
+func (m *MockServer) WithHeader(key, value string) *MockServer {
+	m.Headers[key] = value
 	return m
 }
 

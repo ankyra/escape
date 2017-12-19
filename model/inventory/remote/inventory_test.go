@@ -36,6 +36,7 @@ const queryNextVersionURL = "/api/v1/registry/query-project/units/name/next-vers
 const listProjectsURL = "/api/v1/registry/"
 const listApplicationsURL = "/api/v1/registry/test/units/"
 const listVersionsURL = "/api/v1/registry/test/units/app/"
+const authMethodsURL = "/api/v1/auth/login-methods"
 
 /*
 
@@ -363,6 +364,124 @@ func (s *suite) Test_ListVersions_fails_if_server_doesnt_respond(c *C) {
 	s.test_ConnectionError(c, s.listVersions, func(url string) string {
 		err := fmt.Sprintf("Get %s%s: dial tcp %s: getsockopt: connection refused", url, listVersionsURL, url[7:])
 		return fmt.Sprintf(error_ListVersions+error_InventoryConnection, "app", "test", url+"/", err)
+	})
+}
+
+/*
+
+	GET AUTH METHODS
+
+*/
+
+const validAuthMethods = `
+{
+	"email": {
+		"type": "email",
+		"url": "http://test"
+	}
+}
+
+`
+
+func (s *suite) Test_GetAuthMethods_happy_path(c *C) {
+	server := NewMockServer().WithBody(validAuthMethods).Start(c)
+	defer server.Stop()
+
+	unit := NewRemoteInventory(server.URL, "token", false)
+	authMethods, err := unit.GetAuthMethods(server.URL)
+	server.ExpectCalled(c, true, authMethodsURL)
+	c.Assert(err, IsNil)
+	c.Assert(authMethods, HasLen, 1)
+	c.Assert(authMethods["email"].Type, Equals, "email")
+	c.Assert(authMethods["email"].URL, Equals, "http://test")
+}
+
+func (s *suite) getAuthMethods(url string) error {
+	unit := NewRemoteInventory(url, "token", false)
+	_, err := unit.GetAuthMethods(url)
+	return err
+}
+
+func (s *suite) Test_GetAuthMethods_NotFound_does_not_return_error_but_nil(c *C) {
+	server := NewMockServer().WithResponseCode(404).Start(c)
+	defer server.Stop()
+	unit := NewRemoteInventory(server.URL, "token", false)
+	authMethods, err := unit.GetAuthMethods(server.URL)
+	server.ExpectCalled(c, true, authMethodsURL)
+	c.Assert(err, IsNil)
+	c.Assert(authMethods, IsNil)
+}
+
+func (s *suite) Test_GetAuthMethods_Errors(c *C) {
+	baseError := error_AuthMethods
+	s.test_RemoteErrorHandling(c, map[int]func(string) string{
+		400: func(url string) string {
+			return fmt.Sprintf(baseError+error_InventoryUserSide, url+"/", "Server Error")
+		},
+		500: func(url string) string {
+			return fmt.Sprintf(baseError+error_InventoryServerSide, url+"/")
+		},
+		416: func(url string) string {
+			return fmt.Sprintf(baseError+error_InventoryUnknownStatus, url+"/", 416, "Server Error")
+		},
+	}, authMethodsURL, s.getAuthMethods)
+}
+
+func (s *suite) Test_GetAuthMethods_fails_if_server_doesnt_respond(c *C) {
+	s.test_ConnectionError(c, s.getAuthMethods, func(url string) string {
+		err := fmt.Sprintf("Get %s%s: dial tcp %s: getsockopt: connection refused", url, authMethodsURL, url[7:])
+		return fmt.Sprintf(error_AuthMethods+error_InventoryConnection, url+"/", err)
+	})
+}
+
+/*
+
+	LOGIN
+
+*/
+
+func (s *suite) Test_Login_happy_path(c *C) {
+	server := NewMockServer().WithHeader("X-Escape-Token", "my-auth-token").Start(c)
+	defer server.Stop()
+
+	unit := NewRemoteInventory(server.URL, "token", false)
+	token, err := unit.Login(server.URL, "user", "password")
+	server.ExpectCalled(c, true, "/")
+	c.Assert(err, IsNil)
+	c.Assert(token, Equals, "my-auth-token")
+}
+
+func (s *suite) login(url string) error {
+	unit := NewRemoteInventory(url, "token", false)
+	_, err := unit.Login(url, "user", "password")
+	return err
+}
+
+func (s *suite) Test_Login_Errors(c *C) {
+	baseError := error_Login
+	s.test_RemoteErrorHandling(c, map[int]func(string) string{
+		400: func(url string) string {
+			return fmt.Sprintf(baseError+error_InventoryUserSide, url, "Server Error")
+		},
+		401: func(url string) string {
+			return fmt.Sprintf(baseError + error_LoginCredentials)
+		},
+		404: func(url string) string {
+			return fmt.Sprintf(baseError+error_InventoryUnknownStatus, url, 404, "Server Error")
+		},
+		500: func(url string) string {
+			return fmt.Sprintf(baseError+error_InventoryServerSide, url)
+		},
+		416: func(url string) string {
+			return fmt.Sprintf(baseError+error_InventoryUnknownStatus, url, 416, "Server Error")
+		},
+	}, "/", s.login)
+}
+
+func (s *suite) Test_Login_fails_if_server_doesnt_respond(c *C) {
+	s.test_ConnectionError(c, s.login, func(url string) string {
+		err := fmt.Sprintf("Post %s: dial tcp %s: getsockopt: connection refused", url, url[7:])
+		return fmt.Sprintf(error_Login+error_InventoryConnection, url, err)
 	})
 }
 

@@ -50,7 +50,7 @@ func (m *mockInventory) UploadRelease(project, releasePath string, metadata *cor
 func (m *mockInventory) GetAuthMethods(url string) (map[string]*types.AuthMethod, error) {
 	return nil, nil
 }
-func (m *mockInventory) LoginWithSecretToken(url, username, password string) (string, error) {
+func (m *mockInventory) Login(url, username, password string) (string, error) {
 	return "", nil
 }
 func (r *mockInventory) ListProjects() ([]string, error) {

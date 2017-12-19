@@ -53,7 +53,7 @@ func (r *LocalInventory) GetAuthMethods(url string) (map[string]*types.AuthMetho
 	return nil, nil
 }
 
-func (r *LocalInventory) LoginWithSecretToken(url, username, password string) (string, error) {
+func (r *LocalInventory) Login(url, username, password string) (string, error) {
 	return "", nil
 }
 func (r *LocalInventory) ListProjects() ([]string, error) {

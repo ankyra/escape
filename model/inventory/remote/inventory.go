@@ -62,6 +62,9 @@ const error_ListApplicationsNotFound = ", because the project '%s' could not be 
 const error_ListVersions = "Couldn't list versions for application '%s' in project '%s'"
 const error_ListVersionsNotFound = ", because the project '%s' or application '%s' could not be found in the Inventory at '%s'."
 const error_ListProjectForbidden = ", because you don't have permissions to view this project in the Inventory at '%s'. Please ask an administrator for access."
+const error_AuthMethods = "Couldn't get authentication methods from server"
+const error_Login = "Couldn't login to the Inventory"
+const error_LoginCredentials = ", because the username or password was incorrect."
 
 func (r *inventory) QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
 	if !strings.HasPrefix(version, "v") && version != "latest" {
@@ -195,6 +198,57 @@ func (r *inventory) urlToList(url, baseErrorMessage, notFoundMessage string, tra
 	return transformToList(result), nil
 }
 
+func (r *inventory) GetAuthMethods(url string) (map[string]*types.AuthMethod, error) {
+	authUrl := r.endpoints.AuthMethods(url)
+	resp, err := r.client.GET(authUrl)
+	if err != nil {
+		return nil, fmt.Errorf(error_AuthMethods+error_InventoryConnection, r.apiServer, err.Error())
+	}
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(resp.Body)
+	body := buf.String()
+
+	if resp.StatusCode == 400 {
+		return nil, fmt.Errorf(error_AuthMethods+error_InventoryUserSide, r.apiServer, body)
+	} else if resp.StatusCode == 404 {
+		return nil, nil
+	} else if resp.StatusCode == 500 {
+		return nil, fmt.Errorf(error_AuthMethods+error_InventoryServerSide, r.apiServer)
+	} else if resp.StatusCode != 200 {
+		return nil, fmt.Errorf(error_AuthMethods+error_InventoryUnknownStatus, r.apiServer, resp.StatusCode, body)
+	}
+	result := map[string]*types.AuthMethod{}
+	if err := json.Unmarshal([]byte(body), &result); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (r *inventory) Login(url, username, password string) (string, error) {
+	payload := map[string]string{
+		"username":     username,
+		"secret_token": password,
+	}
+	resp, err := r.client.POST_json_with_authentication(url, payload)
+	if err != nil {
+		return "", fmt.Errorf(error_Login+error_InventoryConnection, url, err.Error())
+	}
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(resp.Body)
+	body := buf.String()
+
+	if resp.StatusCode == 400 {
+		return "", fmt.Errorf(error_Login+error_InventoryUserSide, url, body)
+	} else if resp.StatusCode == 401 {
+		return "", fmt.Errorf(error_Login + error_LoginCredentials)
+	} else if resp.StatusCode == 500 {
+		return "", fmt.Errorf(error_Login+error_InventoryServerSide, url)
+	} else if resp.StatusCode != 200 {
+		return "", fmt.Errorf(error_Login+error_InventoryUnknownStatus, url, resp.StatusCode, body)
+	}
+	return resp.Header.Get("X-Escape-Token"), nil
+}
+
 func (r *inventory) DownloadRelease(project, name, version, targetFile string) error {
 	url := r.endpoints.DownloadRelease(project, name, version)
 	resp, err := r.client.GET_with_authentication(url)
@@ -258,47 +312,4 @@ func (r *inventory) register(project string, metadata *core.ReleaseMetadata) err
 		return fmt.Errorf("Couldn't register package (%s): %s", resp.Status, result)
 	}
 	return nil
-}
-
-func (r *inventory) GetAuthMethods(url string) (map[string]*types.AuthMethod, error) {
-	authUrl := r.endpoints.AuthMethods(url)
-	resp, err := r.client.GET(authUrl)
-	if err != nil {
-		return nil, fmt.Errorf("Couldn't get auth methods from server '%s'", url)
-	}
-	if resp.StatusCode == 404 {
-		return nil, nil
-	} else if resp.StatusCode != 200 {
-		result, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, fmt.Errorf("Couldn't get auth methods from server '%s': %s", authUrl, resp.Status)
-		}
-		return nil, fmt.Errorf("Couldn't get auth methods from server '%s': %s\n%s", authUrl, resp.Status, string(result))
-	}
-	result := map[string]*types.AuthMethod{}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, err
-	}
-	return result, nil
-}
-
-func (r *inventory) LoginWithSecretToken(url, username, password string) (string, error) {
-	payload := map[string]string{
-		"username":     username,
-		"secret_token": password,
-	}
-	resp, err := r.client.POST_json_with_authentication(url, payload)
-	if err != nil {
-		return "", err
-	}
-	if resp.StatusCode == 401 {
-		return "", fmt.Errorf("Invalid credentials")
-	} else if resp.StatusCode != 200 {
-		result, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return "", fmt.Errorf("Failed to login: %s", resp.Status)
-		}
-		return "", fmt.Errorf("Failed to login (%s): %s", resp.Status, result)
-	}
-	return resp.Header.Get("X-Escape-Token"), nil
 }
