@@ -205,20 +205,20 @@ func (r *inventory) GetAuthMethods(url string) (map[string]*types.AuthMethod, er
 	authUrl := r.endpoints.AuthMethods(url)
 	resp, err := r.client.GET(authUrl)
 	if err != nil {
-		return nil, fmt.Errorf(error_AuthMethods+error_InventoryConnection, r.apiServer, err.Error())
+		return nil, fmt.Errorf(error_AuthMethods+error_InventoryConnection, url, err.Error())
 	}
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(resp.Body)
 	body := buf.String()
 
 	if resp.StatusCode == 400 {
-		return nil, fmt.Errorf(error_AuthMethods+error_InventoryUserSide, r.apiServer, body)
+		return nil, fmt.Errorf(error_AuthMethods+error_InventoryUserSide, url, body)
 	} else if resp.StatusCode == 404 {
 		return nil, nil
 	} else if resp.StatusCode == 500 {
-		return nil, fmt.Errorf(error_AuthMethods+error_InventoryServerSide, r.apiServer)
+		return nil, fmt.Errorf(error_AuthMethods+error_InventoryServerSide, url)
 	} else if resp.StatusCode != 200 {
-		return nil, fmt.Errorf(error_AuthMethods+error_InventoryUnknownStatus, r.apiServer, resp.StatusCode, body)
+		return nil, fmt.Errorf(error_AuthMethods+error_InventoryUnknownStatus, url, resp.StatusCode, body)
 	}
 	result := map[string]*types.AuthMethod{}
 	if err := json.Unmarshal([]byte(body), &result); err != nil {

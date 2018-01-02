@@ -422,13 +422,13 @@ func (s *suite) Test_GetAuthMethods_Errors(c *C) {
 	baseError := error_AuthMethods
 	s.test_RemoteErrorHandling(c, map[int]func(string) string{
 		400: func(url string) string {
-			return fmt.Sprintf(baseError+error_InventoryUserSide, url+"/", "Server Error")
+			return fmt.Sprintf(baseError+error_InventoryUserSide, url, "Server Error")
 		},
 		500: func(url string) string {
-			return fmt.Sprintf(baseError+error_InventoryServerSide, url+"/")
+			return fmt.Sprintf(baseError+error_InventoryServerSide, url)
 		},
 		416: func(url string) string {
-			return fmt.Sprintf(baseError+error_InventoryUnknownStatus, url+"/", 416, "Server Error")
+			return fmt.Sprintf(baseError+error_InventoryUnknownStatus, url, 416, "Server Error")
 		},
 	}, authMethodsURL, s.getAuthMethods)
 }
@@ -436,7 +436,7 @@ func (s *suite) Test_GetAuthMethods_Errors(c *C) {
 func (s *suite) Test_GetAuthMethods_fails_if_server_doesnt_respond(c *C) {
 	s.test_ConnectionError(c, s.getAuthMethods, func(url string) string {
 		err := fmt.Sprintf("Get %s%s: dial tcp %s: getsockopt: connection refused", url, authMethodsURL, url[7:])
-		return fmt.Sprintf(error_AuthMethods+error_InventoryConnection, url+"/", err)
+		return fmt.Sprintf(error_AuthMethods+error_InventoryConnection, url, err)
 	})
 }
 
