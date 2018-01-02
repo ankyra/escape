@@ -41,7 +41,7 @@ const listApplicationsURL = "/api/v1/registry/test/units/"
 const listVersionsURL = "/api/v1/registry/test/units/app/"
 const authMethodsURL = "/api/v1/auth/login-methods"
 const downloadURL = "/api/v1/registry/prj/units/name/versions/v1.0/download"
-const uploadURL = "/api/v1/registry/prj/upload"
+const uploadURL = "/api/v1/registry/prj/units/name/versions/v1.0/upload"
 const registerURL = "/api/v1/registry/prj/register"
 
 /*
@@ -502,8 +502,7 @@ func (s *suite) Test_Download_happy_path(c *C) {
 	server := NewMockServer().WithBody(`abcdef`).Start(c)
 	defer server.Stop()
 
-	unit := NewRemoteInventory(server.URL, "token", false)
-	err := unit.DownloadRelease("prj", "name", "1.0", "testdata.txt")
+	err := s.download(server.URL)
 	server.ExpectCalled(c, true, downloadURL)
 	c.Assert(err, IsNil)
 	content, err := ioutil.ReadFile("testdata.txt")
@@ -554,6 +553,32 @@ func (s *suite) Test_Download_fails_if_server_doesnt_respond(c *C) {
 
 */
 
+func (s *suite) upload(url string) error {
+	unit := NewRemoteInventory(url, "token", false)
+	metadata := core.NewReleaseMetadata("name", "1.0")
+	return unit.UploadRelease("prj", "testdata.txt", metadata)
+}
+
+func (s *suite) Test_UploadRelease_Happy_path(c *C) {
+	os.RemoveAll("testdata.txt")
+	server := NewMockServer().WithBody(``).Start(c)
+	defer server.Stop()
+
+	err := ioutil.WriteFile("testdata.txt", []byte("test"), 0644)
+	c.Assert(err, IsNil)
+
+	c.Assert(s.upload(server.URL), IsNil)
+	server.ExpectCalled(c, true, uploadURL)
+	os.RemoveAll("testdata.txt")
+}
+
+func (s *suite) Test_UploadRelease_fails_if_server_doesnt_respond(c *C) {
+	s.test_ConnectionError(c, s.upload, func(url string) string {
+		err := fmt.Sprintf("Post %s%s: dial tcp %s: getsockopt: connection refused", url, registerURL, url[7:])
+		return fmt.Sprintf(error_Register+error_InventoryConnection, "prj", "name-v1.0", url+"/", err)
+	})
+}
+
 /*
 
 	REGISTER
@@ -579,7 +604,7 @@ func (s *suite) Test_Register_Errors(c *C) {
 			return fmt.Sprintf(baseError+error_ListProjectForbidden, url+"/")
 		},
 		404: func(url string) string {
-			return fmt.Sprintf(baseError+error_DownloadNotFound, url+"/")
+			return fmt.Sprintf(baseError+error_ListApplicationsNotFound, "prj", url+"/")
 		},
 		500: func(url string) string {
 			return fmt.Sprintf(baseError+error_InventoryServerSide, url+"/")

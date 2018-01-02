@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"sort"
 	"strings"
@@ -67,6 +66,7 @@ const error_Login = "Couldn't login to the Inventory"
 const error_LoginCredentials = ", because the username or password was incorrect."
 const error_Download = "Couldn't download release '%s'"
 const error_DownloadNotFound = ", because the package could not be found in the Inventory at '%s'"
+const error_Upload = "Couldn't upload release '%s/%s'"
 const error_Register = "Couldn't register release '%s/%s'"
 
 func (r *inventory) QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
@@ -299,17 +299,28 @@ func (r *inventory) UploadRelease(project, releasePath string, metadata *core.Re
 	}
 	url := r.endpoints.UploadRelease(project, metadata.Name, metadata.Version)
 	resp, err := r.client.POST_file_with_authentication(url, releasePath)
+	baseError := fmt.Sprintf(error_Upload, project, metadata.GetReleaseId())
 	if err != nil {
 		return err
 	}
-	if resp.StatusCode == 401 {
-		return fmt.Errorf("Unauthorized")
+	if resp.StatusCode == 400 {
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(resp.Body)
+		body := buf.String()
+		return fmt.Errorf(baseError+error_InventoryUserSide, r.apiServer, body)
+	} else if resp.StatusCode == 401 {
+		return fmt.Errorf(error_Unauthorized, r.apiServer, r.apiServer)
+	} else if resp.StatusCode == 403 {
+		return fmt.Errorf(baseError+error_ListProjectForbidden, r.apiServer)
+	} else if resp.StatusCode == 404 {
+		return fmt.Errorf(baseError+error_ListApplicationsNotFound, project, r.apiServer)
+	} else if resp.StatusCode == 500 {
+		return fmt.Errorf(baseError+error_InventoryServerSide, r.apiServer)
 	} else if resp.StatusCode != 200 {
-		result, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return fmt.Errorf("Couldn't upload package (%s)", resp.Status)
-		}
-		return fmt.Errorf("Couldn't upload package (%s): %s", resp.Status, result)
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(resp.Body)
+		body := buf.String()
+		return fmt.Errorf(baseError+error_InventoryUnknownStatus, r.apiServer, resp.StatusCode, body)
 	}
 	return nil
 }
@@ -331,7 +342,7 @@ func (r *inventory) register(project string, metadata *core.ReleaseMetadata) err
 	} else if resp.StatusCode == 403 {
 		return fmt.Errorf(baseError+error_ListProjectForbidden, r.apiServer)
 	} else if resp.StatusCode == 404 {
-		return fmt.Errorf(baseError+error_DownloadNotFound, r.apiServer)
+		return fmt.Errorf(baseError+error_ListApplicationsNotFound, project, r.apiServer)
 	} else if resp.StatusCode == 500 {
 		return fmt.Errorf(baseError+error_InventoryServerSide, r.apiServer)
 	} else if resp.StatusCode != 200 {
