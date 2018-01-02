@@ -17,6 +17,7 @@ limitations under the License.
 package testing
 
 import (
+	"bytes"
 	"net/http"
 	"net/http/httptest"
 	"time"
@@ -31,6 +32,7 @@ type MockServer struct {
 	Server        *httptest.Server
 	URL           string
 	CapturedPath  string
+	CapturedBody  string
 	Headers       map[string]string
 }
 
@@ -52,6 +54,9 @@ func (m *MockServer) Start(c *C) *MockServer {
 			w.WriteHeader(m.ResponseCode)
 			w.Write([]byte(m.Body))
 			m.CapturedPath = r.URL.Path
+			buf := new(bytes.Buffer)
+			buf.ReadFrom(r.Body)
+			m.CapturedBody = buf.String()
 			m.HandlerCalled = true
 		}))
 

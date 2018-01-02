@@ -46,15 +46,15 @@ func NewRemoteInventory(apiServer, escapeToken string, insecureSkipVerify bool) 
 	return inv
 }
 
-const error_QueryReleaseMetadata = "Couldn't get release metadata for '%s'"
-const error_QueryReleaseMetadataNotFound = ", because the release metadata could not be found in the Inventory at '%s'. You probably need to release the '%s' package first."
-const error_QueryReleaseMetadataForbidden = ", because you don't have permission to view the '%s' release in the Inventory at '%s'. Please ask an administrator for access."
 const error_InventoryConnection = ", because the Inventory at '%s' could not be reached: %s"
 const error_InventoryServerSide = ", because the Inventory at '%s' responded with a server-side error code. Please try again or contact an administrator if the problem persists."
 const error_InventoryUserSide = ", because the Inventory at '%s' says there's a problem with the request: %s"
 const error_InventoryUnknownStatus = ", because the Inventory at '%s' responded with status code %d: %s"
-const error_Unauthorized = "You don't have a valid authentication token for the Inventory at %s. Use `escape login --url %s` to login."
 
+const error_QueryReleaseMetadata = "Couldn't get release metadata for '%s'"
+const error_QueryReleaseMetadataNotFound = ", because the release metadata could not be found in the Inventory at '%s'. You probably need to release the '%s' package first."
+const error_QueryReleaseMetadataForbidden = ", because you don't have permission to view the '%s' release in the Inventory at '%s'. Please ask an administrator for access."
+const error_Unauthorized = "You don't have a valid authentication token for the Inventory at %s. Use `escape login --url %s` to login."
 const error_QueryNextVersion = "Couldn't resolve next version for '%s'"
 const error_ListProjects = "Couldn't list projects"
 const error_ListApplications = "Couldn't list applications for project '%s'"
@@ -67,6 +67,7 @@ const error_Login = "Couldn't login to the Inventory"
 const error_LoginCredentials = ", because the username or password was incorrect."
 const error_Download = "Couldn't download release '%s'"
 const error_DownloadNotFound = ", because the package could not be found in the Inventory at '%s'"
+const error_Register = "Couldn't register release '%s/%s'"
 
 func (r *inventory) QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
 	if !strings.HasPrefix(version, "v") && version != "latest" {
@@ -316,17 +317,28 @@ func (r *inventory) UploadRelease(project, releasePath string, metadata *core.Re
 func (r *inventory) register(project string, metadata *core.ReleaseMetadata) error {
 	url := r.endpoints.RegisterPackage(project)
 	resp, err := r.client.POST_json_with_authentication(url, metadata)
+	baseError := fmt.Sprintf(error_Register, project, metadata.GetReleaseId())
 	if err != nil {
-		return err
+		return fmt.Errorf(baseError+error_InventoryConnection, r.apiServer, err.Error())
 	}
-	if resp.StatusCode == 401 {
-		return fmt.Errorf("Unauthorized")
+	if resp.StatusCode == 400 {
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(resp.Body)
+		body := buf.String()
+		return fmt.Errorf(baseError+error_InventoryUserSide, r.apiServer, body)
+	} else if resp.StatusCode == 401 {
+		return fmt.Errorf(error_Unauthorized, r.apiServer, r.apiServer)
+	} else if resp.StatusCode == 403 {
+		return fmt.Errorf(baseError+error_ListProjectForbidden, r.apiServer)
+	} else if resp.StatusCode == 404 {
+		return fmt.Errorf(baseError+error_DownloadNotFound, r.apiServer)
+	} else if resp.StatusCode == 500 {
+		return fmt.Errorf(baseError+error_InventoryServerSide, r.apiServer)
 	} else if resp.StatusCode != 200 {
-		result, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return fmt.Errorf("Couldn't register package: %s", resp.Status)
-		}
-		return fmt.Errorf("Couldn't register package (%s): %s", resp.Status, result)
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(resp.Body)
+		body := buf.String()
+		return fmt.Errorf(baseError+error_InventoryUnknownStatus, r.apiServer, resp.StatusCode, body)
 	}
 	return nil
 }

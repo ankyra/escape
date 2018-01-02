@@ -22,6 +22,7 @@ import (
 	"os"
 	"testing"
 
+	core "github.com/ankyra/escape-core"
 	. "github.com/ankyra/escape/testing"
 	. "gopkg.in/check.v1"
 )
@@ -40,6 +41,8 @@ const listApplicationsURL = "/api/v1/registry/test/units/"
 const listVersionsURL = "/api/v1/registry/test/units/app/"
 const authMethodsURL = "/api/v1/auth/login-methods"
 const downloadURL = "/api/v1/registry/prj/units/name/versions/v1.0/download"
+const uploadURL = "/api/v1/registry/prj/upload"
+const registerURL = "/api/v1/registry/prj/register"
 
 /*
 
@@ -542,6 +545,55 @@ func (s *suite) Test_Download_fails_if_server_doesnt_respond(c *C) {
 	s.test_ConnectionError(c, s.download, func(url string) string {
 		err := fmt.Sprintf("Get %s%s: dial tcp %s: getsockopt: connection refused", url, downloadURL, url[7:])
 		return fmt.Sprintf(error_Download+error_InventoryConnection, "prj/name-v1.0", url+"/", err)
+	})
+}
+
+/*
+
+	UPLOAD
+
+*/
+
+/*
+
+	REGISTER
+
+*/
+
+func (s *suite) register(url string) error {
+	unit := NewRemoteInventory(url, "token", false)
+	metadata := core.NewReleaseMetadata("name", "1.0")
+	return unit.register("prj", metadata)
+}
+
+func (s *suite) Test_Register_Errors(c *C) {
+	baseError := fmt.Sprintf(error_Register, "prj", "name-v1.0")
+	s.test_RemoteErrorHandling(c, map[int]func(string) string{
+		400: func(url string) string {
+			return fmt.Sprintf(baseError+error_InventoryUserSide, url+"/", "Server Error")
+		},
+		401: func(url string) string {
+			return fmt.Sprintf(error_Unauthorized, url+"/", url+"/")
+		},
+		403: func(url string) string {
+			return fmt.Sprintf(baseError+error_ListProjectForbidden, url+"/")
+		},
+		404: func(url string) string {
+			return fmt.Sprintf(baseError+error_DownloadNotFound, url+"/")
+		},
+		500: func(url string) string {
+			return fmt.Sprintf(baseError+error_InventoryServerSide, url+"/")
+		},
+		416: func(url string) string {
+			return fmt.Sprintf(baseError+error_InventoryUnknownStatus, url+"/", 416, "Server Error")
+		},
+	}, registerURL, s.register)
+}
+
+func (s *suite) Test_Register_fails_if_server_doesnt_respond(c *C) {
+	s.test_ConnectionError(c, s.register, func(url string) string {
+		err := fmt.Sprintf("Post %s%s: dial tcp %s: getsockopt: connection refused", url, registerURL, url[7:])
+		return fmt.Sprintf(error_Register+error_InventoryConnection, "prj", "name-v1.0", url+"/", err)
 	})
 }
 
