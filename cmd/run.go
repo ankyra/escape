@@ -196,7 +196,7 @@ var runPromoteCmd = &cobra.Command{
 			return err
 		}
 
-		return controllers.PromoteController{}.Promote(context, state, toEnv, toDeployment, environment, deployment, parsedExtraVars, parsedExtraProviders, force)
+		return controllers.PromoteController{}.Promote(context, state, toEnv, toDeployment, environment, deployment, parsedExtraVars, parsedExtraProviders, useProfileState, force)
 	},
 }
 

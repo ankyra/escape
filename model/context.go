@@ -67,7 +67,8 @@ func (c *Context) InitFromLocalEscapePlanAndState(state, environment, planPath s
 	if environment == "" {
 		return errors.New("Missing 'environment'")
 	}
-	if err := c.LoadLocalState(state, environment); err != nil {
+	useProfileState := false
+	if err := c.LoadLocalState(state, environment, useProfileState); err != nil {
 		return err
 	}
 	if err := c.LoadEscapePlan(planPath); err != nil {
@@ -231,8 +232,8 @@ func (c *Context) CompileEscapePlan() error {
 	return nil
 }
 
-func (c *Context) LoadLocalState(stateFile, environment string) error {
-	if stateFile == "" {
+func (c *Context) LoadLocalState(stateFile, environment string, useProfileState bool) error {
+	if useProfileState {
 		stateFile = c.EscapeConfig.GetCurrentProfile().GetStatePath()
 	}
 	envState, err := state.NewLocalStateProvider(stateFile).Load("", environment)

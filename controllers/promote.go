@@ -29,7 +29,7 @@ import (
 
 type PromoteController struct{}
 
-func (PromoteController) Promote(context Context, state, toEnv, toDeployment, fromEnv, fromDeployment string, extraVars, extraProviders map[string]string, force bool) error {
+func (PromoteController) Promote(context Context, state, toEnv, toDeployment, fromEnv, fromDeployment string, extraVars, extraProviders map[string]string, useProfileState, force bool) error {
 	if fromDeployment == "" {
 		return fmt.Errorf("Missing deployment name.")
 	}
@@ -37,7 +37,7 @@ func (PromoteController) Promote(context Context, state, toEnv, toDeployment, fr
 		return fmt.Errorf("Missing target environment. Use '--to' to define your target environment.")
 	}
 
-	if err := context.LoadLocalState(state, fromEnv); err != nil {
+	if err := context.LoadLocalState(state, fromEnv, useProfileState); err != nil {
 		return err
 	}
 	context.SetRootDeploymentName(fromDeployment)
@@ -60,7 +60,7 @@ func (PromoteController) Promote(context Context, state, toEnv, toDeployment, fr
 		toDeployment = fromDeployment
 	}
 
-	if err := context.LoadLocalState(state, toEnv); err != nil {
+	if err := context.LoadLocalState(state, toEnv, useProfileState); err != nil {
 		return err
 	}
 	context.SetRootDeploymentName(toDeployment)

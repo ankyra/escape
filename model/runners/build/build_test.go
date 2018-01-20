@@ -17,11 +17,12 @@ limitations under the License.
 package build
 
 import (
+	"os"
+
+	"github.com/ankyra/escape-core/state"
 	"github.com/ankyra/escape/model"
 	"github.com/ankyra/escape/model/runners"
-	"github.com/ankyra/escape-core/state"
 	. "gopkg.in/check.v1"
-	"os"
 )
 
 func (s *testSuite) Test_BuildRunner_no_script_defined(c *C) {

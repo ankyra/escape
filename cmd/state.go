@@ -39,7 +39,7 @@ var listDeploymentsCmd = &cobra.Command{
 	Short:   "Show the deployments",
 	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := context.LoadLocalState(state, environment); err != nil {
+		if err := context.LoadLocalState(state, environment, useProfileState); err != nil {
 			return err
 		}
 		result := controllers.StateController{}.ListDeployments(context)

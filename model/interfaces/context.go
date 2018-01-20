@@ -35,7 +35,7 @@ type Context interface {
 	LoadReleaseJson() error
 	CompileEscapePlan() error
 	LoadRemoteState(string, string) error
-	LoadLocalState(string, string) error
+	LoadLocalState(string, string, bool) error
 	Log(key string, values map[string]string)
 	PushLogRelease(string)
 	PushLogSection(string)

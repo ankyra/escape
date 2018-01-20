@@ -93,7 +93,7 @@ var errandsRunCmd = &cobra.Command{
 			return fmt.Errorf("Missing deployment name")
 		}
 		context.SetRootDeploymentName(deployment)
-		if err := context.LoadLocalState(state, environment); err != nil {
+		if err := context.LoadLocalState(state, environment, useProfileState); err != nil {
 			return err
 		}
 		parsedExtraVars, err := ParseExtraVars(extraVars)

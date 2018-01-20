@@ -26,7 +26,7 @@ import (
 )
 
 var state, environment, deployment, escapePlanLocation string
-var remoteState bool
+var remoteState, useProfileState bool
 
 func ProcessFlagsForContext(loadLocalEscapePlan bool) error {
 	if environment == "" {
@@ -37,7 +37,7 @@ func ProcessFlagsForContext(loadLocalEscapePlan bool) error {
 			return err
 		}
 	} else {
-		if err := context.LoadLocalState(state, environment); err != nil {
+		if err := context.LoadLocalState(state, environment, useProfileState); err != nil {
 			return err
 		}
 	}
@@ -62,9 +62,12 @@ func setEscapePlanLocationFlag(c *cobra.Command) {
 
 func setEscapeStateLocationFlag(c *cobra.Command) {
 	c.Flags().StringVarP(&state,
-		"state", "s", "",
+		"state", "s", "escape_state.json",
 		"Location of the Escape state file (ignored when --remote-state is set)",
 	)
+	c.Flags().BoolVarP(&useProfileState,
+		"use-profile-state", "", false,
+		"Instead of using the Escape state file specified in --state, read the 'state_path' value from the configuration profile.")
 }
 
 func setEscapeStateEnvironmentFlag(c *cobra.Command) {
