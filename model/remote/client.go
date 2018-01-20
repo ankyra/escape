@@ -91,6 +91,7 @@ func (c *InventoryClient) POST_file_with_authentication(url, path string) (*http
 	}
 	contentType := bodyWriter.FormDataContentType()
 	bodyWriter.Close()
+
 	req, err := http.NewRequest("POST", url, bodyBuf)
 	if err != nil {
 		return nil, err

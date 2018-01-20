@@ -255,4 +255,6 @@ func init() {
 	runPromoteCmd.Flags().StringVarP(&toEnv, "to", "", "", "The logical environment to promote to")
 	runPromoteCmd.Flags().StringVarP(&toDeployment, "to-deployment", "", "", "The deployment name to promote to (default is the package's \"project/name\")")
 	runPromoteCmd.Flags().BoolVarP(&force, "force", "f", false, "Skip confirmation")
+	runPromoteCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
+	runPromoteCmd.Flags().StringArrayVarP(&extraProviders, "extra-providers", "p", []string{}, "Extra providers (format: provider=deployment, provider=@deployment.txt, @values.json)")
 }
