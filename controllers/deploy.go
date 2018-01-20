@@ -17,7 +17,6 @@ limitations under the License.
 package controllers
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/ankyra/escape-core"
@@ -34,26 +33,7 @@ func SetExtraProviders(context Context, stage string, extraProviders map[string]
 	envState := context.GetEnvironmentState()
 	deplState := envState.GetOrCreateDeploymentState(context.GetRootDeploymentName())
 	metadata := context.GetReleaseMetadata()
-	configuredProviders := deplState.GetProviders(stage)
-	availableProviders := envState.GetProviders()
-	for _, c := range metadata.GetConsumes(stage) {
-		provider, override := extraProviders[c]
-		if override {
-			deplState.SetProvider(stage, c, provider)
-			continue
-		}
-		_, configured := configuredProviders[c]
-		if configured {
-			continue
-		}
-		implementations := availableProviders[c]
-		if len(implementations) == 1 {
-			deplState.SetProvider(stage, c, implementations[0])
-		} else {
-			return fmt.Errorf("Missing provider of type '%s'. This can be configured using the -p / --extra-provider flag.", c)
-		}
-	}
-	return nil
+	return deplState.ConfigureProviders(metadata, stage, extraProviders)
 }
 
 func SaveExtraInputsAndProvidersInDeploymentState(context Context, stage string, extraVars, extraProviders map[string]string) error {
