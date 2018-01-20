@@ -31,43 +31,24 @@ import (
 
 type EscapeConfig struct {
 	ActiveProfile string                          `json:"current_profile"`
-	Profiles      map[string]*EscapeProfileConfig `json:"profiles"`
+	Profiles      map[string]*EscapeConfigProfile `json:"profiles"`
 	saveLocation  string                          `json:"-"`
-}
-
-type EscapeProfileConfig struct {
-	ApiServer          string `json:"api_server"`
-	AuthToken          string `json:"escape_auth_token"`
-	InsecureSkipVerify bool   `json:"insecure_skip_verify"`
-	parent             *EscapeConfig
 }
 
 func NewEscapeConfig() *EscapeConfig {
 	cfg := &EscapeConfig{}
-	cfg.Profiles = map[string]*EscapeProfileConfig{
-		"default": newEscapeProfileConfig(cfg),
+	cfg.Profiles = map[string]*EscapeConfigProfile{
+		"default": newEscapeConfigProfile(cfg),
 	}
 	cfg.ActiveProfile = "default"
 	return cfg
-}
-
-func newEscapeProfileConfig(cfg *EscapeConfig) *EscapeProfileConfig {
-	profile := &EscapeProfileConfig{
-		ApiServer: os.Getenv("ESCAPE_API_SERVER"),
-		AuthToken: os.Getenv("ESCAPE_AUTH_TOKEN"),
-		parent:    cfg,
-	}
-	if profile.ApiServer == "" {
-		profile.ApiServer = "https://escape.ankyra.io"
-	}
-	return profile
 }
 
 func (c *EscapeConfig) NewProfile(profileName string) error {
 	if c.Profiles[profileName] != nil {
 		return fmt.Errorf("Profile already exists")
 	}
-	c.Profiles[profileName] = newEscapeProfileConfig(c)
+	c.Profiles[profileName] = newEscapeConfigProfile(c)
 	return nil
 }
 
@@ -75,7 +56,7 @@ func (c *EscapeConfig) GetInventory() inventory.Inventory {
 	return c.GetCurrentProfile().GetInventory()
 }
 
-func (e *EscapeConfig) GetCurrentProfile() *EscapeProfileConfig {
+func (e *EscapeConfig) GetCurrentProfile() *EscapeConfigProfile {
 	return e.Profiles[e.ActiveProfile]
 }
 
@@ -117,7 +98,7 @@ func (e *EscapeConfig) LoadConfig(cfgFile string) error {
 		return fmt.Errorf("Referenced profile '%s' was not found in the Escape configuration file.", e.ActiveProfile)
 	}
 	for _, t := range e.Profiles {
-		t.parent = e
+		t.fix(e)
 	}
 	return nil
 }
@@ -148,38 +129,4 @@ func (e *EscapeConfig) Save() error {
 		mode = st.Mode()
 	}
 	return ioutil.WriteFile(e.saveLocation, str, mode)
-}
-
-func (t *EscapeProfileConfig) ToJson() string {
-	str, err := json.MarshalIndent(t, "", "   ")
-	if err != nil {
-		panic(err)
-	}
-	return string(str)
-}
-
-func (t *EscapeProfileConfig) GetInventory() inventory.Inventory {
-	return inventory.NewRemoteInventory(t.ApiServer, t.AuthToken, t.InsecureSkipVerify)
-}
-
-func (t *EscapeProfileConfig) Save() error {
-	return t.parent.Save()
-}
-func (t *EscapeProfileConfig) GetApiServer() string {
-	return t.ApiServer
-}
-func (t *EscapeProfileConfig) GetAuthToken() string {
-	return t.AuthToken
-}
-func (t *EscapeProfileConfig) SetApiServer(v string) {
-	t.ApiServer = v
-}
-func (t *EscapeProfileConfig) SetAuthToken(v string) {
-	t.AuthToken = v
-}
-func (t *EscapeProfileConfig) GetInsecureSkipVerify() bool {
-	return t.InsecureSkipVerify
-}
-func (t *EscapeProfileConfig) SetInsecureSkipVerify(v bool) {
-	t.InsecureSkipVerify = v
 }

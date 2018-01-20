@@ -231,8 +231,11 @@ func (c *Context) CompileEscapePlan() error {
 	return nil
 }
 
-func (c *Context) LoadLocalState(cfgFile, environment string) error {
-	envState, err := state.NewLocalStateProvider(cfgFile).Load("", environment)
+func (c *Context) LoadLocalState(stateFile, environment string) error {
+	if stateFile == "" {
+		stateFile = c.EscapeConfig.GetCurrentProfile().GetStatePath()
+	}
+	envState, err := state.NewLocalStateProvider(stateFile).Load("", environment)
 	if err != nil {
 		return err
 	}

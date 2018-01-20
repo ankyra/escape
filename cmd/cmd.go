@@ -62,7 +62,7 @@ func setEscapePlanLocationFlag(c *cobra.Command) {
 
 func setEscapeStateLocationFlag(c *cobra.Command) {
 	c.Flags().StringVarP(&state,
-		"state", "s", "escape_state.json",
+		"state", "s", "",
 		"Location of the Escape state file (ignored when --remote-state is set)",
 	)
 }

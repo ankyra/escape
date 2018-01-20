@@ -23,8 +23,8 @@ import (
 
 	"os/user"
 
-	"github.com/ankyra/escape/util"
 	core "github.com/ankyra/escape-core"
+	"github.com/ankyra/escape/util"
 )
 
 type Path struct {
@@ -95,6 +95,10 @@ func (p *Path) DependencyCacheDirectory(project string) string {
 	return filepath.Join(p.GetAppConfigDir(), project)
 }
 
+func (p *Path) GetDefaultStateLocation() string {
+	return filepath.Join(p.GetAppConfigDir(), "escape_state.json")
+}
+
 func (p *Path) DependencyReleaseArchive(dependency *core.Dependency) string {
 	return filepath.Join(p.baseDir, dependency.GetReleaseId()+".tgz")
 }
@@ -134,6 +138,10 @@ func (p *Path) Script(script string) string {
 
 func (p *Path) EnsureEscapeDirectoryExists() error {
 	return util.MkdirRecursively(p.EscapeDirectory())
+}
+
+func (p *Path) EnsureEscapeConfigDirectoryExists() error {
+	return util.MkdirRecursively(p.GetAppConfigDir())
 }
 
 func (p *Path) EnsureDependencyCacheDirectoryExists(project string) error {
