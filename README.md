@@ -9,12 +9,10 @@ be found [here](https://github.com/ankyra/escape-inventory).
 
 ## Downloads
 
-Cross-platform binaries can be downloaded from
-[webite](https://escape.ankyra.io/downloads/).
-
-## Installation
-
-See the [installation instructions](https://escape.ankyra.io/docs/escape-installation/).
+Cross-platform binaries can be downloaded from [the
+webite](https://escape.ankyra.io/downloads/) where you'll also find the
+[installation
+instructions](https://escape.ankyra.io/docs/escape-installation/).
 
 ## Docker
 
