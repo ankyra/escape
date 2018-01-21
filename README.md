@@ -1,5 +1,7 @@
 # Escape 
 
+[![Build status](https://circleci.com/gh/ankyra/escape.svg?style=shield&circle-token=2f7f6d97a01eefe7b3d1967ce11bb183034c963d)](https://circleci.com/gh/ankyra/escape) 
+
 Escape is a tool that can help with the building, testing, versioning,
 deploying and operating of software platforms. Its goal is to provide best
 practices in release engineering to make it easier to perform these tasks
