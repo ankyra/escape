@@ -1,7 +1,31 @@
 # Escape 
 
-This is the official Escape client.  Please see the [Escape
-Docs](https://escape.ankyra.io/docs/) for the full documentation.
+Escape is a tool that can help with the building, testing, versioning,
+deploying and operating of software.
+
+This repository contains the official Escape client. The Escape Inventory can
+be found [here](https://github.com/ankyra/escape-inventory).
+
+
+## Downloads
+
+Cross-platform binaries can be downloaded from
+[webite](https://escape.ankyra.io/downloads/).
+
+## Installation
+
+See the [installation instructions](https://escape.ankyra.io/docs/escape-installation/).
+
+## Docker
+
+You can also use the Escape docker image which is published in the [central
+Docker hub](https://hub.docker.com/r/ankyra/escape/).
+
+`docker run -it ankyra/escape:latest`
+
+## Usage and Documentation
+
+See the [Escape Docs](https://escape.ankyra.io/docs/) for the full documentation.
 
 ## License
 
