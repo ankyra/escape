@@ -1,5 +1,5 @@
 /*
-Copyright 2017 Ankyra
+Copyright 2017, 2018 Ankyra
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@ limitations under the License.
 package state
 
 import (
+	"github.com/ankyra/escape-core/state"
 	"github.com/ankyra/escape/model/state/local"
 	"github.com/ankyra/escape/model/state/remote"
-	"github.com/ankyra/escape-core/state"
 )
 
 type StateProvider interface {

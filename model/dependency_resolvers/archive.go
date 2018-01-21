@@ -1,5 +1,5 @@
 /*
-Copyright 2017 Ankyra
+Copyright 2017, 2018 Ankyra
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ import (
 	"os"
 	"path/filepath"
 
+	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape/model/paths"
 	"github.com/ankyra/escape/util"
-	core "github.com/ankyra/escape-core"
 )
 
 func FromLocalArchive(path *paths.Path, dep *core.Dependency) (bool, error) {

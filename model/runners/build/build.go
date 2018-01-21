@@ -1,5 +1,5 @@
 /*
-Copyright 2017 Ankyra
+Copyright 2017, 2018 Ankyra
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@ limitations under the License.
 package build
 
 import (
+	"github.com/ankyra/escape-core/state"
 	. "github.com/ankyra/escape/model/runners"
 	"github.com/ankyra/escape/model/runners/deploy"
-	"github.com/ankyra/escape-core/state"
 )
 
 var Stage = "build"

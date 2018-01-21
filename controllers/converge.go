@@ -1,5 +1,5 @@
 /*
-Copyright 2017 Ankyra
+Copyright 2017, 2018 Ankyra
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package controllers
 import (
 	"fmt"
 
-	. "github.com/ankyra/escape/model/interfaces"
 	"github.com/ankyra/escape-core/state"
+	. "github.com/ankyra/escape/model/interfaces"
 )
 
 type ConvergeController struct{}

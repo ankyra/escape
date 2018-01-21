@@ -2,8 +2,8 @@
 
 Escape is a tool that can help with the building, testing, versioning,
 deploying and operating of software platforms. Its goal is to provide best
-practices in release engineering to make it easier to deploy and operate
-software across environments. More information can be found in the [Escape
+practices in release engineering to make it easier to perform these tasks
+across environments and layers. More information can be found in the [Escape
 Documentation](https://escape.ankyra.io/docs/).
 
 ![Escape Logo](/logo.png)
@@ -32,7 +32,7 @@ See the [Escape Docs](https://escape.ankyra.io/docs/) for the full documentation
 ## License
 
 ```
-Copyright 2017 Ankyra
+Copyright 2017, 2018 Ankyra
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
