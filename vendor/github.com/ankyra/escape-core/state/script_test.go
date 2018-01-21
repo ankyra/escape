@@ -17,6 +17,8 @@ limitations under the License.
 package state
 
 import (
+	"errors"
+
 	"github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/script"
 	"github.com/ankyra/escape-core/variables"
@@ -167,6 +169,41 @@ func (s *scriptSuite) Test_ToScriptEnvironment_adds_consumers(c *C) {
 	}
 	test_helper_check_script_environment(c, dict["this"], dicts, "archive-release")
 	test_helper_check_script_environment(c, dict["test"], dicts, "archive-full")
+}
+
+func (s *scriptSuite) Test_ToScriptEnvironment_adds_renamed_consumers(c *C) {
+	resolver := newResolverFromMap(map[string]*core.ReleaseMetadata{
+		"archive-full-v1.0": core.NewReleaseMetadata("test", "1.0"),
+	})
+	metadata := core.NewReleaseMetadata("test", "1.0")
+	cfg, _ := core.NewConsumerConfigFromString("test as t")
+	cfg2, _ := core.NewConsumerConfigFromString("test as t2")
+	metadata.Consumes = []*core.ConsumerConfig{cfg, cfg2}
+	depl.SetProvider("build", "t", "archive-full")
+	depl.SetProvider("build", "t2", "archive-full")
+	env, err := ToScriptEnvironment(depl, metadata, "build", resolver)
+	c.Assert(err, IsNil)
+	c.Assert(script.IsDictAtom((*env)["$"]), Equals, true)
+	dict := script.ExpectDictAtom((*env)["$"])
+	dicts := map[string][]string{
+		"inputs":   []string{},
+		"outputs":  []string{},
+		"metadata": []string{},
+	}
+	test_helper_check_script_environment(c, dict["this"], dicts, "archive-release")
+	test_helper_check_script_environment(c, dict["t"], dicts, "archive-full")
+	test_helper_check_script_environment(c, dict["t2"], dicts, "archive-full")
+}
+
+func (s *scriptSuite) Test_ToScriptEnvironment_fails_if_renamed_consumer_not_configured(c *C) {
+	resolver := newResolverFromMap(map[string]*core.ReleaseMetadata{
+		"archive-full-v1.0": core.NewReleaseMetadata("test", "1.0"),
+	})
+	metadata := core.NewReleaseMetadata("test", "1.0")
+	cfg, _ := core.NewConsumerConfigFromString("test as t")
+	metadata.Consumes = []*core.ConsumerConfig{cfg}
+	_, err := ToScriptEnvironment(depl, metadata, "build", resolver)
+	c.Assert(err, DeepEquals, errors.New(`Provider 't' of type 'test' has not been configured in the deployment state.`))
 }
 
 func (s *scriptSuite) Test_ToScriptEnvironment_fails_if_missing_provider_state(c *C) {

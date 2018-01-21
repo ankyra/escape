@@ -312,4 +312,12 @@ func (s *metadataSuite) Test_AddConsumes(c *C) {
 	m.AddConsumes(dep2)
 	c.Assert(m.GetConsumes("build"), HasLen, 2, Commentf("Most scopes win"))
 	c.Assert(m.GetConsumes("deploy"), HasLen, 2)
+	dep3 := NewConsumerConfig("deploy-scope")
+	dep3.VariableName = "t"
+	m.AddConsumes(dep3)
+	c.Assert(m.GetConsumes("build"), HasLen, 3, Commentf("Variable name is part of key"))
+	c.Assert(m.GetConsumes("deploy"), HasLen, 3)
+	m.AddConsumes(dep3)
+	c.Assert(m.GetConsumes("build"), HasLen, 3)
+	c.Assert(m.GetConsumes("deploy"), HasLen, 3)
 }

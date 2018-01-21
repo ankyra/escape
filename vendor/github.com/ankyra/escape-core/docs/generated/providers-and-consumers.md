@@ -25,4 +25,5 @@ Field | Type | Description
 ------|------|-------------
 |name|`string`|
 |scopes|`[string]`|
+|variable|`string`|
 

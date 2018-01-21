@@ -17,6 +17,7 @@ limitations under the License.
 package state
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/ankyra/escape-core"
@@ -164,6 +165,28 @@ func (s *suite) Test_ConfigureProviders_uses_extra_providers(c *C) {
 	c.Assert(err, IsNil)
 	returnedProviders := deplWithDeps.GetProviders("deploy")
 	c.Assert(returnedProviders["provider1"], Equals, "otherdepl")
+}
+
+func (s *suite) Test_ConfigureProviders_uses_renamed_extra_providers(c *C) {
+	metadata := core.NewReleaseMetadata("test", "1.0")
+	cfg, _ := core.NewConsumerConfigFromString("provider1 as p1")
+	metadata.Consumes = []*core.ConsumerConfig{cfg}
+	providers := map[string]string{
+		"p1": "otherdepl",
+	}
+	err := deplWithDeps.ConfigureProviders(metadata, "deploy", providers)
+	c.Assert(err, IsNil)
+	returnedProviders := deplWithDeps.GetProviders("deploy")
+	c.Assert(returnedProviders["p1"], Equals, "otherdepl")
+}
+
+func (s *suite) Test_ConfigureProviders_fails_if_renamed_provider_not_found(c *C) {
+	metadata := core.NewReleaseMetadata("test", "1.0")
+	cfg, _ := core.NewConsumerConfigFromString("provider1 as p1")
+	metadata.Consumes = []*core.ConsumerConfig{cfg}
+	providers := map[string]string{}
+	err := deplWithDeps.ConfigureProviders(metadata, "deploy", providers)
+	c.Assert(err, DeepEquals, errors.New("Missing provider 'p1' of type 'provider1'. This can be configured using the -p / --extra-provider flag."))
 }
 
 func (s *suite) Test_ConfigureProviders_fails_if_provider_missing(c *C) {

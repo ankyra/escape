@@ -247,10 +247,6 @@ func (s *metadataSuite) Test_Diff_Variables(c *C) {
 
 func (s *metadataSuite) Test_Diff_Slices(c *C) {
 	testCases := [][]interface{}{
-		[]interface{}{"Consumes", []string{"test"}, []string{}, `Remove 'test' from Consumes`},
-		[]interface{}{"Consumes", []string{}, []string{"test"}, `Add 'test' to Consumes`},
-		[]interface{}{"Consumes", []string{"test"}, []string{"kubernetes"}, `Change Consumes[0].Name from 'test' to 'kubernetes'`},
-
 		[]interface{}{"Provides", []string{"test"}, []string{}, `Remove 'test' from Provides`},
 		[]interface{}{"Provides", []string{}, []string{"test"}, `Add 'test' to Provides`},
 		[]interface{}{"Provides", []string{"test"}, []string{"kubernetes"}, `Change Provides[0].Name from 'test' to 'kubernetes'`},
@@ -287,6 +283,26 @@ func (s *metadataSuite) Test_Diff_Slices(c *C) {
 		changes := Diff(m1, m2)
 		c.Assert(changes, HasLen, 1, Commentf(test[3].(string)))
 		c.Assert(changes[0].ToString(), DeepEquals, test[3])
+	}
+}
+
+func (s *metadataSuite) Test_Diff_Consumes(c *C) {
+	testCases := [][]interface{}{
+		[]interface{}{"Consumes", []string{"test"}, []string{}, `Remove 'test' from Consumes`, 1},
+		[]interface{}{"Consumes", []string{}, []string{"test"}, `Add 'test' to Consumes`, 1},
+		[]interface{}{"Consumes", []string{"test"}, []string{"kubernetes"}, `Change Consumes[0].Name from 'test' to 'kubernetes'`, 2, `Change Consumes[0].VariableName from 'test' to 'kubernetes'`},
+	}
+	for _, test := range testCases {
+		m1 := NewReleaseMetadata("test", "1.0")
+		m2 := NewReleaseMetadata("test", "1.0")
+		m1.SetConsumes(test[1].([]string))
+		m2.SetConsumes(test[2].([]string))
+		changes := Diff(m1, m2)
+		c.Assert(changes, HasLen, test[4].(int), Commentf(test[3].(string)))
+		c.Assert(changes[0].ToString(), DeepEquals, test[3])
+		if test[4].(int) > 1 {
+			c.Assert(changes[1].ToString(), DeepEquals, test[5])
+		}
 	}
 }
 

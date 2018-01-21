@@ -24,6 +24,7 @@ func (s *metadataSuite) Test_NewConsumerConfig(c *C) {
 	consumer := NewConsumerConfig("test")
 	c.Assert(consumer.Name, Equals, "test")
 	c.Assert(consumer.Scopes, DeepEquals, []string{"build", "deploy"})
+	c.Assert(consumer.VariableName, Equals, "test")
 }
 
 func (s *metadataSuite) Test_NewConsumerConfigFromMap(c *C) {
@@ -34,6 +35,18 @@ func (s *metadataSuite) Test_NewConsumerConfigFromMap(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(consumer.Name, Equals, "test")
 	c.Assert(consumer.Scopes, DeepEquals, []string{"build", "deploy"})
+	c.Assert(consumer.VariableName, Equals, "test")
+}
+
+func (s *metadataSuite) Test_NewConsumerConfigFromMap_renamed_var(c *C) {
+	consumer, err := NewConsumerConfigFromMap(map[interface{}]interface{}{
+		"name":   "test as t",
+		"scopes": []interface{}{"build", "deploy"},
+	})
+	c.Assert(err, IsNil)
+	c.Assert(consumer.Name, Equals, "test")
+	c.Assert(consumer.Scopes, DeepEquals, []string{"build", "deploy"})
+	c.Assert(consumer.VariableName, Equals, "t")
 }
 
 func (s *metadataSuite) Test_NewConsumerConfigFromMap_No_Scopes_360_blaze_it(c *C) {
@@ -43,6 +56,7 @@ func (s *metadataSuite) Test_NewConsumerConfigFromMap_No_Scopes_360_blaze_it(c *
 	c.Assert(err, IsNil)
 	c.Assert(consumer.Name, Equals, "test")
 	c.Assert(consumer.Scopes, DeepEquals, []string{"build", "deploy"})
+	c.Assert(consumer.VariableName, Equals, "test")
 }
 
 func (s *metadataSuite) Test_NewConsumerConfigFromMap_limited_scope(c *C) {
@@ -53,6 +67,7 @@ func (s *metadataSuite) Test_NewConsumerConfigFromMap_limited_scope(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(consumer.Name, Equals, "test")
 	c.Assert(consumer.Scopes, DeepEquals, []string{"deploy"})
+	c.Assert(consumer.VariableName, Equals, "test")
 }
 
 func (s *metadataSuite) Test_NewConsumerConfigFromInterface_String(c *C) {
@@ -60,6 +75,28 @@ func (s *metadataSuite) Test_NewConsumerConfigFromInterface_String(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(consumer.Name, Equals, "test")
 	c.Assert(consumer.Scopes, DeepEquals, []string{"build", "deploy"})
+	c.Assert(consumer.VariableName, Equals, "test")
+}
+
+func (s *metadataSuite) Test_NewConsumerConfigFromInterface_Renamed_String(c *C) {
+	consumer, err := NewConsumerConfigFromInterface("test as t")
+	c.Assert(err, IsNil)
+	c.Assert(consumer.Name, Equals, "test")
+	c.Assert(consumer.Scopes, DeepEquals, []string{"build", "deploy"})
+	c.Assert(consumer.VariableName, Equals, "t")
+}
+
+func (s *metadataSuite) Test_NewConsumerConfigFromInterface_Renamed_String_fails_if_invalid_Format(c *C) {
+	cases := []string{
+		"test as $23",
+		"test this p1",
+		"test as   $23",
+		"",
+	}
+	for _, test := range cases {
+		_, err := NewConsumerConfigFromInterface(test)
+		c.Assert(err, Not(IsNil))
+	}
 }
 
 func (s *metadataSuite) Test_NewConsumerConfigFromInterface_Map(c *C) {
@@ -67,6 +104,7 @@ func (s *metadataSuite) Test_NewConsumerConfigFromInterface_Map(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(consumer.Name, Equals, "test")
 	c.Assert(consumer.Scopes, DeepEquals, []string{"build", "deploy"})
+	c.Assert(consumer.VariableName, Equals, "test")
 }
 
 func (s *metadataSuite) Test_NewConsumerConfigFromInterface_fails_on_wrong_type(c *C) {

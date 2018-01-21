@@ -269,7 +269,7 @@ func (m *ReleaseMetadata) AddOutputVariable(output *variables.Variable) {
 
 func (m *ReleaseMetadata) AddConsumes(c *ConsumerConfig) {
 	for _, consumer := range m.Consumes {
-		if consumer.Name == c.Name {
+		if consumer.Name == c.Name && consumer.VariableName == c.VariableName {
 			if len(consumer.Scopes) < len(c.Scopes) {
 				consumer.Scopes = c.Scopes
 			}
@@ -287,9 +287,17 @@ func (m *ReleaseMetadata) SetConsumes(c []string) {
 
 func (m *ReleaseMetadata) GetConsumes(stage string) []string {
 	result := []string{}
+	for _, c := range m.GetConsumerConfig(stage) {
+		result = append(result, c.Name)
+	}
+	return result
+}
+
+func (m *ReleaseMetadata) GetConsumerConfig(stage string) []*ConsumerConfig {
+	result := []*ConsumerConfig{}
 	for _, c := range m.Consumes {
 		if c.InScope(stage) {
-			result = append(result, c.Name)
+			result = append(result, c)
 		}
 	}
 	return result

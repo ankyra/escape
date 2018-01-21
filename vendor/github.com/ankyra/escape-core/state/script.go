@@ -99,9 +99,14 @@ func (s *StateCompiler) CompileDependencies(d *DeploymentState, metadata *core.R
 
 func (s *StateCompiler) CompileProviders(d *DeploymentState, metadata *core.ReleaseMetadata, stage string) error {
 	providers := d.GetProviders(stage)
-	for _, consumes := range metadata.GetConsumes(stage) {
-		deplName, ok := providers[consumes]
+	for _, consumerCfg := range metadata.GetConsumerConfig(stage) {
+		consumes := consumerCfg.Name
+		variable := consumerCfg.VariableName
+		deplName, ok := providers[variable]
 		if !ok {
+			if variable != consumes {
+				return fmt.Errorf("Provider '%s' of type '%s' has not been configured in the deployment state.", variable, consumes)
+			}
 			return fmt.Errorf("No provider of type '%s' was configured in the deployment state.", consumes)
 		}
 		deplState, err := d.GetEnvironmentState().LookupDeploymentState(deplName)
@@ -112,7 +117,7 @@ func (s *StateCompiler) CompileProviders(d *DeploymentState, metadata *core.Rele
 		if err != nil {
 			return err
 		}
-		s.Result[consumes] = s.CompileState(deplState, depMetadata, "deploy", true)
+		s.Result[variable] = s.CompileState(deplState, depMetadata, "deploy", true)
 	}
 	return nil
 }

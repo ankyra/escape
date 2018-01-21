@@ -48,11 +48,11 @@ func (s *variableSuite) Test_NewVariableFromInterface_Fails_On_Unknown_Type(c *C
 
 func (s *variableSuite) Test_NewVariableFromInterface_Fails_On_Invalid_String(c *C) {
 	_, err := NewVariableFromInterface("test oops")
-	c.Assert(err.Error(), Equals, "Invalid variable id format 'test oops'")
+	c.Assert(err.Error(), Equals, "Invalid variable format 'test oops'")
 }
 func (s *variableSuite) Test_NewVariableFromInterface_Fails_On_Invalid_Map(c *C) {
 	_, err := NewVariableFromInterface(map[interface{}]interface{}{"id": 12})
-	c.Assert(err.Error(), Equals, "Invalid variable id format '12'")
+	c.Assert(err.Error(), Equals, "Invalid variable format '12'")
 }
 
 func (s *variableSuite) Test_NewVariableFromString(c *C) {

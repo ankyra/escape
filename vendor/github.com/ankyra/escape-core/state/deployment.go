@@ -182,20 +182,25 @@ func (d *DeploymentState) GetProviders(stage string) map[string]string {
 func (d *DeploymentState) ConfigureProviders(metadata *core.ReleaseMetadata, stage string, extraProviders map[string]string) error {
 	configuredProviders := d.GetProviders(stage)
 	availableProviders := d.environment.GetProviders()
-	for _, c := range metadata.GetConsumes(stage) {
-		provider, override := extraProviders[c]
+	for _, consumerCfg := range metadata.GetConsumerConfig(stage) {
+		c := consumerCfg.Name
+		variable := consumerCfg.VariableName
+		provider, override := extraProviders[variable]
 		if override {
-			d.SetProvider(stage, c, provider)
+			d.SetProvider(stage, variable, provider)
 			continue
 		}
-		_, configured := configuredProviders[c]
+		_, configured := configuredProviders[variable]
 		if configured {
 			continue
 		}
 		implementations := availableProviders[c]
 		if len(implementations) == 1 {
-			d.SetProvider(stage, c, implementations[0])
+			d.SetProvider(stage, variable, implementations[0])
 		} else {
+			if variable != c {
+				return fmt.Errorf("Missing provider '%s' of type '%s'. This can be configured using the -p / --extra-provider flag.", variable, c)
+			}
 			return fmt.Errorf("Missing provider of type '%s'. This can be configured using the -p / --extra-provider flag.", c)
 		}
 	}

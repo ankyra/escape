@@ -21,13 +21,13 @@ import (
 	"strings"
 )
 
-type ParsedDependency struct {
-	QualifiedReleaseId
+type ParsedConsumer struct {
+	Interface    string
 	VariableName string
 }
 
-func ParseDependency(str string) (*ParsedDependency, error) {
-	result := &ParsedDependency{}
+func ParseConsumer(str string) (*ParsedConsumer, error) {
+	result := &ParsedConsumer{}
 	split := strings.Split(str, " ")
 	parts := []string{}
 	for _, part := range split {
@@ -36,22 +36,20 @@ func ParseDependency(str string) (*ParsedDependency, error) {
 		}
 	}
 	if len(parts) != 1 && len(parts) != 3 {
-		return nil, fmt.Errorf("Malformed dependency string '%s'", str)
+		return nil, fmt.Errorf("Malformed consumer string '%s'", str)
 	}
-	releaseId, err := ParseQualifiedReleaseId(parts[0])
-	if err != nil {
-		return nil, err
-	}
+	consumer := parts[0]
 	if len(parts) == 3 {
 		if parts[1] != "as" {
 			return nil, fmt.Errorf("Unexpected '%s' expecting 'as' in '%s'", parts[1], str)
 		}
 		id, err := ParseVariableIdent(parts[2])
 		if err != nil {
-			return nil, fmt.Errorf("Malformed dependency string '%s': %s", str, err.Error())
+			return nil, fmt.Errorf("Malformed consumer string '%s': %s", str, err.Error())
 		}
 		result.VariableName = id
 	}
-	result.QualifiedReleaseId = *releaseId
+	result.Interface = consumer
 	return result, nil
+
 }

@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/ankyra/escape-core/parsers"
 	"github.com/ankyra/escape-core/script"
@@ -145,15 +144,11 @@ func (v *Variable) Validate() error {
 	if v.Id == "" {
 		return fmt.Errorf("Variable object is missing an 'id'")
 	}
-	_, rest := parsers.ParseIdent(v.Id)
-	if strings.TrimSpace(rest) != "" {
-		return fmt.Errorf("Invalid variable id format '%s'", v.Id)
+	id, err := parsers.ParseVariableIdent(v.Id)
+	if err != nil {
+		return err
 	}
-	v.Id = strings.TrimSpace(v.Id)
-	if strings.HasPrefix(strings.ToUpper(v.Id), "PREVIOUS_") {
-		return fmt.Errorf("Invalid variable format '%s'. Variable is not allowed to start with '%s'",
-			v.Id, v.Id[:len("PREVIOUS_")])
-	}
+	v.Id = id
 	if v.Scopes == nil || len(v.Scopes) == 0 {
 		v.Scopes = []string{"build", "deploy"}
 	}

@@ -16,7 +16,11 @@ limitations under the License.
 
 package core
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/ankyra/escape-core/parsers"
+)
 
 /*
 
@@ -34,21 +38,37 @@ field of the Escape Plan.
 
 */
 type ConsumerConfig struct {
-	Name   string   `json:"name" yaml:"name"`
-	Scopes []string `json:"scopes" yaml:"scopes"`
+	Name         string   `json:"name" yaml:"name"`
+	Scopes       []string `json:"scopes" yaml:"scopes"`
+	VariableName string   `json:"variable" yaml:"variable"`
 }
 
+// Only used for testing purposes.
+//
 func NewConsumerConfig(name string) *ConsumerConfig {
 	return &ConsumerConfig{
-		Name:   name,
-		Scopes: []string{"build", "deploy"},
+		Name:         name,
+		Scopes:       []string{"build", "deploy"},
+		VariableName: name,
 	}
+}
+
+func NewConsumerConfigFromString(str string) (*ConsumerConfig, error) {
+	id, err := parsers.ParseConsumer(str)
+	if err != nil {
+		return nil, err
+	}
+	cfg := NewConsumerConfig(id.Interface)
+	if id.VariableName != "" {
+		cfg.VariableName = id.VariableName
+	}
+	return cfg, nil
 }
 
 func NewConsumerConfigFromInterface(v interface{}) (*ConsumerConfig, error) {
 	switch v.(type) {
 	case string:
-		return NewConsumerConfig(v.(string)), nil
+		return NewConsumerConfigFromString(v.(string))
 	case map[interface{}]interface{}:
 		return NewConsumerConfigFromMap(v.(map[interface{}]interface{}))
 	}
@@ -80,7 +100,10 @@ func NewConsumerConfigFromMap(dep map[interface{}]interface{}) (*ConsumerConfig,
 	if name == "" {
 		return nil, fmt.Errorf("Missing 'name' in consumer")
 	}
-	cfg := NewConsumerConfig(name)
+	cfg, err := NewConsumerConfigFromString(name)
+	if err != nil {
+		return nil, err
+	}
 	cfg.Scopes = scopes
 	return cfg, cfg.ValidateAndFix()
 }
@@ -107,6 +130,9 @@ func (c *ConsumerConfig) ValidateAndFix() error {
 	}
 	if c.Name == "" {
 		return fmt.Errorf("Missing name for Consumer")
+	}
+	if c.VariableName == "" {
+		c.VariableName = c.Name
 	}
 	return nil
 }

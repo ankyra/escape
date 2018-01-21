@@ -67,3 +67,9 @@ func (s *dependencySuite) Test_Dependency_Malformed_Release_Id(c *C) {
 	c.Assert(dep, IsNil)
 	c.Assert(err.Error(), Equals, "Invalid version string in release ID 'type-name-whatever': whatever")
 }
+
+func (s *dependencySuite) Test_Dependency_fails_with_invalid_variable_name(c *C) {
+	dep, err := ParseDependency("name-v1.0 as $23")
+	c.Assert(dep, IsNil)
+	c.Assert(err.Error(), Equals, "Malformed dependency string 'name-v1.0 as $23': Invalid variable format '$23'")
+}
