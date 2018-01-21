@@ -22,6 +22,9 @@ extends:
 depends:
 - depends1
 - depends2
+- release_id: depends3
+  consumes:
+    provider: provider1
 
 description: Test description
 

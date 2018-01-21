@@ -22,9 +22,9 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/ankyra/escape/util"
 	"github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/script"
+	"github.com/ankyra/escape/util"
 )
 
 type environmentBuilder struct {
@@ -50,7 +50,7 @@ func (e *environmentBuilder) GetEnviron() []string {
 	return result
 }
 
-func (e *environmentBuilder) GetInputsForPreStep(ctx RunnerContext, stage string) (map[string]interface{}, error) {
+func (e *environmentBuilder) GetInputsForPreStep(ctx *RunnerContext, stage string) (map[string]interface{}, error) {
 	calculatedInputs := map[string]interface{}{}
 	inputs := ctx.GetDeploymentState().GetPreStepInputs(stage)
 	scriptEnv, err := ctx.GetScriptEnvironment(stage)
@@ -67,7 +67,7 @@ func (e *environmentBuilder) GetInputsForPreStep(ctx RunnerContext, stage string
 	return prepInputs(ctx, stage, &calculatedInputs, false)
 }
 
-func (e *environmentBuilder) GetPreDependencyInputs(ctx RunnerContext, stage string) (map[string]interface{}, error) {
+func (e *environmentBuilder) GetPreDependencyInputs(ctx *RunnerContext, stage string) (map[string]interface{}, error) {
 	inputs := map[string]interface{}{}
 	for key, val := range ctx.GetDeploymentState().GetUserInputs(stage) {
 		inputs[key] = val
@@ -88,7 +88,7 @@ func (e *environmentBuilder) GetPreDependencyInputs(ctx RunnerContext, stage str
 	return inputs, nil
 }
 
-func (e *environmentBuilder) GetInputsForDependency(ctx RunnerContext, stage string, mapping map[string]interface{}, parentInputs map[string]interface{}) (map[string]interface{}, error) {
+func (e *environmentBuilder) GetInputsForDependency(ctx *RunnerContext, stage string, mapping map[string]interface{}, parentInputs map[string]interface{}) (map[string]interface{}, error) {
 	inputs := map[string]interface{}{}
 	scriptEnv, err := ctx.GetScriptEnvironmentForPreDependencyStep(stage)
 	if err != nil {
@@ -112,7 +112,7 @@ func (e *environmentBuilder) GetInputsForDependency(ctx RunnerContext, stage str
 	return inputs, nil
 }
 
-func (e *environmentBuilder) GetInputsForErrand(ctx RunnerContext, errand *core.Errand, extraVars map[string]string) (map[string]interface{}, error) {
+func (e *environmentBuilder) GetInputsForErrand(ctx *RunnerContext, errand *core.Errand, extraVars map[string]string) (map[string]interface{}, error) {
 	deplState := ctx.GetDeploymentState()
 	inputs := deplState.GetCalculatedInputs("deploy")
 	for key, val := range extraVars {
@@ -136,7 +136,7 @@ func (e *environmentBuilder) GetInputsForErrand(ctx RunnerContext, errand *core.
 	return result, nil
 }
 
-func (e *environmentBuilder) GetOutputs(ctx RunnerContext, stage string) (map[string]interface{}, error) {
+func (e *environmentBuilder) GetOutputs(ctx *RunnerContext, stage string) (map[string]interface{}, error) {
 	metadata := ctx.GetReleaseMetadata()
 	buildOutputs := ctx.GetBuildOutputs()
 	result := map[string]interface{}{}
@@ -177,7 +177,7 @@ func (e *environmentBuilder) GetEscapeEnvironmentVariables() map[string]interfac
 	}
 }
 
-func (e *environmentBuilder) MergeInputsWithOsEnvironment(ctx RunnerContext) []string {
+func (e *environmentBuilder) MergeInputsWithOsEnvironment(ctx *RunnerContext) []string {
 	result := e.GetEnviron()
 	inputs := ctx.GetBuildInputs()
 	escapeEnv := e.GetEscapeEnvironmentVariables()
@@ -186,7 +186,7 @@ func (e *environmentBuilder) MergeInputsWithOsEnvironment(ctx RunnerContext) []s
 	return result
 }
 
-func (e *environmentBuilder) MergeInputsAndOutputsWithOsEnvironment(ctx RunnerContext) []string {
+func (e *environmentBuilder) MergeInputsAndOutputsWithOsEnvironment(ctx *RunnerContext) []string {
 	result := e.GetEnviron()
 	inputs := ctx.GetBuildInputs()
 	outputs := ctx.GetBuildOutputs()
@@ -208,7 +208,7 @@ func addValues(result, values *map[string]interface{}, prefix string) {
 	}
 }
 
-func prepInputs(ctx RunnerContext, stage string, inputs *map[string]interface{}, isErrand bool) (map[string]interface{}, error) {
+func prepInputs(ctx *RunnerContext, stage string, inputs *map[string]interface{}, isErrand bool) (map[string]interface{}, error) {
 	metadata := ctx.GetReleaseMetadata()
 	deplState := ctx.GetDeploymentState()
 	result := map[string]interface{}{}

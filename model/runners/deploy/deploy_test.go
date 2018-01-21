@@ -17,12 +17,13 @@ limitations under the License.
 package deploy
 
 import (
-	"github.com/ankyra/escape/model"
-	"github.com/ankyra/escape/model/runners"
-	"github.com/ankyra/escape-core/state"
-	. "gopkg.in/check.v1"
 	"os"
 	"testing"
+
+	"github.com/ankyra/escape-core/state"
+	"github.com/ankyra/escape/model"
+	"github.com/ankyra/escape/model/runners"
+	. "gopkg.in/check.v1"
 )
 
 func Test(t *testing.T) { TestingT(t) }
@@ -31,7 +32,7 @@ type testSuite struct{}
 
 var _ = Suite(&testSuite{})
 
-func getRunContext(c *C, stateFile, escapePlan string) runners.RunnerContext {
+func getRunContext(c *C, stateFile, escapePlan string) *runners.RunnerContext {
 	ctx := model.NewContext()
 	ctx.DisableLogger()
 	err := ctx.InitFromLocalEscapePlanAndState(stateFile, "dev", escapePlan)
@@ -41,7 +42,7 @@ func getRunContext(c *C, stateFile, escapePlan string) runners.RunnerContext {
 	return runCtx
 }
 
-func checkStatus(c *C, runCtx runners.RunnerContext, code state.StatusCode) {
+func checkStatus(c *C, runCtx *runners.RunnerContext, code state.StatusCode) {
 	deploymentState := runCtx.GetDeploymentState()
 	c.Assert(deploymentState.GetStatus(Stage).Code, Equals, state.StatusCode(code))
 }

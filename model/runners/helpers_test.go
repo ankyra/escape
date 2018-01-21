@@ -85,7 +85,7 @@ func (s *testSuite) Test_NewScriptStep_initDeploymentState_fails_if_should_be_de
 
 func (s *testSuite) Test_NewScriptStep_initDeploymentState_uses_Inputs_function(c *C) {
 	runCtx := getRunContext(c, "testdata/helper_state.json", "testdata/helper.yml")
-	inputFunc := func(ctx RunnerContext, stage string) (map[string]interface{}, error) {
+	inputFunc := func(ctx *RunnerContext, stage string) (map[string]interface{}, error) {
 		v := map[string]interface{}{
 			"test": "hello",
 		}
@@ -103,7 +103,7 @@ func (s *testSuite) Test_NewScriptStep_initDeploymentState_uses_Inputs_function(
 
 func (s *testSuite) Test_NewScriptStep_initDeploymentState_fails_if_Inputs_fails(c *C) {
 	runCtx := getRunContext(c, "testdata/helper_state.json", "testdata/helper.yml")
-	inputFunc := func(ctx RunnerContext, stage string) (map[string]interface{}, error) {
+	inputFunc := func(ctx *RunnerContext, stage string) (map[string]interface{}, error) {
 		return nil, fmt.Errorf("error")
 	}
 	runCtx.GetDeploymentState().UpdateInputs("deploy", nil)

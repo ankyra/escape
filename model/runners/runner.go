@@ -10,25 +10,25 @@ import (
 )
 
 type Runner interface {
-	Run(RunnerContext) error
+	Run(*RunnerContext) error
 }
 
 type runner struct {
-	run func(ctx RunnerContext) error
+	run func(ctx *RunnerContext) error
 }
 
-func (r *runner) Run(ctx RunnerContext) error {
+func (r *runner) Run(ctx *RunnerContext) error {
 	return r.run(ctx)
 }
 
-func NewRunner(r func(ctx RunnerContext) error) Runner {
+func NewRunner(r func(ctx *RunnerContext) error) Runner {
 	return &runner{
 		run: r,
 	}
 }
 
 func NewCompoundRunner(runners ...Runner) Runner {
-	return NewRunner(func(ctx RunnerContext) error {
+	return NewRunner(func(ctx *RunnerContext) error {
 		for _, r := range runners {
 			if err := r.Run(ctx); err != nil {
 				return err
@@ -39,14 +39,14 @@ func NewCompoundRunner(runners ...Runner) Runner {
 }
 
 func NewStatusCodeRunner(stage string, status state.StatusCode) Runner {
-	return NewRunner(func(ctx RunnerContext) error {
+	return NewRunner(func(ctx *RunnerContext) error {
 		st := state.NewStatus(status)
 		return ctx.GetDeploymentState().UpdateStatus(stage, st)
 	})
 }
 
 func NewDependencyRunner(logKey, stage string, depRunner func() Runner, errorCode state.StatusCode) Runner {
-	return NewRunner(func(ctx RunnerContext) error {
+	return NewRunner(func(ctx *RunnerContext) error {
 		parentInputs, err := NewEnvironmentBuilder().GetPreDependencyInputs(ctx, stage)
 		if err != nil {
 			return ReportFailure(ctx, stage, err, errorCode)
@@ -61,7 +61,7 @@ func NewDependencyRunner(logKey, stage string, depRunner func() Runner, errorCod
 	})
 }
 
-func runDependency(ctx RunnerContext, depCfg *core.DependencyConfig, logKey, stage string, runner Runner, parentInputs map[string]interface{}) error {
+func runDependency(ctx *RunnerContext, depCfg *core.DependencyConfig, logKey, stage string, runner Runner, parentInputs map[string]interface{}) error {
 	dependency := depCfg.ReleaseId
 	ctx.Logger().PushSection("Dependency " + dependency)
 	ctx.Logger().Log(logKey+"."+logKey+"_dependency", map[string]string{
@@ -85,7 +85,10 @@ func runDependency(ctx RunnerContext, depCfg *core.DependencyConfig, logKey, sta
 	if err != nil {
 		return err
 	}
-	depCtx := ctx.NewContextForDependency(metadata)
+	depCtx, err := ctx.NewContextForDependency(metadata, depCfg.Consumes)
+	if err != nil {
+		return err
+	}
 	currentDir, err := os.Getwd()
 	if err != nil {
 		return err

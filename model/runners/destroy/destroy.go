@@ -17,8 +17,8 @@ limitations under the License.
 package destroy
 
 import (
-	. "github.com/ankyra/escape/model/runners"
 	"github.com/ankyra/escape-core/state"
+	. "github.com/ankyra/escape/model/runners"
 )
 
 func NewDestroyRunner(stage string) Runner {
@@ -30,7 +30,7 @@ func NewDestroyRunner(stage string) Runner {
 }
 
 func NewPreDestroyRunner(stage string) Runner {
-	return NewRunner(func(ctx RunnerContext) error {
+	return NewRunner(func(ctx *RunnerContext) error {
 		deferred := func() Runner { return NewDestroyRunner("deploy") }
 		err := NewDependencyRunner("destroy", stage, deferred, state.DestroyFailure).Run(ctx)
 		if err != nil {
@@ -41,7 +41,7 @@ func NewPreDestroyRunner(stage string) Runner {
 }
 
 func NewMainDestroyRunner(stage string) Runner {
-	return NewRunner(func(ctx RunnerContext) error {
+	return NewRunner(func(ctx *RunnerContext) error {
 		step := NewScriptStep(ctx, stage, "destroy", true)
 		step.ModifiesOutputVariables = true
 		return RunOrReportFailure(ctx, stage, step, state.RunningMainDestroyStep, state.DestroyFailure)
@@ -49,14 +49,14 @@ func NewMainDestroyRunner(stage string) Runner {
 }
 
 func NewPostDestroyRunner(stage string) Runner {
-	return NewRunner(func(ctx RunnerContext) error {
+	return NewRunner(func(ctx *RunnerContext) error {
 		step := NewScriptStep(ctx, stage, "post_destroy", true)
 		step.Commit = deleteCommit
 		return RunOrReportFailure(ctx, stage, step, state.RunningPostDestroyStep, state.DestroyFailure)
 	})
 }
 
-func deleteCommit(ctx RunnerContext, depl *state.DeploymentState, stage string) error {
+func deleteCommit(ctx *RunnerContext, depl *state.DeploymentState, stage string) error {
 	if err := depl.CommitVersion(stage, ctx.GetReleaseMetadata()); err != nil {
 		return err
 	}

@@ -21,7 +21,7 @@ import (
 	. "gopkg.in/check.v1"
 )
 
-func getRunContext(c *C, stateFile, escapePlan string) RunnerContext {
+func getRunContext(c *C, stateFile, escapePlan string) *RunnerContext {
 	ctx := model.NewContext()
 	ctx.DisableLogger()
 	err := ctx.InitFromLocalEscapePlanAndState(stateFile, "dev", escapePlan)

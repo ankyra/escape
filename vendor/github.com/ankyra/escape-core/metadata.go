@@ -141,7 +141,7 @@ func validate(m *ReleaseMetadata) error {
 	if m.Project == "" {
 		m.Project = "_"
 	}
-	if err := validateName(m.Project); m.Project != "_" && err != nil {
+	if err := ValidateProjectName(m.Project); err != nil {
 		return err
 	}
 	if m.ApiVersion <= 0 || m.ApiVersion > CurrentApiVersion {
@@ -195,6 +195,13 @@ func validateName(name string) error {
 		return fmt.Errorf("The name '%s' is a protected variable.", name)
 	}
 	return nil
+}
+
+func ValidateProjectName(name string) error {
+	if name == "_" {
+		return nil
+	}
+	return validateName(name)
 }
 
 func (m *ReleaseMetadata) AddExtension(releaseId string) {

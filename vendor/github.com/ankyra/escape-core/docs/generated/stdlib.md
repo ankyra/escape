@@ -17,6 +17,27 @@ h2 {
 Standard library functions for the [Escape Scripting Language](../scripting-language/)
 
 
+# Functions acting on integers
+
+## add(y :: integer)
+
+Add two integers
+
+
+# Unary functions
+
+## timestamp()
+
+Returns a UNIX timestamp
+
+
+# Functions acting on everything
+
+## id(parameter :: *)
+
+Returns its argument
+
+
 # Functions acting on lists
 
 ## env_lookup(key :: string)
@@ -38,41 +59,29 @@ Slice a list. Usually accessed implicitly using slice syntax (eg. `list[0:5]`)
 
 # Functions acting on strings
 
-## concat(v1 :: string, v2 :: string, ...)
+## track_patch_version()
 
-Concatate stringable arguments
-
-## replace(old :: string, new :: string, n :: integer)
-
-Replace returns a copy of the string s with the first n non-overlapping instances of old replaced by new. If old is empty, it matches at the beginning of the string and after each UTF-8 sequence, yielding up to k+1 replacements for a k-rune string. If n < 0, there is no limit on the number of replacements.
-
-## read_file()
-
-Read the contents of a file
+Track patch version
 
 ## lower(v :: string)
 
 Returns a copy of the string v with all Unicode characters mapped to their lower case
 
-## base64_encode()
+## upper(v :: string)
 
-Encode string to base64
-
-## trim()
-
-Returns a slice of the string s, with all leading and trailing white space removed, as defined by Unicode. 
-
-## track_major_version()
-
-Track major version
-
-## track_minor_version()
-
-Track minor version
+Returns a copy of the string v with all Unicode characters mapped to their upper case
 
 ## title(v :: string)
 
 Returns a copy of the string v with all Unicode characters mapped to their title case
+
+## base64_encode()
+
+Encode string to base64
+
+## track_version()
+
+Track version
 
 ## split(sep :: string)
 
@@ -82,36 +91,27 @@ Split slices s into all substrings separated by sep and returns a slice of the s
 
 Decode string from base64
 
-## track_patch_version()
+## trim()
 
-Track patch version
+Returns a slice of the string s, with all leading and trailing white space removed, as defined by Unicode. 
 
-## upper(v :: string)
+## read_file()
 
-Returns a copy of the string v with all Unicode characters mapped to their upper case
+Read the contents of a file
 
-## track_version()
+## concat(v1 :: string, v2 :: string, ...)
 
-Track version
+Concatate stringable arguments
 
+## replace(old :: string, new :: string, n :: integer)
 
-# Functions acting on integers
+Replace returns a copy of the string s with the first n non-overlapping instances of old replaced by new. If old is empty, it matches at the beginning of the string and after each UTF-8 sequence, yielding up to k+1 replacements for a k-rune string. If n < 0, there is no limit on the number of replacements.
 
-## add(y :: integer)
+## track_major_version()
 
-Add two integers
+Track major version
 
+## track_minor_version()
 
-# Unary functions
-
-## timestamp()
-
-Returns a UNIX timestamp
-
-
-# Functions acting on everything
-
-## id(parameter :: *)
-
-Returns its argument
+Track minor version
 

@@ -7,6 +7,9 @@ extends:
 depends:
 - depends1
 - depends2
+- consumes:
+    provider: provider1
+  release_id: depends3
 consumes:
 - provider1
 - provider2

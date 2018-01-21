@@ -17,6 +17,8 @@ limitations under the License.
 package state
 
 import (
+	"fmt"
+
 	"github.com/ankyra/escape-core"
 	. "gopkg.in/check.v1"
 )
@@ -148,4 +150,39 @@ func (s *suite) Test_GetProviders_includes_parent_build_providers_for_dep(c *C) 
 	c.Assert(providers["kubernetes"], Equals, "archive-release")
 	c.Assert(providers["gcp"], Equals, "archive-release-build")
 	c.Assert(providers["doesnt-exist"], Equals, "doesnt-exist-build")
+}
+
+func (s *suite) Test_ConfigureProviders_uses_extra_providers(c *C) {
+	metadata := core.NewReleaseMetadata("test", "1.0")
+	metadata.Consumes = []*core.ConsumerConfig{
+		core.NewConsumerConfig("provider1"),
+	}
+	providers := map[string]string{
+		"provider1": "otherdepl",
+	}
+	err := deplWithDeps.ConfigureProviders(metadata, "deploy", providers)
+	c.Assert(err, IsNil)
+	returnedProviders := deplWithDeps.GetProviders("deploy")
+	c.Assert(returnedProviders["provider1"], Equals, "otherdepl")
+}
+
+func (s *suite) Test_ConfigureProviders_fails_if_provider_missing(c *C) {
+	metadata := core.NewReleaseMetadata("test", "1.0")
+	metadata.Consumes = []*core.ConsumerConfig{
+		core.NewConsumerConfig("provider1"),
+	}
+	err := deplWithDeps.ConfigureProviders(metadata, "deploy", nil)
+	c.Assert(err, DeepEquals, fmt.Errorf("Missing provider of type 'provider1'. This can be configured using the -p / --extra-provider flag."))
+}
+
+func (s *suite) Test_ConfigureProviders_succeeds_if_provider_already_configured(c *C) {
+	metadata := core.NewReleaseMetadata("test", "1.0")
+	metadata.Consumes = []*core.ConsumerConfig{
+		core.NewConsumerConfig("provider1"),
+	}
+	deplWithDeps.SetProvider("deploy", "provider1", "otherdepl")
+	err := deplWithDeps.ConfigureProviders(metadata, "deploy", nil)
+	c.Assert(err, IsNil)
+	returnedProviders := deplWithDeps.GetProviders("deploy")
+	c.Assert(returnedProviders["provider1"], Equals, "otherdepl")
 }

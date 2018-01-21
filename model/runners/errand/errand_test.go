@@ -31,7 +31,7 @@ type testSuite struct{}
 
 var _ = Suite(&testSuite{})
 
-func getRunContext(c *C, stateFile, escapePlan string) runners.RunnerContext {
+func getRunContext(c *C, stateFile, escapePlan string) *runners.RunnerContext {
 	ctx := model.NewContext()
 	ctx.DisableLogger()
 	err := ctx.InitFromLocalEscapePlanAndState(stateFile, "dev", escapePlan)

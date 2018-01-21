@@ -27,25 +27,7 @@ import (
 	"github.com/ankyra/escape/util"
 )
 
-type RunnerContext interface {
-	GetEnvironmentState() *state.EnvironmentState
-	GetDeploymentState() *state.DeploymentState
-	SetDeploymentState(*state.DeploymentState)
-	GetReleaseMetadata() *core.ReleaseMetadata
-	SetReleaseMetadata(*core.ReleaseMetadata)
-	Logger() util.Logger
-	GetPath() *paths.Path
-	GetBuildInputs() map[string]interface{}
-	SetBuildInputs(map[string]interface{})
-	GetBuildOutputs() map[string]interface{}
-	SetBuildOutputs(map[string]interface{})
-	NewContextForDependency(*core.ReleaseMetadata) RunnerContext
-	GetScriptEnvironment(stage string) (*script.ScriptEnvironment, error)
-	GetScriptEnvironmentForPreDependencyStep(stage string) (*script.ScriptEnvironment, error)
-	GetRootDeploymentName() string
-}
-
-type runnerContext struct {
+type RunnerContext struct {
 	environmentState *state.EnvironmentState
 	deploymentState  *state.DeploymentState
 	releaseMetadata  *core.ReleaseMetadata
@@ -55,93 +37,114 @@ type runnerContext struct {
 	logger           util.Logger
 	context          Context
 	stage            string
+
+	toScriptEnvironment func(d *state.DeploymentState, metadata *core.ReleaseMetadata, stage string, context state.DeploymentResolver) (*script.ScriptEnvironment, error)
 }
 
-func NewRunnerContext(context Context, rootStage string) (RunnerContext, error) {
+func NewRunnerContext(context Context, rootStage string) (*RunnerContext, error) {
 	metadata := context.GetReleaseMetadata()
 	if metadata == nil {
 		return nil, fmt.Errorf("Missing metadata in context. This is a bug in Escape.")
 	}
 	deplState := context.GetEnvironmentState().GetOrCreateDeploymentState(context.GetRootDeploymentName())
 	deplState.Release = metadata.GetVersionlessReleaseId()
-	return &runnerContext{
-		path:             paths.NewPath(),
-		environmentState: context.GetEnvironmentState(),
-		deploymentState:  deplState,
-		releaseMetadata:  metadata,
-		logger:           context.GetLogger(),
-		context:          context,
-		stage:            rootStage,
+	return &RunnerContext{
+		path:                paths.NewPath(),
+		environmentState:    context.GetEnvironmentState(),
+		deploymentState:     deplState,
+		releaseMetadata:     metadata,
+		logger:              context.GetLogger(),
+		context:             context,
+		stage:               rootStage,
+		toScriptEnvironment: state.ToScriptEnvironment,
 	}, nil
 }
 
-func (r *runnerContext) GetPath() *paths.Path {
+func (r *RunnerContext) GetPath() *paths.Path {
 	return r.path
 }
 
-func (r *runnerContext) GetEnvironmentState() *state.EnvironmentState {
+func (r *RunnerContext) GetEnvironmentState() *state.EnvironmentState {
 	return r.environmentState
 }
 
-func (r *runnerContext) GetDeploymentState() *state.DeploymentState {
+func (r *RunnerContext) GetDeploymentState() *state.DeploymentState {
 	return r.deploymentState
 }
 
-func (r *runnerContext) GetRootDeploymentName() string {
+func (r *RunnerContext) GetRootDeploymentName() string {
 	return r.context.GetRootDeploymentName()
 }
 
-func (r *runnerContext) SetDeploymentState(d *state.DeploymentState) {
+func (r *RunnerContext) SetDeploymentState(d *state.DeploymentState) {
 	r.deploymentState = d
 }
 
-func (r *runnerContext) Logger() util.Logger {
+func (r *RunnerContext) Logger() util.Logger {
 	return r.logger
 }
 
-func (r *runnerContext) GetReleaseMetadata() *core.ReleaseMetadata {
+func (r *RunnerContext) GetReleaseMetadata() *core.ReleaseMetadata {
 	return r.releaseMetadata
 }
 
-func (r *runnerContext) SetReleaseMetadata(m *core.ReleaseMetadata) {
+func (r *RunnerContext) SetReleaseMetadata(m *core.ReleaseMetadata) {
 	r.releaseMetadata = m
 }
 
-func (r *runnerContext) GetBuildInputs() map[string]interface{} {
+func (r *RunnerContext) GetBuildInputs() map[string]interface{} {
 	return r.inputs
 }
 
-func (r *runnerContext) SetBuildInputs(inputs map[string]interface{}) {
+func (r *RunnerContext) SetBuildInputs(inputs map[string]interface{}) {
 	r.inputs = inputs
 }
 
-func (r *runnerContext) GetBuildOutputs() map[string]interface{} {
+func (r *RunnerContext) GetBuildOutputs() map[string]interface{} {
 	return r.outputs
 }
 
-func (r *runnerContext) SetBuildOutputs(outputs map[string]interface{}) {
+func (r *RunnerContext) SetBuildOutputs(outputs map[string]interface{}) {
 	r.outputs = outputs
 }
 
-func (r *runnerContext) GetScriptEnvironment(stage string) (*script.ScriptEnvironment, error) {
-	return state.ToScriptEnvironment(r.GetDeploymentState(), r.GetReleaseMetadata(), stage, r.context)
+func (r *RunnerContext) GetScriptEnvironment(stage string) (*script.ScriptEnvironment, error) {
+	return r.toScriptEnvironment(r.GetDeploymentState(), r.GetReleaseMetadata(), stage, r.context)
 }
 
-func (r *runnerContext) GetScriptEnvironmentForPreDependencyStep(stage string) (*script.ScriptEnvironment, error) {
+func (r *RunnerContext) GetScriptEnvironmentForPreDependencyStep(stage string) (*script.ScriptEnvironment, error) {
 	// should only contain metadata, parent inputs and providers
 	return state.ToScriptEnvironmentForDependencyStep(r.GetDeploymentState(), r.GetReleaseMetadata(), stage, r.context)
 }
 
-func (r *runnerContext) NewContextForDependency(metadata *core.ReleaseMetadata) RunnerContext {
-	return &runnerContext{
-		environmentState: r.environmentState,
-		deploymentState:  r.deploymentState.GetDeploymentOrMakeNew(r.stage, metadata.GetVersionlessReleaseId()),
-		path:             r.path.NewPathForDependency(metadata),
-		releaseMetadata:  metadata,
-		logger:           r.logger,
-		inputs:           r.inputs,
-		outputs:          r.outputs,
-		context:          r.context,
-		stage:            "deploy",
+func (r *RunnerContext) NewContextForDependency(metadata *core.ReleaseMetadata, consumerMapping map[string]string) (*RunnerContext, error) {
+	depl := r.deploymentState.GetDeploymentOrMakeNew(r.stage, metadata.GetVersionlessReleaseId())
+
+	scriptEnv, err := r.GetScriptEnvironment(r.stage)
+	if err != nil {
+		return nil, err
 	}
+	for iface, providerDepl := range consumerMapping {
+		val, err := script.ParseAndEvalToGoValue(providerDepl, scriptEnv)
+		if err != nil {
+			return nil, err
+		}
+		valStr, ok := val.(string)
+		if !ok {
+			return nil, fmt.Errorf("Expecting string for provider mapping '%s', but got '%v'", iface, val)
+		}
+		consumerMapping[iface] = valStr
+	}
+	return &RunnerContext{
+		environmentState:    r.environmentState,
+		deploymentState:     depl,
+		path:                r.path.NewPathForDependency(metadata),
+		releaseMetadata:     metadata,
+		logger:              r.logger,
+		inputs:              r.inputs,
+		outputs:             r.outputs,
+		context:             r.context,
+		stage:               "deploy",
+		toScriptEnvironment: r.toScriptEnvironment,
+	}, depl.ConfigureProviders(metadata, "deploy", consumerMapping)
 }

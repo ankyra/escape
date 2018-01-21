@@ -179,6 +179,29 @@ func (d *DeploymentState) GetProviders(stage string) map[string]string {
 	return result
 }
 
+func (d *DeploymentState) ConfigureProviders(metadata *core.ReleaseMetadata, stage string, extraProviders map[string]string) error {
+	configuredProviders := d.GetProviders(stage)
+	availableProviders := d.environment.GetProviders()
+	for _, c := range metadata.GetConsumes(stage) {
+		provider, override := extraProviders[c]
+		if override {
+			d.SetProvider(stage, c, provider)
+			continue
+		}
+		_, configured := configuredProviders[c]
+		if configured {
+			continue
+		}
+		implementations := availableProviders[c]
+		if len(implementations) == 1 {
+			d.SetProvider(stage, c, implementations[0])
+		} else {
+			return fmt.Errorf("Missing provider of type '%s'. This can be configured using the -p / --extra-provider flag.", c)
+		}
+	}
+	return nil
+}
+
 func (d *DeploymentState) GetPreStepInputs(stage string) map[string]interface{} {
 	result := map[string]interface{}{}
 	for key, val := range d.environment.Inputs {

@@ -33,13 +33,13 @@ type ScriptStep struct {
 	ModifiesOutputVariables bool
 	Stage                   string
 	Step                    string
-	Inputs                  func(ctx RunnerContext, stage string) (map[string]interface{}, error)
+	Inputs                  func(ctx *RunnerContext, stage string) (map[string]interface{}, error)
 	LoadOutputs             bool
 	ScriptPath              string
-	Commit                  func(ctx RunnerContext, d *state.DeploymentState, stage string) error
+	Commit                  func(ctx *RunnerContext, d *state.DeploymentState, stage string) error
 }
 
-func NewScriptStep(ctx RunnerContext, stage, step string, shouldBeDeployed bool) *ScriptStep {
+func NewScriptStep(ctx *RunnerContext, stage, step string, shouldBeDeployed bool) *ScriptStep {
 	return &ScriptStep{
 		ShouldBeDeployed:        shouldBeDeployed,
 		ShouldDownload:          false,
@@ -53,14 +53,14 @@ func NewScriptStep(ctx RunnerContext, stage, step string, shouldBeDeployed bool)
 	}
 }
 
-func ReportFailure(ctx RunnerContext, stage string, err error, statusCode state.StatusCode) error {
+func ReportFailure(ctx *RunnerContext, stage string, err error, statusCode state.StatusCode) error {
 	if err2 := ctx.GetDeploymentState().UpdateStatus(stage, state.NewStatus(statusCode)); err2 != nil {
 		return fmt.Errorf("Couldn't update status '%s'. Trying to set failure status, because: %s", err2.Error(), err.Error())
 	}
 	return err
 }
 
-func RunOrReportFailure(ctx RunnerContext, stage string, runner Runner, startCode, errorCode state.StatusCode) error {
+func RunOrReportFailure(ctx *RunnerContext, stage string, runner Runner, startCode, errorCode state.StatusCode) error {
 	if err := ctx.GetDeploymentState().UpdateStatus(stage, state.NewStatus(startCode)); err != nil {
 		return err
 	}
@@ -71,7 +71,7 @@ func RunOrReportFailure(ctx RunnerContext, stage string, runner Runner, startCod
 }
 
 func NewPreScriptStepRunner(stage, field string, startCode, errorCode state.StatusCode) Runner {
-	return NewRunner(func(ctx RunnerContext) error {
+	return NewRunner(func(ctx *RunnerContext) error {
 		step := NewScriptStep(ctx, stage, field, false)
 		step.ShouldDownload = true
 		step.Inputs = NewEnvironmentBuilder().GetInputsForPreStep
@@ -80,7 +80,7 @@ func NewPreScriptStepRunner(stage, field string, startCode, errorCode state.Stat
 	})
 }
 func NewMainStepRunner(stage, field string, startCode, errorCode state.StatusCode) Runner {
-	return NewRunner(func(ctx RunnerContext) error {
+	return NewRunner(func(ctx *RunnerContext) error {
 		step := NewScriptStep(ctx, stage, field, true)
 		step.Commit = mainCommit
 		step.LoadOutputs = false
@@ -89,7 +89,7 @@ func NewMainStepRunner(stage, field string, startCode, errorCode state.StatusCod
 	})
 }
 func NewPostScriptStepRunner(stage, field string, startCode, errorCode state.StatusCode) Runner {
-	return NewRunner(func(ctx RunnerContext) error {
+	return NewRunner(func(ctx *RunnerContext) error {
 		step := NewScriptStep(ctx, stage, field, true)
 		step.Commit = postCommit
 		step.ModifiesOutputVariables = true
@@ -98,7 +98,7 @@ func NewPostScriptStepRunner(stage, field string, startCode, errorCode state.Sta
 }
 
 func NewScriptRunner(stage, field string, successCode, errorCode state.StatusCode) Runner {
-	return NewRunner(func(ctx RunnerContext) error {
+	return NewRunner(func(ctx *RunnerContext) error {
 		err := NewScriptStep(ctx, stage, field, true).Run(ctx)
 		if err != nil {
 			return ReportFailure(ctx, stage, err, errorCode)
@@ -108,7 +108,7 @@ func NewScriptRunner(stage, field string, successCode, errorCode state.StatusCod
 	})
 }
 
-func compileTemplates(ctx RunnerContext, stage string) error {
+func compileTemplates(ctx *RunnerContext, stage string) error {
 	env, err := ctx.GetScriptEnvironment(stage)
 	if err != nil {
 		return err
@@ -122,7 +122,7 @@ func compileTemplates(ctx RunnerContext, stage string) error {
 	return nil
 }
 
-func preCommit(ctx RunnerContext, deploymentState *state.DeploymentState, stage string) error {
+func preCommit(ctx *RunnerContext, deploymentState *state.DeploymentState, stage string) error {
 	inputs := ctx.GetBuildInputs()
 	metadata := ctx.GetReleaseMetadata()
 	if err := deploymentState.CommitVersion(stage, metadata); err != nil {
@@ -134,11 +134,11 @@ func preCommit(ctx RunnerContext, deploymentState *state.DeploymentState, stage 
 	return compileTemplates(ctx, stage)
 }
 
-func mainCommit(ctx RunnerContext, deploymentState *state.DeploymentState, stage string) error {
+func mainCommit(ctx *RunnerContext, deploymentState *state.DeploymentState, stage string) error {
 	return ctx.GetDeploymentState().UpdateOutputs(stage, ctx.GetBuildOutputs())
 }
 
-func postCommit(ctx RunnerContext, deploymentState *state.DeploymentState, stage string) error {
+func postCommit(ctx *RunnerContext, deploymentState *state.DeploymentState, stage string) error {
 	processedOutputs, err := NewEnvironmentBuilder().GetOutputs(ctx, stage)
 	if err != nil {
 		return err
@@ -146,7 +146,7 @@ func postCommit(ctx RunnerContext, deploymentState *state.DeploymentState, stage
 	return deploymentState.UpdateOutputs(stage, processedOutputs)
 }
 
-func (b *ScriptStep) Run(ctx RunnerContext) error {
+func (b *ScriptStep) Run(ctx *RunnerContext) error {
 	ctx.GetPath().EnsureEscapeDirectoryExists()
 	if b.ScriptPath != "" {
 		scriptPath, err := b.initScript(ctx)
@@ -173,7 +173,7 @@ func (b *ScriptStep) Run(ctx RunnerContext) error {
 	return nil
 }
 
-func (b *ScriptStep) initScript(ctx RunnerContext) (string, error) {
+func (b *ScriptStep) initScript(ctx *RunnerContext) (string, error) {
 	script := ctx.GetPath().Script(b.ScriptPath)
 	ctx.Logger().Log(b.Stage+".step", map[string]string{
 		"step":   b.Step,
@@ -188,7 +188,7 @@ func (b *ScriptStep) initScript(ctx RunnerContext) (string, error) {
 	return script, nil
 }
 
-func (b *ScriptStep) initDeploymentState(ctx RunnerContext) (*state.DeploymentState, error) {
+func (b *ScriptStep) initDeploymentState(ctx *RunnerContext) (*state.DeploymentState, error) {
 	deploymentState := ctx.GetDeploymentState()
 
 	metadata := ctx.GetReleaseMetadata()
@@ -228,14 +228,14 @@ func (b *ScriptStep) initDeploymentState(ctx RunnerContext) (*state.DeploymentSt
 	return deploymentState, nil
 }
 
-func (b *ScriptStep) getEnv(ctx RunnerContext) []string {
+func (b *ScriptStep) getEnv(ctx *RunnerContext) []string {
 	if !b.LoadOutputs {
 		return NewEnvironmentBuilder().MergeInputsWithOsEnvironment(ctx)
 	}
 	return NewEnvironmentBuilder().MergeInputsAndOutputsWithOsEnvironment(ctx)
 }
 
-func (b *ScriptStep) handleDownloads(ctx RunnerContext) error {
+func (b *ScriptStep) handleDownloads(ctx *RunnerContext) error {
 	if !b.ShouldDownload {
 		return nil
 	}
@@ -243,7 +243,7 @@ func (b *ScriptStep) handleDownloads(ctx RunnerContext) error {
 	return dependency_resolvers.DoDownloads(downloads, ctx.Logger())
 }
 
-func (b *ScriptStep) getCmd(ctx RunnerContext) ([]string, error) {
+func (b *ScriptStep) getCmd(ctx *RunnerContext) ([]string, error) {
 	if b.ModifiesOutputVariables {
 		if err := writeOutputsToFile(ctx.GetBuildOutputs()); err != nil {
 			return nil, err
@@ -254,7 +254,7 @@ func (b *ScriptStep) getCmd(ctx RunnerContext) ([]string, error) {
 	return []string{b.ScriptPath}, nil
 }
 
-func (b *ScriptStep) runScript(ctx RunnerContext) error {
+func (b *ScriptStep) runScript(ctx *RunnerContext) error {
 	env := b.getEnv(ctx)
 	cmd, err := b.getCmd(ctx)
 	if err != nil {
@@ -268,7 +268,7 @@ func (b *ScriptStep) runScript(ctx RunnerContext) error {
 	return b.readOutputVariables(ctx)
 }
 
-func (b *ScriptStep) readOutputVariables(ctx RunnerContext) error {
+func (b *ScriptStep) readOutputVariables(ctx *RunnerContext) error {
 	if !b.ModifiesOutputVariables {
 		return nil
 	}

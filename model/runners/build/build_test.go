@@ -82,12 +82,12 @@ func (s *testSuite) Test_BuildRunner_has_access_to_previous_outputs(c *C) {
 	checkStatus(c, runCtx, state.OK)
 }
 
-func checkStatus(c *C, runCtx runners.RunnerContext, code state.StatusCode) {
+func checkStatus(c *C, runCtx *runners.RunnerContext, code state.StatusCode) {
 	deploymentState := runCtx.GetDeploymentState()
 	c.Assert(deploymentState.GetStatus(Stage).Code, Equals, state.StatusCode(code))
 }
 
-func getRunContext(c *C, stateFile, escapePlan string) runners.RunnerContext {
+func getRunContext(c *C, stateFile, escapePlan string) *runners.RunnerContext {
 	ctx := model.NewContext()
 	ctx.DisableLogger()
 	err := ctx.InitFromLocalEscapePlanAndState(stateFile, "dev", escapePlan)
