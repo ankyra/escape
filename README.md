@@ -1,11 +1,15 @@
 # Escape 
 
 Escape is a tool that can help with the building, testing, versioning,
-deploying and operating of software.
+deploying and operating of software platforms. Its goal is to provide best
+practices in release engineering to make it easier to deploy and operate
+software across environments. More information can be found in the [Escape
+Documentation](https://escape.ankyra.io/docs/).
+
+![Escape Logo](/logo.png)
 
 This repository contains the official Escape client. The Escape Inventory can
 be found [here](https://github.com/ankyra/escape-inventory).
-
 
 ## Downloads
 
