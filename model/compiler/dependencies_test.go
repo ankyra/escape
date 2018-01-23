@@ -137,7 +137,36 @@ func (s *suite) Test_Compile_Dependencies_adds_consumers(c *C) {
 	}
 	c.Assert(compileDependencies(ctx), IsNil)
 	c.Assert(ctx.Metadata.GetConsumes("deploy"), DeepEquals, []string{"test-consumer-1", "test-consumer-2"})
-	c.Assert(ctx.Metadata.GetConsumes("build"), DeepEquals, []string{"test-consumer-1", "test-consumer-3"})
+	c.Assert(ctx.Metadata.GetConsumes("build"), DeepEquals, []string{"test-consumer-1"})
+}
+
+func (s *suite) Test_Compile_Dependencies_adds_consumers_unless_part_of_consumer_mapping(c *C) {
+	plan := escape_plan.NewEscapePlan()
+	plan.Depends = nil
+	plan.Depends = []interface{}{
+		map[interface{}]interface{}{
+			"release_id": "dependency-v1.0",
+			"consumes": map[interface{}]interface{}{
+				"test-consumer-1": "some-deployment",
+				"renamed":         "some-other-deployment",
+			},
+		},
+	}
+	ctx := NewCompilerContext(plan, nil)
+	ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
+		if dep.ReleaseId == "_/dependency-v1.0" {
+			m := core.NewReleaseMetadata("dependency", "1.0")
+			m.AddConsumes(core.NewConsumerConfig("test-consumer-1"))
+			cfg := core.NewConsumerConfig("test-consumer-2")
+			cfg.VariableName = "renamed"
+			m.AddConsumes(cfg)
+			return m, nil
+		}
+		return nil, fmt.Errorf("Resolve error")
+	}
+	c.Assert(compileDependencies(ctx), IsNil)
+	c.Assert(ctx.Metadata.GetConsumes("deploy"), DeepEquals, []string{})
+	c.Assert(ctx.Metadata.GetConsumes("build"), DeepEquals, []string{})
 }
 
 func (s *suite) Test_Compile_Dependencies_nil(c *C) {

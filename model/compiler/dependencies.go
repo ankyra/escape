@@ -49,7 +49,16 @@ func compileDependencyConfig(ctx *CompilerContext, depend *core.DependencyConfig
 		return nil, err
 	}
 	for _, consume := range metadata.Consumes {
-		ctx.Metadata.AddConsumes(consume)
+		found := false
+		for provider, _ := range depend.Consumes {
+			if provider == consume.VariableName {
+				found = true
+				break
+			}
+		}
+		if !found {
+			ctx.Metadata.AddConsumes(consume)
+		}
 	}
 	for _, input := range metadata.Inputs {
 		if !input.HasDefault() {
