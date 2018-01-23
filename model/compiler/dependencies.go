@@ -49,6 +49,9 @@ func compileDependencyConfig(ctx *CompilerContext, depend *core.DependencyConfig
 		return nil, err
 	}
 	for _, consume := range metadata.Consumes {
+		if !consume.InScope("deploy") {
+			continue
+		}
 		found := false
 		for provider, _ := range depend.Consumes {
 			if provider == consume.VariableName {
