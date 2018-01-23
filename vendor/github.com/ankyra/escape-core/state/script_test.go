@@ -1,5 +1,5 @@
 /*
-Copyright 2017 Ankyra
+Copyright 2017, 2018 Ankyra
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ func (s *scriptSuite) Test_ToScriptEnvironment_adds_dependencies(c *C) {
 		"metadata": []string{},
 	}
 	test_helper_check_script_environment(c, dict["this"], dicts, "archive-full")
-	test_helper_check_script_environment(c, dict["test-v1.0"], dicts, "_/test")
+	test_helper_check_script_environment(c, dict["test-v1.0"], dicts, "archive-full:_/test")
 }
 
 func (s *scriptSuite) Test_ToScriptEnvironment_honours_variable_context(c *C) {
@@ -103,8 +103,8 @@ func (s *scriptSuite) Test_ToScriptEnvironment_honours_variable_context(c *C) {
 		"metadata": []string{},
 	}
 	test_helper_check_script_environment(c, dict["this"], dicts, "archive-full")
-	test_helper_check_script_environment(c, dict["test-v1.0"], dicts, "_/test")
-	test_helper_check_script_environment(c, dict["test"], dicts, "_/test")
+	test_helper_check_script_environment(c, dict["test-v1.0"], dicts, "archive-full:_/test")
+	test_helper_check_script_environment(c, dict["test"], dicts, "archive-full:_/test")
 }
 
 func (s *scriptSuite) Test_ToScriptEnvironment_ignores_missing_variables_in_variable_context(c *C) {

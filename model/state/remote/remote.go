@@ -65,7 +65,7 @@ func (r *remoteStateProvider) Save(depl *DeploymentState) error {
 	rootDeploymentStage := depl.GetRootDeploymentStage()
 	url := r.endpoints.UpdateDeploymentState(project, env, rootDeploymentName)
 	data := map[string]interface{}{
-		"path":       depl.GetDependencyPath(),
+		"path":       depl.GetDeploymentPath(),
 		"state":      depl,
 		"root_stage": rootDeploymentStage,
 	}

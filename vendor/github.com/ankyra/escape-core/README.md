@@ -2,14 +2,22 @@
 
 [![Build status](https://circleci.com/gh/ankyra/escape-core.svg?style=shield&circle-token=d7df85c68526fa4db52bf41ba48a05c52ae8f31d)](https://circleci.com/gh/ankyra/escape-core) [![Documentation](https://godoc.org/github.com/ankyra/escape-core?status.svg)](http://godoc.org/github.com/ankyra/escape-core)
 
-Core library containing datastructures for working with Release Metadata, State and the Escape Scripting Language.
+Core library containing datastructures for working with Release Metadata, State
+and the Escape Scripting Language. This library is used by:
 
-Please see https://escape.ankyra.io/ for the full documentation.
+* [Escape client](https://github.com/ankyra/escape)
+* [Escape Inventory](https://github.com/ankyra/escape-inventory)
+
+## Documentation
+
+Godoc API documentation can be found [here](http://godoc.org/github.com/ankyra/escape-core).
+
+For documentation on Escape itself see [the Escape Docs](https://escape.ankyra.io/docs/).
 
 ## License
 
 ```
-Copyright 2017 Ankyra
+Copyright 2017, 2018 Ankyra
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

@@ -1,5 +1,5 @@
 /*
-Copyright 2017 Ankyra
+Copyright 2017, 2018 Ankyra
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ func (d *DeploymentState) GetRootDeploymentStage() string {
 	return stage
 }
 
-func (d *DeploymentState) GetDependencyPath() string {
+func (d *DeploymentState) GetDeploymentPath() string {
 	result := []string{}
 	p := d
 	for p != nil {
@@ -94,6 +94,17 @@ func (d *DeploymentState) GetVersion(stage string) string {
 
 func (d *DeploymentState) GetEnvironmentState() *EnvironmentState {
 	return d.environment
+}
+
+func (d *DeploymentState) GetDeployment(stage, deploymentName string) (*DeploymentState, error) {
+	st := d.GetStageOrCreateNew(stage)
+	depl, ok := st.Deployments[deploymentName]
+	if !ok {
+		return nil, DeploymentDoesNotExistError(deploymentName)
+	}
+	depl.parentStage = st
+	st.Deployments[deploymentName] = depl
+	return depl, nil
 }
 
 func (d *DeploymentState) GetDeploymentOrMakeNew(stage, deploymentName string) *DeploymentState {

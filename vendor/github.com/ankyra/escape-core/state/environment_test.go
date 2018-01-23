@@ -1,5 +1,5 @@
 /*
-Copyright 2017 Ankyra
+Copyright 2017, 2018 Ankyra
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -94,4 +94,30 @@ func (s *suite) Test_GetProvidersOfType(c *C) {
 
 	providers = env.GetProvidersOfType("no-test-provider")
 	c.Assert(providers, HasLen, 0)
+}
+
+func (s *suite) Test_ResolveDeploymentPath(c *C) {
+	proj, _ := NewProjectState("project")
+	env := proj.GetEnvironmentStateOrMakeNew("env")
+	_, err := env.ResolveDeploymentPath("deploy", "test")
+	c.Assert(err, DeepEquals, DeploymentDoesNotExistError("test"))
+	_, err = env.ResolveDeploymentPath("build", "test")
+	c.Assert(err, DeepEquals, DeploymentDoesNotExistError("test"))
+
+	depl := env.GetOrCreateDeploymentState("test")
+	returnedDepl, err := env.ResolveDeploymentPath("deploy", "test")
+	c.Assert(err, IsNil)
+	c.Assert(returnedDepl, DeepEquals, depl)
+
+	deplDep := depl.GetDeploymentOrMakeNew("deploy", "test-dependency")
+	returnedDepl, err = env.ResolveDeploymentPath("deploy", "test:test-dependency")
+	c.Assert(err, IsNil)
+	c.Assert(returnedDepl, DeepEquals, deplDep)
+	_, err = env.ResolveDeploymentPath("build", "test:test-dependency")
+	c.Assert(err, DeepEquals, DeploymentDoesNotExistError("test-dependency"))
+
+	deplDep2 := deplDep.GetDeploymentOrMakeNew("deploy", "test-dependency2")
+	returnedDepl, err = env.ResolveDeploymentPath("deploy", "test:test-dependency:test-dependency2")
+	c.Assert(err, IsNil)
+	c.Assert(returnedDepl, DeepEquals, deplDep2)
 }
