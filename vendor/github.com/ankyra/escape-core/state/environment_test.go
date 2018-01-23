@@ -99,6 +99,7 @@ func (s *suite) Test_GetProvidersOfType(c *C) {
 func (s *suite) Test_ResolveDeploymentPath(c *C) {
 	proj, _ := NewProjectState("project")
 	env := proj.GetEnvironmentStateOrMakeNew("env")
+
 	_, err := env.ResolveDeploymentPath("deploy", "test")
 	c.Assert(err, DeepEquals, DeploymentDoesNotExistError("test"))
 	_, err = env.ResolveDeploymentPath("build", "test")
@@ -114,10 +115,27 @@ func (s *suite) Test_ResolveDeploymentPath(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(returnedDepl, DeepEquals, deplDep)
 	_, err = env.ResolveDeploymentPath("build", "test:test-dependency")
-	c.Assert(err, DeepEquals, DeploymentDoesNotExistError("test-dependency"))
+	c.Assert(err, DeepEquals, DeploymentPathResolveError("build", "test:test-dependency", "test-dependency"))
 
 	deplDep2 := deplDep.GetDeploymentOrMakeNew("deploy", "test-dependency2")
 	returnedDepl, err = env.ResolveDeploymentPath("deploy", "test:test-dependency:test-dependency2")
 	c.Assert(err, IsNil)
 	c.Assert(returnedDepl, DeepEquals, deplDep2)
+}
+
+func (s *suite) Test_ResolveDeploymentPath_with_build_stage(c *C) {
+	proj, _ := NewProjectState("project")
+	env := proj.GetEnvironmentStateOrMakeNew("env")
+
+	depl := env.GetOrCreateDeploymentState("test")
+	returnedDepl, err := env.ResolveDeploymentPath("build", "test")
+	c.Assert(err, IsNil)
+	c.Assert(returnedDepl, DeepEquals, depl)
+
+	deplDep := depl.GetDeploymentOrMakeNew("build", "test-dependency")
+	returnedDepl, err = env.ResolveDeploymentPath("build", "test:test-dependency")
+	c.Assert(err, IsNil)
+	c.Assert(returnedDepl, DeepEquals, deplDep)
+	_, err = env.ResolveDeploymentPath("deploy", "test:test-dependency")
+	c.Assert(err, DeepEquals, DeploymentPathResolveError("deploy", "test:test-dependency", "test-dependency"))
 }

@@ -109,7 +109,7 @@ func (s *StateCompiler) CompileProviders(d *DeploymentState, metadata *core.Rele
 			}
 			return fmt.Errorf("No provider of type '%s' was configured in the deployment state.", consumes)
 		}
-		deplState, err := d.GetEnvironmentState().ResolveDeploymentPath(stage, deplName)
+		deplState, err := d.GetEnvironmentState().ResolveDeploymentPath(d.GetRootDeploymentStage(), deplName)
 		if err != nil {
 			return err
 		}

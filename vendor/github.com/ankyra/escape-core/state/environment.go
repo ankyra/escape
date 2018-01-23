@@ -25,6 +25,10 @@ func DeploymentDoesNotExistError(deploymentName string) error {
 	return fmt.Errorf("Deployment '%s' does not exist", deploymentName)
 }
 
+func DeploymentPathResolveError(stage, deploymentPath, deploymentName string) error {
+	return fmt.Errorf("Failed to resolve deployment path '%s': the deployment '%s' could not be found in the %s stage", deploymentPath, deploymentName, stage)
+}
+
 type EnvironmentState struct {
 	Name        string                      `json:"name"`
 	Inputs      map[string]interface{}      `json:"inputs,omitempty"`
@@ -95,7 +99,7 @@ func (e *EnvironmentState) ResolveDeploymentPath(stage, deploymentPath string) (
 	for _, p := range parts[1:] {
 		newVal, err := val.GetDeployment(stage, p)
 		if err != nil {
-			return nil, err
+			return nil, DeploymentPathResolveError(stage, deploymentPath, p)
 		}
 		val = newVal
 		stage = "deploy"
