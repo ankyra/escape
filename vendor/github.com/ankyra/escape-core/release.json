@@ -8,23 +8,23 @@
       "README.md": "72bda3a0e4c579e06e1f459d53eb2076",
       "consumer.go": "f13ce04bc16ce249a06d05d7fa0658db",
       "consumer_test.go": "e49077a8242e9e16a2b90ae6468fb886",
-      "core.go": "63b13fdeea1dc3e14e66109b2ce5da9c",
+      "core.go": "793deb451aba807a43f6043a4fc11872",
       "core.go.tpl": "4099a7b2c6c7798799ea2819f8cf5c27",
       "dependency.go": "7b1b8db659fed9753f6e3c86d6438a80",
-      "dependency_config.go": "7cc35c53b12ec58a4a374809efa86ec7",
-      "dependency_config_test.go": "7cf59d8571c22a43a0c18b1a51f09958",
+      "dependency_config.go": "415d25a7d0c1cbec7496d50e153f68d1",
+      "dependency_config_test.go": "7a4b2e24905c03c9e055c3660a40fca7",
       "dependency_test.go": "548fcc9b10d415f8fe5eb6877a112889",
       "diff.go": "0696c416c5b7989e9ec9b252ace090ea",
       "diff_test.go": "8c0ab4860dc13ce475501a2a3e30a563",
       "docs/generate_pages.go": "6f9a2bea4ba36801d27c29dace654dd6",
       "docs/generate_stdlib_docs.go": "672a40c6b105e634e880d5447d5b30f0",
-      "docs/generated/dependencies.md": "c4ffcf571d502ef3c3110b4e97748410",
+      "docs/generated/dependencies.md": "7f86f757d8bfc38617e792c96c166500",
       "docs/generated/downloads.md": "2c6d58f3f3c14c770e426114be2e8ebd",
       "docs/generated/errands.md": "1fbe5372d3789570fb41a43f63dfd40c",
       "docs/generated/extensions.md": "8fbf06d246023679e41159a4041ced0d",
       "docs/generated/input-and-output-variables.md": "9a626703807de0628458e4262d883320",
       "docs/generated/providers-and-consumers.md": "3a6aa96daca4a6bb92c3b6efa3e46389",
-      "docs/generated/stdlib.md": "5de14013f4343ea491470038007a7ffc",
+      "docs/generated/stdlib.md": "f1021874861feba45ad28fc9d4c63d3c",
       "docs/generated/templates.md": "fffaa52cdb246bc5dd9471c3e425f894",
       "docs/scripting_language.md": "79ffa91ba9dad432b9c3810b474036d8",
       "download_config.go": "e1f64beb02a3f1825d428280976d209a",
@@ -32,15 +32,15 @@
       "errand_test.go": "de80890ce5f1714da94804eef7d7699e",
       "extension_config.go": "aac1efa292b8856aade1f0804ccb8058",
       "metadata.go": "9128b075885ac97463726251a8a49194",
-      "metadata_test.go": "c1b3eb50e4ff91f333d649d77acf5294",
+      "metadata_test.go": "35abdd1eb0d0645cf9181058012a889d",
       "parsers/consumer.go": "6ac33725157930093aceb29f4db3fbdb",
       "parsers/consumer_test.go": "4214109154a387c4142bc9ac4ad6a009",
-      "parsers/dependency.go": "aa97afa5a606e7c4b42fe55297e2badd",
-      "parsers/dependency_test.go": "8cf4308ed3454251ad6042f343a31136",
+      "parsers/dependency.go": "be3bf74de4855944993e567225767e22",
+      "parsers/dependency_test.go": "831a4936b67b725872c61ad83d03605a",
       "parsers/primitives.go": "5c97d746873dfc09cff5a3d49cac5596",
       "parsers/primitives_test.go": "af6282111d81f6679b6b41be87998c20",
-      "parsers/release_id.go": "b281f799f9972e1b1789996aa2f2c5ca",
-      "parsers/release_id_test.go": "64ccc153ee611979ca045b9d8cde5b1d",
+      "parsers/release_id.go": "e9e3e43c96e6b201c32bb1a8c8d2463b",
+      "parsers/release_id_test.go": "afa79911270f7c237792280b68f8e859",
       "parsers/variable.go": "d605b2a63bde1e732bb11b89faee5932",
       "parsers/variable_options.go": "f96b32175a6cee29810dbfe19d914fe5",
       "parsers/variable_options_test.go": "952917c3d9350f523ddb789c15473f2a",
@@ -144,23 +144,36 @@
    "name": "escape-core",
    "repository": "git@github.com:ankyra/escape-core.git",
    "branch": "master",
-   "git_revision": "bb8eed58f666435b630d0999311346ed6ef50709",
-   "revision_message": "Use the root deployment stage when resolving dependency paths.\nReferences ankyra/escape#14",
+   "git_revision": "49fddc13024a4adfc35e390608be66cff0d42769",
+   "revision_message": "Improve error generation in parsers package",
    "revision_author": "Bart Spaans \u003cbart.spaans@gmail.com\u003e",
    "metadata": {
       "release_metadata_api_version": "9"
    },
-   "version": "0.9.8",
+   "version": "0.9.9",
    "consumes": [],
    "downloads": null,
    "depends": [],
    "errands": {},
    "extends": [
       {
-         "release_id": "_/extension-golang-binary-v0.0.21"
+         "release_id": "_/extension-golang-binary-v0.0.24"
       }
    ],
    "inputs": [
+      {
+         "id": "go_docker_image",
+         "type": "string",
+         "default": "golang:1.9.0",
+         "description": "The go Docker image to use.",
+         "visible": true,
+         "items": null,
+         "eval_before_dependencies": true,
+         "scopes": [
+            "build",
+            "deploy"
+         ]
+      },
       {
          "id": "package_name",
          "type": "string",
@@ -191,7 +204,7 @@
          "id": "build_command",
          "type": "string",
          "default": "go build \u0026\u0026 go run docs/generate_stdlib_docs.go \u0026\u0026 go run docs/generate_pages.go",
-         "description": "Override the build command.",
+         "description": "Setting this overrides the default build command.",
          "visible": false,
          "items": null,
          "eval_before_dependencies": true,
@@ -204,7 +217,20 @@
          "id": "test_command",
          "type": "string",
          "default": "go test -cover -v $(/usr/local/go/bin/go list ./... | grep -v docs )",
-         "description": "Override the test command.",
+         "description": "Setting this overrides the default test command.",
+         "visible": false,
+         "items": null,
+         "eval_before_dependencies": true,
+         "scopes": [
+            "build",
+            "deploy"
+         ]
+      },
+      {
+         "id": "go_vendor_path",
+         "type": "string",
+         "default": "vendor/",
+         "description": "The location of the vendor directory (used for escape_go_dependencies)",
          "visible": false,
          "items": null,
          "eval_before_dependencies": true,
@@ -219,21 +245,8 @@
          "default": [
             "docs/generated:docs/"
          ],
-         "description": "\"Copy these files after build. Example:\n- README.md:file_in_root.txt\"\n",
+         "description": "Copy files and directories out of the Docker volume into the current\ndirectory after the build has completed. The format is `SRC:DEST`.  For\nexample: \n- README.md:file_in_root.txt\n",
          "visible": false,
-         "items": null,
-         "eval_before_dependencies": true,
-         "scopes": [
-            "build",
-            "deploy"
-         ]
-      },
-      {
-         "id": "go_vendor_path",
-         "type": "string",
-         "default": "vendor/",
-         "description": "The location of the vendor directory (used for escape_go_dependencies)",
-         "visible": true,
          "items": null,
          "eval_before_dependencies": true,
          "scopes": [
@@ -245,7 +258,7 @@
          "id": "escape_go_dependencies",
          "type": "list",
          "default": [],
-         "description": "\"Copy these Escape dependencies into vendor/ on build. Example:\n- heist/escape-middleware:github.com/ankyra/escape-middleware\"\n",
+         "description": "Copy Escape dependencies into the $go_vendor_path directory before building.\nThe format is `DEP:DEST`.  For example: \n- _/escape-core:github.com/ankyra/escape-core\n",
          "visible": false,
          "options": {
             "string": true
@@ -307,6 +320,7 @@
             "copy_files_after_build": "$this.inputs.copy_files_after_build",
             "description": "$this.description",
             "escape_go_dependencies": "$this.inputs.escape_go_dependencies",
+            "go_docker_image": "$this.inputs.go_docker_image",
             "go_vendor_path": "$this.inputs.go_vendor_path",
             "id": "$this.id",
             "logo": "$this.logo",
@@ -323,6 +337,6 @@
       }
    ],
    "variable_context": {
-      "extension-golang-binary": "_/extension-golang-binary-v0.0.21"
+      "extension-golang-binary": "_/extension-golang-binary-v0.0.24"
    }
 }

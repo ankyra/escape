@@ -37,24 +37,75 @@ type DependencyConfig struct {
 	// - To always use the latest version: `my-organisation/my-dependency-latest`
 	// - To always use version 0.1.1: `my-organisation/my-dependency-v0.1.1`
 	// - To always use the latest version in the 0.1 series: `my-organisation/my-dependency-v0.1.@`
-	ReleaseId     string                 `json:"release_id" yaml:"release_id"`
-	BuildMapping  map[string]interface{} `json:"build_mapping" yaml:"build_mapping"`
+	// - To make it possible to reference a dependency using a different name: `my-organisation/my-dependency-latest as my-name`
+	ReleaseId string `json:"release_id" yaml:"release_id"`
+
+	// Define the values of dependency inputs using Escape Script.
+	Mapping map[string]interface{} `json:"mapping" yaml:"mapping"`
+
+	// Define the values of dependency inputs using Escape Script when running
+	// stages in the build scope.
+	BuildMapping map[string]interface{} `json:"build_mapping" yaml:"build_mapping"`
+
+	// Define the values of dependency inputs using Escape Script when running
+	// stages in the deploy scope.
 	DeployMapping map[string]interface{} `json:"deploy_mapping" yaml:"deploy_mapping"`
-	Consumes      map[string]string      `json:"consumes" yaml:"consumes"`
+
+	// Map providers from the parent to dependencies.
+	//
+	// Example:
+	// ```
+	// consumes:
+	// - my-provider
+	// depends:
+	// - release_id: my-org/my-dep-latest
+	//     consumes:
+	//       provider: $my-provider.deployment
+	// ```
+	Consumes map[string]string `json:"consumes" yaml:"consumes"`
+
+	// The name of the (sub)-deployment. This defaults to the versionless release id;
+	// e.g. if the release_id is `my-org/my-dep-v1.0` then the DeploymentName will be
+	// `my-org/my-dep` by default.
+	DeploymentName string `json:"deployment_name" yaml:"deployment_name"`
+
+	// The variable used to reference this dependency. By default the variable
+	// name is the versionless release id of the dependency, but this can be
+	// overruled by renaming the dependency (e.g. `my-org/my-release-latest as
+	// my-variable`. This field will be set automatically at build time.
+	// Overwriting this field in the Escape plan has no effect.
+	VariableName string `json:"variable" yaml:"variable"`
 
 	// A list of scopes (`build`, `deploy`) that defines during which stage(s)
 	// this dependency should be fetched and deployed. *Currently not implemented!*
 	Scopes []string `json:"scopes" yaml:"scopes"`
+
+	// Parsed out of the release ID. For example: when release id is
+	// `"my-org/my-name-v1.0"` this value is `"my-org"`.
+	Project string `json:"-" yaml:"-"`
+
+	// Parsed out of the release ID. For example: when release id is
+	// `"my-org/my-name-v1.0"` this value is `"my-name"`.
+	Name string `json:"-" yaml:"-"`
+
+	// Parsed out of the release ID. For example: when release id is
+	// `"my-org/my-name-v1.0"` this value is `"1.0"`.
+	Version string `json:"-" yaml:"-"`
 }
 
 func NewDependencyConfig(releaseId string) *DependencyConfig {
 	return &DependencyConfig{
 		ReleaseId:     releaseId,
+		Mapping:       map[string]interface{}{},
 		BuildMapping:  map[string]interface{}{},
 		DeployMapping: map[string]interface{}{},
 		Scopes:        []string{"build", "deploy"},
 		Consumes:      map[string]string{},
 	}
+}
+
+func DependencyNeedsResolvingError(dependencyReleaseId string) error {
+	return fmt.Errorf("The dependency '%s' needs its version resolved.", dependencyReleaseId)
 }
 
 func (d *DependencyConfig) Validate(m *ReleaseMetadata) error {
@@ -66,6 +117,13 @@ func (d *DependencyConfig) Validate(m *ReleaseMetadata) error {
 	}
 	if d.Scopes == nil || len(d.Scopes) == 0 {
 		d.Scopes = []string{"build", "deploy"}
+	}
+	dep, err := NewDependencyFromString(d.ReleaseId)
+	if err != nil {
+		return err
+	}
+	if dep.NeedsResolving() {
+		return DependencyNeedsResolvingError(d.ReleaseId)
 	}
 	return nil
 }

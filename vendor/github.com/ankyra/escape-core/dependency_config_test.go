@@ -20,9 +20,9 @@ import (
 	. "gopkg.in/check.v1"
 )
 
-func (s *metadataSuite) Test_DependencyConfig_Mapping_is_set(c *C) {
+func (s *metadataSuite) Test_NewDependencyConfig_happy_path(c *C) {
 	metadata := NewReleaseMetadata("name", "1.0")
-	dep := NewDependencyConfig("my-dependency")
+	dep := NewDependencyConfig("my-dependency-v1.1")
 	dep.BuildMapping = nil
 	dep.DeployMapping = nil
 	c.Assert(dep.Validate(metadata), IsNil)
@@ -32,6 +32,39 @@ func (s *metadataSuite) Test_DependencyConfig_Mapping_is_set(c *C) {
 	c.Assert(dep.DeployMapping, HasLen, 0)
 	c.Assert(dep.Scopes, DeepEquals, []string{"build", "deploy"})
 	c.Assert(dep.Consumes, DeepEquals, map[string]string{})
+}
+
+func (s *metadataSuite) Test_NewDependencyConfig_fails_if_invalid_dependency_string(c *C) {
+	cases := []string{
+		"",
+		"my",
+		"my-dependency",
+		"my-dependency-v£%%",
+	}
+	for _, test := range cases {
+		metadata := NewReleaseMetadata("name", "1.0")
+		dep := NewDependencyConfig(test)
+		dep.BuildMapping = nil
+		dep.DeployMapping = nil
+		c.Assert(dep.Validate(metadata), NotNil)
+	}
+}
+
+func (s *metadataSuite) Test_NewDependencyConfig_fails_if_version_needs_resolving(c *C) {
+	cases := []string{
+		"my-dependency-latest",
+		"my-dependency-v1.0.@",
+		"my-dependency-v0.@",
+		"my-dependency-v@",
+		"my-dependency-@",
+	}
+	for _, test := range cases {
+		metadata := NewReleaseMetadata("name", "1.0")
+		dep := NewDependencyConfig(test)
+		dep.BuildMapping = nil
+		dep.DeployMapping = nil
+		c.Assert(dep.Validate(metadata), DeepEquals, DependencyNeedsResolvingError(test))
+	}
 }
 
 func (s *metadataSuite) Test_NewDependencyConfigFromMap(c *C) {

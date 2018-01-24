@@ -32,10 +32,26 @@ type QualifiedReleaseId struct {
 	Project string
 }
 
+func InvalidReleaseFormatError(releaseId string) error {
+	return fmt.Errorf("Invalid release format: %s.", releaseId)
+}
+
+func InvalidVersionStringInReleaseIdError(releaseId, version string) error {
+	return fmt.Errorf("Invalid version string in release ID '%s': '%s' is not a valid version.", releaseId, version)
+}
+
+func InvalidReleaseIdError(releaseId, err string) error {
+	return fmt.Errorf("Invalid release ID '%s'. %s", releaseId, err)
+}
+
+func InvalidVersionError(version string) error {
+	return fmt.Errorf("Invalid version string '%s'.", version)
+}
+
 func ParseReleaseId(releaseId string) (*ReleaseId, error) {
 	split := strings.Split(releaseId, "-")
 	if len(split) < 2 { // build-version
-		return nil, fmt.Errorf("Invalid release format: %s", releaseId)
+		return nil, InvalidReleaseFormatError(releaseId)
 	}
 	result := &ReleaseId{}
 	result.Name = strings.Join(split[:len(split)-1], "-")
@@ -46,18 +62,17 @@ func ParseReleaseId(releaseId string) (*ReleaseId, error) {
 	} else if strings.HasPrefix(version, "v") {
 		result.Version = version[1:]
 	} else {
-		return nil, fmt.Errorf("Invalid version string in release ID '%s': %s", releaseId, version)
+		return nil, InvalidVersionStringInReleaseIdError(releaseId, version)
 	}
-
-	if err := result.Validate(); err != nil {
-		return nil, fmt.Errorf("Invalid release ID '%s': %s", releaseId, err.Error())
+	if !isValidVersion(result.Version) {
+		return nil, InvalidVersionStringInReleaseIdError(releaseId, version)
 	}
 	return result, nil
 }
 
 func ParseQualifiedReleaseId(releaseId string) (*QualifiedReleaseId, error) {
 	if releaseId == "" {
-		return nil, fmt.Errorf("Invalid release format: ''")
+		return nil, InvalidReleaseFormatError("''")
 	}
 	parts := strings.Split(releaseId, "/")
 	releaseId = parts[0]
@@ -80,20 +95,19 @@ func (r *QualifiedReleaseId) ToString() string {
 	return r.Project + "/" + r.ReleaseId.ToString()
 }
 
-func (r *ReleaseId) Validate() error {
-	return ValidateVersion(r.Version)
+func isValidVersion(version string) bool {
+	if version == "latest" || version == "@" {
+		return true
+	}
+	re := regexp.MustCompile(`^[0-9]+(\.[0-9]+)*(\.@)?$`)
+	return re.Match([]byte(version))
 }
 
 func ValidateVersion(version string) error {
-	if version == "latest" || version == "@" {
+	if isValidVersion(version) {
 		return nil
 	}
-	re := regexp.MustCompile(`^[0-9]+(\.[0-9]+)*(\.@)?$`)
-	matches := re.Match([]byte(version))
-	if !matches {
-		return fmt.Errorf("Invalid version format: %s", version)
-	}
-	return nil
+	return InvalidVersionError(version)
 }
 
 func (r *ReleaseId) ToString() string {

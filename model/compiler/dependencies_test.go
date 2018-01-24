@@ -183,7 +183,7 @@ func (s *suite) Test_Compile_Dependencies_fails_if_invalid_format(c *C) {
 		"$invalid_dependency$",
 	}
 	ctx := NewCompilerContext(plan, nil)
-	c.Assert(compileDependencies(ctx).Error(), Equals, "Invalid release format: $invalid_dependency$")
+	c.Assert(compileDependencies(ctx).Error(), Equals, "Invalid release format: $invalid_dependency$.")
 }
 
 func (s *suite) Test_Compile_Dependencies_fails_if_resolve_version_fails(c *C) {

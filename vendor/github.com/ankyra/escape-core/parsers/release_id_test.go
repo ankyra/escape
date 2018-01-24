@@ -17,8 +17,9 @@ limitations under the License.
 package parsers
 
 import (
-	. "gopkg.in/check.v1"
 	"testing"
+
+	. "gopkg.in/check.v1"
 )
 
 func Test(t *testing.T) { TestingT(t) }
@@ -93,19 +94,19 @@ func (s *releaseIdSuite) Test_NeedsResolving_false(c *C) {
 
 func (s *releaseIdSuite) Test_ReleaseId_Invalid_Format1(c *C) {
 	_, err := ParseReleaseId("type")
-	c.Assert(err.Error(), Equals, "Invalid release format: type")
+	c.Assert(err, DeepEquals, InvalidReleaseFormatError("type"))
 }
 func (s *releaseIdSuite) Test_ReleaseId_Invalid_Format2(c *C) {
 	_, err := ParseReleaseId("type-name")
-	c.Assert(err.Error(), Equals, "Invalid version string in release ID 'type-name': name")
+	c.Assert(err, DeepEquals, InvalidVersionStringInReleaseIdError("type-name", "name"))
 }
 func (s *releaseIdSuite) Test_ReleaseId_Missing_Version(c *C) {
 	_, err := ParseReleaseId("type-name-nope")
-	c.Assert(err.Error(), Equals, "Invalid version string in release ID 'type-name-nope': nope")
+	c.Assert(err, DeepEquals, InvalidVersionStringInReleaseIdError("type-name-nope", "nope"))
 }
 func (s *releaseIdSuite) Test_ReleaseId_Invalid_Version(c *C) {
 	_, err := ParseReleaseId("type-name-vnope")
-	c.Assert(err.Error(), Equals, "Invalid release ID 'type-name-vnope': Invalid version format: nope")
+	c.Assert(err, DeepEquals, InvalidVersionStringInReleaseIdError("type-name-vnope", "vnope"))
 }
 
 func (s *releaseIdSuite) Test_QualifiedReleaseID(c *C) {
@@ -133,26 +134,37 @@ func (s *releaseIdSuite) Test_QualifiedReleaseID_fails_on_invalid_input(c *C) {
 	}
 }
 
-func (s *releaseIdSuite) Test_ValidateVersion(c *C) {
-	c.Assert(ValidateVersion("latest"), IsNil)
-	c.Assert(ValidateVersion("0"), IsNil)
-	c.Assert(ValidateVersion("10"), IsNil)
-	c.Assert(ValidateVersion("0.0"), IsNil)
-	c.Assert(ValidateVersion("0.10"), IsNil)
-	c.Assert(ValidateVersion("0.0.0"), IsNil)
-	c.Assert(ValidateVersion("0.0.10"), IsNil)
-	c.Assert(ValidateVersion("0.@"), IsNil)
-	c.Assert(ValidateVersion("0.0.@"), IsNil)
+func (s *releaseIdSuite) Test_IsValidVersion(c *C) {
+	cases := []string{
+		"latest",
+		"0",
+		"10",
+		"0.0",
+		"0.10",
+		"0.0.0",
+		"0.0.10",
+		"0.@",
+		"0.0.@",
+	}
+	for _, test := range cases {
+		c.Assert(isValidVersion(test), Equals, true)
+	}
 }
 
-func (s *releaseIdSuite) Test_ValidateVersion_Error(c *C) {
-	c.Assert(ValidateVersion("whatsthisnow"), Not(IsNil))
-	c.Assert(ValidateVersion("nope"), Not(IsNil))
-	c.Assert(ValidateVersion("0.test"), Not(IsNil))
-	c.Assert(ValidateVersion("0.0.test"), Not(IsNil))
-	c.Assert(ValidateVersion("0.0.latest"), Not(IsNil))
-	c.Assert(ValidateVersion("0-0"), Not(IsNil))
-	c.Assert(ValidateVersion("0_0"), Not(IsNil))
-	c.Assert(ValidateVersion("0@"), Not(IsNil))
-	c.Assert(ValidateVersion("0.0@"), Not(IsNil))
+func (s *releaseIdSuite) Test_IsValidVersion_false(c *C) {
+	cases := []string{
+		"",
+		"whatsthisnow",
+		"nope",
+		"0.test",
+		"0.0.test",
+		"0.0.latest",
+		"0-0",
+		"0_0",
+		"0@",
+		"0.0@",
+	}
+	for _, test := range cases {
+		c.Assert(isValidVersion(test), Equals, false)
+	}
 }

@@ -127,7 +127,7 @@ func (s *metadataSuite) Test_validate(c *C) {
 		`{"name": "1"}`:                                             "Invalid name '1'",
 		`{"name": "test"}`:                                          "Missing version field in release metadata",
 		`{"name": "test", "version": "1", "api_version": 1000}`:     "The release metadata is compiled with a version of Escape targetting API version v1000, but this build supports up to v" + strconv.Itoa(CurrentApiVersion),
-		`{"name": "name", "version": "@ASD"}`:                       "Invalid version format: @ASD",
+		`{"name": "name", "version": "@ASD"}`:                       "Invalid version string '@ASD'.",
 		`{"name": "name", "version": "1", "inputs": [{"id": ""}]}`:  "Variable object is missing an 'id'",
 		`{"name": "name", "version": "1", "outputs": [{"id": ""}]}`: "Variable object is missing an 'id'",
 	}

@@ -26,6 +26,20 @@ type ParsedDependency struct {
 	VariableName string
 }
 
+const expectFormatError = `Expecting either a "[RELEASE_ID]" or "[RELEASE_ID] as [VARIABLE]".`
+
+func MalformedDependencyStringError(depString, err string) error {
+	return fmt.Errorf("Malformed dependency string '%s'. %s", depString, err)
+}
+
+func MalformedDependencyStringExpectingError(depString string) error {
+	return MalformedDependencyStringError(depString, expectFormatError)
+}
+
+func ExpectingAsError(unexpected, in string) error {
+	return fmt.Errorf("Unexpected '%s'; expecting 'as' in '%s. %s'", unexpected, in, expectFormatError)
+}
+
 func ParseDependency(str string) (*ParsedDependency, error) {
 	result := &ParsedDependency{}
 	split := strings.Split(str, " ")
@@ -36,7 +50,7 @@ func ParseDependency(str string) (*ParsedDependency, error) {
 		}
 	}
 	if len(parts) != 1 && len(parts) != 3 {
-		return nil, fmt.Errorf("Malformed dependency string '%s'", str)
+		return nil, MalformedDependencyStringExpectingError(str)
 	}
 	releaseId, err := ParseQualifiedReleaseId(parts[0])
 	if err != nil {
@@ -44,11 +58,11 @@ func ParseDependency(str string) (*ParsedDependency, error) {
 	}
 	if len(parts) == 3 {
 		if parts[1] != "as" {
-			return nil, fmt.Errorf("Unexpected '%s' expecting 'as' in '%s'", parts[1], str)
+			return nil, ExpectingAsError(parts[1], str)
 		}
 		id, err := ParseVariableIdent(parts[2])
 		if err != nil {
-			return nil, fmt.Errorf("Malformed dependency string '%s': %s", str, err.Error())
+			return nil, MalformedDependencyStringError(str, err.Error())
 		}
 		result.VariableName = id
 	}

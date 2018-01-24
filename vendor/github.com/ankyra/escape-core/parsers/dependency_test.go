@@ -53,23 +53,23 @@ func (s *dependencySuite) Test_Dependency_WhiteSpace(c *C) {
 func (s *dependencySuite) Test_Dependency_Missing_Id(c *C) {
 	dep, err := ParseDependency("name-v1.0 as")
 	c.Assert(dep, IsNil)
-	c.Assert(err.Error(), Equals, "Malformed dependency string 'name-v1.0 as'")
+	c.Assert(err, DeepEquals, MalformedDependencyStringExpectingError("name-v1.0 as"))
 }
 
 func (s *dependencySuite) Test_Dependency_Second_Word_Not_As(c *C) {
 	dep, err := ParseDependency("type-name-v1.0 oh identifier")
 	c.Assert(dep, IsNil)
-	c.Assert(err.Error(), Equals, "Unexpected 'oh' expecting 'as' in 'type-name-v1.0 oh identifier'")
+	c.Assert(err, DeepEquals, ExpectingAsError("oh", "type-name-v1.0 oh identifier"))
 }
 
 func (s *dependencySuite) Test_Dependency_Malformed_Release_Id(c *C) {
 	dep, err := ParseDependency("type-name-whatever")
 	c.Assert(dep, IsNil)
-	c.Assert(err.Error(), Equals, "Invalid version string in release ID 'type-name-whatever': whatever")
+	c.Assert(err, DeepEquals, InvalidVersionStringInReleaseIdError("type-name-whatever", "whatever"))
 }
 
 func (s *dependencySuite) Test_Dependency_fails_with_invalid_variable_name(c *C) {
 	dep, err := ParseDependency("name-v1.0 as $23")
 	c.Assert(dep, IsNil)
-	c.Assert(err.Error(), Equals, "Malformed dependency string 'name-v1.0 as $23': Invalid variable format '$23'")
+	c.Assert(err, DeepEquals, MalformedDependencyStringError("name-v1.0 as $23", "Invalid variable format '$23'"))
 }
