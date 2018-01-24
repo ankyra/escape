@@ -1,21 +1,21 @@
 {
-   "api_version": 9,
-   "built_with_core_version": "0.9.7",
-   "built_with_escape_version": "0.22.5",
+   "api_version": 10,
+   "built_with_core_version": "0.10.10",
+   "built_with_escape_version": "0.22.9",
    "description": "Core library containing datastructures for working with Release Metadata, State and the Escape Scripting Language.\nPlease see https://escape.ankyra.io for the full documentation.",
    "files": {
       "LICENSE": "2a944942e1496af1886903d274dedb13",
       "README.md": "72bda3a0e4c579e06e1f459d53eb2076",
       "consumer.go": "f13ce04bc16ce249a06d05d7fa0658db",
       "consumer_test.go": "e49077a8242e9e16a2b90ae6468fb886",
-      "core.go": "793deb451aba807a43f6043a4fc11872",
+      "core.go": "7f9a34aacc71d1435b9d73d4a66102d0",
       "core.go.tpl": "4099a7b2c6c7798799ea2819f8cf5c27",
-      "dependency.go": "7b1b8db659fed9753f6e3c86d6438a80",
-      "dependency_config.go": "415d25a7d0c1cbec7496d50e153f68d1",
-      "dependency_config_test.go": "7a4b2e24905c03c9e055c3660a40fca7",
+      "dependency.go": "824ac7f427ead64864ee36bc8431564a",
+      "dependency_config.go": "c46c4ae749505ceea1a3ff4c02e670e2",
+      "dependency_config_test.go": "136b789c3b591d5a414f9b116b51d8c6",
       "dependency_test.go": "548fcc9b10d415f8fe5eb6877a112889",
       "diff.go": "0696c416c5b7989e9ec9b252ace090ea",
-      "diff_test.go": "8c0ab4860dc13ce475501a2a3e30a563",
+      "diff_test.go": "b498c8a357f2f2a89248c4295297a159",
       "docs/generate_pages.go": "6f9a2bea4ba36801d27c29dace654dd6",
       "docs/generate_stdlib_docs.go": "672a40c6b105e634e880d5447d5b30f0",
       "docs/generated/dependencies.md": "7f86f757d8bfc38617e792c96c166500",
@@ -24,15 +24,15 @@
       "docs/generated/extensions.md": "8fbf06d246023679e41159a4041ced0d",
       "docs/generated/input-and-output-variables.md": "9a626703807de0628458e4262d883320",
       "docs/generated/providers-and-consumers.md": "3a6aa96daca4a6bb92c3b6efa3e46389",
-      "docs/generated/stdlib.md": "f1021874861feba45ad28fc9d4c63d3c",
+      "docs/generated/stdlib.md": "6cc9ed69e319cd8afeba09c3bb9a424f",
       "docs/generated/templates.md": "fffaa52cdb246bc5dd9471c3e425f894",
       "docs/scripting_language.md": "79ffa91ba9dad432b9c3810b474036d8",
       "download_config.go": "e1f64beb02a3f1825d428280976d209a",
       "errand.go": "9a6714f0143390faa5644c8d6f6b735c",
       "errand_test.go": "de80890ce5f1714da94804eef7d7699e",
       "extension_config.go": "aac1efa292b8856aade1f0804ccb8058",
-      "metadata.go": "9128b075885ac97463726251a8a49194",
-      "metadata_test.go": "35abdd1eb0d0645cf9181058012a889d",
+      "metadata.go": "608ddb9ae26f6801d152e5cca2058836",
+      "metadata_test.go": "1931d311c95f23877ed2f3fabc247080",
       "parsers/consumer.go": "6ac33725157930093aceb29f4db3fbdb",
       "parsers/consumer_test.go": "4214109154a387c4142bc9ac4ad6a009",
       "parsers/dependency.go": "be3bf74de4855944993e567225767e22",
@@ -57,6 +57,7 @@
       "script/parser_test.go": "a175ed50d520aa78da0252707cb4b284",
       "script/script.go": "1559c57937540bf796beaab8b38d1d02",
       "script/type.go": "c88eddb4a80f4d702b510875e89380f1",
+      "state/.script_test.go.swp": "d0b33ace8b024c98f32e0845facaa979",
       "state/dag.go": "4f62beb03f412911c6091fc89de76bda",
       "state/dag_test.go": "aabafd4be73ea045c10001784bc61e8b",
       "state/deployment.go": "cfb64498c76b2d0c67b000f95086185b",
@@ -65,8 +66,8 @@
       "state/environment_test.go": "4c9c78f377a054737e300056568880d9",
       "state/project.go": "4c45fc909275c9fe566e5f25bbff9971",
       "state/project_test.go": "8ce2ec92c727ddc08fa68f549a60f708",
-      "state/script.go": "1e53247dc080445391c61a2661156982",
-      "state/script_test.go": "22cf97fb83e0c55986c9afedb4bc3cd6",
+      "state/script.go": "35a2cdee7cde63e23ee35c1b9df319a9",
+      "state/script_test.go": "c02a24e000069ac7824b6c298844ca6f",
       "state/stage.go": "a4b15b6fbc39710736454fb4aa511759",
       "state/status.go": "bdfa737a10988887037cc878bd04f3b7",
       "state/status_test.go": "08b9ad2033b1170f6ec4a9b06d0fe137",
@@ -144,13 +145,13 @@
    "name": "escape-core",
    "repository": "git@github.com:ankyra/escape-core.git",
    "branch": "master",
-   "git_revision": "49fddc13024a4adfc35e390608be66cff0d42769",
-   "revision_message": "Improve error generation in parsers package",
+   "git_revision": "3f96463d64cf71dfb20db29e5a1e21e94197bd1e",
+   "revision_message": "Remove VariableCtx on ReleaseMetadata.",
    "revision_author": "Bart Spaans \u003cbart.spaans@gmail.com\u003e",
    "metadata": {
-      "release_metadata_api_version": "9"
+      "release_metadata_api_version": "10"
    },
-   "version": "0.9.9",
+   "version": "0.10.11",
    "consumes": [],
    "downloads": null,
    "depends": [],
@@ -335,8 +336,5 @@
             "versionless_release": "$this.versionless_release"
          }
       }
-   ],
-   "variable_context": {
-      "extension-golang-binary": "_/extension-golang-binary-v0.0.24"
-   }
+   ]
 }

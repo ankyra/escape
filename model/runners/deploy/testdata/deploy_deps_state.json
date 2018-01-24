@@ -33,6 +33,25 @@
                                  "inputs": {
                                     "variable": "testinput"
                                  },
+                                 "calculated_outputs": {
+                                    "output_variable": "dependency output"
+                                 },
+                                 "version": "0.0.1",
+                                 "status": {
+                                    "status": "ok",
+                                    "updated_at": "2018-01-24T20:06:24.614625409Z"
+                                 }
+                              }
+                           }
+                        },
+                        "dep": {
+                           "name": "dep",
+                           "release": "_/dependency",
+                           "stages": {
+                              "deploy": {
+                                 "inputs": {
+                                    "variable": "testinput"
+                                 },
                                  "calculated_inputs": {
                                     "PREVIOUS_OUTPUT_output_variable": "dependency output"
                                  },
@@ -42,7 +61,7 @@
                                  "version": "0.0.1",
                                  "status": {
                                     "status": "ok",
-                                    "updated_at": "2018-01-23T17:38:26.972194822Z"
+                                    "updated_at": "2018-01-24T20:33:27.950333513Z"
                                  }
                               }
                            }
@@ -51,7 +70,7 @@
                      "version": "0.0.1",
                      "status": {
                         "status": "ok",
-                        "updated_at": "2018-01-23T17:38:26.972682377Z"
+                        "updated_at": "2018-01-24T20:33:27.950875994Z"
                      }
                   }
                }

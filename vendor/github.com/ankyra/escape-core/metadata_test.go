@@ -149,16 +149,6 @@ func (s *metadataSuite) Test_GetVersionlessReleaseId(c *C) {
 	c.Assert(releaseId, Equals, "_/test-release")
 }
 
-func (s *metadataSuite) Test_VariableContext(c *C) {
-	m := NewReleaseMetadata("test-release", "0.1")
-	m.SetVariableInContext("test_key1", "test_value1")
-	m.SetVariableInContext("test_key2", "test_value2")
-	ctx := m.GetVariableContext()
-	c.Assert(ctx, HasLen, 2)
-	c.Assert(ctx["test_key1"], Equals, "test_value1")
-	c.Assert(ctx["test_key2"], Equals, "test_value2")
-}
-
 func (s *metadataSuite) Test_InputVariables(c *C) {
 	v1, _ := variables.NewVariableFromString("input_variable1", "string")
 	v2, _ := variables.NewVariableFromString("input_variable2", "string")
@@ -238,8 +228,6 @@ func (s *metadataSuite) Test_FromJson(c *C) {
 	c.Assert(m.GetConsumes("deploy")[1], Equals, "provider2")
 	c.Assert(m.GetConsumes("build"), HasLen, 1)
 	c.Assert(m.GetConsumes("build")[0], Equals, "provider1")
-	c.Assert(m.GetVariableContext()["base"], Equals, "test-depends-v1")
-	c.Assert(m.GetVariableContext()["test-depends"], Equals, "test-depends-v1")
 }
 
 func (s *metadataSuite) Test_AddInputVariable(c *C) {

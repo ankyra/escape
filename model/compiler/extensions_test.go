@@ -37,8 +37,7 @@ func (s *suite) Test_Compile_Extensions(c *C) {
 		return nil, fmt.Errorf("Resolve error %s", dep.ReleaseId)
 	}
 	c.Assert(compileExtensions(ctx), IsNil)
-	c.Assert(ctx.VariableCtx["dependency"].GetQualifiedReleaseId(), Equals, "_/dependency-v1.0")
-	c.Assert(ctx.Metadata.VariableCtx["dependency"], Equals, "_/dependency-v1.0")
+	c.Assert(ctx.VariableCtx["_/dependency"].GetQualifiedReleaseId(), Equals, "_/dependency-v1.0")
 	c.Assert(ctx.Metadata.GetExtensions(), DeepEquals, []string{"_/dependency-v1.0"})
 }
 
@@ -50,7 +49,7 @@ func (s *suite) Test_Compile_Extensions_adds_dependencies_to_plan(c *C) {
 	ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
 		if dep.ReleaseId == "_/dependency-v1.0" {
 			m := core.NewReleaseMetadata("dependency", "1.0")
-			m.SetDependencies([]string{"recursive-dep-latest as dep", "another-dep-v1.0", "another-dep-v1.0"})
+			m.SetDependencies([]string{"recursive-dep-v1.0 as dep", "another-dep-v1.0", "another-dep-v1.0"})
 			return m, nil
 		}
 		return nil, fmt.Errorf("Resolve error %s", dep.ReleaseId)
@@ -58,34 +57,22 @@ func (s *suite) Test_Compile_Extensions_adds_dependencies_to_plan(c *C) {
 	c.Assert(compileExtensions(ctx), IsNil)
 	deps, err := ctx.Plan.GetDependencies()
 	c.Assert(err, IsNil)
-	c.Assert(deps, DeepEquals, []*core.DependencyConfig{core.NewDependencyConfig("recursive-dep-latest as dep"), core.NewDependencyConfig("another-dep-v1.0")})
-}
+	c.Assert(deps, HasLen, 2)
+	cfg1 := core.NewDependencyConfig("recursive-dep-v1.0 as dep")
+	cfg2 := core.NewDependencyConfig("another-dep-v1.0")
+	c.Assert(cfg1.Validate(nil), IsNil)
+	c.Assert(cfg2.Validate(nil), IsNil)
 
-func (s *suite) Test_Compile_Extensions_adds_variable_context(c *C) {
-	plan := escape_plan.NewEscapePlan()
-	plan.Extends = []string{"dependency-v1.0"}
-
-	ctx := NewCompilerContext(plan, nil)
-	ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
-		if dep.ReleaseId == "_/dependency-v1.0" {
-			m := core.NewReleaseMetadata("dependency", "1.0")
-			m.VariableCtx = map[string]string{
-				"oh": "project/recursive-dependency-v1.0",
-			}
-			return m, nil
-		} else if dep.ReleaseId == "project/recursive-dependency-v1.0" {
-			m := core.NewReleaseMetadata("recursive-dependency", "1.0")
-			m.Project = "project"
-			return m, nil
-		}
-		return nil, fmt.Errorf("Resolve error %s", dep.ReleaseId)
-	}
-	c.Assert(compileExtensions(ctx), IsNil)
-	c.Assert(ctx.VariableCtx["dependency"].GetQualifiedReleaseId(), Equals, "_/dependency-v1.0")
-	c.Assert(ctx.VariableCtx["oh"].GetQualifiedReleaseId(), Equals, "project/recursive-dependency-v1.0")
-	c.Assert(ctx.Metadata.VariableCtx["dependency"], Equals, "_/dependency-v1.0")
-	c.Assert(ctx.Metadata.VariableCtx["oh"], Equals, "project/recursive-dependency-v1.0")
-	c.Assert(ctx.Metadata.GetExtensions(), DeepEquals, []string{"_/dependency-v1.0"})
+	// These fields will be set when the dependency configs of the escape
+	// plan are validated (see dependencies.go). Not ideal.
+	cfg1.Project = ""
+	cfg1.Name = ""
+	cfg1.Version = ""
+	cfg2.Project = ""
+	cfg2.Name = ""
+	cfg2.Version = ""
+	c.Assert(deps[0], DeepEquals, cfg1)
+	c.Assert(deps[1], DeepEquals, cfg2)
 }
 
 func (s *suite) Test_Compile_Extensions_nil(c *C) {
@@ -117,41 +104,6 @@ func (s *suite) Test_Compile_Extensions_fails_if_version_cant_be_resolved(c *C) 
 	plan.Extends = []string{"test-v1"}
 	ctx := NewCompilerContext(plan, nil)
 	ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
-		return nil, fmt.Errorf("Resolve error")
-	}
-	c.Assert(compileExtensions(ctx), Not(IsNil))
-}
-
-func (s *suite) Test_Compile_Extensions_fails_if_variable_context_cant_be_parsed(c *C) {
-	plan := escape_plan.NewEscapePlan()
-	plan.Extends = []string{"dependency-v1.0"}
-	ctx := NewCompilerContext(plan, nil)
-	ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
-		if dep.ReleaseId == "_/dependency-v1.0" {
-			m := core.NewReleaseMetadata("dependency", "1.0")
-			m.VariableCtx = map[string]string{
-				"oh": "oasdoasidja ospdij apsdojk apsodk apsodk",
-			}
-			return m, nil
-		}
-		return nil, fmt.Errorf("Resolve error")
-	}
-	c.Assert(compileExtensions(ctx), Not(IsNil))
-}
-
-func (s *suite) Test_Compile_Extensions_fails_if_variable_context_cant_be_resolved(c *C) {
-	plan := escape_plan.NewEscapePlan()
-	plan.Extends = []string{"dependency-v1.0"}
-
-	ctx := NewCompilerContext(plan, nil)
-	ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
-		if dep.ReleaseId == "_/dependency-v1.0" {
-			m := core.NewReleaseMetadata("dependency", "1.0")
-			m.VariableCtx = map[string]string{
-				"oh": "_/cant-be-resovled-v1",
-			}
-			return m, nil
-		}
 		return nil, fmt.Errorf("Resolve error")
 	}
 	c.Assert(compileExtensions(ctx), Not(IsNil))

@@ -17,19 +17,17 @@ limitations under the License.
 package compiler
 
 import (
-	"fmt"
-
 	"github.com/ankyra/escape-core"
 	"github.com/ankyra/escape/model/paths"
 )
 
 func compileExtensions(ctx *CompilerContext) error {
 	for _, extend := range ctx.Plan.Extends {
-		dep, err := core.NewDependencyFromString(extend)
-		if err != nil {
+		depCfg := core.NewDependencyConfig(extend)
+		if err := depCfg.EnsureConfigIsParsed(); err != nil {
 			return err
 		}
-		metadata, err := resolveVersion(ctx, core.NewDependencyConfig(extend), dep)
+		metadata, err := resolveVersion(ctx, depCfg)
 		if err != nil {
 			return err
 		}
@@ -81,19 +79,10 @@ func compileExtensions(ctx *CompilerContext) error {
 				}
 			}
 		}
-		for key, val := range metadata.GetVariableContext() {
-			if ctx.DependencyFetcher == nil {
-				return fmt.Errorf("Missing dependency fetcher")
-			}
-			metadata, err := ctx.DependencyFetcher(core.NewDependencyConfig(val))
-			if err != nil {
-				return err
-			}
-			ctx.VariableCtx[key] = metadata
-			ctx.Metadata.SetVariableInContext(key, metadata.GetQualifiedReleaseId())
+		if err := depCfg.Validate(metadata); err != nil {
+			return err
 		}
-		ctx.VariableCtx[dep.Name] = metadata
-		ctx.Metadata.SetVariableInContext(dep.Name, metadata.GetQualifiedReleaseId())
+		ctx.VariableCtx[depCfg.VariableName] = metadata
 		ctx.Metadata.AddExtension(metadata.GetQualifiedReleaseId())
 	}
 	return nil

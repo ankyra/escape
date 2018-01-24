@@ -20,7 +20,6 @@ import (
 	"os"
 
 	"github.com/ankyra/escape-core"
-	"github.com/ankyra/escape-core/parsers"
 	. "github.com/ankyra/escape/model/interfaces"
 	"github.com/ankyra/escape/model/paths"
 	"github.com/ankyra/escape/model/runners"
@@ -74,12 +73,12 @@ func (d DeployController) Deploy(context Context, extraVars, extraProviders map[
 
 func (d DeployController) FetchAndDeploy(context Context, releaseId string, extraVars, extraProviders map[string]string) error {
 	// TODO cd into temp directory
-	parsed, err := parsers.ParseQualifiedReleaseId(releaseId)
-	if err != nil {
+	parsed := core.NewDependencyConfig(releaseId)
+	if err := parsed.EnsureConfigIsParsed(); err != nil {
 		return err
 	}
 	if parsed.NeedsResolving() {
-		metadata, err := context.QueryReleaseMetadata(core.NewDependencyFromQualifiedReleaseId(parsed))
+		metadata, err := context.QueryReleaseMetadata(parsed)
 		if err != nil {
 			return err
 		}
@@ -95,7 +94,7 @@ func (d DeployController) FetchAndDeploy(context Context, releaseId string, extr
 	if err != nil {
 		return err
 	}
-	root := paths.NewPath().UnpackedDepDirectory(core.NewDependencyFromQualifiedReleaseId(parsed))
+	root := paths.NewPath().UnpackedDepCfgDirectory(parsed)
 	err = os.Chdir(root)
 	if err := context.LoadReleaseJson(); err != nil {
 		return err

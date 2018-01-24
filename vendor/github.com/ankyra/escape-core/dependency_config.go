@@ -18,6 +18,9 @@ package core
 
 import (
 	"fmt"
+	"strings"
+
+	"github.com/ankyra/escape-core/parsers"
 )
 
 /*
@@ -93,6 +96,11 @@ type DependencyConfig struct {
 	Version string `json:"-" yaml:"-"`
 }
 
+type ResolvedDependencyConfig struct {
+	*DependencyConfig
+	ReleaseMetadata *ReleaseMetadata
+}
+
 func NewDependencyConfig(releaseId string) *DependencyConfig {
 	return &DependencyConfig{
 		ReleaseId:     releaseId,
@@ -104,8 +112,42 @@ func NewDependencyConfig(releaseId string) *DependencyConfig {
 	}
 }
 
+func (d *DependencyConfig) Resolve(m *ReleaseMetadata) *ResolvedDependencyConfig {
+	return &ResolvedDependencyConfig{
+		DependencyConfig: d,
+		ReleaseMetadata:  m,
+	}
+}
+
 func DependencyNeedsResolvingError(dependencyReleaseId string) error {
 	return fmt.Errorf("The dependency '%s' needs its version resolved.", dependencyReleaseId)
+}
+
+func (d *DependencyConfig) EnsureConfigIsParsed() error {
+	parsed, err := parsers.ParseDependency(d.ReleaseId)
+	if err != nil {
+		return err
+	}
+	d.ReleaseId = parsed.QualifiedReleaseId.ToString()
+	d.Project = parsed.Project
+	d.Name = parsed.Name
+	d.Version = parsed.Version
+	if d.VariableName == "" {
+		d.VariableName = parsed.VariableName
+	}
+	return nil
+}
+
+func (d *DependencyConfig) NeedsResolving() bool {
+	return d.Version == "latest" || strings.HasSuffix(d.Version, ".@")
+}
+
+func (d *DependencyConfig) GetVersionAsString() (version string) {
+	version = "v" + d.Version
+	if d.Version == "latest" {
+		version = d.Version
+	}
+	return version
 }
 
 func (d *DependencyConfig) Validate(m *ReleaseMetadata) error {
@@ -118,12 +160,18 @@ func (d *DependencyConfig) Validate(m *ReleaseMetadata) error {
 	if d.Scopes == nil || len(d.Scopes) == 0 {
 		d.Scopes = []string{"build", "deploy"}
 	}
-	dep, err := NewDependencyFromString(d.ReleaseId)
-	if err != nil {
+	if err := d.EnsureConfigIsParsed(); err != nil {
 		return err
 	}
-	if dep.NeedsResolving() {
+	if d.NeedsResolving() {
 		return DependencyNeedsResolvingError(d.ReleaseId)
+	}
+	d.DeploymentName = d.VariableName
+	if d.DeploymentName == "" {
+		d.DeploymentName = d.Project + "/" + d.Name
+	}
+	if d.VariableName == "" {
+		d.VariableName = d.Project + "/" + d.Name
 	}
 	return nil
 }
@@ -159,75 +207,101 @@ func (d *DependencyConfig) InScope(scope string) bool {
 	return false
 }
 
+func ExpectingTypeForDependencyFieldError(typ, field string, val interface{}) error {
+	return fmt.Errorf("Expecting %s for dependency '%s'; got '%T'", typ, field, val)
+}
+
+func ExpectingStringKeyInMapError(field string, val interface{}) error {
+	return fmt.Errorf("Expecting string key in dependency '%s'; got '%T'", field, val)
+}
+
+func stringFromInterface(field string, val interface{}) (string, error) {
+	valString, ok := val.(string)
+	if !ok {
+		return "", ExpectingTypeForDependencyFieldError("string", field, val)
+	}
+	return valString, nil
+}
+
+func mapFromInterface(field string, val interface{}) (map[string]interface{}, error) {
+	valMap, ok := val.(map[interface{}]interface{})
+	if !ok {
+		return nil, ExpectingTypeForDependencyFieldError("dict", field, val)
+	}
+	result := map[string]interface{}{}
+	for k, v := range valMap {
+		kStr, ok := k.(string)
+		if !ok {
+			return nil, ExpectingStringKeyInMapError(field, k)
+		}
+		result[kStr] = v
+	}
+	return result, nil
+}
+
 func NewDependencyConfigFromMap(dep map[interface{}]interface{}) (*DependencyConfig, error) {
-	var releaseId string
+	var releaseId, deploymentName, variable string
 	buildMapping := map[string]interface{}{}
 	deployMapping := map[string]interface{}{}
 	consumes := map[string]string{}
 	scopes := []string{}
 	for key, val := range dep {
+		var err error
 		keyStr, ok := key.(string)
 		if !ok {
 			return nil, fmt.Errorf("Expecting string key in dependency")
 		}
 		if keyStr == "release_id" {
-			valString, ok := val.(string)
-			if !ok {
-				return nil, fmt.Errorf("Expecting string for dependency 'release_id' got '%T'", val)
+			releaseId, err = stringFromInterface("release_id", val)
+			if err != nil {
+				return nil, err
 			}
-			releaseId = valString
+		} else if keyStr == "deployment_name" {
+			deploymentName, err = stringFromInterface("deployment_name", val)
+			if err != nil {
+				return nil, err
+			}
+		} else if keyStr == "variable" {
+			variable, err = stringFromInterface("variable", val)
+			if err != nil {
+				return nil, err
+			}
 		} else if key == "mapping" { // backwards compatibility with release metadata <= 6
-			valMap, ok := val.(map[interface{}]interface{})
-			if !ok {
-				return nil, fmt.Errorf("Expecting dict for dependency 'mapping' got '%T'", val)
+			valMap, err := mapFromInterface("mapping", val)
+			if err != nil {
+				return nil, err
 			}
 			for k, v := range valMap {
-				kStr, ok := k.(string)
-				if !ok {
-					return nil, fmt.Errorf("Expecting string key in dependency 'mapping'")
-				}
-				buildMapping[kStr] = v
-				deployMapping[kStr] = v
+				buildMapping[k] = v
+				deployMapping[k] = v
 			}
 		} else if key == "build_mapping" {
-			valMap, ok := val.(map[interface{}]interface{})
-			if !ok {
-				return nil, fmt.Errorf("Expecting dict for dependency 'build_mapping' got '%T'", val)
+			valMap, err := mapFromInterface("build_mapping", val)
+			if err != nil {
+				return nil, err
 			}
 			for k, v := range valMap {
-				kStr, ok := k.(string)
-				if !ok {
-					return nil, fmt.Errorf("Expecting string key in dependency 'build_mapping'")
-				}
-				buildMapping[kStr] = v
+				buildMapping[k] = v
 			}
 		} else if key == "deploy_mapping" {
-			valMap, ok := val.(map[interface{}]interface{})
-			if !ok {
-				return nil, fmt.Errorf("Expecting dict for dependency 'deploy_mapping' got '%T'", val)
+			valMap, err := mapFromInterface("deploy_mapping", val)
+			if err != nil {
+				return nil, err
 			}
 			for k, v := range valMap {
-				kStr, ok := k.(string)
-				if !ok {
-					return nil, fmt.Errorf("Expecting string key in dependency 'deploy_mapping'")
-				}
-				deployMapping[kStr] = v
+				deployMapping[k] = v
 			}
 		} else if key == "consumes" {
-			valMap, ok := val.(map[interface{}]interface{})
-			if !ok {
-				return nil, fmt.Errorf("Expecting dict for dependency 'consumes' got '%T'", val)
+			valMap, err := mapFromInterface("consumes", val)
+			if err != nil {
+				return nil, err
 			}
 			for k, v := range valMap {
-				kStr, ok := k.(string)
-				if !ok {
-					return nil, fmt.Errorf("Expecting string key in dependency consumer mapping")
-				}
 				vStr, ok := v.(string)
 				if !ok {
 					return nil, fmt.Errorf("Expecting string value in dependency consumer mapping")
 				}
-				consumes[kStr] = vStr
+				consumes[k] = vStr
 			}
 		} else if key == "scopes" {
 			s, err := parseScopesFromInterface(val)
@@ -241,6 +315,8 @@ func NewDependencyConfigFromMap(dep map[interface{}]interface{}) (*DependencyCon
 		return nil, fmt.Errorf("Missing 'release_id' in dependency")
 	}
 	cfg := NewDependencyConfig(releaseId)
+	cfg.DeploymentName = deploymentName
+	cfg.VariableName = variable
 	cfg.BuildMapping = buildMapping
 	cfg.DeployMapping = deployMapping
 	cfg.Scopes = scopes

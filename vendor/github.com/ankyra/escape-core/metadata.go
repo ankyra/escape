@@ -60,18 +60,17 @@ type ReleaseMetadata struct {
 	Metadata               map[string]string `json:"metadata"`
 	Version                string            `json:"version"`
 
-	Consumes    []*ConsumerConfig     `json:"consumes"`
-	Downloads   []*DownloadConfig     `json:"downloads"`
-	Depends     []*DependencyConfig   `json:"depends"`
-	Errands     map[string]*Errand    `json:"errands"`
-	Extends     []*ExtensionConfig    `json:"extends"`
-	Inputs      []*variables.Variable `json:"inputs"`
-	Outputs     []*variables.Variable `json:"outputs"`
-	Project     string                `json:"project"`
-	Provides    []*ProviderConfig     `json:"provides"`
-	Stages      map[string]*ExecStage `json:"stages"`
-	Templates   []*templates.Template `json:"templates"`
-	VariableCtx map[string]string     `json:"variable_context"`
+	Consumes  []*ConsumerConfig     `json:"consumes"`
+	Downloads []*DownloadConfig     `json:"downloads"`
+	Depends   []*DependencyConfig   `json:"depends"`
+	Errands   map[string]*Errand    `json:"errands"`
+	Extends   []*ExtensionConfig    `json:"extends"`
+	Inputs    []*variables.Variable `json:"inputs"`
+	Outputs   []*variables.Variable `json:"outputs"`
+	Project   string                `json:"project"`
+	Provides  []*ProviderConfig     `json:"provides"`
+	Stages    map[string]*ExecStage `json:"stages"`
+	Templates []*templates.Template `json:"templates"`
 }
 
 func NewEmptyReleaseMetadata() *ReleaseMetadata {
@@ -81,16 +80,15 @@ func NewEmptyReleaseMetadata() *ReleaseMetadata {
 		Files:                map[string]string{},
 		Metadata:             map[string]string{},
 
-		Consumes:    []*ConsumerConfig{},
-		Depends:     []*DependencyConfig{},
-		Errands:     map[string]*Errand{},
-		Extends:     []*ExtensionConfig{},
-		Inputs:      []*variables.Variable{},
-		Outputs:     []*variables.Variable{},
-		Provides:    []*ProviderConfig{},
-		Stages:      map[string]*ExecStage{},
-		Templates:   []*templates.Template{},
-		VariableCtx: map[string]string{},
+		Consumes:  []*ConsumerConfig{},
+		Depends:   []*DependencyConfig{},
+		Errands:   map[string]*Errand{},
+		Extends:   []*ExtensionConfig{},
+		Inputs:    []*variables.Variable{},
+		Outputs:   []*variables.Variable{},
+		Provides:  []*ProviderConfig{},
+		Stages:    map[string]*ExecStage{},
+		Templates: []*templates.Template{},
 	}
 }
 
@@ -379,7 +377,11 @@ func (m *ReleaseMetadata) AddDependency(dep *DependencyConfig) {
 }
 
 func (m *ReleaseMetadata) AddDependencyFromString(dep string) {
-	m.Depends = append(m.Depends, NewDependencyConfig(dep))
+	cfg := NewDependencyConfig(dep)
+	if err := cfg.Validate(m); err != nil {
+		panic(err)
+	}
+	m.Depends = append(m.Depends, cfg)
 }
 
 func (m *ReleaseMetadata) SetDependencies(deps []string) {
@@ -387,19 +389,6 @@ func (m *ReleaseMetadata) SetDependencies(deps []string) {
 	for _, d := range deps {
 		m.AddDependencyFromString(d)
 	}
-}
-
-func (m *ReleaseMetadata) GetVariableContext() map[string]string {
-	if m.VariableCtx == nil {
-		return map[string]string{}
-	}
-	return m.VariableCtx
-}
-
-func (m *ReleaseMetadata) SetVariableInContext(v string, ref string) {
-	ctx := m.GetVariableContext()
-	ctx[v] = ref
-	m.VariableCtx = ctx
 }
 
 func (m *ReleaseMetadata) GetReleaseId() string {

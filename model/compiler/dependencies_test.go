@@ -30,6 +30,7 @@ func (s *suite) Test_Compile_Dependencies(c *C) {
 	plan.Depends = nil
 	plan.Depends = []interface{}{
 		"dependency-latest as dep",
+		"project/other-dependency-latest",
 	}
 	lookupResult := core.NewReleaseMetadata("dependency", "1.0")
 	ctx := NewCompilerContext(plan, nil)
@@ -37,20 +38,28 @@ func (s *suite) Test_Compile_Dependencies(c *C) {
 		if dep.ReleaseId == "_/dependency-v1.0" {
 			return lookupResult, nil
 		}
+		if dep.ReleaseId == "project/other-dependency-v1.0" {
+			return lookupResult, nil
+		}
 		return nil, fmt.Errorf("Resolve error")
 	}
-	ctx.ReleaseQuery = func(dep *core.Dependency) (*core.ReleaseMetadata, error) {
-		if dep.GetQualifiedReleaseId() == "_/dependency-latest" {
+	ctx.ReleaseQuery = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
+		if dep.ReleaseId == "_/dependency-latest" {
+			return lookupResult, nil
+		}
+		if dep.ReleaseId == "project/other-dependency-latest" {
 			return lookupResult, nil
 		}
 		return nil, fmt.Errorf("Resolve error")
 	}
 	c.Assert(compileDependencies(ctx), IsNil)
-	c.Assert(ctx.Metadata.Depends[0], DeepEquals, core.NewDependencyConfig("_/dependency-v1.0"))
-	c.Assert(ctx.Metadata.VariableCtx["dependency"], Equals, "_/dependency-v1.0")
-	c.Assert(ctx.Metadata.VariableCtx["dep"], Equals, "_/dependency-v1.0")
-	c.Assert(ctx.VariableCtx["dependency"].GetQualifiedReleaseId(), Equals, "_/dependency-v1.0")
+	cfg := core.NewDependencyConfig("_/dependency-v1.0 as dep")
+	cfg.Validate(nil)
+	cfg.DeploymentName = "dep"
+	//c.Assert(cfg.DeploymentName, Equals, "dep")
+	c.Assert(ctx.Metadata.Depends[0], DeepEquals, cfg)
 	c.Assert(ctx.VariableCtx["dep"].GetQualifiedReleaseId(), Equals, "_/dependency-v1.0")
+	c.Assert(ctx.VariableCtx["project/other-dependency"].GetQualifiedReleaseId(), Equals, "_/dependency-v1.0")
 }
 
 func (s *suite) Test_Compile_Dependencies_with_mapping(c *C) {
@@ -72,8 +81,8 @@ func (s *suite) Test_Compile_Dependencies_with_mapping(c *C) {
 		}
 		return nil, fmt.Errorf("Resolve error")
 	}
-	ctx.ReleaseQuery = func(dep *core.Dependency) (*core.ReleaseMetadata, error) {
-		if dep.GetQualifiedReleaseId() == "_/dependency-latest" {
+	ctx.ReleaseQuery = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
+		if dep.ReleaseId == "_/dependency-latest" {
 			return lookupResult, nil
 		}
 		return nil, fmt.Errorf("Resolve error")
@@ -82,9 +91,6 @@ func (s *suite) Test_Compile_Dependencies_with_mapping(c *C) {
 	c.Assert(ctx.Metadata.Depends[0].ReleaseId, Equals, "_/dependency-v1.0")
 	c.Assert(ctx.Metadata.Depends[0].BuildMapping["input_variable"], Equals, "test")
 	c.Assert(ctx.Metadata.Depends[0].DeployMapping["input_variable"], Equals, "test")
-	c.Assert(ctx.Metadata.VariableCtx["dependency"], Equals, "_/dependency-v1.0")
-	c.Assert(ctx.Metadata.VariableCtx["dep"], Equals, "_/dependency-v1.0")
-	c.Assert(ctx.VariableCtx["dependency"].GetQualifiedReleaseId(), Equals, "_/dependency-v1.0")
 	c.Assert(ctx.VariableCtx["dep"].GetQualifiedReleaseId(), Equals, "_/dependency-v1.0")
 }
 
@@ -192,7 +198,7 @@ func (s *suite) Test_Compile_Dependencies_fails_if_resolve_version_fails(c *C) {
 		"dependency-latest",
 	}
 	ctx := NewCompilerContext(plan, nil)
-	ctx.ReleaseQuery = func(dep *core.Dependency) (*core.ReleaseMetadata, error) {
+	ctx.ReleaseQuery = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
 		return nil, fmt.Errorf("Resolve error")
 	}
 	ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {

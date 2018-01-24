@@ -29,7 +29,7 @@ type Context interface {
 	InitFromLocalEscapePlanAndState(string, string, string) error
 	InitReleaseMetadataByReleaseId(string) error
 	GetDependencyMetadata(*core.DependencyConfig) (*core.ReleaseMetadata, error)
-	QueryReleaseMetadata(*core.Dependency) (*core.ReleaseMetadata, error)
+	QueryReleaseMetadata(*core.DependencyConfig) (*core.ReleaseMetadata, error)
 	LoadEscapeConfig(cfgFile string, cfgProfile string) error
 	LoadEscapePlan(string) error
 	LoadReleaseJson() error

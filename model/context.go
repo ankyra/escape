@@ -20,7 +20,6 @@ import (
 	"errors"
 
 	"github.com/ankyra/escape-core"
-	"github.com/ankyra/escape-core/parsers"
 	types "github.com/ankyra/escape-core/state"
 	"github.com/ankyra/escape/model/compiler"
 	"github.com/ankyra/escape/model/config"
@@ -81,11 +80,11 @@ func (c *Context) InitFromLocalEscapePlanAndState(state, environment, planPath s
 }
 
 func (c *Context) InitReleaseMetadataByReleaseId(releaseId string) error {
-	parsed, err := parsers.ParseQualifiedReleaseId(releaseId)
-	if err != nil {
+	dep := core.NewDependencyConfig(releaseId)
+	if err := dep.EnsureConfigIsParsed(); err != nil {
 		return err
 	}
-	metadata, err := c.QueryReleaseMetadata(core.NewDependencyFromQualifiedReleaseId(parsed))
+	metadata, err := c.QueryReleaseMetadata(dep)
 	if err != nil {
 		return err
 	}
@@ -148,8 +147,8 @@ func (c *Context) SetRootDeploymentName(name string) {
 	c.RootDeploymentName = name
 }
 
-func (c *Context) QueryReleaseMetadata(dep *core.Dependency) (*core.ReleaseMetadata, error) {
-	metadata, ok := c.DependencyMetadata[dep.GetQualifiedReleaseId()]
+func (c *Context) QueryReleaseMetadata(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
+	metadata, ok := c.DependencyMetadata[dep.ReleaseId]
 	if ok {
 		return metadata, nil
 	}
@@ -157,22 +156,21 @@ func (c *Context) QueryReleaseMetadata(dep *core.Dependency) (*core.ReleaseMetad
 	if err != nil {
 		return nil, err
 	}
-	c.DependencyMetadata[dep.GetQualifiedReleaseId()] = metadata
+	c.DependencyMetadata[dep.ReleaseId] = metadata
 	return metadata, nil
 }
 
-func (c *Context) GetDependencyMetadata(depCfg *core.DependencyConfig) (*core.ReleaseMetadata, error) {
-	depReleaseId := depCfg.ReleaseId
-	metadata, ok := c.DependencyMetadata[depReleaseId]
+func (c *Context) GetDependencyMetadata(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
+	metadata, ok := c.DependencyMetadata[dep.ReleaseId]
 	if ok {
 		return metadata, nil
 	}
 	var err error
-	metadata, err = c.fetchDependencyAndReadMetadata(depCfg)
+	metadata, err = c.fetchDependencyAndReadMetadata(dep)
 	if err != nil {
 		return nil, err
 	}
-	c.DependencyMetadata[depReleaseId] = metadata
+	c.DependencyMetadata[dep.ReleaseId] = metadata
 	return metadata, nil
 }
 

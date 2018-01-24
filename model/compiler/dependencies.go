@@ -39,19 +39,14 @@ func compileDependencies(ctx *CompilerContext) error {
 }
 
 func compileDependencyConfig(ctx *CompilerContext, depend *core.DependencyConfig) (*core.DependencyConfig, error) {
-
-	dep, err := core.NewDependencyFromString(depend.ReleaseId)
+	if err := depend.EnsureConfigIsParsed(); err != nil {
+		return nil, err
+	}
+	metadata, err := resolveVersion(ctx, depend)
 	if err != nil {
 		return nil, err
 	}
-	metadata, err := resolveVersion(ctx, depend, dep)
-	if err != nil {
-		return nil, err
-	}
-	for _, consume := range metadata.Consumes {
-		if !consume.InScope("deploy") {
-			continue
-		}
+	for _, consume := range metadata.GetConsumerConfig("deploy") {
 		found := false
 		for provider, _ := range depend.Consumes {
 			if provider == consume.VariableName {
@@ -69,32 +64,28 @@ func compileDependencyConfig(ctx *CompilerContext, depend *core.DependencyConfig
 			ctx.Metadata.AddInputVariable(input)
 		}
 	}
-	ctx.VariableCtx[dep.Name] = metadata
-	ctx.Metadata.SetVariableInContext(dep.Name, metadata.GetQualifiedReleaseId())
-
-	if dep.VariableName != "" {
-		ctx.VariableCtx[dep.VariableName] = metadata
-		ctx.Metadata.SetVariableInContext(dep.VariableName, metadata.GetQualifiedReleaseId())
+	if err := depend.Validate(ctx.Metadata); err != nil {
+		return nil, err
 	}
-	depend.ReleaseId = dep.GetQualifiedReleaseId()
+	ctx.VariableCtx[depend.VariableName] = metadata
 	return depend, nil
 }
 
-func resolveVersion(ctx *CompilerContext, depCfg *core.DependencyConfig, d *core.Dependency) (*core.ReleaseMetadata, error) {
-	if d.NeedsResolving() {
+func resolveVersion(ctx *CompilerContext, depCfg *core.DependencyConfig) (*core.ReleaseMetadata, error) {
+	if depCfg.NeedsResolving() {
 		if ctx.ReleaseQuery == nil {
 			return nil, fmt.Errorf("Missing release query function")
 		}
-		metadata, err := ctx.ReleaseQuery(d)
+		metadata, err := ctx.ReleaseQuery(depCfg)
 		if err != nil {
 			return nil, err
 		}
-		d.Version = metadata.Version
+		depCfg.ReleaseId = depCfg.Project + "/" + depCfg.Name + "-v" + metadata.Version
+		depCfg.Version = metadata.Version
 	}
 	if ctx.DependencyFetcher == nil {
 		return nil, fmt.Errorf("Missing dependency fetcher")
 	}
-	depCfg.ReleaseId = d.GetQualifiedReleaseId()
 	metadata, err := ctx.DependencyFetcher(depCfg)
 	if err != nil {
 		return nil, err

@@ -47,7 +47,7 @@ func (s *scriptSuite) Test_ToScript(c *C) {
 	c.Assert(err, IsNil)
 	metadata.AddInputVariable(input)
 	metadata.AddOutputVariable(input)
-	unit := NewStateCompiler(nil).CompileState(depl, metadata, "deploy", true)
+	unit := newStateCompiler(nil).compileState(depl, metadata, "deploy", true)
 	dicts := map[string][]string{
 		"inputs":   []string{"user_level"},
 		"outputs":  []string{"user_level"},
@@ -58,7 +58,7 @@ func (s *scriptSuite) Test_ToScript(c *C) {
 
 func (s *scriptSuite) Test_ToScript_doesnt_include_variable_that_are_not_defined_in_release_metadata(c *C) {
 	metadata := core.NewReleaseMetadata("test", "1.0")
-	unit := NewStateCompiler(nil).CompileState(depl, metadata, "deploy", true)
+	unit := newStateCompiler(nil).compileState(depl, metadata, "deploy", true)
 	dicts := map[string][]string{
 		"inputs":   []string{},
 		"outputs":  []string{},
@@ -69,10 +69,12 @@ func (s *scriptSuite) Test_ToScript_doesnt_include_variable_that_are_not_defined
 
 func (s *scriptSuite) Test_ToScriptEnvironment_adds_dependencies(c *C) {
 	resolver := newResolverFromMap(map[string]*core.ReleaseMetadata{
-		"test-v1.0": core.NewReleaseMetadata("test", "1.0"),
+		"_/archive-dep-v1.0":  core.NewReleaseMetadata("test", "1.0"),
+		"_/archive-dep2-v1.0": core.NewReleaseMetadata("test", "1.0"),
 	})
 	metadata := core.NewReleaseMetadata("test", "1.0")
-	metadata.SetDependencies([]string{"test-v1.0"})
+	metadata.SetDependencies([]string{"archive-dep-v1.0 as archive-dep", "archive-dep2-v1.0"})
+
 	env, err := ToScriptEnvironment(fullDepl, metadata, "build", resolver)
 	c.Assert(err, IsNil)
 	c.Assert(script.IsDictAtom((*env)["$"]), Equals, true)
@@ -83,42 +85,8 @@ func (s *scriptSuite) Test_ToScriptEnvironment_adds_dependencies(c *C) {
 		"metadata": []string{},
 	}
 	test_helper_check_script_environment(c, dict["this"], dicts, "archive-full")
-	test_helper_check_script_environment(c, dict["test-v1.0"], dicts, "archive-full:_/test")
-}
-
-func (s *scriptSuite) Test_ToScriptEnvironment_honours_variable_context(c *C) {
-	resolver := newResolverFromMap(map[string]*core.ReleaseMetadata{
-		"test-v1.0": core.NewReleaseMetadata("test", "1.0"),
-	})
-	metadata := core.NewReleaseMetadata("test", "1.0")
-	metadata.SetDependencies([]string{"test-v1.0"})
-	metadata.SetVariableInContext("test", "test-v1.0")
-	env, err := ToScriptEnvironment(fullDepl, metadata, "build", resolver)
-	c.Assert(err, IsNil)
-	c.Assert(script.IsDictAtom((*env)["$"]), Equals, true)
-	dict := script.ExpectDictAtom((*env)["$"])
-	dicts := map[string][]string{
-		"inputs":   []string{},
-		"outputs":  []string{},
-		"metadata": []string{},
-	}
-	test_helper_check_script_environment(c, dict["this"], dicts, "archive-full")
-	test_helper_check_script_environment(c, dict["test-v1.0"], dicts, "archive-full:_/test")
-	test_helper_check_script_environment(c, dict["test"], dicts, "archive-full:_/test")
-}
-
-func (s *scriptSuite) Test_ToScriptEnvironment_ignores_missing_variables_in_variable_context(c *C) {
-	resolver := newResolverFromMap(map[string]*core.ReleaseMetadata{
-		"test-v1.0": core.NewReleaseMetadata("test", "1.0"),
-	})
-	metadata := core.NewReleaseMetadata("test", "1.0")
-	metadata.SetDependencies([]string{"test-v1.0"})
-	metadata.SetVariableInContext("test", "doesnt-exist-1.0")
-	env, err := ToScriptEnvironment(fullDepl, metadata, "build", resolver)
-	c.Assert(err, IsNil)
-	c.Assert(script.IsDictAtom((*env)["$"]), Equals, true)
-	dict := script.ExpectDictAtom((*env)["$"])
-	c.Assert(dict["test"], IsNil)
+	test_helper_check_script_environment(c, dict["archive-dep"], dicts, "archive-full:archive-dep")
+	test_helper_check_script_environment(c, dict["_/archive-dep2"], dicts, "archive-full:_/archive-dep2")
 }
 
 func (s *scriptSuite) Test_ToScriptEnvironment_doesnt_add_dependencies_that_are_not_in_metadata(c *C) {

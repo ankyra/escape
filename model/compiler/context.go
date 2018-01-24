@@ -37,7 +37,7 @@ type CompilerContext struct {
 	Plan              *escape_plan.EscapePlan
 	VariableCtx       map[string]*core.ReleaseMetadata
 	DependencyFetcher func(*core.DependencyConfig) (*core.ReleaseMetadata, error)
-	ReleaseQuery      func(*core.Dependency) (*core.ReleaseMetadata, error)
+	ReleaseQuery      func(*core.DependencyConfig) (*core.ReleaseMetadata, error)
 	Inventory         inventory.Inventory
 	Logger            util.Logger
 }

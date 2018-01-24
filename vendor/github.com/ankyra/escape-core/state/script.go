@@ -17,6 +17,7 @@ limitations under the License.
 package state
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/ankyra/escape-core"
@@ -35,6 +36,34 @@ func (d *deploymentResolver) GetDependencyMetadata(depend *core.DependencyConfig
 	return d.resolver(depend)
 }
 
+func MissingDeploymentStateError() error {
+	return errors.New("Missing deployment state. This is a bug in Escape.")
+}
+
+func ToScriptEnvironment(d *DeploymentState, metadata *core.ReleaseMetadata, stage string, context DeploymentResolver) (*script.ScriptEnvironment, error) {
+	if d == nil {
+		return nil, MissingDeploymentStateError()
+	}
+	result, err := newStateCompiler(context).Compile(d, metadata, stage)
+	if err != nil {
+		return nil, err
+	}
+	return script.NewScriptEnvironmentWithGlobals(script.ExpectDictAtom(result)), nil
+}
+
+func ToScriptEnvironmentForDependencyStep(d *DeploymentState, metadata *core.ReleaseMetadata, stage string, context DeploymentResolver) (*script.ScriptEnvironment, error) {
+	if d == nil {
+		return nil, MissingDeploymentStateError()
+	}
+	st := newStateCompiler(context)
+	st.DependencyInputsAreAvailable = false
+	result, err := st.Compile(d, metadata, stage)
+	if err != nil {
+		return nil, err
+	}
+	return script.NewScriptEnvironmentWithGlobals(script.ExpectDictAtom(result)), nil
+}
+
 func newResolverFromMap(metaMap map[string]*core.ReleaseMetadata) DeploymentResolver {
 	return &deploymentResolver{
 		resolver: func(depend *core.DependencyConfig) (*core.ReleaseMetadata, error) {
@@ -47,57 +76,44 @@ func newResolverFromMap(metaMap map[string]*core.ReleaseMetadata) DeploymentReso
 	}
 }
 
-func ToScriptEnvironment(d *DeploymentState, metadata *core.ReleaseMetadata, stage string, context DeploymentResolver) (*script.ScriptEnvironment, error) {
-	if d == nil {
-		return nil, fmt.Errorf("Missing deployment state. This is a bug in Escape.")
-	}
-	result, err := NewStateCompiler(context).Compile(d, metadata, stage)
-	if err != nil {
-		return nil, err
-	}
-	return script.NewScriptEnvironmentWithGlobals(script.ExpectDictAtom(result)), nil
-}
-
-func ToScriptEnvironmentForDependencyStep(d *DeploymentState, metadata *core.ReleaseMetadata, stage string, context DeploymentResolver) (*script.ScriptEnvironment, error) {
-	if d == nil {
-		return nil, fmt.Errorf("Missing deployment state. This is a bug in Escape.")
-	}
-	st := NewStateCompiler(context)
-	st.DependencyInputsAreAvailable = false
-	result, err := st.Compile(d, metadata, stage)
-	if err != nil {
-		return nil, err
-	}
-	return script.NewScriptEnvironmentWithGlobals(script.ExpectDictAtom(result)), nil
-}
-
-type StateCompiler struct {
+type stateCompiler struct {
 	Result                       map[string]script.Script
 	Resolver                     DeploymentResolver
 	DependencyInputsAreAvailable bool
 }
 
-func NewStateCompiler(context DeploymentResolver) *StateCompiler {
-	return &StateCompiler{
+func newStateCompiler(context DeploymentResolver) *stateCompiler {
+	return &stateCompiler{
 		Result:                       map[string]script.Script{},
 		Resolver:                     context,
 		DependencyInputsAreAvailable: true,
 	}
 }
 
-func (s *StateCompiler) CompileDependencies(d *DeploymentState, metadata *core.ReleaseMetadata, stage string) error {
+func (s *stateCompiler) Compile(d *DeploymentState, metadata *core.ReleaseMetadata, stage string) (script.Script, error) {
+	s.Result["this"] = s.compileState(d, metadata, stage, s.DependencyInputsAreAvailable)
+	if err := s.compileDependencies(d, metadata, stage); err != nil {
+		return nil, err
+	}
+	if err := s.compileProviders(d, metadata, stage); err != nil {
+		return nil, err
+	}
+	return script.LiftDict(s.Result), nil
+}
+
+func (s *stateCompiler) compileDependencies(d *DeploymentState, metadata *core.ReleaseMetadata, stage string) error {
 	for _, depend := range metadata.Depends {
 		depMetadata, err := s.Resolver.GetDependencyMetadata(depend)
 		if err != nil {
 			return err
 		}
-		depState := d.GetDeploymentOrMakeNew(stage, depMetadata.GetVersionlessReleaseId())
-		s.Result[depend.ReleaseId] = s.CompileState(depState, depMetadata, "deploy", s.DependencyInputsAreAvailable)
+		depState := d.GetDeploymentOrMakeNew(stage, depend.DeploymentName)
+		s.Result[depend.VariableName] = s.compileState(depState, depMetadata, "deploy", s.DependencyInputsAreAvailable)
 	}
 	return nil
 }
 
-func (s *StateCompiler) CompileProviders(d *DeploymentState, metadata *core.ReleaseMetadata, stage string) error {
+func (s *stateCompiler) compileProviders(d *DeploymentState, metadata *core.ReleaseMetadata, stage string) error {
 	providers := d.GetProviders(stage)
 	for _, consumerCfg := range metadata.GetConsumerConfig(stage) {
 		consumes := consumerCfg.Name
@@ -117,34 +133,12 @@ func (s *StateCompiler) CompileProviders(d *DeploymentState, metadata *core.Rele
 		if err != nil {
 			return err
 		}
-		s.Result[variable] = s.CompileState(deplState, depMetadata, "deploy", true)
+		s.Result[variable] = s.compileState(deplState, depMetadata, "deploy", true)
 	}
 	return nil
 }
 
-func (s *StateCompiler) CompileVariableCtx(metadata *core.ReleaseMetadata) {
-	for key, ref := range metadata.GetVariableContext() {
-		script, ok := s.Result[ref]
-		if !ok {
-			continue
-		}
-		s.Result[key] = script
-	}
-}
-
-func (s *StateCompiler) Compile(d *DeploymentState, metadata *core.ReleaseMetadata, stage string) (script.Script, error) {
-	s.Result["this"] = s.CompileState(d, metadata, stage, s.DependencyInputsAreAvailable)
-	if err := s.CompileDependencies(d, metadata, stage); err != nil {
-		return nil, err
-	}
-	if err := s.CompileProviders(d, metadata, stage); err != nil {
-		return nil, err
-	}
-	s.CompileVariableCtx(metadata)
-	return script.LiftDict(s.Result), nil
-}
-
-func (s *StateCompiler) CompileState(d *DeploymentState, metadata *core.ReleaseMetadata, stage string, includeVariables bool) script.Script {
+func (s *stateCompiler) compileState(d *DeploymentState, metadata *core.ReleaseMetadata, stage string, includeVariables bool) script.Script {
 	result := map[string]script.Script{}
 	if metadata != nil {
 		result = metadata.ToScriptMap()

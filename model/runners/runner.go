@@ -85,7 +85,7 @@ func runDependency(ctx *RunnerContext, depCfg *core.DependencyConfig, logKey, st
 	if err != nil {
 		return err
 	}
-	depCtx, err := ctx.NewContextForDependency(metadata, depCfg.Consumes)
+	depCtx, err := ctx.NewContextForDependency(depCfg.DeploymentName, metadata, depCfg.Consumes)
 	if err != nil {
 		return err
 	}
