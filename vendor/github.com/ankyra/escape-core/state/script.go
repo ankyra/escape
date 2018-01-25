@@ -98,6 +98,7 @@ func (s *stateCompiler) Compile(d *DeploymentState, metadata *core.ReleaseMetada
 	if err := s.compileProviders(d, metadata, stage); err != nil {
 		return nil, err
 	}
+	s.compileVariableCtx(metadata)
 	return script.LiftDict(s.Result), nil
 }
 
@@ -136,6 +137,16 @@ func (s *stateCompiler) compileProviders(d *DeploymentState, metadata *core.Rele
 		s.Result[variable] = s.compileState(deplState, depMetadata, "deploy", true)
 	}
 	return nil
+}
+
+func (s *stateCompiler) compileVariableCtx(metadata *core.ReleaseMetadata) {
+	for key, ref := range metadata.VariableCtx {
+		script, ok := s.Result[ref]
+		if !ok {
+			continue
+		}
+		s.Result[key] = script
+	}
 }
 
 func (s *stateCompiler) compileState(d *DeploymentState, metadata *core.ReleaseMetadata, stage string, includeVariables bool) script.Script {

@@ -71,6 +71,12 @@ type ReleaseMetadata struct {
 	Provides  []*ProviderConfig     `json:"provides"`
 	Stages    map[string]*ExecStage `json:"stages"`
 	Templates []*templates.Template `json:"templates"`
+
+	// The VariableCtx is deprecrated and used to support packages that were
+	// compiled using an Escape version below v0.23.0. Pay no heed.  This field
+	// was superseded by tracking VariableNames on the DependencyConfig and
+	// ConsumerConfig instead.
+	VariableCtx map[string]string `json:"variable_context"`
 }
 
 func NewEmptyReleaseMetadata() *ReleaseMetadata {
@@ -80,15 +86,16 @@ func NewEmptyReleaseMetadata() *ReleaseMetadata {
 		Files:                map[string]string{},
 		Metadata:             map[string]string{},
 
-		Consumes:  []*ConsumerConfig{},
-		Depends:   []*DependencyConfig{},
-		Errands:   map[string]*Errand{},
-		Extends:   []*ExtensionConfig{},
-		Inputs:    []*variables.Variable{},
-		Outputs:   []*variables.Variable{},
-		Provides:  []*ProviderConfig{},
-		Stages:    map[string]*ExecStage{},
-		Templates: []*templates.Template{},
+		Consumes:    []*ConsumerConfig{},
+		Depends:     []*DependencyConfig{},
+		Errands:     map[string]*Errand{},
+		Extends:     []*ExtensionConfig{},
+		Inputs:      []*variables.Variable{},
+		Outputs:     []*variables.Variable{},
+		Provides:    []*ProviderConfig{},
+		Stages:      map[string]*ExecStage{},
+		Templates:   []*templates.Template{},
+		VariableCtx: map[string]string{},
 	}
 }
 
