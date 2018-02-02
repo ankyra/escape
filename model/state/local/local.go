@@ -19,11 +19,12 @@ package local
 import (
 	"fmt"
 	"io/ioutil"
-	"os/user"
 	"path/filepath"
 
 	. "github.com/ankyra/escape-core/state"
 )
+
+const DefaultProjectName = "local-state-project"
 
 type localStateProvider struct {
 	state        *ProjectState
@@ -39,10 +40,7 @@ func NewLocalStateProvider(file string) *localStateProvider {
 func (l *localStateProvider) Load(project, env string) (*EnvironmentState, error) {
 	var err error
 	if project == "" {
-		project, err = getDefaultName()
-		if err != nil {
-			return nil, err
-		}
+		project = DefaultProjectName
 	}
 	prj, err := NewProjectStateFromFile(project, l.saveLocation, l)
 	if err != nil {
@@ -63,12 +61,4 @@ func (l *localStateProvider) Save(depl *DeploymentState) error {
 	}
 	contents := []byte(l.state.ToJson())
 	return ioutil.WriteFile(l.saveLocation, contents, 0644)
-}
-
-func getDefaultName() (string, error) {
-	currentUser, err := user.Current()
-	if err != nil {
-		return "", err
-	}
-	return currentUser.Username, nil
 }
