@@ -80,8 +80,9 @@ func (s *testSuite) Test_NewContextForDependency(c *C) {
 	c.Assert(err, IsNil)
 	metadata := core.NewReleaseMetadata("test", "1.0")
 	consumers := map[string]string{}
-	depl := runCtx.deploymentState.GetDeploymentOrMakeNew("deploy",
+	depl, err := runCtx.deploymentState.GetDeploymentOrMakeNew("deploy",
 		metadata.GetVersionlessReleaseId())
+	c.Assert(err, IsNil)
 	depRunCtx, err := runCtx.NewContextForDependency(metadata.GetVersionlessReleaseId(), metadata, consumers)
 	c.Assert(err, IsNil)
 	c.Assert(depRunCtx.GetEnvironmentState(), Equals, runCtx.environmentState)

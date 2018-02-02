@@ -18,10 +18,11 @@ package local
 
 import (
 	"fmt"
-	. "github.com/ankyra/escape-core/state"
 	"io/ioutil"
 	"os/user"
 	"path/filepath"
+
+	. "github.com/ankyra/escape-core/state"
 )
 
 type localStateProvider struct {
@@ -53,7 +54,7 @@ func (l *localStateProvider) Load(project, env string) (*EnvironmentState, error
 		return nil, err
 	}
 	l.saveLocation = path
-	return prj.GetEnvironmentStateOrMakeNew(env), nil
+	return prj.GetEnvironmentStateOrMakeNew(env)
 }
 
 func (l *localStateProvider) Save(depl *DeploymentState) error {

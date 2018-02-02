@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	"github.com/ankyra/escape-core"
+	"github.com/ankyra/escape-core/state/validate"
 	. "gopkg.in/check.v1"
 )
 
@@ -34,18 +35,64 @@ func (s *suite) SetUpTest(c *C) {
 	var err error
 	p, err := NewProjectStateFromFile("prj", "testdata/project.json", nil)
 	c.Assert(err, IsNil)
-	env := p.GetEnvironmentStateOrMakeNew("dev")
+	env, err := p.GetEnvironmentStateOrMakeNew("dev")
+	c.Assert(err, IsNil)
 
-	depl = env.GetOrCreateDeploymentState("archive-release")
-	fullDepl = env.GetOrCreateDeploymentState("archive-full")
+	depl, err = env.GetOrCreateDeploymentState("archive-release")
+	c.Assert(err, IsNil)
+	fullDepl, err = env.GetOrCreateDeploymentState("archive-full")
+	c.Assert(err, IsNil)
 
-	dep := env.GetOrCreateDeploymentState("archive-release-with-deps")
-	deplWithDeps = dep.GetDeploymentOrMakeNew("deploy", "archive-release")
-	dep2 := dep.GetDeploymentOrMakeNew("build", "build-release")
-	buildRootStage = dep2.GetDeploymentOrMakeNew("deploy", "build-root-release")
+	dep, err := env.GetOrCreateDeploymentState("archive-release-with-deps")
+	c.Assert(err, IsNil)
+	deplWithDeps, err = dep.GetDeploymentOrMakeNew(DeployStage, "archive-release")
+	c.Assert(err, IsNil)
+	dep2, err := dep.GetDeploymentOrMakeNew(BuildStage, "build-release")
+	c.Assert(err, IsNil)
+	buildRootStage, err = dep2.GetDeploymentOrMakeNew(DeployStage, "build-root-release")
+	c.Assert(err, IsNil)
 
-	dep = env.GetOrCreateDeploymentState("archive-release-deployed-deps")
-	deployedDepsDepl = dep.GetDeploymentOrMakeNew("build", "archive-release")
+	dep, err = env.GetOrCreateDeploymentState("archive-release-deployed-deps")
+	c.Assert(err, IsNil)
+	deployedDepsDepl, err = dep.GetDeploymentOrMakeNew(BuildStage, "archive-release")
+	c.Assert(err, IsNil)
+}
+
+func (s *suite) Test_Deployment_NewDeploymentState(c *C) {
+	d, err := NewDeploymentState(nil, "name", "project/application")
+	c.Assert(err, IsNil)
+	c.Assert(d.Name, Equals, "name")
+	c.Assert(d.Release, Equals, "project/application")
+	c.Assert(d.Stages, Not(IsNil))
+	c.Assert(d.Inputs, Not(IsNil))
+	c.Assert(d.environment, IsNil)
+}
+
+func (s *suite) Test_Deployment_validateAndFix_fixes_nils(c *C) {
+	d, err := NewDeploymentState(nil, "name", "project/application")
+	c.Assert(err, IsNil)
+	d.Stages = nil
+	d.Inputs = nil
+	c.Assert(d.validateAndFix("name", nil), IsNil)
+	c.Assert(d.Stages, Not(IsNil))
+	c.Assert(d.Inputs, Not(IsNil))
+}
+
+func (s *suite) Test_Deployment_validateAndFix_fails_on_invalid_name(c *C) {
+	for _, test := range validate.InvalidDeploymentNames {
+		d, err := NewDeploymentState(nil, "name", "project/application")
+		c.Assert(err, IsNil)
+		c.Assert(d.validateAndFix(test, nil), DeepEquals, validate.InvalidDeploymentNameError(test))
+	}
+}
+
+func (s *suite) Test_Deployment_validateAndFix_valid_names(c *C) {
+	for _, test := range validate.ValidDeploymentNames {
+		d, err := NewDeploymentState(nil, "name", "project/application")
+		c.Assert(err, IsNil)
+		c.Assert(d.validateAndFix(test, nil), IsNil)
+		c.Assert(d.Name, Equals, test)
+	}
 }
 
 func (s *suite) Test_GetRootDeploymentName(c *C) {
@@ -57,8 +104,8 @@ func (s *suite) Test_GetRootDeploymentName(c *C) {
 func (s *suite) Test_GetRootDeploymentStage(c *C) {
 	c.Assert(depl.GetRootDeploymentStage(), Equals, "")
 	c.Assert(fullDepl.GetRootDeploymentStage(), Equals, "")
-	c.Assert(deplWithDeps.GetRootDeploymentStage(), Equals, "deploy")
-	c.Assert(buildRootStage.GetRootDeploymentStage(), Equals, "build")
+	c.Assert(deplWithDeps.GetRootDeploymentStage(), Equals, DeployStage)
+	c.Assert(buildRootStage.GetRootDeploymentStage(), Equals, BuildStage)
 }
 
 func (s *suite) Test_GetDeploymentPath(c *C) {
@@ -70,25 +117,37 @@ func (s *suite) Test_GetDeploymentPath(c *C) {
 func (s *suite) Test_GetDeploymentOrMakeNew(c *C) {
 	depDepl := deployedDepsDepl
 	c.Assert(depDepl.Name, Equals, "archive-release")
-	c.Assert(depDepl.parentStage.Name, Equals, "build")
+	c.Assert(depDepl.parentStage.Name, Equals, BuildStage)
 
-	depDepl2 := depDepl.GetDeploymentOrMakeNew("deploy", "deploy-dep-name")
+	depDepl2, err := depDepl.GetDeploymentOrMakeNew(DeployStage, "deploy-dep-name")
+	c.Assert(err, IsNil)
 	c.Assert(depDepl2.Name, Equals, "deploy-dep-name")
-	c.Assert(depDepl2.parentStage.Name, Equals, "deploy")
+	c.Assert(depDepl2.parentStage.Name, Equals, DeployStage)
 
-	depDepl3 := depDepl2.GetDeploymentOrMakeNew("deploy", "deploy-dep-name")
+	depDepl3, err := depDepl2.GetDeploymentOrMakeNew(DeployStage, "deploy-dep-name")
+	c.Assert(err, IsNil)
 	c.Assert(depDepl3.Name, Equals, "deploy-dep-name")
-	c.Assert(depDepl3.parentStage.Name, Equals, "deploy")
+	c.Assert(depDepl3.parentStage.Name, Equals, DeployStage)
+}
+
+func (s *suite) Test_GetDeploymentOrMakeNew_fails_on_invalid_deployment_names(c *C) {
+	for _, test := range validate.InvalidDeploymentNames {
+		_, err := deployedDepsDepl.GetDeploymentOrMakeNew(DeployStage, test)
+		c.Assert(err, DeepEquals, validate.InvalidDeploymentNameError(test))
+	}
 }
 
 func (s *suite) Test_GetPreStepInputs_for_dependency_uses_parent_build_stage(c *C) {
-	inputs := deployedDepsDepl.GetPreStepInputs("deploy")
+	inputs := deployedDepsDepl.GetPreStepInputs(DeployStage)
 	c.Assert(inputs["variable"], Equals, "build_variable")
 }
 
 func (s *suite) Test_GetPreStepInputs_for_nested_dependency_uses_parent_build_stage(c *C) {
-	nestedDepl := deployedDepsDepl.GetDeploymentOrMakeNew("deploy", "nested1").GetDeploymentOrMakeNew("deploy", "nested2")
-	inputs := nestedDepl.GetPreStepInputs("deploy")
+	parentDepl, err := deployedDepsDepl.GetDeploymentOrMakeNew(DeployStage, "nested1")
+	c.Assert(err, IsNil)
+	nestedDepl, err := parentDepl.GetDeploymentOrMakeNew(DeployStage, "nested2")
+	c.Assert(err, IsNil)
+	inputs := nestedDepl.GetPreStepInputs(DeployStage)
 	c.Assert(inputs["variable"], Equals, "build_variable")
 }
 
@@ -97,23 +156,23 @@ func (s *suite) Test_GetEnvironmentState(c *C) {
 	c.Assert(env.Name, Equals, "dev")
 }
 func (s *suite) Test_CommitVersion(c *C) {
-	c.Assert(depl.GetVersion("build"), Equals, "")
-	c.Assert(depl.GetVersion("deploy"), Equals, "")
-	depl.CommitVersion("build", core.NewReleaseMetadata("test", "1"))
-	depl.CommitVersion("deploy", core.NewReleaseMetadata("test", "10"))
-	c.Assert(depl.GetVersion("build"), Equals, "1")
-	c.Assert(depl.GetVersion("deploy"), Equals, "10")
+	c.Assert(depl.GetVersion(BuildStage), Equals, "")
+	c.Assert(depl.GetVersion(DeployStage), Equals, "")
+	depl.CommitVersion(BuildStage, core.NewReleaseMetadata("test", "1"))
+	depl.CommitVersion(DeployStage, core.NewReleaseMetadata("test", "10"))
+	c.Assert(depl.GetVersion(BuildStage), Equals, "1")
+	c.Assert(depl.GetVersion(DeployStage), Equals, "10")
 }
 
 func (s *suite) Test_CommitVersion_sets_provides_field(c *C) {
 	metadata := core.NewReleaseMetadata("test", "1")
 	metadata.SetProvides([]string{"test-provider"})
-	depl.CommitVersion("deploy", metadata)
-	c.Assert(depl.GetStageOrCreateNew("deploy").Provides, DeepEquals, []string{"test-provider"})
+	depl.CommitVersion(DeployStage, metadata)
+	c.Assert(depl.GetStageOrCreateNew(DeployStage).Provides, DeepEquals, []string{"test-provider"})
 }
 
 func (s *suite) Test_GetBuildInputs(c *C) {
-	inputs := depl.GetPreStepInputs("deploy")
+	inputs := depl.GetPreStepInputs(DeployStage)
 	c.Assert(inputs["input_variable"], DeepEquals, "depl_override")
 	c.Assert(inputs["list_input"], DeepEquals, []interface{}{"depl_override"})
 	c.Assert(inputs["env_level_variable"], DeepEquals, "env")
@@ -122,18 +181,18 @@ func (s *suite) Test_GetBuildInputs(c *C) {
 }
 
 func (s *suite) Test_GetProviders_nil_providers(c *C) {
-	depl.GetStageOrCreateNew("deploy").Providers = nil
-	providers := depl.GetProviders("deploy")
+	depl.GetStageOrCreateNew(DeployStage).Providers = nil
+	providers := depl.GetProviders(DeployStage)
 	c.Assert(providers, HasLen, 0)
 }
 
 func (s *suite) Test_GetProviders_no_providers(c *C) {
-	providers := depl.GetProviders("deploy")
+	providers := depl.GetProviders(DeployStage)
 	c.Assert(providers, HasLen, 0)
 }
 
 func (s *suite) Test_GetProviders_includes_parent_providers(c *C) {
-	providers := deplWithDeps.GetProviders("deploy")
+	providers := deplWithDeps.GetProviders(DeployStage)
 	c.Assert(providers, HasLen, 3)
 	c.Assert(providers["kubernetes"], Equals, "archive-release")
 	c.Assert(providers["gcp"], Equals, "archive-release")
@@ -143,10 +202,13 @@ func (s *suite) Test_GetProviders_includes_parent_providers(c *C) {
 func (s *suite) Test_GetProviders_includes_parent_build_providers_for_dep(c *C) {
 	p, err := NewProjectStateFromFile("prj", "testdata/project.json", nil)
 	c.Assert(err, IsNil)
-	env := p.GetEnvironmentStateOrMakeNew("dev")
-	dep := env.GetOrCreateDeploymentState("archive-release-with-deps")
-	deplWithDeps = dep.GetDeploymentOrMakeNew("build", "archive-release")
-	providers := deplWithDeps.GetProviders("deploy")
+	env, err := p.GetEnvironmentStateOrMakeNew("dev")
+	c.Assert(err, IsNil)
+	dep, err := env.GetOrCreateDeploymentState("archive-release-with-deps")
+	c.Assert(err, IsNil)
+	deplWithDeps, err = dep.GetDeploymentOrMakeNew(BuildStage, "archive-release")
+	c.Assert(err, IsNil)
+	providers := deplWithDeps.GetProviders(DeployStage)
 	c.Assert(providers, HasLen, 3)
 	c.Assert(providers["kubernetes"], Equals, "archive-release")
 	c.Assert(providers["gcp"], Equals, "archive-release-build")
@@ -161,9 +223,9 @@ func (s *suite) Test_ConfigureProviders_uses_extra_providers(c *C) {
 	providers := map[string]string{
 		"provider1": "otherdepl",
 	}
-	err := deplWithDeps.ConfigureProviders(metadata, "deploy", providers)
+	err := deplWithDeps.ConfigureProviders(metadata, DeployStage, providers)
 	c.Assert(err, IsNil)
-	returnedProviders := deplWithDeps.GetProviders("deploy")
+	returnedProviders := deplWithDeps.GetProviders(DeployStage)
 	c.Assert(returnedProviders["provider1"], Equals, "otherdepl")
 }
 
@@ -174,9 +236,9 @@ func (s *suite) Test_ConfigureProviders_uses_renamed_extra_providers(c *C) {
 	providers := map[string]string{
 		"p1": "otherdepl",
 	}
-	err := deplWithDeps.ConfigureProviders(metadata, "deploy", providers)
+	err := deplWithDeps.ConfigureProviders(metadata, DeployStage, providers)
 	c.Assert(err, IsNil)
-	returnedProviders := deplWithDeps.GetProviders("deploy")
+	returnedProviders := deplWithDeps.GetProviders(DeployStage)
 	c.Assert(returnedProviders["p1"], Equals, "otherdepl")
 }
 
@@ -185,7 +247,7 @@ func (s *suite) Test_ConfigureProviders_fails_if_renamed_provider_not_found(c *C
 	cfg, _ := core.NewConsumerConfigFromString("provider1 as p1")
 	metadata.Consumes = []*core.ConsumerConfig{cfg}
 	providers := map[string]string{}
-	err := deplWithDeps.ConfigureProviders(metadata, "deploy", providers)
+	err := deplWithDeps.ConfigureProviders(metadata, DeployStage, providers)
 	c.Assert(err, DeepEquals, errors.New("Missing provider 'p1' of type 'provider1'. This can be configured using the -p / --extra-provider flag."))
 }
 
@@ -194,7 +256,7 @@ func (s *suite) Test_ConfigureProviders_fails_if_provider_missing(c *C) {
 	metadata.Consumes = []*core.ConsumerConfig{
 		core.NewConsumerConfig("provider1"),
 	}
-	err := deplWithDeps.ConfigureProviders(metadata, "deploy", nil)
+	err := deplWithDeps.ConfigureProviders(metadata, DeployStage, nil)
 	c.Assert(err, DeepEquals, fmt.Errorf("Missing provider of type 'provider1'. This can be configured using the -p / --extra-provider flag."))
 }
 
@@ -203,9 +265,9 @@ func (s *suite) Test_ConfigureProviders_succeeds_if_provider_already_configured(
 	metadata.Consumes = []*core.ConsumerConfig{
 		core.NewConsumerConfig("provider1"),
 	}
-	deplWithDeps.SetProvider("deploy", "provider1", "otherdepl")
-	err := deplWithDeps.ConfigureProviders(metadata, "deploy", nil)
+	deplWithDeps.SetProvider(DeployStage, "provider1", "otherdepl")
+	err := deplWithDeps.ConfigureProviders(metadata, DeployStage, nil)
 	c.Assert(err, IsNil)
-	returnedProviders := deplWithDeps.GetProviders("deploy")
+	returnedProviders := deplWithDeps.GetProviders(DeployStage)
 	c.Assert(returnedProviders["provider1"], Equals, "otherdepl")
 }

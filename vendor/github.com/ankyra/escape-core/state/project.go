@@ -22,6 +22,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
+	"github.com/ankyra/escape-core/state/validate"
 	"github.com/ankyra/escape-core/util"
 )
 
@@ -36,17 +37,15 @@ type ProjectState struct {
 }
 
 func NewProjectState(prjName string) (*ProjectState, error) {
-	return &ProjectState{
+	p := &ProjectState{
 		Name:         prjName,
 		Environments: map[string]*EnvironmentState{},
-	}, nil
+	}
+	return p, p.ValidateAndFix()
 }
 
 func NewProjectStateFromJsonString(data string, backend Backend) (*ProjectState, error) {
-	prjState, err := NewProjectState("")
-	if err != nil {
-		return nil, err
-	}
+	prjState := &ProjectState{}
 	if err := json.Unmarshal([]byte(data), prjState); err != nil {
 		return nil, err
 	}
@@ -71,7 +70,7 @@ func NewProjectStateFromFile(prjName, cfgFile string, backend Backend) (*Project
 			return nil, err
 		}
 		p.Backend = backend
-		return p, p.ValidateAndFix()
+		return p, nil
 	}
 	data, err := ioutil.ReadFile(cfgFile)
 	if err != nil {
@@ -92,8 +91,8 @@ func (p *ProjectState) Save(d *DeploymentState) error {
 }
 
 func (p *ProjectState) ValidateAndFix() error {
-	if p.Name == "" {
-		return fmt.Errorf("State is missing project name")
+	if !validate.IsValidProjectName(p.Name) {
+		return validate.InvalidProjectNameError(p.Name)
 	}
 	if p.Environments == nil {
 		p.Environments = map[string]*EnvironmentState{}
@@ -106,13 +105,17 @@ func (p *ProjectState) ValidateAndFix() error {
 	return nil
 }
 
-func (p *ProjectState) GetEnvironmentStateOrMakeNew(env string) *EnvironmentState {
+func (p *ProjectState) GetEnvironmentStateOrMakeNew(env string) (*EnvironmentState, error) {
 	e, ok := p.Environments[env]
 	if !ok || e == nil {
-		p.Environments[env] = NewEnvironmentState(env, p)
-		return p.Environments[env]
+		e, err := NewEnvironmentState(env, p)
+		if err != nil {
+			return nil, err
+		}
+		p.Environments[env] = e
+		return e, nil
 	}
-	return e
+	return e, nil
 }
 
 func (p *ProjectState) ToJson() string {

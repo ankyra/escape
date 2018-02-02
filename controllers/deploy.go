@@ -30,14 +30,20 @@ type DeployController struct{}
 
 func SetExtraProviders(context Context, stage string, extraProviders map[string]string) error {
 	envState := context.GetEnvironmentState()
-	deplState := envState.GetOrCreateDeploymentState(context.GetRootDeploymentName())
+	deplState, err := envState.GetOrCreateDeploymentState(context.GetRootDeploymentName())
+	if err != nil {
+		return err
+	}
 	metadata := context.GetReleaseMetadata()
 	return deplState.ConfigureProviders(metadata, stage, extraProviders)
 }
 
 func SaveExtraInputsAndProvidersInDeploymentState(context Context, stage string, extraVars, extraProviders map[string]string) error {
 	envState := context.GetEnvironmentState()
-	deplState := envState.GetOrCreateDeploymentState(context.GetRootDeploymentName())
+	deplState, err := envState.GetOrCreateDeploymentState(context.GetRootDeploymentName())
+	if err != nil {
+		return err
+	}
 	inputs := deplState.GetUserInputs(stage)
 	for key, val := range extraVars {
 		inputs[key] = val

@@ -22,17 +22,20 @@ import (
 
 func (s *suite) Test_GetDeploymentStateDAG_empty_env(c *C) {
 	prj, _ := NewProjectState("my-project")
-	env := prj.GetEnvironmentStateOrMakeNew("my-env")
-	dag, err := env.GetDeploymentStateDAG("build")
+	env, err := prj.GetEnvironmentStateOrMakeNew("my-env")
+	c.Assert(err, IsNil)
+	dag, err := env.GetDeploymentStateDAG(BuildStage)
 	c.Assert(err, IsNil)
 	c.Assert(dag, HasLen, 0)
 }
 
 func (s *suite) Test_GetDeploymentStateDAG_one_deployment(c *C) {
-	stage := "deploy"
+	stage := DeployStage
 	prj, _ := NewProjectState("my-project")
-	env := prj.GetEnvironmentStateOrMakeNew("my-env")
-	depl1 := env.GetOrCreateDeploymentState("depl1")
+	env, err := prj.GetEnvironmentStateOrMakeNew("my-env")
+	c.Assert(err, IsNil)
+	depl1, err := env.GetOrCreateDeploymentState("depl1")
+	c.Assert(err, IsNil)
 	depl1.GetStageOrCreateNew(stage)
 	dag, err := env.GetDeploymentStateDAG(stage)
 	c.Assert(err, IsNil)
@@ -42,11 +45,14 @@ func (s *suite) Test_GetDeploymentStateDAG_one_deployment(c *C) {
 }
 
 func (s *suite) Test_GetDeploymentStateDAG_two_deployments_one_provider(c *C) {
-	stage := "deploy"
+	stage := DeployStage
 	prj, _ := NewProjectState("my-project")
-	env := prj.GetEnvironmentStateOrMakeNew("my-env")
-	depl1 := env.GetOrCreateDeploymentState("depl1")
-	depl2 := env.GetOrCreateDeploymentState("depl2")
+	env, err := prj.GetEnvironmentStateOrMakeNew("my-env")
+	c.Assert(err, IsNil)
+	depl1, err := env.GetOrCreateDeploymentState("depl1")
+	c.Assert(err, IsNil)
+	depl2, err := env.GetOrCreateDeploymentState("depl2")
+	c.Assert(err, IsNil)
 	st := depl1.GetStageOrCreateNew(stage)
 	st.Providers["whatever"] = "depl2"
 	depl2.GetStageOrCreateNew(stage)
@@ -75,14 +81,20 @@ func (s *suite) Test_GetDeploymentStateDAG(c *C) {
 	// D
 	// E
 
-	stage := "deploy"
+	stage := DeployStage
 	prj, _ := NewProjectState("my-project")
-	env := prj.GetEnvironmentStateOrMakeNew("my-env")
-	deplA := env.GetOrCreateDeploymentState("deplA")
-	deplB := env.GetOrCreateDeploymentState("deplB")
-	deplC := env.GetOrCreateDeploymentState("deplC")
-	deplD := env.GetOrCreateDeploymentState("deplD")
-	deplE := env.GetOrCreateDeploymentState("deplE")
+	env, err := prj.GetEnvironmentStateOrMakeNew("my-env")
+	c.Assert(err, IsNil)
+	deplA, err := env.GetOrCreateDeploymentState("deplA")
+	c.Assert(err, IsNil)
+	deplB, err := env.GetOrCreateDeploymentState("deplB")
+	c.Assert(err, IsNil)
+	deplC, err := env.GetOrCreateDeploymentState("deplC")
+	c.Assert(err, IsNil)
+	deplD, err := env.GetOrCreateDeploymentState("deplD")
+	c.Assert(err, IsNil)
+	deplE, err := env.GetOrCreateDeploymentState("deplE")
+	c.Assert(err, IsNil)
 
 	stA := deplA.GetStageOrCreateNew(stage)
 	stA.Providers["b"] = "deplB"

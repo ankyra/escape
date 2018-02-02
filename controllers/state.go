@@ -74,7 +74,10 @@ func (p StateController) ShowProviders(context Context) *ControllerResult {
 func (p StateController) CreateState(context Context, stage string, extraVars, extraProviders map[string]string) error {
 	envState := context.GetEnvironmentState()
 	metadata := context.GetReleaseMetadata()
-	deplState := envState.GetOrCreateDeploymentState(context.GetRootDeploymentName())
+	deplState, err := envState.GetOrCreateDeploymentState(context.GetRootDeploymentName())
+	if err != nil {
+		return err
+	}
 	deplState.Release = metadata.GetVersionlessReleaseId()
 	inputs := deplState.GetUserInputs(stage)
 	changed := false

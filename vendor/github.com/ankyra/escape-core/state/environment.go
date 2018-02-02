@@ -19,6 +19,8 @@ package state
 import (
 	"fmt"
 	"strings"
+
+	"github.com/ankyra/escape-core/state/validate"
 )
 
 func DeploymentDoesNotExistError(deploymentName string) error {
@@ -26,7 +28,8 @@ func DeploymentDoesNotExistError(deploymentName string) error {
 }
 
 func DeploymentPathResolveError(stage, deploymentPath, deploymentName string) error {
-	return fmt.Errorf("Failed to resolve deployment path '%s': the deployment '%s' could not be found in the %s stage", deploymentPath, deploymentName, stage)
+	return fmt.Errorf("Failed to resolve deployment path '%s': the deployment '%s' could not be found in the %s stage",
+		deploymentPath, deploymentName, stage)
 }
 
 type EnvironmentState struct {
@@ -36,13 +39,14 @@ type EnvironmentState struct {
 	Project     *ProjectState               `json:"-"`
 }
 
-func NewEnvironmentState(envName string, project *ProjectState) *EnvironmentState {
-	return &EnvironmentState{
+func NewEnvironmentState(envName string, project *ProjectState) (*EnvironmentState, error) {
+	e := &EnvironmentState{
 		Name:        envName,
 		Inputs:      map[string]interface{}{},
 		Deployments: map[string]*DeploymentState{},
 		Project:     project,
 	}
+	return e, e.ValidateAndFix(envName, project)
 }
 
 func (e *EnvironmentState) GetDeployments() []*DeploymentState {
@@ -62,8 +66,14 @@ func (e *EnvironmentState) Save(d *DeploymentState) error {
 }
 
 func (e *EnvironmentState) ValidateAndFix(name string, project *ProjectState) error {
+	if !validate.IsValidEnvironmentName(name) {
+		return validate.InvalidEnvironmentNameError(name)
+	}
 	e.Name = name
 	e.Project = project
+	if e.Inputs == nil {
+		e.Inputs = map[string]interface{}{}
+	}
 	if e.Deployments == nil {
 		e.Deployments = map[string]*DeploymentState{}
 	}
@@ -71,9 +81,6 @@ func (e *EnvironmentState) ValidateAndFix(name string, project *ProjectState) er
 		if err := depl.validateAndFix(deplName, e); err != nil {
 			return err
 		}
-	}
-	if e.Name == "" {
-		return fmt.Errorf("Environment name is missing from the EnvironmentState")
 	}
 	return nil
 }
@@ -102,24 +109,28 @@ func (e *EnvironmentState) ResolveDeploymentPath(stage, deploymentPath string) (
 			return nil, DeploymentPathResolveError(stage, deploymentPath, p)
 		}
 		val = newVal
-		stage = "deploy"
+		stage = DeployStage
 	}
 	return val, nil
 }
 
-func (e *EnvironmentState) GetOrCreateDeploymentState(deploymentName string) *DeploymentState {
+func (e *EnvironmentState) GetOrCreateDeploymentState(deploymentName string) (*DeploymentState, error) {
 	depl, ok := e.Deployments[deploymentName]
 	if !ok {
-		depl = NewDeploymentState(e, deploymentName, deploymentName)
+		depl, err := NewDeploymentState(e, deploymentName, deploymentName)
+		if err != nil {
+			return nil, err
+		}
 		e.Deployments[deploymentName] = depl
+		return depl, nil
 	}
-	return depl
+	return depl, nil
 }
 
 func (e *EnvironmentState) GetProviders() map[string][]string {
 	result := map[string][]string{}
 	for deplName, depl := range e.Deployments {
-		st := depl.GetStageOrCreateNew("deploy")
+		st := depl.GetStageOrCreateNew(DeployStage)
 		for _, provides := range st.Provides {
 			result[provides] = append(result[provides], deplName)
 		}
@@ -130,7 +141,7 @@ func (e *EnvironmentState) GetProviders() map[string][]string {
 func (e *EnvironmentState) GetProvidersOfType(typ string) []string {
 	result := []string{}
 	for deplName, depl := range e.Deployments {
-		st := depl.GetStageOrCreateNew("deploy")
+		st := depl.GetStageOrCreateNew(DeployStage)
 		for _, provides := range st.Provides {
 			if provides == typ {
 				result = append(result, deplName)

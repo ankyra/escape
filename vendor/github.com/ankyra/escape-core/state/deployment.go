@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/ankyra/escape-core"
+	"github.com/ankyra/escape-core/state/validate"
 )
 
 type DeploymentState struct {
@@ -34,14 +35,15 @@ type DeploymentState struct {
 	parentStage *StageState            `json:"-"`
 }
 
-func NewDeploymentState(env *EnvironmentState, name, release string) *DeploymentState {
-	return &DeploymentState{
+func NewDeploymentState(env *EnvironmentState, name, release string) (*DeploymentState, error) {
+	d := &DeploymentState{
 		Name:        name,
 		Release:     release,
 		Stages:      map[string]*StageState{},
 		Inputs:      map[string]interface{}{},
 		environment: env,
 	}
+	return d, d.validateAndFix(name, env)
 }
 
 func (d *DeploymentState) GetName() string {
@@ -107,16 +109,20 @@ func (d *DeploymentState) GetDeployment(stage, deploymentName string) (*Deployme
 	return depl, nil
 }
 
-func (d *DeploymentState) GetDeploymentOrMakeNew(stage, deploymentName string) *DeploymentState {
+func (d *DeploymentState) GetDeploymentOrMakeNew(stage, deploymentName string) (*DeploymentState, error) {
 	st := d.GetStageOrCreateNew(stage)
 	depl, ok := st.Deployments[deploymentName]
 	if !ok {
-		depl = NewDeploymentState(d.environment, deploymentName, deploymentName)
+		newDepl, err := NewDeploymentState(d.environment, deploymentName, deploymentName)
+		if err != nil {
+			return nil, err
+		}
+		depl = newDepl
 		depl.parent = d
 	}
 	depl.parentStage = st
 	st.Deployments[deploymentName] = depl
-	return depl
+	return depl, nil
 }
 
 func (d *DeploymentState) GetUserInputs(stage string) map[string]interface{} {
@@ -269,11 +275,11 @@ func (d *DeploymentState) getDependencyStages(startStage string) []*StageState {
 }
 
 func (d *DeploymentState) validateAndFix(name string, env *EnvironmentState) error {
+	if !validate.IsValidDeploymentName(name) {
+		return validate.InvalidDeploymentNameError(name)
+	}
 	d.Name = name
 	d.environment = env
-	if d.Name == "" {
-		return fmt.Errorf("Deployment name is missing from DeploymentState")
-	}
 	if d.Release == "" {
 		d.Release = name
 	}
