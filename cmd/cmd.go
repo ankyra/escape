@@ -25,15 +25,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var state, environment, deployment, escapePlanLocation string
-var remoteState, useProfileState bool
+var state, environment, deployment, escapePlanLocation, remoteState string
+var useProfileState bool
 
 func ProcessFlagsForContext(loadLocalEscapePlan bool) error {
 	if environment == "" {
 		return fmt.Errorf("Missing 'environment'")
 	}
-	if remoteState {
-		if err := context.LoadRemoteState(state, environment); err != nil {
+	if remoteState != "" {
+		if err := context.LoadRemoteState(remoteState, environment); err != nil {
 			return err
 		}
 	} else {
@@ -85,9 +85,9 @@ func setEscapeDeploymentFlag(c *cobra.Command) {
 }
 
 func setEscapeRemoteStateFlag(c *cobra.Command) {
-	c.Flags().BoolVarP(&remoteState,
-		"remote-state", "r", false,
-		"Use remote state.")
+	c.Flags().StringVarP(&remoteState,
+		"remote-state", "r", "",
+		"Use remote state project.")
 }
 
 func setPlanAndStateFlags(c *cobra.Command) {

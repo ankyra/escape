@@ -182,7 +182,7 @@ var runPromoteCmd = &cobra.Command{
 	Short:   "Run a promotion of package from one environment to another",
 	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if remoteState {
+		if remoteState != "" {
 			return fmt.Errorf("Currently not supported with remote state")
 		}
 
