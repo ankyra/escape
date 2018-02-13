@@ -19,6 +19,7 @@ package remote
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 
 	. "github.com/ankyra/escape-core/state"
 	"github.com/ankyra/escape/model/remote"
@@ -76,7 +77,11 @@ func (r *remoteStateProvider) Save(depl *DeploymentState) error {
 	if resp.StatusCode == 401 {
 		return fmt.Errorf("Unauthorized")
 	} else if resp.StatusCode != 200 {
-		return fmt.Errorf("Couldn't update deployment state: %s", resp.Status)
+		bytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return fmt.Errorf("Couldn't update deployment state: %s", resp.Status)
+		}
+		return fmt.Errorf("Couldn't update deployment state: %s", bytes)
 	}
 	return nil
 }
