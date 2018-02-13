@@ -56,6 +56,7 @@ func (l *localStateProvider) Load(project, env string) (*EnvironmentState, error
 }
 
 func (l *localStateProvider) Save(depl *DeploymentState) error {
+	fmt.Println("Oh no local save wat")
 	if l.saveLocation == "" {
 		return fmt.Errorf("Save location has not been set. Inexplicably")
 	}

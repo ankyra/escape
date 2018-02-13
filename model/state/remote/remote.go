@@ -78,7 +78,7 @@ func (r *remoteStateProvider) Save(depl *DeploymentState) error {
 		return fmt.Errorf("Unauthorized")
 	} else if resp.StatusCode != 200 {
 		bytes, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
+		if err != nil || len(bytes) == 0 {
 			return fmt.Errorf("Couldn't update deployment state (%s).", resp.Status)
 		}
 		return fmt.Errorf("Couldn't update deployment state (%s): %s.", resp.Status, bytes)

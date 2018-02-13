@@ -29,10 +29,12 @@ var state, environment, deployment, escapePlanLocation, remoteState string
 var useProfileState bool
 
 func LoadState() error {
+	context.SetRootDeploymentName(deployment)
 	if remoteState != "" {
 		if err := context.LoadRemoteState(remoteState, environment); err != nil {
 			return err
 		}
+		return nil
 	}
 	return context.LoadLocalState(state, environment, useProfileState)
 }
@@ -52,7 +54,6 @@ func ProcessFlagsForContext(loadLocalEscapePlan bool) error {
 			return err
 		}
 	}
-	context.SetRootDeploymentName(deployment)
 	return nil
 }
 
