@@ -28,18 +28,21 @@ import (
 var state, environment, deployment, escapePlanLocation, remoteState string
 var useProfileState bool
 
-func ProcessFlagsForContext(loadLocalEscapePlan bool) error {
-	if environment == "" {
-		return fmt.Errorf("Missing 'environment'")
-	}
+func LoadState() error {
 	if remoteState != "" {
 		if err := context.LoadRemoteState(remoteState, environment); err != nil {
 			return err
 		}
-	} else {
-		if err := context.LoadLocalState(state, environment, useProfileState); err != nil {
-			return err
-		}
+	}
+	return context.LoadLocalState(state, environment, useProfileState)
+}
+
+func ProcessFlagsForContext(loadLocalEscapePlan bool) error {
+	if environment == "" {
+		return fmt.Errorf("Missing 'environment'")
+	}
+	if err := LoadState(); err != nil {
+		return err
 	}
 	if loadLocalEscapePlan {
 		if err := context.LoadEscapePlan(escapePlanLocation); err != nil {

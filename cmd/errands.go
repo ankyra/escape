@@ -92,10 +92,10 @@ var errandsRunCmd = &cobra.Command{
 		if deployment == "" && !readLocalErrands {
 			return fmt.Errorf("Missing deployment name")
 		}
-		context.SetRootDeploymentName(deployment)
-		if err := context.LoadLocalState(state, environment, useProfileState); err != nil {
+		if err := LoadState(); err != nil {
 			return err
 		}
+		context.SetRootDeploymentName(deployment)
 		parsedExtraVars, err := ParseExtraVars(extraVars)
 		if err != nil {
 			return err
@@ -103,7 +103,7 @@ var errandsRunCmd = &cobra.Command{
 		errand := args[0]
 
 		if readLocalErrands {
-			return RunLocalErrand(state, environment, escapePlanLocation, errand, parsedExtraVars)
+			return RunLocalErrand(deployment, errand, parsedExtraVars)
 		}
 		return RunDeployedErrand(deployment, errand, parsedExtraVars)
 	},
@@ -125,7 +125,7 @@ func RunDeployedErrand(deployment, errand string, parsedExtraVars map[string]str
 	return controllers.ErrandsController{}.RunRemoteErrand(context, errand, parsedExtraVars)
 }
 
-func RunLocalErrand(state, environment, escapePlanLocation, errand string, parsedExtraVars map[string]string) error {
+func RunLocalErrand(deployment, errand string, parsedExtraVars map[string]string) error {
 	if err := ProcessFlagsForContext(true); err != nil {
 		return err
 	}
