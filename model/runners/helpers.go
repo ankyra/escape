@@ -54,7 +54,9 @@ func NewScriptStep(ctx *RunnerContext, stage, step string, shouldBeDeployed bool
 }
 
 func ReportFailure(ctx *RunnerContext, stage string, err error, statusCode state.StatusCode) error {
-	if err2 := ctx.GetDeploymentState().UpdateStatus(stage, state.NewStatus(statusCode)); err2 != nil {
+	status := state.NewStatus(statusCode)
+	status.Data = err.Error()
+	if err2 := ctx.GetDeploymentState().UpdateStatus(stage, status); err2 != nil {
 		return fmt.Errorf("Couldn't update status '%s'. Trying to set failure status, because: %s", err2.Error(), err.Error())
 	}
 	return err
