@@ -89,3 +89,12 @@ var ValidDeploymentNames = []string{
 	"t",
 	"TEST",
 }
+
+var InvalidStageNames = []string{
+	"",
+	"aweoijaweioj",
+	"  build",
+	"  deploy  ",
+	"deploy ",
+	".",
+}

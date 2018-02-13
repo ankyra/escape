@@ -50,6 +50,14 @@ func (d *DeploymentState) GetName() string {
 	return d.Name
 }
 
+func (d *DeploymentState) Summarize() *DeploymentState {
+	result, _ := NewDeploymentState(d.environment, d.Name, d.Release)
+	for name, stage := range d.Stages {
+		result.Stages[name] = stage.Summarize()
+	}
+	return result
+}
+
 func (d *DeploymentState) GetRootDeploymentName() string {
 	prev := d
 	p := prev
@@ -272,6 +280,18 @@ func (d *DeploymentState) getDependencyStages(startStage string) []*StageState {
 		p = p.parent
 	}
 	return stages
+}
+
+func (d *DeploymentState) ValidateNames() error {
+	if !validate.IsValidDeploymentName(d.Name) {
+		return validate.InvalidDeploymentNameError(d.Name)
+	}
+	for _, st := range d.Stages {
+		if err := st.ValidateNames(); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (d *DeploymentState) validateAndFix(name string, env *EnvironmentState) error {

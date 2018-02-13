@@ -271,3 +271,32 @@ func (s *suite) Test_ConfigureProviders_succeeds_if_provider_already_configured(
 	returnedProviders := deplWithDeps.GetProviders(DeployStage)
 	c.Assert(returnedProviders["provider1"], Equals, "otherdepl")
 }
+
+func (s *suite) Test_Deployment_ValidateNames_fails_if_invalid_name(c *C) {
+	d, err := NewDeploymentState(nil, "name", "project/application")
+	c.Assert(err, IsNil)
+	for _, name := range validate.InvalidDeploymentNames {
+		d.Name = name
+		c.Assert(d.ValidateNames(), DeepEquals, validate.InvalidDeploymentNameError(name))
+	}
+}
+
+func (s *suite) Test_Deployment_ValidateNames_fails_if_invalid_sub_deployment_name(c *C) {
+	for _, name := range validate.InvalidDeploymentNames {
+		d, _ := NewDeploymentState(nil, "name", "project/application")
+		st := d.GetStageOrCreateNew("deploy")
+		brokenDepl, _ := NewDeploymentState(nil, name, "project/application")
+		st.Deployments[name] = brokenDepl
+		c.Assert(d.ValidateNames(), DeepEquals, validate.InvalidDeploymentNameError(name))
+	}
+}
+
+func (s *suite) Test_Deployment_Summarize(c *C) {
+	d := deployedDepsDepl.Summarize()
+	c.Assert(d.Name, Equals, deployedDepsDepl.Name)
+	c.Assert(d.Release, Equals, deployedDepsDepl.Release)
+	c.Assert(d.Inputs, HasLen, 0)
+	c.Assert(d.Stages, HasLen, 1)
+	c.Assert(d.Stages["deploy"].Deployments, HasLen, 0)
+
+}

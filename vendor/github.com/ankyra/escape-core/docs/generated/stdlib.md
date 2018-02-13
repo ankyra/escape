@@ -17,13 +17,6 @@ h2 {
 Standard library functions for the [Escape Scripting Language](../scripting-language/)
 
 
-# Functions acting on everything
-
-## id(parameter :: *)
-
-Returns its argument
-
-
 # Functions acting on lists
 
 ## env_lookup(key :: string)
@@ -45,25 +38,13 @@ Slice a list. Usually accessed implicitly using slice syntax (eg. `list[0:5]`)
 
 # Functions acting on strings
 
-## concat(v1 :: string, v2 :: string, ...)
-
-Concatate stringable arguments
-
-## title(v :: string)
-
-Returns a copy of the string v with all Unicode characters mapped to their title case
-
-## base64_decode()
-
-Decode string from base64
-
-## track_major_version()
-
-Track major version
-
 ## upper(v :: string)
 
 Returns a copy of the string v with all Unicode characters mapped to their upper case
+
+## split(sep :: string)
+
+Split slices s into all substrings separated by sep and returns a slice of the substrings between those separators. If sep is empty, Split splits after each UTF-8 sequence.
 
 ## replace(old :: string, new :: string, n :: integer)
 
@@ -77,29 +58,41 @@ Read the contents of a file
 
 Track minor version
 
-## split(sep :: string)
+## concat(v1 :: string, v2 :: string, ...)
 
-Split slices s into all substrings separated by sep and returns a slice of the substrings between those separators. If sep is empty, Split splits after each UTF-8 sequence.
-
-## track_version()
-
-Track version
+Concatate stringable arguments
 
 ## lower(v :: string)
 
 Returns a copy of the string v with all Unicode characters mapped to their lower case
 
+## track_patch_version()
+
+Track patch version
+
+## track_major_version()
+
+Track major version
+
+## title(v :: string)
+
+Returns a copy of the string v with all Unicode characters mapped to their title case
+
 ## base64_encode()
 
 Encode string to base64
+
+## base64_decode()
+
+Decode string from base64
 
 ## trim()
 
 Returns a slice of the string s, with all leading and trailing white space removed, as defined by Unicode. 
 
-## track_patch_version()
+## track_version()
 
-Track patch version
+Track version
 
 
 # Functions acting on integers
@@ -114,4 +107,11 @@ Add two integers
 ## timestamp()
 
 Returns a UNIX timestamp
+
+
+# Functions acting on everything
+
+## id(parameter :: *)
+
+Returns its argument
 

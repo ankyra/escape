@@ -47,6 +47,26 @@ func newStage() *StageState {
 	}
 }
 
+func (st *StageState) Summarize() *StageState {
+	result := newStage()
+	result.Name = st.Name
+	result.Status = st.Status
+	result.Version = st.Version
+	return result
+}
+
+func (st *StageState) ValidateNames() error {
+	if !validate.IsValidStageName(st.Name) {
+		return validate.InvalidStageNameError(st.Name)
+	}
+	for _, depl := range st.Deployments {
+		if err := depl.ValidateNames(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (st *StageState) validateAndFix(name string, envState *EnvironmentState, deplState *DeploymentState) error {
 	if !validate.IsValidStageName(name) {
 		return validate.InvalidStageNameError(name)
