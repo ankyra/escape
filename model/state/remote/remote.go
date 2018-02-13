@@ -79,9 +79,9 @@ func (r *remoteStateProvider) Save(depl *DeploymentState) error {
 	} else if resp.StatusCode != 200 {
 		bytes, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			return fmt.Errorf("Couldn't update deployment state: %s", resp.Status)
+			return fmt.Errorf("Couldn't update deployment state (%s).", resp.Status)
 		}
-		return fmt.Errorf("Couldn't update deployment state: %s", bytes)
+		return fmt.Errorf("Couldn't update deployment state (%s): %s.", resp.Status, bytes)
 	}
 	return nil
 }
