@@ -61,7 +61,7 @@ type EscapePlan struct {
 	// The version is a required field. Escape uses semantic versioning to
 	// version packages.  Either specify the full version or use the '@' symbol
 	// to let Escape pick the next version at build time. See
-	// [here](/docs/versioning/) for more versioning approaches.
+	// [here](/docs/guides/versioning/) for more versioning approaches.
 	//
 	// Format: `/[0-9]+(\.[0-9]+)*(\.@)?/`
 	//
