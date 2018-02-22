@@ -22,7 +22,7 @@ title: "%s"
 slug: %s
 type: "docs"
 toc: true
-wip: true
+wip: false
 ---
 `
 
@@ -37,7 +37,7 @@ var TypeMap = map[string]string{
 	"build_inputs":     "`[string]`, [Variables](/docs/reference/input-and-output-variables/)",
 	"deploy_inputs":    "`[string]`, [Variables](/docs/reference/input-and-output-variables/)",
 	"outputs":          "`[string]`, [Variables](/docs/reference/input-and-output-variables/)",
-	"errands":          "[Errands](/docs/reference/errands/)",
+	"errands":          "{string:[Errands](/docs/reference/errands/)}",
 	"downloads":        "[Downloads](/docs/reference/downloads/)",
 	"templates":        "[Templates](/docs/reference/templates/)",
 	"build_templates":  "[Templates](/docs/reference/templates/)",
