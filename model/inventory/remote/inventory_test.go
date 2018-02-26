@@ -33,16 +33,16 @@ func Test(t *testing.T) { TestingT(t) }
 
 var _ = Suite(&suite{})
 
-const queryReleaseMetadataURL = "/api/v1/registry/query-project/units/name/versions/v1.0.0/"
-const queryReleaseMetadataLatestURL = "/api/v1/registry/query-project/units/name/versions/latest/"
-const queryNextVersionURL = "/api/v1/registry/query-project/units/name/next-version"
-const listProjectsURL = "/api/v1/registry/"
-const listApplicationsURL = "/api/v1/registry/test/units/"
-const listVersionsURL = "/api/v1/registry/test/units/app/"
+const queryReleaseMetadataURL = "/api/v1/inventory/query-project/units/name/versions/v1.0.0/"
+const queryReleaseMetadataLatestURL = "/api/v1/inventory/query-project/units/name/versions/latest/"
+const queryNextVersionURL = "/api/v1/inventory/query-project/units/name/next-version"
+const listProjectsURL = "/api/v1/inventory/"
+const listApplicationsURL = "/api/v1/inventory/test/units/"
+const listVersionsURL = "/api/v1/inventory/test/units/app/"
 const authMethodsURL = "/api/v1/auth/login-methods"
-const downloadURL = "/api/v1/registry/prj/units/name/versions/v1.0/download"
-const uploadURL = "/api/v1/registry/prj/units/name/versions/v1.0/upload"
-const registerURL = "/api/v1/registry/prj/register"
+const downloadURL = "/api/v1/inventory/prj/units/name/versions/v1.0/download"
+const uploadURL = "/api/v1/inventory/prj/units/name/versions/v1.0/upload"
+const registerURL = "/api/v1/inventory/prj/register"
 
 /*
 

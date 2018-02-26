@@ -4,7 +4,7 @@ title: "Templates"
 slug: templates
 type: "docs"
 toc: true
-wip: true
+wip: false
 contributeLink: https://github.com/ankyra/escape-core/blob/master/templates/templates.go
 ---
 

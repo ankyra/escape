@@ -27,7 +27,8 @@
                      "version": "0.0.1",
                      "status": {
                         "status": "failure",
-                        "updated_at": "2018-02-12T17:15:39.538939425Z"
+                        "updated_at": "2018-02-13T17:07:24.25515482Z",
+                        "data": "Referenced post_deploy script '/home/bspaans/src/3rdparty/gopath/src/github.com/ankyra/escape/model/runners/deploy/testdata/doesnt_exist.sh' does not exist"
                      }
                   }
                }

@@ -286,7 +286,8 @@ func (d *DeploymentState) ValidateNames() error {
 	if !validate.IsValidDeploymentName(d.Name) {
 		return validate.InvalidDeploymentNameError(d.Name)
 	}
-	for _, st := range d.Stages {
+	for name, st := range d.Stages {
+		st.Name = name
 		if err := st.ValidateNames(); err != nil {
 			return err
 		}

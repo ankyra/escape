@@ -40,7 +40,7 @@ func (s *ServerEndpoints) ApiServer() string {
 	return s.apiServer + "/"
 }
 func (s *ServerEndpoints) ReleaseQuery(project, name, version string) string {
-	return s.ApiServer() + "api/v1/registry/" + project + "/units/" + name + "/versions/" + version + "/"
+	return s.ApiServer() + "api/v1/inventory/" + project + "/units/" + name + "/versions/" + version + "/"
 }
 func (s *ServerEndpoints) PreviousReleaseQuery(project, name, version string) string {
 	return s.ReleaseQuery(project, name, version) + "previous/"
@@ -52,13 +52,13 @@ func (s *ServerEndpoints) NextReleaseVersion(project, name, prefix string) strin
 	return s.ProjectNameQuery(project, name) + "next-version?" + v.Encode()
 }
 func (s *ServerEndpoints) ListProjects() string {
-	return s.ApiServer() + "api/v1/registry/"
+	return s.ApiServer() + "api/v1/inventory/"
 }
 func (s *ServerEndpoints) ListApplications(project string) string {
-	return s.ApiServer() + "api/v1/registry/" + project + "/units/"
+	return s.ApiServer() + "api/v1/inventory/" + project + "/units/"
 }
 func (s *ServerEndpoints) ProjectQuery(project string) string {
-	return s.ApiServer() + "api/v1/registry/" + project + "/"
+	return s.ApiServer() + "api/v1/inventory/" + project + "/"
 }
 func (s *ServerEndpoints) ProjectNameQuery(project, name string) string {
 	return s.ProjectQuery(project) + "units/" + name + "/"
