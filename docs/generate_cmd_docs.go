@@ -62,7 +62,7 @@ title: "%s"
 slug: %s
 type: "docs"
 toc: true
-wip: true
+wip: false
 ---
 
 %s
