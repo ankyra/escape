@@ -23,6 +23,9 @@ import (
 	. "gopkg.in/check.v1"
 )
 
+/*
+	NewScriptStep
+*/
 func (s *testSuite) Test_NewScriptStep(c *C) {
 	runCtx := getRunContext(c, "testdata/helper_state.json", "testdata/helper.yml")
 	shouldBeDeployed := true
@@ -127,6 +130,9 @@ func (s *testSuite) Test_NewScriptStep_initDeploymentState_uses_calculated_input
 	c.Assert(runCtx.GetBuildInputs()["test"], Equals, "hello")
 }
 
+/*
+	ReadOutputsFromFile
+*/
 func (s *testSuite) Test_ReadOutputsFromFile(c *C) {
 	outputs, err := readOutputsFromFile("testdata/outputs.json")
 	c.Assert(err, IsNil)

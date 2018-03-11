@@ -11,13 +11,15 @@
                   "": {
                      "status": {
                         "status": "empty",
-                        "updated_at": "2017-07-19T02:48:43.067040558+01:00"
+                        "updated_at": "2017-07-19T02:48:43.067040558+01:00",
+                        "try_again_at": "0001-01-01T00:00:00Z"
                      }
                   },
                   "build": {
                      "status": {
                         "status": "empty",
-                        "updated_at": "2017-07-19T02:48:43.067039516+01:00"
+                        "updated_at": "2017-07-19T02:48:43.067039516+01:00",
+                        "try_again_at": "0001-01-01T00:00:00Z"
                      }
                   },
                   "deploy": {
@@ -27,8 +29,9 @@
                      "version": "0.0.1",
                      "status": {
                         "status": "failure",
-                        "updated_at": "2018-02-13T17:07:24.25515482Z",
-                        "data": "Referenced post_deploy script '/home/bspaans/src/3rdparty/gopath/src/github.com/ankyra/escape/model/runners/deploy/testdata/doesnt_exist.sh' does not exist"
+                        "updated_at": "2018-03-11T19:40:10.574296097Z",
+                        "data": "Referenced post_deploy script '/home/bspaans/src/3rdparty/gopath/src/github.com/ankyra/escape/model/runners/deploy/testdata/doesnt_exist.sh' does not exist",
+                        "try_again_at": "0001-01-01T00:00:00Z"
                      }
                   }
                }

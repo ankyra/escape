@@ -11,7 +11,8 @@
                   "": {
                      "status": {
                         "status": "empty",
-                        "updated_at": "2017-07-19T02:49:05.916452168+01:00"
+                        "updated_at": "2017-07-19T02:49:05.916452168+01:00",
+                        "try_again_at": "0001-01-01T00:00:00Z"
                      }
                   },
                   "build": {
@@ -24,13 +25,15 @@
                      "version": "0.0.1",
                      "status": {
                         "status": "running_post_step",
-                        "updated_at": "2018-02-13T17:07:24.28775389Z"
+                        "updated_at": "2018-03-11T19:40:10.696194923Z",
+                        "try_again_at": "0001-01-01T00:00:00Z"
                      }
                   },
                   "deploy": {
                      "status": {
                         "status": "empty",
-                        "updated_at": "2017-07-19T02:49:05.916451821+01:00"
+                        "updated_at": "2017-07-19T02:49:05.916451821+01:00",
+                        "try_again_at": "0001-01-01T00:00:00Z"
                      }
                   }
                }
