@@ -18,10 +18,14 @@ package controllers
 
 import (
 	"fmt"
+	"math"
+	"time"
 
 	"github.com/ankyra/escape-core/state"
 	. "github.com/ankyra/escape/model/interfaces"
 )
+
+const BackoffStart = 1
 
 type ConvergeController struct{}
 
@@ -47,13 +51,32 @@ func ConvergeDeployment(context Context, depl *state.DeploymentState, refresh bo
 		return fmt.Errorf("No 'version' set for deployment of '%s' in deployment '%s'",
 			depl.Release, depl.Name)
 	}
-	if stage.Status.Code == state.TestPending {
-		return SmokeController{}.FetchAndSmoke(context, depl.Release+"-v"+stage.Version)
+	releaseId := depl.Release + "-v" + stage.Version
+	status := stage.Status
+	if status.Code == state.TestPending {
+		return SmokeController{}.FetchAndSmoke(context, releaseId)
 	}
-	if stage.Status.Code == state.DestroyPending {
-		return DestroyController{}.FetchAndDestroy(context, depl.Release+"-v"+stage.Version, false, true)
+	if status.Code == state.DestroyPending {
+		return DestroyController{}.FetchAndDestroy(context, releaseId, false, true)
 	}
-	if !refresh && stage.Status.Code == state.OK {
+	if status.IsError() {
+
+		now := time.Now()
+		if status.TryAgainAt.IsZero() {
+			// The action has not been retried so set an initial retry time and save
+			// the new status.
+			status.TryAgainAt = now.Add(time.Duration(BackoffStart) * time.Second)
+			return depl.UpdateStatus(state.DeployStage, status)
+		}
+		if stage.Status.TryAgainAt.Before(now) {
+			// The action has to be retried.
+			return retryAction(context, depl)
+		} else {
+			// The action will be retried in a later round. Do nothing.
+			return nil
+		}
+	}
+	if !refresh && status.Code == state.OK {
 		context.Log("converge.skip_ok", map[string]string{
 			"deployment": depl.Name,
 			"release":    depl.Release + "-v" + stage.Version,
@@ -65,5 +88,33 @@ func ConvergeDeployment(context Context, depl *state.DeploymentState, refresh bo
 		"release":    depl.Release + "-v" + stage.Version,
 	})
 	context.SetRootDeploymentName(depl.Name)
-	return DeployController{}.FetchAndDeploy(context, depl.Release+"-v"+stage.Version, nil, nil)
+	return DeployController{}.FetchAndDeploy(context, releaseId, nil, nil)
+}
+
+func retryAction(context Context, depl *state.DeploymentState) error {
+	stage := depl.GetStageOrCreateNew(state.DeployStage)
+	status := stage.Status
+	releaseId := depl.Release + "-v" + stage.Version
+	var err error
+	if status.Code == state.Failure {
+		err = DeployController{}.FetchAndDeploy(context, releaseId, nil, nil)
+	} else if status.Code == state.TestFailure {
+		err = SmokeController{}.FetchAndSmoke(context, releaseId)
+	} else if status.Code == state.DestroyFailure {
+		err = DestroyController{}.FetchAndDestroy(context, releaseId, false, true)
+	} else {
+		return fmt.Errorf("Unknown error status '%s'. This is a bug in Esape.", status.Code)
+	}
+	if err == nil {
+		return nil
+	}
+	now := time.Now()
+	status.Tried += 1
+	backOff := time.Duration(BackoffStart*math.Exp(float64(status.Tried))) * time.Second
+	fmt.Println(backOff)
+	status.TryAgainAt = now.Add(backOff)
+	if err2 := depl.UpdateStatus(state.DeployStage, status); err2 != nil {
+		return fmt.Errorf("Couldn't update status '%s'. Trying to set failure status, because: %s", err2.Error(), err.Error())
+	}
+	return err
 }
