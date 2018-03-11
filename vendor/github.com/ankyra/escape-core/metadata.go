@@ -484,6 +484,7 @@ func (m *ReleaseMetadata) ToScriptMap() map[string]script.Script {
 
 		"branch":              script.LiftString(m.Branch),
 		"description":         script.LiftString(m.Description),
+		"license":             script.LiftString(m.License),
 		"logo":                script.LiftString(m.Logo),
 		"name":                script.LiftString(m.Name),
 		"revision":            script.LiftString(m.Revision),

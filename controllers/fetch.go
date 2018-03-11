@@ -17,9 +17,12 @@ limitations under the License.
 package controllers
 
 import (
+	"os"
+
 	"github.com/ankyra/escape-core"
 	"github.com/ankyra/escape/model"
 	. "github.com/ankyra/escape/model/interfaces"
+	"github.com/ankyra/escape/model/paths"
 )
 
 type FetchController struct{}
@@ -32,4 +35,30 @@ func (FetchController) Fetch(context Context, releaseIds []string) error {
 		}
 	}
 	return nil
+}
+
+func (f FetchController) ResolveFetchAndLoad(context Context, releaseId string) error {
+	// TODO cd into temp directory ?
+	parsed := core.NewDependencyConfig(releaseId)
+	if err := parsed.EnsureConfigIsParsed(); err != nil {
+		return err
+	}
+	if parsed.NeedsResolving() {
+		metadata, err := context.QueryReleaseMetadata(parsed)
+		if err != nil {
+			return err
+		}
+		parsed.Version = metadata.Version
+		metadata.Project = parsed.Project // inventory needs to be updated to latest core
+		releaseId = metadata.GetQualifiedReleaseId()
+	}
+	if err := f.Fetch(context, []string{releaseId}); err != nil {
+		return err
+	}
+	root := paths.NewPath().UnpackedDepCfgDirectory(parsed)
+	err := os.Chdir(root)
+	if err != nil {
+		return err
+	}
+	return context.LoadReleaseJson()
 }

@@ -17,6 +17,8 @@ limitations under the License.
 package controllers
 
 import (
+	"os"
+
 	. "github.com/ankyra/escape/model/interfaces"
 	"github.com/ankyra/escape/model/runners"
 	"github.com/ankyra/escape/model/runners/destroy"
@@ -50,4 +52,21 @@ func (DestroyController) Destroy(context Context, destroyBuild, destroyDeploymen
 	context.PopLogRelease()
 	context.PopLogSection()
 	return nil
+}
+
+func (d DestroyController) FetchAndDestroy(context Context, releaseId string, destroyBuild, destroyDeployment bool) error {
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	fetcher := FetchController{}
+	if err := fetcher.ResolveFetchAndLoad(context, releaseId); err != nil {
+		os.Chdir(currentDir)
+		return err
+	}
+	if err := d.Destroy(context, destroyBuild, destroyDeployment); err != nil {
+		os.Chdir(currentDir)
+		return err
+	}
+	return os.Chdir(currentDir)
 }

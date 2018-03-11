@@ -17,8 +17,9 @@ limitations under the License.
 package state
 
 import (
-	. "gopkg.in/check.v1"
 	"time"
+
+	. "gopkg.in/check.v1"
 )
 
 func (s *suite) Test_Status_Sets_Time(c *C) {
@@ -118,4 +119,8 @@ func (s *suite) Test_Status_IsRunning(c *C) {
 		st := NewStatus(t)
 		c.Assert(st.IsRunning(), Equals, false)
 	}
+}
+
+func (s *suite) Test_StatusTransitionAllowed(c *C) {
+	c.Assert(StatusTransitionAllowed(Empty, Pending), Equals, true)
 }

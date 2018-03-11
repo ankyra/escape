@@ -23,7 +23,7 @@
                      "version": "0.0.1",
                      "status": {
                         "status": "failure",
-                        "updated_at": "2018-03-11T19:40:10.993435563Z",
+                        "updated_at": "2018-03-11T20:39:27.572022463Z",
                         "data": "Referenced pre_deploy script '/home/bspaans/src/3rdparty/gopath/src/github.com/ankyra/escape/model/runners/deploy/testdata/doesnt_exist.sh' does not exist",
                         "try_again_at": "0001-01-01T00:00:00Z"
                      }

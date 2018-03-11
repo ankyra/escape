@@ -19,9 +19,7 @@ package controllers
 import (
 	"os"
 
-	"github.com/ankyra/escape-core"
 	. "github.com/ankyra/escape/model/interfaces"
-	"github.com/ankyra/escape/model/paths"
 	"github.com/ankyra/escape/model/runners"
 	"github.com/ankyra/escape/model/runners/deploy"
 )
@@ -78,31 +76,13 @@ func (d DeployController) Deploy(context Context, extraVars, extraProviders map[
 }
 
 func (d DeployController) FetchAndDeploy(context Context, releaseId string, extraVars, extraProviders map[string]string) error {
-	// TODO cd into temp directory
-	parsed := core.NewDependencyConfig(releaseId)
-	if err := parsed.EnsureConfigIsParsed(); err != nil {
-		return err
-	}
-	if parsed.NeedsResolving() {
-		metadata, err := context.QueryReleaseMetadata(parsed)
-		if err != nil {
-			return err
-		}
-		parsed.Version = metadata.Version
-		metadata.Project = parsed.Project // inventory needs to be updated to latest core
-		releaseId = metadata.GetQualifiedReleaseId()
-	}
-	fetcher := FetchController{}
-	if err := fetcher.Fetch(context, []string{releaseId}); err != nil {
-		return err
-	}
 	currentDir, err := os.Getwd()
 	if err != nil {
 		return err
 	}
-	root := paths.NewPath().UnpackedDepCfgDirectory(parsed)
-	err = os.Chdir(root)
-	if err := context.LoadReleaseJson(); err != nil {
+	fetcher := FetchController{}
+	if err := fetcher.ResolveFetchAndLoad(context, releaseId); err != nil {
+		os.Chdir(currentDir)
 		return err
 	}
 	if err := d.Deploy(context, extraVars, extraProviders); err != nil {

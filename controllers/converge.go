@@ -42,10 +42,16 @@ func ConvergeDeployment(context Context, depl *state.DeploymentState, refresh bo
 	if depl.Release == "" {
 		return fmt.Errorf("No release set for deployment '%s'", depl.Name)
 	}
-	stage := depl.GetStageOrCreateNew("deploy")
+	stage := depl.GetStageOrCreateNew(state.DeployStage)
 	if stage.Version == "" {
 		return fmt.Errorf("No 'version' set for deployment of '%s' in deployment '%s'",
 			depl.Release, depl.Name)
+	}
+	if stage.Status.Code == state.TestPending {
+		return SmokeController{}.FetchAndSmoke(context, depl.Release+"-v"+stage.Version)
+	}
+	if stage.Status.Code == state.DestroyPending {
+		return DestroyController{}.FetchAndDestroy(context, depl.Release+"-v"+stage.Version, false, true)
 	}
 	if !refresh && stage.Status.Code == state.OK {
 		context.Log("converge.skip_ok", map[string]string{

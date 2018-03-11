@@ -252,6 +252,7 @@ func test_helper_check_script_environment(c *C, unit script.Script, dicts map[st
 		"version":     "1.0",
 		"description": "",
 		"logo":        "",
+		"license":     "",
 		"release":     "test-v1.0",
 		"id":          "_/test-v1.0",
 		"name":        "test",
