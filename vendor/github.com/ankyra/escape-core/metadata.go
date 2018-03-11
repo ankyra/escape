@@ -50,6 +50,7 @@ type ReleaseMetadata struct {
 	BuiltWithEscapeVersion string            `json:"built_with_escape_version"`
 	Description            string            `json:"description"`
 	Files                  map[string]string `json:"files", {}`
+	License                string            `json:"license"`
 	Logo                   string            `json:"logo"`
 	Name                   string            `json:"name"`
 	Repository             string            `json:"repository"`

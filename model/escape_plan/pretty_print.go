@@ -29,7 +29,8 @@ type prettyPrinter struct {
 	Spacing      int
 }
 
-var Fields = []string{"name", "version", "description", "logo", "extends", "depends",
+var Fields = []string{"name", "version", "description", "license", "logo",
+	"extends", "depends",
 	"consumes", "build_consumes", "deploy_consumes",
 	"provides", "inputs", "build_inputs", "deploy_inputs",
 	"outputs", "metadata", "includes", "errands", "downloads",
@@ -42,6 +43,7 @@ var templateMap = map[string]string{
 	"name":             keyValTpl,
 	"version":          keyValTpl,
 	"description":      keyValTpl,
+	"license":          keyValTpl,
 	"logo":             keyValTpl,
 	"path":             keyValTpl,
 	"pre_build":        keyValTpl,

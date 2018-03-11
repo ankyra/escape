@@ -87,6 +87,9 @@ func NewProjectStateFromFile(prjName, cfgFile string, backend Backend) (*Project
 }
 
 func (p *ProjectState) Save(d *DeploymentState) error {
+	if p.Backend == nil {
+		return fmt.Errorf("Couldn't save deployment state: missing state Backend for ProjectState. This is a bug in Escape.")
+	}
 	return p.Backend.Save(d)
 }
 

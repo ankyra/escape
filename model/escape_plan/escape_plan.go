@@ -81,6 +81,10 @@ type EscapePlan struct {
 	// A path to an image. Only used for presentation purposes.
 	Logo string `yaml:"logo,omitempty"`
 
+	// The license. For example `Apache Software License`, `BSD License`, `GPLv3`, etc.
+	// Currently no input validation is performed on this field.
+	License string `yaml:"license,omitempty"`
+
 	// Metadata key value pairs.
 	//
 	// [Escape Script](/docs/scripting-language/) can be used to

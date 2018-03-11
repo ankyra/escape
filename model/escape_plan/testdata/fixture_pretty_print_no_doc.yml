@@ -1,6 +1,7 @@
 name: test
 version: 0.1.@
 description: Test description
+license: Apache Software License
 logo: logo.png
 extends:
 - extends1

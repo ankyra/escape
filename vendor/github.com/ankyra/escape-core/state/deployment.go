@@ -166,6 +166,15 @@ func (d *DeploymentState) CommitVersion(stage string, metadata *core.ReleaseMeta
 	return nil
 }
 
+func (d *DeploymentState) SetFailureStatus(stage string, err error, statusCode StatusCode) error {
+	status := NewStatus(statusCode)
+	status.Data = err.Error()
+	if err2 := d.UpdateStatus(stage, status); err2 != nil {
+		return fmt.Errorf("Couldn't update status '%s'. Trying to set failure status, because: %s", err2.Error(), err.Error())
+	}
+	return err
+}
+
 func (d *DeploymentState) UpdateStatus(stage string, status *Status) error {
 	d.GetStageOrCreateNew(stage).Status = status
 	return d.Save()

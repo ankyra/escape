@@ -40,5 +40,6 @@ func compileBasicFields(ctx *CompilerContext) error {
 	ctx.Metadata.SetProvides(ctx.Plan.Provides)
 	ctx.Metadata.Project = project
 	ctx.Metadata.Downloads = ctx.Plan.Downloads
+	ctx.Metadata.License = ctx.Plan.License
 	return nil
 }

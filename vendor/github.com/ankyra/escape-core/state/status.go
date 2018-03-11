@@ -68,10 +68,12 @@ var OKStatuses = map[StatusCode]bool{
 var RunningStatus = map[StatusCode]bool{}
 
 type Status struct {
-	Code      StatusCode `json:"status"`
-	UpdatedAt time.Time  `json:"updated_at,omitempty"`
-	UpdatedBy string     `json:"updated_by,omitempty"`
-	Data      string     `json:"data,omitempty"`
+	Code       StatusCode `json:"status"`
+	UpdatedAt  time.Time  `json:"updated_at,omitempty"`
+	UpdatedBy  string     `json:"updated_by,omitempty"`
+	Data       string     `json:"data,omitempty"`
+	TryAgainAt time.Time  `json:"try_again_at,omitempty"`
+	Tried      int        `json:"tried,omitempty"`
 }
 
 func NewStatus(code StatusCode) *Status {

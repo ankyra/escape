@@ -28,6 +28,8 @@ depends:
 
 description: Test description
 
+license: Apache Software License
+
 errands:
   errand1:
     script: path/to/script1.sh

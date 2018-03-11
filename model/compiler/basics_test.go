@@ -27,6 +27,7 @@ func (s *suite) Test_Compile_Basics(c *C) {
 	plan.Name = "testor"
 	plan.Description = "  trim me\nplease\n"
 	plan.Provides = []string{"provider1", "provider2"}
+	plan.License = "Apache Software License"
 	ctx := NewCompilerContext(plan, nil)
 	c.Assert(compileBasicFields(ctx), IsNil)
 	c.Assert(ctx.Metadata.Name, Equals, "testor")
@@ -34,6 +35,7 @@ func (s *suite) Test_Compile_Basics(c *C) {
 	c.Assert(ctx.Metadata.Project, Equals, "_")
 	c.Assert(ctx.Metadata.GetProvides(), DeepEquals, []string{"provider1", "provider2"})
 	c.Assert(ctx.Metadata.BuiltWithEscapeVersion, Equals, util.EscapeVersion)
+	c.Assert(ctx.Metadata.License, Equals, "Apache Software License")
 }
 
 func (s *suite) Test_Compile_Basics_fails_if_name_is_not_set(c *C) {
