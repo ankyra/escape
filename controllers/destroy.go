@@ -19,6 +19,7 @@ package controllers
 import (
 	"os"
 
+	"github.com/ankyra/escape-core/state"
 	. "github.com/ankyra/escape/model/interfaces"
 	"github.com/ankyra/escape/model/runners"
 	"github.com/ankyra/escape/model/runners/destroy"
@@ -42,7 +43,7 @@ func (DestroyController) Destroy(context Context, destroyBuild, destroyDeploymen
 	if destroyDeployment {
 		runnerContext, err := runners.NewRunnerContext(context, "deploy")
 		if err != nil {
-			return err
+			return MarkDeploymentFailed(context, err, state.DestroyFailure)
 		}
 		if err := destroy.NewDestroyRunner("deploy").Run(runnerContext); err != nil {
 			return err
@@ -57,12 +58,12 @@ func (DestroyController) Destroy(context Context, destroyBuild, destroyDeploymen
 func (d DestroyController) FetchAndDestroy(context Context, releaseId string, destroyBuild, destroyDeployment bool) error {
 	currentDir, err := os.Getwd()
 	if err != nil {
-		return err
+		return MarkDeploymentFailed(context, err, state.DestroyFailure)
 	}
 	fetcher := FetchController{}
 	if err := fetcher.ResolveFetchAndLoad(context, releaseId); err != nil {
 		os.Chdir(currentDir)
-		return err
+		return MarkDeploymentFailed(context, err, state.DestroyFailure)
 	}
 	if err := d.Destroy(context, destroyBuild, destroyDeployment); err != nil {
 		os.Chdir(currentDir)

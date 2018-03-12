@@ -19,6 +19,7 @@ package controllers
 import (
 	"os"
 
+	"github.com/ankyra/escape-core/state"
 	. "github.com/ankyra/escape/model/interfaces"
 	"github.com/ankyra/escape/model/runners"
 	"github.com/ankyra/escape/model/runners/deploy"
@@ -57,11 +58,11 @@ func (d DeployController) Deploy(context Context, extraVars, extraProviders map[
 	context.PushLogSection("Deploy")
 	context.Log("deploy.start", nil)
 	if err := SaveExtraInputsAndProvidersInDeploymentState(context, "deploy", extraVars, extraProviders); err != nil {
-		return err
+		return MarkDeploymentFailed(context, err, state.Failure)
 	}
 	runnerContext, err := runners.NewRunnerContext(context, "deploy")
 	if err != nil {
-		return err
+		return MarkDeploymentFailed(context, err, state.Failure)
 	}
 	if err := deploy.NewDeployRunner().Run(runnerContext); err != nil {
 		return err
@@ -78,16 +79,25 @@ func (d DeployController) Deploy(context Context, extraVars, extraProviders map[
 func (d DeployController) FetchAndDeploy(context Context, releaseId string, extraVars, extraProviders map[string]string) error {
 	currentDir, err := os.Getwd()
 	if err != nil {
-		return err
+		return MarkDeploymentFailed(context, err, state.Failure)
 	}
 	fetcher := FetchController{}
 	if err := fetcher.ResolveFetchAndLoad(context, releaseId); err != nil {
 		os.Chdir(currentDir)
-		return err
+		return MarkDeploymentFailed(context, err, state.Failure)
 	}
 	if err := d.Deploy(context, extraVars, extraProviders); err != nil {
 		os.Chdir(currentDir)
 		return err
 	}
 	return os.Chdir(currentDir)
+}
+
+func MarkDeploymentFailed(context Context, err error, errorCode state.StatusCode) error {
+	envState := context.GetEnvironmentState()
+	deplState, err2 := envState.GetOrCreateDeploymentState(context.GetRootDeploymentName())
+	if err2 != nil {
+		return err2
+	}
+	return deplState.SetFailureStatus(state.DeployStage, err, errorCode)
 }

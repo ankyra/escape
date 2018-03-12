@@ -53,6 +53,7 @@ func ConvergeDeployment(context Context, depl *state.DeploymentState, refresh bo
 	}
 	releaseId := depl.Release + "-v" + stage.Version
 	status := stage.Status
+	context.SetRootDeploymentName(depl.Name)
 	if status.Code == state.TestPending {
 		return SmokeController{}.FetchAndSmoke(context, releaseId)
 	}
@@ -87,7 +88,6 @@ func ConvergeDeployment(context Context, depl *state.DeploymentState, refresh bo
 		"deployment": depl.Name,
 		"release":    depl.Release + "-v" + stage.Version,
 	})
-	context.SetRootDeploymentName(depl.Name)
 	return DeployController{}.FetchAndDeploy(context, releaseId, nil, nil)
 }
 
