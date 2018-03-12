@@ -50,6 +50,15 @@ func getExtraPathDir() string {
 	return filepath.Join(GetAppConfigDir(runtime.GOOS, currentUser.HomeDir), ".bin")
 }
 
+func pipeReader(pipe io.ReadCloser, channel chan string) {
+	scanner := bufio.NewScanner(pipe)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		channel <- line
+	}
+	close(channel)
+}
+
 func (p *processRecorder) Record(cmd []string, env []string, log Logger) (string, error) {
 	extraPath := getExtraPathDir()
 	MkdirRecursively(extraPath)
@@ -81,14 +90,6 @@ func (p *processRecorder) Record(cmd []string, env []string, log Logger) (string
 		return "", RecordError(cmd, err)
 	}
 
-	pipeReader := func(pipe io.ReadCloser, channel chan string) {
-		scanner := bufio.NewScanner(pipe)
-		for scanner.Scan() {
-			line := strings.TrimSpace(scanner.Text())
-			channel <- line
-		}
-		close(channel)
-	}
 	go pipeReader(stdout, stdoutChannel)
 	go pipeReader(stderr, stderrChannel)
 
@@ -143,12 +144,6 @@ func (p *processRecorder) Record(cmd []string, env []string, log Logger) (string
 		return lines, RecordError(cmd, returnErr)
 	}
 	return lines, nil
-}
-
-func drainChannels(resultChannel chan string, logLine func(string)) {
-	for line := range resultChannel {
-		logLine(line)
-	}
 }
 
 func (p *processRecorder) Run(cmd []string, env []string, log Logger) error {

@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	core "github.com/ankyra/escape-core"
+	"github.com/ankyra/escape-core/state"
 	"github.com/ankyra/escape-core/variables"
 	"github.com/ankyra/escape/model/escape_plan"
 	. "gopkg.in/check.v1"
@@ -64,7 +65,6 @@ func (s *suite) Test_Compile_Dependencies(c *C) {
 
 func (s *suite) Test_Compile_Dependencies_with_mapping(c *C) {
 	plan := escape_plan.NewEscapePlan()
-	plan.Depends = nil
 	plan.Depends = []interface{}{
 		map[interface{}]interface{}{
 			"release_id": "dependency-latest as dep",
@@ -92,6 +92,147 @@ func (s *suite) Test_Compile_Dependencies_with_mapping(c *C) {
 	c.Assert(ctx.Metadata.Depends[0].BuildMapping["input_variable"], Equals, "test")
 	c.Assert(ctx.Metadata.Depends[0].DeployMapping["input_variable"], Equals, "test")
 	c.Assert(ctx.VariableCtx["dep"].GetQualifiedReleaseId(), Equals, "_/dependency-v1.0")
+}
+
+func (s *suite) Test_Compile_Dependencies_with_mapping_does_not_add_variables_to_parent(c *C) {
+
+	cases := [][]interface{}{
+		[]interface{}{[]interface{}{state.DeployStage, state.BuildStage}, false},
+		[]interface{}{[]interface{}{state.DeployStage}, false},
+		[]interface{}{[]interface{}{state.BuildStage}, false},
+		[]interface{}{[]interface{}{}, false},
+	}
+	for _, test := range cases {
+		scopes := test[0]
+		definesInput := test[1].(bool)
+
+		plan := escape_plan.NewEscapePlan()
+		plan.Depends = []interface{}{
+			map[interface{}]interface{}{
+				"release_id": "dependency-latest as dep",
+				"scopes":     scopes,
+				"mapping": map[interface{}]interface{}{
+					"input_variable": "test",
+				},
+			},
+		}
+		lookupResult := core.NewReleaseMetadata("dependency", "1.0")
+		v1, _ := variables.NewVariableFromString("input_variable", "string")
+		lookupResult.AddInputVariable(v1)
+		ctx := NewCompilerContext(plan, nil)
+		ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
+			if dep.ReleaseId == "_/dependency-v1.0" {
+				return lookupResult, nil
+			}
+			return nil, fmt.Errorf("Resolve error")
+		}
+		ctx.ReleaseQuery = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
+			if dep.ReleaseId == "_/dependency-latest" {
+				return lookupResult, nil
+			}
+			return nil, fmt.Errorf("Resolve error")
+		}
+		c.Assert(compileDependencies(ctx), IsNil)
+		if !definesInput {
+			c.Assert(ctx.Metadata.Inputs, HasLen, 0, Commentf(fmt.Sprintf("%v", scopes)))
+		} else {
+			c.Assert(ctx.Metadata.Inputs, HasLen, 1, Commentf(fmt.Sprintf("%v", scopes)))
+		}
+	}
+}
+
+func (s *suite) Test_Compile_Dependencies_with_deploy_mapping_does_not_add_variables_to_parent(c *C) {
+
+	cases := [][]interface{}{
+		[]interface{}{[]interface{}{state.DeployStage, state.BuildStage}, true},
+		[]interface{}{[]interface{}{state.DeployStage}, false},
+		[]interface{}{[]interface{}{state.BuildStage}, true},
+		[]interface{}{[]interface{}{}, false},
+	}
+	for _, test := range cases {
+		scopes := test[0]
+		definesInput := test[1].(bool)
+
+		plan := escape_plan.NewEscapePlan()
+		plan.Depends = []interface{}{
+			map[interface{}]interface{}{
+				"release_id": "dependency-latest as dep",
+				"scopes":     scopes,
+				"deploy_mapping": map[interface{}]interface{}{
+					"input_variable": "test",
+				},
+			},
+		}
+		lookupResult := core.NewReleaseMetadata("dependency", "1.0")
+		v1, _ := variables.NewVariableFromString("input_variable", "string")
+		lookupResult.AddInputVariable(v1)
+		ctx := NewCompilerContext(plan, nil)
+		ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
+			if dep.ReleaseId == "_/dependency-v1.0" {
+				return lookupResult, nil
+			}
+			return nil, fmt.Errorf("Resolve error")
+		}
+		ctx.ReleaseQuery = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
+			if dep.ReleaseId == "_/dependency-latest" {
+				return lookupResult, nil
+			}
+			return nil, fmt.Errorf("Resolve error")
+		}
+		c.Assert(compileDependencies(ctx), IsNil)
+		if !definesInput {
+			c.Assert(ctx.Metadata.Inputs, HasLen, 0, Commentf(fmt.Sprintf("%v", scopes)))
+		} else {
+			c.Assert(ctx.Metadata.Inputs, HasLen, 1, Commentf(fmt.Sprintf("%v", scopes)))
+		}
+	}
+}
+
+func (s *suite) Test_Compile_Dependencies_with_build_mapping_does_not_add_variables_to_parent(c *C) {
+
+	cases := [][]interface{}{
+		[]interface{}{[]interface{}{state.DeployStage, state.BuildStage}, true},
+		[]interface{}{[]interface{}{state.DeployStage}, true},
+		[]interface{}{[]interface{}{state.BuildStage}, false},
+		[]interface{}{[]interface{}{}, false},
+	}
+	for _, test := range cases {
+		scopes := test[0]
+		definesInput := test[1].(bool)
+
+		plan := escape_plan.NewEscapePlan()
+		plan.Depends = []interface{}{
+			map[interface{}]interface{}{
+				"release_id": "dependency-latest as dep",
+				"scopes":     scopes,
+				"build_mapping": map[interface{}]interface{}{
+					"input_variable": "test",
+				},
+			},
+		}
+		lookupResult := core.NewReleaseMetadata("dependency", "1.0")
+		v1, _ := variables.NewVariableFromString("input_variable", "string")
+		lookupResult.AddInputVariable(v1)
+		ctx := NewCompilerContext(plan, nil)
+		ctx.DependencyFetcher = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
+			if dep.ReleaseId == "_/dependency-v1.0" {
+				return lookupResult, nil
+			}
+			return nil, fmt.Errorf("Resolve error")
+		}
+		ctx.ReleaseQuery = func(dep *core.DependencyConfig) (*core.ReleaseMetadata, error) {
+			if dep.ReleaseId == "_/dependency-latest" {
+				return lookupResult, nil
+			}
+			return nil, fmt.Errorf("Resolve error")
+		}
+		c.Assert(compileDependencies(ctx), IsNil)
+		if !definesInput {
+			c.Assert(ctx.Metadata.Inputs, HasLen, 0, Commentf(fmt.Sprintf("%v", scopes)))
+		} else {
+			c.Assert(ctx.Metadata.Inputs, HasLen, 1, Commentf(fmt.Sprintf("%v", scopes)))
+		}
+	}
 }
 
 func (s *suite) Test_Compile_Dependencies_adds_inputs_without_defaults(c *C) {

@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/ankyra/escape-core"
+	"github.com/ankyra/escape-core/state"
 )
 
 func compileDependencies(ctx *CompilerContext) error {
@@ -46,7 +47,7 @@ func compileDependencyConfig(ctx *CompilerContext, depend *core.DependencyConfig
 	if err != nil {
 		return nil, err
 	}
-	for _, consume := range metadata.GetConsumerConfig("deploy") {
+	for _, consume := range metadata.GetConsumerConfig(state.DeployStage) {
 		found := false
 		for provider, _ := range depend.Consumes {
 			if provider == consume.VariableName {
@@ -59,7 +60,24 @@ func compileDependencyConfig(ctx *CompilerContext, depend *core.DependencyConfig
 		}
 	}
 	for _, input := range metadata.Inputs {
+		_, mapped := depend.Mapping[input.Id]
+		if mapped {
+			continue
+		}
+		_, mappedBuild := depend.BuildMapping[input.Id]
+		if mappedBuild && !depend.InScope(state.DeployStage) {
+			continue
+		}
+		_, mappedDeploy := depend.DeployMapping[input.Id]
+		if mappedDeploy && !depend.InScope(state.BuildStage) {
+			continue
+		}
+		if mappedBuild && mappedDeploy {
+			continue
+		}
+
 		if !input.HasDefault() {
+			input.Scopes = depend.Scopes
 			input.EvalBeforeDependencies = true
 			ctx.Metadata.AddInputVariable(input)
 		}
