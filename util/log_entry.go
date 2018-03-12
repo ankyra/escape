@@ -239,8 +239,36 @@ var logMessages = map[string]map[string]string{
 		"msg":   "Converging deployment of {{ .release }} for deployment {{ .deployment }}",
 		"level": "info",
 	},
+	"converge.test_pending": map[string]string{
+		"msg":   "Performing user's request to run smoke tests from {{ .release }} against deployment {{ .deployment }}.",
+		"level": "info",
+	},
+	"converge.deploy_retry": map[string]string{
+		"msg":   "Retrying deployment of {{ .release }} in deployment {{ .deployment }}.",
+		"level": "info",
+	},
+	"converge.test_retry": map[string]string{
+		"msg":   "Retrying smoke tests from {{ .release }} against deployment {{ .deployment }}.",
+		"level": "info",
+	},
+	"converge.destroy_pending": map[string]string{
+		"msg":   "Performing user's request to run the destroy steps from {{ .release }} on deployment {{ .deployment }}",
+		"level": "info",
+	},
+	"converge.destroy_retry": map[string]string{
+		"msg":   "Retrying destroy steps from {{ .release }} against deployment {{ .deployment }}.",
+		"level": "info",
+	},
+	"converge.mark_retry": map[string]string{
+		"msg":   "Marking deployment {{ .deployment }} to retry in {{ .backoff }}.",
+		"level": "info",
+	},
 	"converge.skip_ok": map[string]string{
 		"msg":   "Skipping deployment {{ .deployment }}; already deployed (use --refresh to redeploy)",
+		"level": "info",
+	},
+	"converge.skip_retry_later": map[string]string{
+		"msg":   "Skipping deployment {{ .deployment }}; will be retried in {{ .retriedIn }}.",
 		"level": "info",
 	},
 	"deploy.deploy_dependency": map[string]string{
