@@ -54,45 +54,15 @@ func ConvergeDeployment(context Context, depl *state.DeploymentState, refresh bo
 	releaseId := depl.Release + "-v" + stage.Version
 	status := stage.Status
 	context.SetRootDeploymentName(depl.Name)
+
 	if status.Code == state.TestPending {
-		context.Log("converge.test_pending", map[string]string{
-			"deployment": depl.Name,
-			"release":    releaseId,
-		})
-		return SmokeController{}.FetchAndSmoke(context, releaseId)
+		return convergeSmoke(context, depl, releaseId, "converge.test_pending")
 	}
 	if status.Code == state.DestroyPending {
-		context.Log("converge.destroy_pending", map[string]string{
-			"deployment": depl.Name,
-			"release":    releaseId,
-		})
-		return DestroyController{}.FetchAndDestroy(context, releaseId, false, true)
+		return convergeDestroy(context, depl, releaseId, "converge.destroy_pending")
 	}
 	if status.IsError() {
-
-		now := time.Now()
-		if status.TryAgainAt.IsZero() {
-			// The action has not been retried so set an initial retry time and save
-			// the new status.
-			backOff := time.Duration(BackoffStart) * time.Second
-			status.TryAgainAt = now.Add(backOff)
-			context.Log("converge.mark_retry", map[string]string{
-				"deployment": depl.Name,
-				"backoff":    backOff.String(),
-			})
-			return depl.UpdateStatus(state.DeployStage, status)
-		}
-		if stage.Status.TryAgainAt.Before(now) {
-			// The action has to be retried.
-			return retryAction(context, depl)
-		} else {
-			// The action will be retried in a later round. Do nothing.
-			context.Log("converge.skip_retry_later", map[string]string{
-				"deployment": depl.Name,
-				"retriedIn":  status.TryAgainAt.Sub(now).String(),
-			})
-			return nil
-		}
+		return handleExponentialBackoff(context, depl, status)
 	}
 	if !refresh && status.Code == state.OK {
 		context.Log("converge.skip_ok", map[string]string{
@@ -101,11 +71,35 @@ func ConvergeDeployment(context Context, depl *state.DeploymentState, refresh bo
 		})
 		return nil
 	}
-	context.Log("converge", map[string]string{
+	return convergeDeploy(context, depl, releaseId, "converge")
+}
+
+func handleExponentialBackoff(context Context, depl *state.DeploymentState, status *state.Status) error {
+	now := time.Now()
+
+	// The action has not been retried so set an initial retry time and save
+	// the new status.
+	if status.TryAgainAt.IsZero() {
+		backOff := time.Duration(BackoffStart) * time.Second
+		status.TryAgainAt = now.Add(backOff)
+		context.Log("converge.mark_retry", map[string]string{
+			"deployment": depl.Name,
+			"backoff":    backOff.String(),
+		})
+		return depl.UpdateStatus(state.DeployStage, status)
+	}
+
+	// Retry action
+	if status.TryAgainAt.Before(now) {
+		return retryAction(context, depl)
+	}
+
+	// The action will be retried in a later round. Do nothing.
+	context.Log("converge.skip_retry_later", map[string]string{
 		"deployment": depl.Name,
-		"release":    releaseId,
+		"retriedIn":  status.TryAgainAt.Sub(now).String(),
 	})
-	return DeployController{}.FetchAndDeploy(context, releaseId, nil, nil)
+	return nil
 }
 
 func retryAction(context Context, depl *state.DeploymentState) error {
@@ -114,23 +108,11 @@ func retryAction(context Context, depl *state.DeploymentState) error {
 	releaseId := depl.Release + "-v" + stage.Version
 	var err error
 	if status.Code == state.Failure {
-		context.Log("converge.deploy_retry", map[string]string{
-			"deployment": depl.Name,
-			"release":    releaseId,
-		})
-		err = DeployController{}.FetchAndDeploy(context, releaseId, nil, nil)
+		err = convergeDeploy(context, depl, releaseId, "converge.deploy_retry")
 	} else if status.Code == state.TestFailure {
-		context.Log("converge.test_retry", map[string]string{
-			"deployment": depl.Name,
-			"release":    releaseId,
-		})
-		err = SmokeController{}.FetchAndSmoke(context, releaseId)
+		err = convergeSmoke(context, depl, releaseId, "converge.test_retry")
 	} else if status.Code == state.DestroyFailure {
-		context.Log("converge.destroy_retry", map[string]string{
-			"deployment": depl.Name,
-			"release":    releaseId,
-		})
-		err = DestroyController{}.FetchAndDestroy(context, releaseId, false, true)
+		err = convergeDestroy(context, depl, releaseId, "converge.destroy_retry")
 	} else {
 		return fmt.Errorf("Unknown error status '%s'. This is a bug in Esape.", status.Code)
 	}
@@ -149,4 +131,28 @@ func retryAction(context Context, depl *state.DeploymentState) error {
 		return fmt.Errorf("Couldn't update status '%s'. Trying to set failure status, because: %s", err2.Error(), err.Error())
 	}
 	return err
+}
+
+func convergeSmoke(context Context, depl *state.DeploymentState, releaseId, logKey string) error {
+	context.Log(logKey, map[string]string{
+		"deployment": depl.Name,
+		"release":    releaseId,
+	})
+	return SmokeController{}.FetchAndSmoke(context, releaseId)
+}
+
+func convergeDestroy(context Context, depl *state.DeploymentState, releaseId, logKey string) error {
+	context.Log(logKey, map[string]string{
+		"deployment": depl.Name,
+		"release":    releaseId,
+	})
+	return DestroyController{}.FetchAndDestroy(context, releaseId, false, true)
+}
+
+func convergeDeploy(context Context, depl *state.DeploymentState, releaseId, logKey string) error {
+	context.Log(logKey, map[string]string{
+		"deployment": depl.Name,
+		"release":    releaseId,
+	})
+	return DeployController{}.FetchAndDeploy(context, releaseId, nil, nil)
 }
