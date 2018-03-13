@@ -28,7 +28,6 @@ import (
 	"github.com/ankyra/escape/model/paths"
 	"github.com/ankyra/escape/model/state"
 	"github.com/ankyra/escape/util/logger/api"
-	"github.com/ankyra/escape/util/logger/consumers"
 	"github.com/ankyra/escape/util/logger/loggers"
 )
 
@@ -46,22 +45,13 @@ type Context struct {
 func NewContext() *Context {
 	ctx := &Context{}
 	ctx.EscapeConfig = config.NewEscapeConfig()
-	ctx.Logger = loggers.NewLogger([]api.LogConsumer{
-		consumers.NewFancyTerminalOutputLogConsumer(),
-	})
+	ctx.Logger = loggers.NewLogger([]api.LogConsumer{})
 	ctx.DependencyMetadata = map[string]*core.ReleaseMetadata{}
 	return ctx
 }
 
-func (c *Context) SetLogCollapse(s bool) {
-	consumer := consumers.NewFancyTerminalOutputLogConsumer()
-	consumer.CollapseSections = s
-	c.Logger = loggers.NewLogger([]api.LogConsumer{consumer})
-}
-
-func (c *Context) DisableLogger() {
-	consumer := consumers.NewNullLogConsumer()
-	c.Logger = loggers.NewLogger([]api.LogConsumer{consumer})
+func (c *Context) SetLogger(logger api.Logger) {
+	c.Logger = logger
 }
 
 func (c *Context) InitFromLocalEscapePlanAndState(state, environment, planPath string) error {

@@ -33,7 +33,6 @@ var _ = Suite(&testSuite{})
 
 func getRunContext(c *C, stateFile, escapePlan string) *runners.RunnerContext {
 	ctx := model.NewContext()
-	ctx.DisableLogger()
 	err := ctx.InitFromLocalEscapePlanAndState(stateFile, "dev", escapePlan)
 	c.Assert(err, IsNil)
 	runCtx, err := runners.NewRunnerContext(ctx, "deploy")

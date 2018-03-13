@@ -23,6 +23,7 @@ import (
 
 	"github.com/ankyra/escape/util/logger/api"
 
+	"golang.org/x/crypto/ssh/terminal"
 	"golang.org/x/text/transform"
 	"golang.org/x/text/unicode/norm"
 )
@@ -34,10 +35,13 @@ type fancyTerminalOutput struct {
 	LastLineWasCollapsed  bool
 }
 
-func NewFancyTerminalOutputLogConsumer() *fancyTerminalOutput {
+func NewFancyTerminalOutputLogConsumer(collapse bool) *fancyTerminalOutput {
+	if !terminal.IsTerminal(int(os.Stdout.Fd())) || os.Getenv("CI") == "true" {
+		collapse = false
+	}
 	return &fancyTerminalOutput{
 		PreviousSectionStack: []string{},
-		CollapseSections:     true,
+		CollapseSections:     collapse,
 	}
 }
 

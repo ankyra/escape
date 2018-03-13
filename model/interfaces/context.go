@@ -47,9 +47,8 @@ type Context interface {
 	GetEnvironmentState() *state.EnvironmentState
 	GetEscapeConfig() *config.EscapeConfig
 	GetInventory() inventory.Inventory
+	SetLogger(api.Logger)
 	GetLogger() api.Logger
 	GetRootDeploymentName() string
 	SetRootDeploymentName(string)
-	SetLogCollapse(bool)
-	DisableLogger()
 }

@@ -22,11 +22,11 @@ import (
 	"github.com/ankyra/escape/model"
 	. "github.com/ankyra/escape/model/interfaces"
 	"github.com/ankyra/escape/util"
+	"github.com/ankyra/escape/util/logger"
 	"github.com/spf13/cobra"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
-var cfgFile, cfgProfile, cfgLogLevel string
+var cfgFile, cfgProfile, cfgLogLevel, cfgLogger string
 var cfgLogCollapse, jsonFlag bool
 var context Context
 
@@ -49,15 +49,11 @@ See the documentation at https://escape.ankyra.io/docs/
 			return err
 		}
 
-		context.SetLogCollapse(cfgLogCollapse)
-		if cfgLogLevel != "" {
-			context.GetLogger().SetLogLevel(cfgLogLevel)
+		logger, err := logger.GetLogger(cfgLogger, cfgLogLevel, cfgLogCollapse)
+		if err != nil {
+			return err
 		}
-
-		if !terminal.IsTerminal(int(os.Stdout.Fd())) || os.Getenv("CI") == "true" {
-			context.SetLogCollapse(false)
-		}
-
+		context.SetLogger(logger)
 		return nil
 	},
 }
@@ -79,5 +75,6 @@ func init() {
 	RootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "~/.escape_config", "Local of the global Escape configuration file")
 	RootCmd.PersistentFlags().StringVar(&cfgProfile, "profile", "", "Configuration profile")
 	RootCmd.PersistentFlags().StringVarP(&cfgLogLevel, "level", "l", "info", "Log level: debug, success, info, warn, error")
+	RootCmd.PersistentFlags().StringVarP(&cfgLogger, "logger", "", "default", "Logger: default, json")
 	RootCmd.PersistentFlags().BoolVarP(&cfgLogCollapse, "collapse-logs", "", true, "Collapse log sections.")
 }
