@@ -76,7 +76,7 @@ func (p *processRecorder) Record(cmd []string, env []string, log api.Logger) (st
 	proc := exec.Command(cmd[0], cmd[1:]...)
 	proc.Dir = p.WorkingDirectory
 	proc.Env = newEnv
-	bufferSize := 2
+	bufferSize := 1
 	stdoutChannel := make(chan string, bufferSize)
 	stderrChannel := make(chan string, bufferSize)
 
