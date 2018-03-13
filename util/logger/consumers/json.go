@@ -17,6 +17,8 @@ limitations under the License.
 package consumers
 
 import (
+	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/ankyra/escape/util/logger/api"
@@ -29,11 +31,25 @@ func NewJSONLogConsumer() *jsonLogConsumer {
 }
 
 type JSONMessage struct {
-	Timestamp time.Time `json:"timestampe"`
-	Message   string    `json:"message"`
-	Level     string    `json:"level"`
+	Timestamp time.Time         `json:"timestamp"`
+	Message   string            `json:"message"`
+	Level     string            `json:"level"`
+	LogKey    string            `json:"log_key"`
+	LogValues map[string]string `json:"log_values"`
 }
 
 func (t *jsonLogConsumer) Consume(entry *api.LogEntry) error {
+	msg := JSONMessage{
+		Timestamp: entry.Timestamp,
+		Message:   entry.Message,
+		Level:     entry.LogLevel.String(),
+		LogKey:    entry.LogKey,
+		LogValues: entry.LogValues,
+	}
+	bytes, err := json.Marshal(msg)
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(bytes))
 	return nil
 }

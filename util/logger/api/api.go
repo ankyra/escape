@@ -16,6 +16,8 @@ limitations under the License.
 
 package api
 
+import "time"
+
 type LogLevel int
 
 const (
@@ -25,6 +27,21 @@ const (
 	WARN    = iota
 	ERROR   = iota
 )
+
+func (l LogLevel) String() string {
+	if l == DEBUG {
+		return "debug"
+	} else if l == INFO {
+		return "info"
+	} else if l == SUCCESS {
+		return "success"
+	} else if l == WARN {
+		return "warn"
+	} else if l == ERROR {
+		return "error"
+	}
+	return ""
+}
 
 func StringToLogLevel(logLevel string) LogLevel {
 	if logLevel == "debug" {
@@ -45,6 +62,9 @@ type LogEntry struct {
 	Release      string
 	Collapse     bool
 	LogLevel     LogLevel
+	Timestamp    time.Time
+	LogKey       string
+	LogValues    map[string]string
 }
 
 type Logger interface {

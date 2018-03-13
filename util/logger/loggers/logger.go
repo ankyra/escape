@@ -19,6 +19,7 @@ package loggers
 import (
 	"bytes"
 	"text/template"
+	"time"
 
 	"github.com/ankyra/escape/util/logger/api"
 )
@@ -68,10 +69,13 @@ func (l *logger) Log(key string, values map[string]string) {
 		collapse = "true"
 	}
 	entry := &api.LogEntry{
+		LogKey:       key,
+		LogValues:    values,
 		Message:      writer.String(),
 		SectionStack: l.sections,
 		LogLevel:     api.LogLevel(level),
 		Collapse:     collapse == "true",
+		Timestamp:    time.Now(),
 	}
 	for _, c := range l.consumers {
 		if err := c.Consume(entry); err != nil {
