@@ -30,11 +30,12 @@ import (
 
 	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape/util"
+	"github.com/ankyra/escape/util/logger/api"
 )
 
-var downloadLogger util.Logger
+var downloadLogger api.Logger
 
-func DoDownloads(downloads []*core.DownloadConfig, logger util.Logger) error {
+func DoDownloads(downloads []*core.DownloadConfig, logger api.Logger) error {
 	downloadLogger = logger
 	for _, download := range downloads {
 		if err := DoDownload(download); err != nil {

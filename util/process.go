@@ -25,12 +25,14 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/ankyra/escape/util/logger/api"
 )
 
 type ProcessRecorder interface {
 	SetWorkingDirectory(string)
-	Record(cmd []string, env []string, log Logger) (string, error)
-	Run(cmd []string, env []string, log Logger) error
+	Record(cmd []string, env []string, log api.Logger) (string, error)
+	Run(cmd []string, env []string, log api.Logger) error
 }
 
 type processRecorder struct {
@@ -59,7 +61,7 @@ func pipeReader(pipe io.ReadCloser, channel chan string) {
 	close(channel)
 }
 
-func (p *processRecorder) Record(cmd []string, env []string, log Logger) (string, error) {
+func (p *processRecorder) Record(cmd []string, env []string, log api.Logger) (string, error) {
 	extraPath := getExtraPathDir()
 	MkdirRecursively(extraPath)
 	newEnv := []string{}
@@ -146,7 +148,7 @@ func (p *processRecorder) Record(cmd []string, env []string, log Logger) (string
 	return lines, nil
 }
 
-func (p *processRecorder) Run(cmd []string, env []string, log Logger) error {
+func (p *processRecorder) Run(cmd []string, env []string, log api.Logger) error {
 	_, err := p.Record(cmd, env, log)
 	return err
 }

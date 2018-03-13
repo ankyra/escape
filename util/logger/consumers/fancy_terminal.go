@@ -14,19 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package util
+package consumers
 
 import (
 	"fmt"
-	"golang.org/x/text/transform"
-	"golang.org/x/text/unicode/norm"
 	"os"
 	"reflect"
-)
 
-type LogConsumer interface {
-	Consume(*LogEntry) error
-}
+	"github.com/ankyra/escape/util/logger/api"
+
+	"golang.org/x/text/transform"
+	"golang.org/x/text/unicode/norm"
+)
 
 type fancyTerminalOutput struct {
 	PreviousSectionStack  []string
@@ -35,14 +34,14 @@ type fancyTerminalOutput struct {
 	LastLineWasCollapsed  bool
 }
 
-func NewFancyTerminalOutputLogConsumer() LogConsumer {
+func NewFancyTerminalOutputLogConsumer() *fancyTerminalOutput {
 	return &fancyTerminalOutput{
 		PreviousSectionStack: []string{},
 		CollapseSections:     true,
 	}
 }
 
-func (t *fancyTerminalOutput) Consume(entry *LogEntry) error {
+func (t *fancyTerminalOutput) Consume(entry *api.LogEntry) error {
 
 	if entry.Message == "" {
 		return nil
@@ -91,12 +90,11 @@ func (t *fancyTerminalOutput) Consume(entry *LogEntry) error {
 	//msg := stripCtlAndExtFromUnicode(entry.Message)
 	msg := entry.Message
 	t.PreviousMessageLength = len(msg)
-	if entry.LogLevel == SUCCESS {
+	if entry.LogLevel == api.SUCCESS {
 		fmt.Fprint(os.Stderr, "\x1b[32m")
 		fmt.Fprint(os.Stderr, "\u2714\ufe0f ")
 		t.PreviousMessageLength += 2
-	} else if entry.LogLevel == INFO {
-	} else if entry.LogLevel == ERROR {
+	} else if entry.LogLevel == api.ERROR {
 		fmt.Fprint(os.Stderr, "\x1b[31m")
 	}
 	fmt.Fprint(os.Stderr, msg)
@@ -108,7 +106,7 @@ func (t *fancyTerminalOutput) Consume(entry *LogEntry) error {
 	return nil
 }
 
-func (t *fancyTerminalOutput) plainOutput(entry *LogEntry) error {
+func (t *fancyTerminalOutput) plainOutput(entry *api.LogEntry) error {
 	indent := len(entry.SectionStack) - 1
 	if indent < 0 {
 		indent = 0
@@ -119,10 +117,10 @@ func (t *fancyTerminalOutput) plainOutput(entry *LogEntry) error {
 		fmt.Fprint(os.Stderr, entry.SectionStack[len(entry.SectionStack)-1])
 		fmt.Fprint(os.Stderr, ": ")
 	}
-	if entry.LogLevel == SUCCESS {
+	if entry.LogLevel == api.SUCCESS {
 		fmt.Fprint(os.Stderr, "\x1b[32m")
 		fmt.Fprint(os.Stderr, "\u2714\ufe0f ")
-	} else if entry.LogLevel == ERROR {
+	} else if entry.LogLevel == api.ERROR {
 		fmt.Fprint(os.Stderr, "\x1b[31m")
 	}
 	//msg := stripCtlAndExtFromUnicode(entry.Message)

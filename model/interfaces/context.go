@@ -22,7 +22,7 @@ import (
 	"github.com/ankyra/escape/model/config"
 	plan "github.com/ankyra/escape/model/escape_plan"
 	"github.com/ankyra/escape/model/inventory"
-	"github.com/ankyra/escape/util"
+	"github.com/ankyra/escape/util/logger/api"
 )
 
 type Context interface {
@@ -47,7 +47,7 @@ type Context interface {
 	GetEnvironmentState() *state.EnvironmentState
 	GetEscapeConfig() *config.EscapeConfig
 	GetInventory() inventory.Inventory
-	GetLogger() util.Logger
+	GetLogger() api.Logger
 	GetRootDeploymentName() string
 	SetRootDeploymentName(string)
 	SetLogCollapse(bool)

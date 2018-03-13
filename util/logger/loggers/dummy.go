@@ -14,14 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package util
+package loggers
 
-import (
-	"errors"
-	"strings"
-)
+import "github.com/ankyra/escape/util/logger/api"
 
-func RecordError(cmd []string, err error) error {
-	cmdString := strings.Join(cmd, " ")
-	return errors.New("Failed to successfully execute command '" + cmdString + "': " + err.Error())
+type LoggerDummy struct{}
+
+func NewLoggerDummy() api.Logger {
+	return &LoggerDummy{}
+}
+
+func (l *LoggerDummy) Log(key string, values map[string]string) {
+}
+
+func (l *LoggerDummy) PushSection(s string) {
+}
+
+func (l *LoggerDummy) PopSection() {
+}
+
+func (l *LoggerDummy) PushRelease(s string) {
+}
+
+func (l *LoggerDummy) PopRelease() {
+}
+
+func (l *LoggerDummy) SetLogLevel(logLevel string) {
 }

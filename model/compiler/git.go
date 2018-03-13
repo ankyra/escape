@@ -20,35 +20,36 @@ import (
 	"os"
 
 	"github.com/ankyra/escape/util"
+	"github.com/ankyra/escape/util/logger/loggers"
 )
 
 func compileGit(ctx *CompilerContext) error {
 	rec := util.NewProcessRecorder()
-	result, err := rec.Record([]string{"git", "rev-parse", "HEAD"}, os.Environ(), util.NewLoggerDummy())
+	result, err := rec.Record([]string{"git", "rev-parse", "HEAD"}, os.Environ(), loggers.NewLoggerDummy())
 	if err != nil {
 		return nil
 	}
 	ctx.Metadata.Revision = result
 
-	result, err = rec.Record([]string{"git", "rev-parse", "--abbrev-ref", "HEAD"}, os.Environ(), util.NewLoggerDummy())
+	result, err = rec.Record([]string{"git", "rev-parse", "--abbrev-ref", "HEAD"}, os.Environ(), loggers.NewLoggerDummy())
 	if err != nil {
 		return nil
 	}
 	ctx.Metadata.Branch = result
 
-	result, err = rec.Record([]string{"git", "config", "--get", "remote.origin.url"}, os.Environ(), util.NewLoggerDummy())
+	result, err = rec.Record([]string{"git", "config", "--get", "remote.origin.url"}, os.Environ(), loggers.NewLoggerDummy())
 	if err != nil {
 		return nil
 	}
 	ctx.Metadata.Repository = result
 
-	result, err = rec.Record([]string{"git", "show", "-s", "--format=%B", "HEAD"}, os.Environ(), util.NewLoggerDummy())
+	result, err = rec.Record([]string{"git", "show", "-s", "--format=%B", "HEAD"}, os.Environ(), loggers.NewLoggerDummy())
 	if err != nil {
 		return nil
 	}
 	ctx.Metadata.RevisionMessage = result
 
-	result, err = rec.Record([]string{"git", "show", "-s", "--format=%an <%ae>", "HEAD"}, os.Environ(), util.NewLoggerDummy())
+	result, err = rec.Record([]string{"git", "show", "-s", "--format=%an <%ae>", "HEAD"}, os.Environ(), loggers.NewLoggerDummy())
 	if err != nil {
 		return nil
 	}

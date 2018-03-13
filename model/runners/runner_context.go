@@ -24,7 +24,7 @@ import (
 	"github.com/ankyra/escape-core/state"
 	. "github.com/ankyra/escape/model/interfaces"
 	"github.com/ankyra/escape/model/paths"
-	"github.com/ankyra/escape/util"
+	"github.com/ankyra/escape/util/logger/api"
 )
 
 type RunnerContext struct {
@@ -34,7 +34,7 @@ type RunnerContext struct {
 	path             *paths.Path
 	inputs           map[string]interface{}
 	outputs          map[string]interface{}
-	logger           util.Logger
+	logger           api.Logger
 	context          Context
 	stage            string
 
@@ -83,7 +83,7 @@ func (r *RunnerContext) SetDeploymentState(d *state.DeploymentState) {
 	r.deploymentState = d
 }
 
-func (r *RunnerContext) Logger() util.Logger {
+func (r *RunnerContext) Logger() api.Logger {
 	return r.logger
 }
 

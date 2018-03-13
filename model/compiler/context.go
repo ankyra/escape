@@ -30,6 +30,7 @@ import (
 	"github.com/ankyra/escape/model/escape_plan"
 	"github.com/ankyra/escape/model/inventory"
 	"github.com/ankyra/escape/util"
+	"github.com/ankyra/escape/util/logger/api"
 )
 
 type CompilerContext struct {
@@ -39,7 +40,7 @@ type CompilerContext struct {
 	DependencyFetcher func(*core.DependencyConfig) (*core.ReleaseMetadata, error)
 	ReleaseQuery      func(*core.DependencyConfig) (*core.ReleaseMetadata, error)
 	Inventory         inventory.Inventory
-	Logger            util.Logger
+	Logger            api.Logger
 }
 
 func NewCompilerContext(plan *escape_plan.EscapePlan, inventory inventory.Inventory) *CompilerContext {
@@ -51,7 +52,7 @@ func NewCompilerContext(plan *escape_plan.EscapePlan, inventory inventory.Invent
 	}
 }
 
-func NewCompilerContextWithLogger(plan *escape_plan.EscapePlan, inventory inventory.Inventory, logger util.Logger) *CompilerContext {
+func NewCompilerContextWithLogger(plan *escape_plan.EscapePlan, inventory inventory.Inventory, logger api.Logger) *CompilerContext {
 	ctx := NewCompilerContext(plan, inventory)
 	ctx.Logger = logger
 	return ctx

@@ -14,55 +14,38 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package util
+package loggers
 
 import (
 	"bytes"
 	"text/template"
+
+	"github.com/ankyra/escape/util/logger/api"
 )
-
-type LogLevel int
-
-type LogEntry struct {
-	Message      string
-	SectionStack []string
-	Release      string
-	Collapse     bool
-	LogLevel     LogLevel
-}
-
-type Logger interface {
-	Log(string, map[string]string)
-	PushSection(string)
-	PopSection()
-	PushRelease(string)
-	PopRelease()
-	SetLogLevel(string)
-}
 
 type logger struct {
 	sections  []string
 	releases  []string
-	consumers []LogConsumer
-	logLevel  LogLevel
+	consumers []api.LogConsumer
+	logLevel  api.LogLevel
 }
 
-func NewLogger(consumers []LogConsumer) Logger {
+func NewLogger(consumers []api.LogConsumer) api.Logger {
 	return &logger{
 		sections:  []string{},
 		consumers: consumers,
-		logLevel:  INFO,
+		logLevel:  api.INFO,
 	}
 }
 
 func (l *logger) Log(key string, values map[string]string) {
-	msg, ok := logMessages[key]
+	msg, ok := api.LogMessages[key]
 	if !ok {
 		panic("Unknown log key: " + key)
 	}
 
-	level := stringToLogLevel(msg["level"])
-	if stringToLogLevel(msg["level"]) < l.logLevel {
+	level := api.StringToLogLevel(msg["level"])
+	if api.StringToLogLevel(msg["level"]) < l.logLevel {
 		return
 	}
 
@@ -84,10 +67,10 @@ func (l *logger) Log(key string, values map[string]string) {
 	if !ok {
 		collapse = "true"
 	}
-	entry := &LogEntry{
+	entry := &api.LogEntry{
 		Message:      writer.String(),
 		SectionStack: l.sections,
-		LogLevel:     LogLevel(level),
+		LogLevel:     api.LogLevel(level),
 		Collapse:     collapse == "true",
 	}
 	for _, c := range l.consumers {
@@ -114,5 +97,5 @@ func (l *logger) PopRelease() {
 }
 
 func (l *logger) SetLogLevel(logLevel string) {
-	l.logLevel = stringToLogLevel(logLevel)
+	l.logLevel = api.StringToLogLevel(logLevel)
 }

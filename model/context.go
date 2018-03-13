@@ -27,7 +27,9 @@ import (
 	"github.com/ankyra/escape/model/inventory"
 	"github.com/ankyra/escape/model/paths"
 	"github.com/ankyra/escape/model/state"
-	"github.com/ankyra/escape/util"
+	"github.com/ankyra/escape/util/logger/api"
+	"github.com/ankyra/escape/util/logger/consumers"
+	"github.com/ankyra/escape/util/logger/loggers"
 )
 
 type Context struct {
@@ -35,8 +37,8 @@ type Context struct {
 	EscapePlan         *escape_plan.EscapePlan
 	ReleaseMetadata    *core.ReleaseMetadata
 	EnvironmentState   *types.EnvironmentState
-	Logger             util.Logger
-	LogConsumers       []util.LogConsumer
+	Logger             api.Logger
+	LogConsumers       []api.LogConsumer
 	DependencyMetadata map[string]*core.ReleaseMetadata
 	RootDeploymentName string
 }
@@ -44,22 +46,22 @@ type Context struct {
 func NewContext() *Context {
 	ctx := &Context{}
 	ctx.EscapeConfig = config.NewEscapeConfig()
-	ctx.Logger = util.NewLogger([]util.LogConsumer{
-		util.NewFancyTerminalOutputLogConsumer(),
+	ctx.Logger = loggers.NewLogger([]api.LogConsumer{
+		consumers.NewFancyTerminalOutputLogConsumer(),
 	})
 	ctx.DependencyMetadata = map[string]*core.ReleaseMetadata{}
 	return ctx
 }
 
 func (c *Context) SetLogCollapse(s bool) {
-	consumer := util.NewFancyTerminalOutputLogConsumer()
+	consumer := consumers.NewFancyTerminalOutputLogConsumer()
 	consumer.CollapseSections = s
-	c.Logger = util.NewLogger([]util.LogConsumer{consumer})
+	c.Logger = loggers.NewLogger([]api.LogConsumer{consumer})
 }
 
 func (c *Context) DisableLogger() {
-	consumer := util.NewNullLogConsumer()
-	c.Logger = util.NewLogger([]util.LogConsumer{consumer})
+	consumer := consumers.NewNullLogConsumer()
+	c.Logger = loggers.NewLogger([]api.LogConsumer{consumer})
 }
 
 func (c *Context) InitFromLocalEscapePlanAndState(state, environment, planPath string) error {
@@ -92,7 +94,7 @@ func (c *Context) InitReleaseMetadataByReleaseId(releaseId string) error {
 	return nil
 }
 
-func (c *Context) GetLogger() util.Logger {
+func (c *Context) GetLogger() api.Logger {
 	return c.Logger
 }
 

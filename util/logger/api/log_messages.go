@@ -14,50 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package util
+package api
 
-const (
-	DEBUG   = iota
-	INFO    = iota
-	SUCCESS = iota
-	WARN    = iota
-	ERROR   = iota
-)
-
-func stringToLogLevel(logLevel string) LogLevel {
-	if logLevel == "debug" {
-		return DEBUG
-	} else if logLevel == "warn" {
-		return WARN
-	} else if logLevel == "success" {
-		return SUCCESS
-	} else if logLevel == "error" {
-		return ERROR
-	}
-
-	return INFO
-}
-
-const EscapeLogo = `
-  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-  @                                 @
-  @ @@@@@@                .@.       @
-  @ @@@@@@                @@@       @
-  @ @@@@@@                @@@.      @
-  @ @@@@@@    +             @@@@;   @
-  @ @@@@@@   +@            +@@@,@   @
-  @ @@@@@@  +@@@@@@@@@@@@  +@@@ :   @
-  @ @@@@@@ +@@@@@@@@@@@@@.@@@#@@    @
-  @ @@@@@@  +@@@@@@@@@@@@    .@@    @
-  @ @@@@@@   +@             #@@@    @
-  @ @@@@@@    +             @# @    @ 
-  @ @@@@@@                  @, @@@. @
-  @ @@@@@@                  @       @
-  @ @@@@@@                  @       @
-  @                                 @
-  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@`
-
-var logMessages = map[string]map[string]string{
+var LogMessages = map[string]map[string]string{
 	"package.finished": map[string]string{
 		"msg":   "Packaged {{ .release }} at {{ .path }}",
 		"level": "success",
