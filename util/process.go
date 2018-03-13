@@ -136,8 +136,7 @@ func (p *processRecorder) Record(cmd []string, env []string, log api.Logger) (st
 
 	if err := proc.Start(); err != nil {
 		returnErr = err
-	}
-	if err := proc.Wait(); err != nil {
+	} else if err := proc.Wait(); err != nil {
 		returnErr = err
 	}
 	<-done
