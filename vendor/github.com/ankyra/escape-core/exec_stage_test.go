@@ -26,9 +26,9 @@ var _ = Suite(&execSuite{})
 
 func (s *execSuite) Test_ExecStage_ValidateAndFix_parses_deprecated_Script(c *C) {
 	cases := [][]interface{}{
-		[]interface{}{"myscript.sh", []string{"/bin/sh", "-c", "./myscript.sh .escape/outputs.json"}},
-		[]interface{}{"myscript.sh test", []string{"/bin/sh", "-c", "./myscript.sh test .escape/outputs.json"}},
-		[]interface{}{"deps/_/escape/escape", []string{"/bin/sh", "-c", "./deps/_/escape/escape .escape/outputs.json"}},
+		[]interface{}{"myscript.sh", []string{"sh", "-c", "./myscript.sh .escape/outputs.json"}},
+		[]interface{}{"myscript.sh test", []string{"sh", "-c", "./myscript.sh test .escape/outputs.json"}},
+		[]interface{}{"deps/_/escape/escape", []string{"sh", "-c", "./deps/_/escape/escape .escape/outputs.json"}},
 	}
 	for _, test := range cases {
 		unit := ExecStage{
