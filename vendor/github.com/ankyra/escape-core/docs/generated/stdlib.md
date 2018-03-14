@@ -17,13 +17,6 @@ h2 {
 Standard library functions for the [Escape Scripting Language](../scripting-language/)
 
 
-# Functions acting on everything
-
-## id(parameter :: *)
-
-Returns its argument
-
-
 # Functions acting on lists
 
 ## list_index(n :: integer)
@@ -45,21 +38,21 @@ Join concatenates the elements of a to create a single string. The separator str
 
 # Functions acting on strings
 
-## track_patch_version()
+## track_minor_version()
 
-Track patch version
+Track minor version
 
 ## track_version()
 
 Track version
 
-## concat(v1 :: string, v2 :: string, ...)
+## base64_encode()
 
-Concatate stringable arguments
+Encode string to base64
 
-## lower(v :: string)
+## trim()
 
-Returns a copy of the string v with all Unicode characters mapped to their lower case
+Returns a slice of the string s, with all leading and trailing white space removed, as defined by Unicode. 
 
 ## split(sep :: string)
 
@@ -69,33 +62,33 @@ Split slices s into all substrings separated by sep and returns a slice of the s
 
 Decode string from base64
 
-## trim()
+## read_file()
 
-Returns a slice of the string s, with all leading and trailing white space removed, as defined by Unicode. 
+Read the contents of a file
 
 ## upper(v :: string)
 
 Returns a copy of the string v with all Unicode characters mapped to their upper case
 
-## read_file()
+## title(v :: string)
 
-Read the contents of a file
+Returns a copy of the string v with all Unicode characters mapped to their title case
 
-## base64_encode()
+## concat(v1 :: string, v2 :: string, ...)
 
-Encode string to base64
+Concatate stringable arguments
 
 ## track_major_version()
 
 Track major version
 
-## track_minor_version()
+## track_patch_version()
 
-Track minor version
+Track patch version
 
-## title(v :: string)
+## lower(v :: string)
 
-Returns a copy of the string v with all Unicode characters mapped to their title case
+Returns a copy of the string v with all Unicode characters mapped to their lower case
 
 ## replace(old :: string, new :: string, n :: integer)
 
@@ -114,4 +107,11 @@ Add two integers
 ## timestamp()
 
 Returns a UNIX timestamp
+
+
+# Functions acting on everything
+
+## id(parameter :: *)
+
+Returns its argument
 

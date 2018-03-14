@@ -1,14 +1,14 @@
 {
-   "api_version": 12,
-   "built_with_core_version": "0.12.3",
-   "built_with_escape_version": "0.24.9",
+   "api_version": 13,
+   "built_with_core_version": "0.13.12",
+   "built_with_escape_version": "0.25.0",
    "description": "Core library containing datastructures for working with Release Metadata, State and the Escape Scripting Language.\nPlease see https://escape.ankyra.io/docs/ for the full documentation.",
    "files": {
       "LICENSE": "2a944942e1496af1886903d274dedb13",
       "README.md": "72bda3a0e4c579e06e1f459d53eb2076",
       "consumer.go": "181f5a757142e5ef338d1c94d2ac4204",
       "consumer_test.go": "e49077a8242e9e16a2b90ae6468fb886",
-      "core.go": "b36c33be1481be53c626473afcd23c40",
+      "core.go": "ec1581bff90d0dcbb4b75f3eab7702a5",
       "core.go.tpl": "4099a7b2c6c7798799ea2819f8cf5c27",
       "dependency.go": "824ac7f427ead64864ee36bc8431564a",
       "dependency_config.go": "c46c4ae749505ceea1a3ff4c02e670e2",
@@ -24,14 +24,14 @@
       "docs/generated/extensions.md": "9f3ea5257f865d6bcee6e39e7cf841c7",
       "docs/generated/input-and-output-variables.md": "96f743ace9fba65778864daeae14c9cd",
       "docs/generated/providers-and-consumers.md": "51705ae407d4698ce5a7032280fe3d32",
-      "docs/generated/stdlib.md": "dde999a604b9748ace00ae5f53000ad0",
+      "docs/generated/stdlib.md": "9842b4b526b10fe58f5e99a274ee5397",
       "docs/generated/templates.md": "2a70ab1c736e2b16864717e424a8c03b",
       "docs/scripting_language.md": "79ffa91ba9dad432b9c3810b474036d8",
       "download_config.go": "e1f64beb02a3f1825d428280976d209a",
       "errand.go": "9a6714f0143390faa5644c8d6f6b735c",
       "errand_test.go": "de80890ce5f1714da94804eef7d7699e",
-      "exec_stage.go": "78300362385485cdf8b40455b13943f5",
-      "exec_stage_test.go": "5f3cfc8f235d956624d33fdf6576cced",
+      "exec_stage.go": "57a56580b1bc5092890407d45392c9b9",
+      "exec_stage_test.go": "e6ab0b1d13668b9c0c1f09cd7482cae7",
       "extension_config.go": "722c6e17f89ab43060978ff126fec2d1",
       "metadata.go": "4c0a7883debec7a7f447f3ff8002caa7",
       "metadata_test.go": "a7b866a79b8fc3d9b4da89c594870b0a",
@@ -152,7 +152,7 @@
    "metadata": {
       "release_metadata_api_version": "13"
    },
-   "version": "0.13.12",
+   "version": "0.13.13",
    "consumes": [],
    "downloads": null,
    "depends": [],
@@ -280,29 +280,8 @@
       "build": {
          "script": "deps/_/extension-golang-binary/build.sh"
       },
-      "deploy": {
-         "script": ""
-      },
-      "destroy": {
-         "script": ""
-      },
-      "post_deploy": {
-         "script": ""
-      },
-      "post_destroy": {
-         "script": ""
-      },
       "pre_build": {
          "script": "prebuild.sh"
-      },
-      "pre_deploy": {
-         "script": ""
-      },
-      "pre_destroy": {
-         "script": ""
-      },
-      "smoke": {
-         "script": ""
       },
       "test": {
          "script": "deps/_/extension-golang-binary/test.sh"

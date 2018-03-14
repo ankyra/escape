@@ -43,7 +43,7 @@ func (s *testSuite) Test_NewScriptStep(c *C) {
 
 func (s *testSuite) Test_NewScriptStep_inits_scriptpath(c *C) {
 	runCtx := getRunContext(c, "testdata/helper_state.json", "testdata/helper.yml")
-	exec := core.NewExecStageFromString("./yo.sh")
+	exec := core.NewExecStageForRelativeScript("./yo.sh")
 	runCtx.GetReleaseMetadata().SetExecStage("pre_build", exec)
 	step := NewScriptStep(runCtx, "deploy", "pre_build", false)
 	c.Assert(step.Script, DeepEquals, exec)

@@ -38,13 +38,6 @@ type ExecStage struct {
 	RelativeScript string `json:"script,omitempty"`
 }
 
-func NewExecStageFromString(str string) *ExecStage {
-	return &ExecStage{
-		Cmd:  "bash",
-		Args: []string{"-c", str},
-	}
-}
-
 func ExpectingTypeForExecStageError(typ, field string, val interface{}) error {
 	return fmt.Errorf("Expecting %s for exec stage field %s; got '%T'", typ, field, val)
 }
@@ -109,7 +102,7 @@ func (e *ExecStage) GetAsCommand() []string {
 		return append(result, e.Args...)
 	} else if e.RelativeScript != "" {
 		script := "./" + e.RelativeScript + " .escape/outputs.json"
-		return []string{"sh", "-c", script}
+		return []string{"/bin/sh", "-c", script}
 	} else if e.Inline != "" {
 		panic("not yet supported")
 	}
