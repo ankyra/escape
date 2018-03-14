@@ -88,28 +88,6 @@ func (p PlanController) Get(context Context, field string) error {
 		output = context.GetEscapePlan().Description
 	case "logo":
 		output = context.GetEscapePlan().Logo
-	case "pre_build":
-		output = context.GetEscapePlan().PreBuild
-	case "build":
-		output = context.GetEscapePlan().Build
-	case "post_build":
-		output = context.GetEscapePlan().PostBuild
-	case "test":
-		output = context.GetEscapePlan().Test
-	case "pre_deploy":
-		output = context.GetEscapePlan().PreDeploy
-	case "deploy":
-		output = context.GetEscapePlan().Deploy
-	case "post_deploy":
-		output = context.GetEscapePlan().PostDeploy
-	case "smoke":
-		output = context.GetEscapePlan().Smoke
-	case "pre_destroy":
-		output = context.GetEscapePlan().PreDestroy
-	case "destroy":
-		output = context.GetEscapePlan().Destroy
-	case "post_destroy":
-		output = context.GetEscapePlan().PostDestroy
 	default:
 		return fmt.Errorf("This field is currently unsupported by this command.")
 	}

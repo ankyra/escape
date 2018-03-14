@@ -111,5 +111,9 @@ pre_destroy: pre_destroy.sh
 
 destroy: destroy.sh
 
-post_destroy: post_destroy.sh
+post_destroy:
+  args:
+  - run
+  - nginx
+  cmd: docker
 

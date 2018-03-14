@@ -16,30 +16,61 @@ limitations under the License.
 
 package compiler
 
-import core "github.com/ankyra/escape-core"
+import (
+	"fmt"
+
+	core "github.com/ankyra/escape-core"
+)
 
 func compileScripts(ctx *CompilerContext) error {
 	plan := ctx.Plan
-	setStage(ctx, "build", plan.Build)
-	setStage(ctx, "deploy", plan.Deploy)
-	setStage(ctx, "destroy", plan.Destroy)
-	setStage(ctx, "pre_build", plan.PreBuild)
-	setStage(ctx, "pre_deploy", plan.PreDeploy)
-	setStage(ctx, "pre_destroy", plan.PreDestroy)
-	setStage(ctx, "post_build", plan.PostBuild)
-	setStage(ctx, "post_deploy", plan.PostDeploy)
-	setStage(ctx, "post_destroy", plan.PostDestroy)
-	setStage(ctx, "test", plan.Test)
-	setStage(ctx, "smoke", plan.Smoke)
+	cases := [][]interface{}{
+		[]interface{}{"build", plan.Build},
+		[]interface{}{"deploy", plan.Deploy},
+		[]interface{}{"destroy", plan.Destroy},
+		[]interface{}{"pre_build", plan.PreBuild},
+		[]interface{}{"pre_deploy", plan.PreDeploy},
+		[]interface{}{"pre_destroy", plan.PreDestroy},
+		[]interface{}{"post_build", plan.PostBuild},
+		[]interface{}{"post_deploy", plan.PostDeploy},
+		[]interface{}{"post_destroy", plan.PostDestroy},
+		[]interface{}{"test", plan.Test},
+		[]interface{}{"smoke", plan.Smoke},
+	}
+	for _, script := range cases {
+		if err := setStage(ctx, script[0].(string), script[1]); err != nil {
+			return fmt.Errorf("In field %s: %s", script[0], err.Error())
+		}
+	}
 	return nil
 }
 
-func setStage(ctx *CompilerContext, field string, script string) {
-	if script == "" {
-		return
-	}
+func setStage(ctx *CompilerContext, field string, script interface{}) error {
+	var stage *core.ExecStage
 	metadata := ctx.Metadata
-	ctx.AddFileDigest(script)
-	stage := core.NewExecStageForRelativeScript(script)
+
+	if script == nil {
+		return nil
+	}
+
+	switch script.(type) {
+	case string:
+		if script.(string) == "" {
+			return nil
+		}
+		ctx.AddFileDigest(script.(string))
+		stage = core.NewExecStageForRelativeScript(script.(string))
+	case map[interface{}]interface{}:
+		returnedStage, err := core.NewExecStageFromDict(script.(map[interface{}]interface{}))
+		if err != nil {
+			return err
+		}
+		stage = returnedStage
+	default:
+		return fmt.Errorf("Expecting dict or string type. Got '%T'", script)
+	}
+	if stage == nil {
+	}
 	metadata.SetExecStage(field, stage)
+	return nil
 }

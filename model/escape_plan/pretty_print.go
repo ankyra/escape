@@ -46,17 +46,17 @@ var templateMap = map[string]string{
 	"license":          keyValTpl,
 	"logo":             keyValTpl,
 	"path":             keyValTpl,
-	"pre_build":        keyValTpl,
-	"build":            keyValTpl,
-	"post_build":       keyValTpl,
-	"pre_deploy":       keyValTpl,
-	"deploy":           keyValTpl,
-	"post_deploy":      keyValTpl,
-	"pre_destroy":      keyValTpl,
-	"destroy":          keyValTpl,
-	"post_destroy":     keyValTpl,
-	"smoke":            keyValTpl,
-	"test":             keyValTpl,
+	"pre_build":        strOrMapTpl,
+	"build":            strOrMapTpl,
+	"post_build":       strOrMapTpl,
+	"pre_deploy":       strOrMapTpl,
+	"deploy":           strOrMapTpl,
+	"post_deploy":      strOrMapTpl,
+	"pre_destroy":      strOrMapTpl,
+	"destroy":          strOrMapTpl,
+	"post_destroy":     strOrMapTpl,
+	"smoke":            strOrMapTpl,
+	"test":             strOrMapTpl,
 	"depends":          listValTpl,
 	"extends":          listValTpl,
 	"consumes":         listValTpl,
@@ -128,16 +128,18 @@ func (e *prettyPrinter) Print(plan *EscapePlan) []byte {
 }
 
 func (e *prettyPrinter) prettyPrintValue(key string, val interface{}) []byte {
-	value, err := yaml.Marshal(val)
+	v, err := yaml.Marshal(val)
 	if err != nil {
 		panic(err)
 	}
+	value := string(v)
 	if val == nil {
-		value = []byte("")
+		value = ""
 	}
 	tpl := template.New("escape-plan")
 	tpl.Funcs(map[string]interface{}{
-		"indent": indent,
+		"indent":       indent,
+		"hasNoNewLine": hasNoNewLine,
 	})
 	tpl, err = tpl.Parse(templateMap[key])
 	if err != nil {
@@ -145,7 +147,7 @@ func (e *prettyPrinter) prettyPrintValue(key string, val interface{}) []byte {
 	}
 	valueMap := map[string]string{
 		"key":   key,
-		"value": strings.TrimSpace(string(value)),
+		"value": strings.TrimSpace(value),
 	}
 	doc := []byte("")
 	writer := bytes.NewBuffer(doc)
@@ -164,9 +166,14 @@ func indent(s string) string {
 	}
 	return strings.Join(parts, "\n")
 }
+func hasNoNewLine(s string) bool {
+	return !strings.Contains(s, "\n")
+}
 
 const keyValTpl = `{{ .key }}: {{ if .value }}{{ .value }}{{else}}""{{end}}`
 const listValTpl = `{{ .key }}:{{ if eq .value "[]" }} []{{else if eq .value ""}} []{{else}}
 {{ .value}}{{end}}`
 const mapValTpl = `{{ .key }}:{{ if eq .value "{}" }} {}{{else if eq .value ""}} {}{{else}}
+{{ indent .value }}{{end}}`
+const strOrMapTpl = `{{ .key }}:{{ if hasNoNewLine .value }} {{if .value}}{{ .value}}{{else}}""{{end}}{{else}}
 {{ indent .value }}{{end}}`

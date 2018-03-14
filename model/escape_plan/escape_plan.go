@@ -142,41 +142,41 @@ type EscapePlan struct {
 	Outputs []interface{} `yaml:"outputs,omitempty"`
 
 	// Build script.
-	Build string `yaml:"build,omitempty"`
+	Build interface{} `yaml:"build,omitempty"`
 
 	// Pre-build script. The script has access to all the build scoped input
 	// variables.
-	PreBuild string `yaml:"pre_build,omitempty"`
+	PreBuild interface{} `yaml:"pre_build,omitempty"`
 
 	// Post-build script. The script has access to all the build scoped input
 	// and output variables.
-	PostBuild string `yaml:"post_build,omitempty"`
+	PostBuild interface{} `yaml:"post_build,omitempty"`
 
 	// Test script.
-	Test string `yaml:"test,omitempty"`
+	Test interface{} `yaml:"test,omitempty"`
 
 	// Deploy script.
-	Deploy string `yaml:"deploy,omitempty"`
+	Deploy interface{} `yaml:"deploy,omitempty"`
 
 	// Pre-deploy script. The script has access to all the deploy scoped input
 	// variables.
-	PreDeploy string `yaml:"pre_deploy,omitempty"`
+	PreDeploy interface{} `yaml:"pre_deploy,omitempty"`
 
 	// Post-deploy script. The script has access to all the deploy scoped input
 	// and output variables.
-	PostDeploy string `yaml:"post_deploy,omitempty"`
+	PostDeploy interface{} `yaml:"post_deploy,omitempty"`
 
 	// Smoke script.
-	Smoke string `yaml:"smoke,omitempty"`
+	Smoke interface{} `yaml:"smoke,omitempty"`
 
 	// Destroy script.
-	Destroy string `yaml:"destroy,omitempty"`
+	Destroy interface{} `yaml:"destroy,omitempty"`
 
 	// Pre-destroy script.
-	PreDestroy string `yaml:"pre_destroy,omitempty"`
+	PreDestroy interface{} `yaml:"pre_destroy,omitempty"`
 
 	// Post-destroy script.
-	PostDestroy string `yaml:"post_destroy,omitempty"`
+	PostDestroy interface{} `yaml:"post_destroy,omitempty"`
 
 	// Errands are scripts that can be run against the deployment of this release.
 	// The scripts receive the deployment's inputs and outputs as environment

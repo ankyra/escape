@@ -46,3 +46,17 @@ func (s *execSuite) Test_ExecStage_ValidateAndFix_errors_when_both_cmd_and_inlin
 	}
 	c.Assert(unit.ValidateAndFix(), Not(IsNil))
 }
+
+func (s *execSuite) Test_ExecStage_from_dict(c *C) {
+	unit, err := NewExecStageFromDict(map[interface{}]interface{}{
+		"script": "test.sh",
+		"cmd":    "docker",
+		"args":   []interface{}{"clean"},
+		"inline": "inline",
+	})
+	c.Assert(err, IsNil)
+	c.Assert(unit.RelativeScript, Equals, "test.sh")
+	c.Assert(unit.Inline, Equals, "inline")
+	c.Assert(unit.Cmd, Equals, "docker")
+	c.Assert(unit.Args, DeepEquals, []string{"clean"})
+}

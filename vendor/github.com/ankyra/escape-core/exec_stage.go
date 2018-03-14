@@ -43,7 +43,54 @@ func NewExecStageFromString(str string) *ExecStage {
 		Cmd:  "bash",
 		Args: []string{"-c", str},
 	}
+}
 
+func ExpectingTypeForExecStageError(typ, field string, val interface{}) error {
+	return fmt.Errorf("Expecting %s for exec stage field %s; got '%T'", typ, field, val)
+}
+
+func NewExecStageFromDict(values map[interface{}]interface{}) (*ExecStage, error) {
+	result := ExecStage{}
+	for k, val := range values {
+		kStr, ok := k.(string)
+		if !ok {
+			return nil, fmt.Errorf("Expecting string key in exec stage. Got '%T'", k)
+		}
+		if kStr == "cmd" {
+			valString, ok := val.(string)
+			if !ok {
+				return nil, ExpectingTypeForExecStageError("string", kStr, val)
+			}
+			result.Cmd = valString
+		} else if kStr == "args" {
+			valList, ok := val.([]interface{})
+			if !ok {
+				return nil, fmt.Errorf("Expecting []string in args exec stage, got '%v' (%T)", val, val)
+			}
+			args := []string{}
+			for _, val := range valList {
+				kStr, ok := val.(string)
+				if !ok {
+					return nil, fmt.Errorf("Expecting string in exec stage args, got '%v' (%T)", val, val)
+				}
+				args = append(args, kStr)
+			}
+			result.Args = args
+		} else if kStr == "inline" {
+			valString, ok := val.(string)
+			if !ok {
+				return nil, ExpectingTypeForExecStageError("string", kStr, val)
+			}
+			result.Inline = valString
+		} else if kStr == "script" {
+			valString, ok := val.(string)
+			if !ok {
+				return nil, ExpectingTypeForExecStageError("string", kStr, val)
+			}
+			result.RelativeScript = valString
+		}
+	}
+	return &result, nil
 }
 
 func NewExecStageForRelativeScript(script string) *ExecStage {
