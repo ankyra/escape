@@ -109,7 +109,7 @@ func (e *ExecStage) GetAsCommand() []string {
 		return append(result, e.Args...)
 	} else if e.RelativeScript != "" {
 		script := "./" + e.RelativeScript + " .escape/outputs.json"
-		return []string{"bash", "-c", script}
+		return []string{"sh", "-c", script}
 	} else if e.Inline != "" {
 		panic("not yet supported")
 	}

@@ -18,8 +18,10 @@ package compiler
 
 import (
 	"fmt"
+	"strings"
 
 	core "github.com/ankyra/escape-core"
+	"github.com/ankyra/escape/util"
 )
 
 func compileScripts(ctx *CompilerContext) error {
@@ -55,11 +57,23 @@ func setStage(ctx *CompilerContext, field string, script interface{}) error {
 
 	switch script.(type) {
 	case string:
-		if script.(string) == "" {
+		str := script.(string)
+		if str == "" {
 			return nil
 		}
-		ctx.AddFileDigest(script.(string))
-		stage = core.NewExecStageForRelativeScript(script.(string))
+		parts := strings.Fields(str)
+		firstArg := parts[0]
+		if util.PathExists(firstArg) {
+			ctx.AddFileDigest(firstArg)
+			stage = core.NewExecStageForRelativeScript(str)
+		} else if strings.HasPrefix(firstArg, ".") {
+			return fmt.Errorf("The relative path to script '%s' doesn't exist (in %s)", firstArg, str)
+		} else {
+			stage = &core.ExecStage{
+				Cmd:  firstArg,
+				Args: parts[1:],
+			}
+		}
 	case map[interface{}]interface{}:
 		returnedStage, err := core.NewExecStageFromDict(script.(map[interface{}]interface{}))
 		if err != nil {
