@@ -20,6 +20,7 @@ import (
 	"os"
 	"testing"
 
+	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/state"
 	"github.com/ankyra/escape/model"
 	"github.com/ankyra/escape/model/runners"
@@ -62,21 +63,21 @@ func (s *testSuite) Test_DeployRunner_commits_version(c *C) {
 
 func (s *testSuite) Test_DeployRunner_failing_pre_deploy_file(c *C) {
 	runCtx := getRunContext(c, "testdata/deploy_state.json", "testdata/deploy_plan.yml")
-	runCtx.GetReleaseMetadata().SetStage("pre_deploy", "testdata/failing_test.sh")
+	runCtx.GetReleaseMetadata().SetExecStage("pre_deploy", core.NewExecStageForRelativeScript("testdata/failing_test.sh"))
 	c.Assert(NewDeployRunner().Run(runCtx), Not(IsNil))
 	checkStatus(c, runCtx, state.Failure)
 }
 
 func (s *testSuite) Test_DeployRunner_failing_deploy_file(c *C) {
 	runCtx := getRunContext(c, "testdata/deploy_state.json", "testdata/deploy_plan.yml")
-	runCtx.GetReleaseMetadata().SetStage(Stage, "testdata/failing_test.sh")
+	runCtx.GetReleaseMetadata().SetExecStage(Stage, core.NewExecStageForRelativeScript("testdata/failing_test.sh"))
 	c.Assert(NewDeployRunner().Run(runCtx), Not(IsNil))
 	checkStatus(c, runCtx, state.Failure)
 }
 
 func (s *testSuite) Test_DeployRunner_missing_post_deploy_file(c *C) {
 	runCtx := getRunContext(c, "testdata/deploy_state.json", "testdata/deploy_plan.yml")
-	runCtx.GetReleaseMetadata().SetStage("post_deploy", "testdata/doesnt_exist.sh")
+	runCtx.GetReleaseMetadata().SetExecStage("post_deploy", core.NewExecStageForRelativeScript("testdata/doesnt_exist.sh"))
 	c.Assert(NewDeployRunner().Run(runCtx), Not(IsNil))
 	checkStatus(c, runCtx, state.Failure)
 }

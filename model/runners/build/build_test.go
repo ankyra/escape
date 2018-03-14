@@ -19,6 +19,7 @@ package build
 import (
 	"os"
 
+	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/state"
 	"github.com/ankyra/escape/model"
 	"github.com/ankyra/escape/model/runners"
@@ -34,14 +35,14 @@ func (s *testSuite) Test_BuildRunner_no_script_defined(c *C) {
 
 func (s *testSuite) Test_BuildRunner_missing_test_file(c *C) {
 	runCtx := getRunContext(c, "testdata/build_state.json", "testdata/build_plan.yml")
-	runCtx.GetReleaseMetadata().SetStage("post_build", "testdata/doesnt_exist.sh")
+	runCtx.GetReleaseMetadata().SetExecStage("post_build", core.NewExecStageForRelativeScript("testdata/doesnt_exist.sh"))
 	c.Assert(NewBuildRunner().Run(runCtx), Not(IsNil))
 	checkStatus(c, runCtx, state.Failure)
 }
 
 func (s *testSuite) Test_BuildRunner_failing_script(c *C) {
 	runCtx := getRunContext(c, "testdata/build_state.json", "testdata/build_plan.yml")
-	runCtx.GetReleaseMetadata().SetStage("post_build", "testdata/failing_test.sh")
+	runCtx.GetReleaseMetadata().SetExecStage("post_build", core.NewExecStageForRelativeScript("testdata/failing_test.sh"))
 	c.Assert(NewBuildRunner().Run(runCtx), Not(IsNil))
 	checkStatus(c, runCtx, state.Failure)
 }

@@ -31,7 +31,7 @@ func NewErrandRunner(errand *core.Errand, extraVars map[string]string) Runner {
 			}
 			return inputs, nil
 		}
-		step.ScriptPath = errand.Script
+		step.Script = core.NewExecStageForRelativeScript(errand.Script)
 		return step.Run(ctx)
 	})
 }

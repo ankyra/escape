@@ -18,7 +18,8 @@ package runners
 
 import (
 	"fmt"
-	"os"
+
+	core "github.com/ankyra/escape-core"
 
 	. "gopkg.in/check.v1"
 )
@@ -35,34 +36,32 @@ func (s *testSuite) Test_NewScriptStep(c *C) {
 	c.Assert(step.Step, Equals, "pre_build")
 	c.Assert(step.Inputs, IsNil)
 	c.Assert(step.LoadOutputs, Equals, shouldBeDeployed)
-	c.Assert(step.ScriptPath, Equals, "")
+	c.Assert(step.Script, IsNil)
 	c.Assert(step.Commit, IsNil)
 	c.Assert(step.ModifiesOutputVariables, Equals, false)
 }
 
 func (s *testSuite) Test_NewScriptStep_inits_scriptpath(c *C) {
 	runCtx := getRunContext(c, "testdata/helper_state.json", "testdata/helper.yml")
-	runCtx.GetReleaseMetadata().SetStage("pre_build", "yo.sh")
+	exec := core.NewExecStageFromString("./yo.sh")
+	runCtx.GetReleaseMetadata().SetExecStage("pre_build", exec)
 	step := NewScriptStep(runCtx, "deploy", "pre_build", false)
-	c.Assert(step.ScriptPath, Equals, "yo.sh")
+	c.Assert(step.Script, DeepEquals, exec)
 }
 
 func (s *testSuite) Test_NewScriptStep_initScript_returns_abs_path(c *C) {
 	runCtx := getRunContext(c, "testdata/helper_state.json", "testdata/helper.yml")
-	runCtx.GetReleaseMetadata().SetStage("pre_build", "testdata/prebuild.sh")
+	runCtx.GetReleaseMetadata().SetExecStage("pre_build", core.NewExecStageForRelativeScript("testdata/prebuild.sh"))
 	step := NewScriptStep(runCtx, "deploy", "pre_build", false)
-	scriptPath, err := step.initScript(runCtx)
+	err := step.initScript(runCtx)
 	c.Assert(err, IsNil)
-	cwd, err := os.Getwd()
-	c.Assert(err, IsNil)
-	c.Assert(scriptPath, Equals, cwd+"/testdata/prebuild.sh")
 }
 
 func (s *testSuite) Test_NewScriptStep_initScript_fails_if_script_doesnt_exist(c *C) {
 	runCtx := getRunContext(c, "testdata/helper_state.json", "testdata/helper.yml")
-	runCtx.GetReleaseMetadata().SetStage("pre_build", "doesnt_exist.sh")
+	runCtx.GetReleaseMetadata().SetExecStage("pre_build", core.NewExecStageForRelativeScript("doesnt_exist.sh"))
 	step := NewScriptStep(runCtx, "deploy", "pre_build", false)
-	_, err := step.initScript(runCtx)
+	err := step.initScript(runCtx)
 	c.Assert(err, Not(IsNil))
 }
 

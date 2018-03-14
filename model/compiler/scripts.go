@@ -16,30 +16,30 @@ limitations under the License.
 
 package compiler
 
+import core "github.com/ankyra/escape-core"
+
 func compileScripts(ctx *CompilerContext) error {
 	plan := ctx.Plan
-	metadata := ctx.Metadata
-	paths := []string{
-		plan.Build, plan.Deploy, plan.Destroy,
-		plan.PreBuild, plan.PreDeploy, plan.PreDestroy,
-		plan.PostBuild, plan.PostDeploy, plan.PostDestroy,
-		plan.Test, plan.Smoke,
-	}
-	for _, path := range paths {
-		if err := ctx.AddFileDigest(path); err != nil {
-			return err
-		}
-	}
-	metadata.SetStage("build", plan.Build)
-	metadata.SetStage("deploy", plan.Deploy)
-	metadata.SetStage("destroy", plan.Destroy)
-	metadata.SetStage("pre_build", plan.PreBuild)
-	metadata.SetStage("pre_deploy", plan.PreDeploy)
-	metadata.SetStage("pre_destroy", plan.PreDestroy)
-	metadata.SetStage("post_build", plan.PostBuild)
-	metadata.SetStage("post_deploy", plan.PostDeploy)
-	metadata.SetStage("post_destroy", plan.PostDestroy)
-	metadata.SetStage("test", plan.Test)
-	metadata.SetStage("smoke", plan.Smoke)
+	setStage(ctx, "build", plan.Build)
+	setStage(ctx, "deploy", plan.Deploy)
+	setStage(ctx, "destroy", plan.Destroy)
+	setStage(ctx, "pre_build", plan.PreBuild)
+	setStage(ctx, "pre_deploy", plan.PreDeploy)
+	setStage(ctx, "pre_destroy", plan.PreDestroy)
+	setStage(ctx, "post_build", plan.PostBuild)
+	setStage(ctx, "post_deploy", plan.PostDeploy)
+	setStage(ctx, "post_destroy", plan.PostDestroy)
+	setStage(ctx, "test", plan.Test)
+	setStage(ctx, "smoke", plan.Smoke)
 	return nil
+}
+
+func setStage(ctx *CompilerContext, field string, script string) {
+	if script == "" {
+		return
+	}
+	metadata := ctx.Metadata
+	ctx.AddFileDigest(script)
+	stage := core.NewExecStageForRelativeScript(script)
+	metadata.SetExecStage(field, stage)
 }

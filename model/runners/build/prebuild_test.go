@@ -17,10 +17,12 @@ limitations under the License.
 package build
 
 import (
-	"github.com/ankyra/escape-core/state"
-	. "gopkg.in/check.v1"
 	"os"
 	"testing"
+
+	core "github.com/ankyra/escape-core"
+	"github.com/ankyra/escape-core/state"
+	. "gopkg.in/check.v1"
 )
 
 func Test(t *testing.T) { TestingT(t) }
@@ -44,7 +46,7 @@ func (s *testSuite) Test_PreBuildRunner_no_script_defined(c *C) {
 
 func (s *testSuite) Test_PreBuildRunner_missing_test_file(c *C) {
 	runCtx := getRunContext(c, "testdata/pre_build_state.json", "testdata/plan.yml")
-	runCtx.GetReleaseMetadata().SetStage("pre_build", "testdata/doesnt_exist.sh")
+	runCtx.GetReleaseMetadata().SetExecStage("pre_build", core.NewExecStageForRelativeScript("testdata/doesnt_exist.sh"))
 	c.Assert(NewPreBuildRunner().Run(runCtx), Not(IsNil))
 	checkStatus(c, runCtx, state.Failure)
 }
@@ -69,7 +71,7 @@ func (s *testSuite) Test_PreBuildRunner_sets_version(c *C) {
 
 func (s *testSuite) Test_PreBuildRunner_failing_script(c *C) {
 	runCtx := getRunContext(c, "testdata/pre_build_state.json", "testdata/pre_build_plan.yml")
-	runCtx.GetReleaseMetadata().SetStage("pre_build", "testdata/failing_test.sh")
+	runCtx.GetReleaseMetadata().SetExecStage("pre_build", core.NewExecStageForRelativeScript("testdata/failing_test.sh"))
 	c.Assert(NewPreBuildRunner().Run(runCtx), Not(IsNil))
 	checkStatus(c, runCtx, state.Failure)
 }
@@ -78,7 +80,7 @@ func (s *testSuite) Test_PreBuildRunner_propagates_default_updates(c *C) {
 	runCtx := getRunContext(c, "testdata/pre_build_default_state.json", "testdata/pre_build_plan.yml")
 	runCtx.GetDeploymentState().UpdateInputs(Stage, nil)
 	c.Assert(runCtx.GetDeploymentState().GetCalculatedInputs(Stage), HasLen, 0)
-	runCtx.GetReleaseMetadata().Stages["pre_build"].Script = ""
+	runCtx.GetReleaseMetadata().Stages["pre_build"].RelativeScript = ""
 	runCtx.GetReleaseMetadata().Inputs[0].Default = "test"
 
 	c.Assert(NewPreBuildRunner().Run(runCtx), IsNil)

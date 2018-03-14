@@ -263,8 +263,6 @@ func diffValue(v interface{}) interface{} {
 		return v
 	case int:
 		return strconv.Itoa(v.(int))
-	case *ExecStage:
-		return v.(*ExecStage).Script
 	case *ConsumerConfig:
 		return v.(*ConsumerConfig).Name
 	case *ProviderConfig:

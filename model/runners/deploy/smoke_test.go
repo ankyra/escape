@@ -19,6 +19,7 @@ package deploy
 import (
 	"os"
 
+	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/state"
 	. "gopkg.in/check.v1"
 )
@@ -37,7 +38,7 @@ func (s *testSuite) Test_SmokeRunner_no_test_script_defined(c *C) {
 
 func (s *testSuite) Test_SmokeRunner_missing_smoke_file(c *C) {
 	runCtx := getRunContext(c, "testdata/smoke_state.json", "testdata/plan.yml")
-	runCtx.GetReleaseMetadata().SetStage("smoke", "testdata/doesnt_exist.sh")
+	runCtx.GetReleaseMetadata().SetExecStage("smoke", core.NewExecStageForRelativeScript("testdata/doesnt_exist.sh"))
 	c.Assert(NewSmokeRunner().Run(runCtx), Not(IsNil))
 	checkStatus(c, runCtx, state.TestFailure)
 }
@@ -53,7 +54,7 @@ func (s *testSuite) Test_SmokeRunner_missing_deployment_state(c *C) {
 
 func (s *testSuite) Test_SmokeRunner_failing_test(c *C) {
 	runCtx := getRunContext(c, "testdata/smoke_state.json", "testdata/smoke_plan.yml")
-	runCtx.GetReleaseMetadata().SetStage("smoke", "testdata/failing_test.sh")
+	runCtx.GetReleaseMetadata().SetExecStage("smoke", core.NewExecStageForRelativeScript("testdata/failing_test.sh"))
 	c.Assert(NewSmokeRunner().Run(runCtx), Not(IsNil))
 	checkStatus(c, runCtx, state.TestFailure)
 }

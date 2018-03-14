@@ -19,6 +19,7 @@ package build
 import (
 	"os"
 
+	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/state"
 	. "gopkg.in/check.v1"
 )
@@ -37,7 +38,7 @@ func (s *testSuite) Test_PostBuildRunner_no_script_defined(c *C) {
 
 func (s *testSuite) Test_PostBuildRunner_missing_test_file(c *C) {
 	runCtx := getRunContext(c, "testdata/post_build_state.json", "testdata/plan.yml")
-	runCtx.GetReleaseMetadata().SetStage("post_build", "testdata/doesnt_exist.sh")
+	runCtx.GetReleaseMetadata().SetExecStage("post_build", core.NewExecStageForRelativeScript("testdata/doesnt_exist.sh"))
 	c.Assert(NewPostBuildRunner().Run(runCtx), Not(IsNil))
 	checkStatus(c, runCtx, state.Failure)
 }
@@ -53,7 +54,7 @@ func (s *testSuite) Test_PostBuildRunner_missing_deployment_state(c *C) {
 
 func (s *testSuite) Test_PostBuildRunner_failing_script(c *C) {
 	runCtx := getRunContext(c, "testdata/post_build_state.json", "testdata/post_build_plan.yml")
-	runCtx.GetReleaseMetadata().SetStage("post_build", "testdata/failing_test.sh")
+	runCtx.GetReleaseMetadata().SetExecStage("post_build", core.NewExecStageForRelativeScript("testdata/failing_test.sh"))
 	c.Assert(NewPostBuildRunner().Run(runCtx), Not(IsNil))
 	checkStatus(c, runCtx, state.Failure)
 }

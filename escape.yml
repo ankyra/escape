@@ -1,8 +1,8 @@
 name: escape
-version: 0.24.@
+version: 0.25.@
 description: |
   The Escape client. This release includes the source and one binary for
-  Linux/AMD64.  For full documentation see http://escape.ankyra.io/
+  Linux/AMD64.  For full documentation see https://escape.ankyra.io/docs/
 
 logo: logo.png
 

@@ -17,8 +17,10 @@ limitations under the License.
 package deploy
 
 import (
-	. "gopkg.in/check.v1"
 	"os"
+
+	core "github.com/ankyra/escape-core"
+	. "gopkg.in/check.v1"
 )
 
 func (s *testSuite) Test_PreDeployRunner(c *C) {
@@ -34,7 +36,7 @@ func (s *testSuite) Test_PreDeployRunner_no_script_defined(c *C) {
 
 func (s *testSuite) Test_PreDeployRunner_missing_test_file(c *C) {
 	runCtx := getRunContext(c, "testdata/pre_deploy_state.json", "testdata/plan.yml")
-	runCtx.GetReleaseMetadata().SetStage("pre_deploy", "testdata/doesnt_exist.sh")
+	runCtx.GetReleaseMetadata().SetExecStage("pre_deploy", core.NewExecStageForRelativeScript("testdata/doesnt_exist.sh"))
 	c.Assert(NewPreDeployRunner().Run(runCtx), Not(IsNil))
 }
 
@@ -47,6 +49,6 @@ func (s *testSuite) Test_PreDeployRunner_missing_deployment_state(c *C) {
 
 func (s *testSuite) Test_PreDeployRunner_failing_script(c *C) {
 	runCtx := getRunContext(c, "testdata/pre_deploy_state.json", "testdata/pre_deploy_plan.yml")
-	runCtx.GetReleaseMetadata().SetStage("pre_deploy", "testdata/failing_test.sh")
+	runCtx.GetReleaseMetadata().SetExecStage("pre_deploy", core.NewExecStageForRelativeScript("testdata/failing_test.sh"))
 	c.Assert(NewPreDeployRunner().Run(runCtx), Not(IsNil))
 }

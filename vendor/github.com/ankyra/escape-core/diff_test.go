@@ -89,13 +89,13 @@ func (s *metadataSuite) Test_Diff_maps(c *C) {
 func (s *metadataSuite) Test_Diff_Stages(c *C) {
 	emptyDict := map[string]*ExecStage{}
 	oldDict := map[string]*ExecStage{
-		"test": &ExecStage{Script: "test.sh"},
+		"test": &ExecStage{RelativeScript: "test.sh"},
 	}
 	newDict := map[string]*ExecStage{
-		"test": &ExecStage{Script: "test2.sh"},
+		"test": &ExecStage{RelativeScript: "test2.sh"},
 	}
 	testCases := [][]interface{}{
-		[]interface{}{oldDict, newDict, `Change Stages["test"].Script from 'test.sh' to 'test2.sh'`},
+		[]interface{}{oldDict, newDict, `Change Stages["test"].RelativeScript from 'test.sh' to 'test2.sh'`},
 		[]interface{}{emptyDict, newDict, `Add 'test' to Stages`},
 		[]interface{}{oldDict, emptyDict, `Remove 'test' from Stages`},
 	}

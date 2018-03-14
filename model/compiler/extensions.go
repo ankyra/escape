@@ -60,7 +60,14 @@ func compileExtensions(ctx *CompilerContext) error {
 			ctx.Metadata.Templates = append(ctx.Metadata.Templates, tpl)
 		}
 		for name, stage := range metadata.Stages {
-			ctx.Metadata.SetStage(name, extensionPath(metadata, stage.Script))
+			if stage.IsEmpty() {
+				continue
+			}
+			if stage.RelativeScript != "" {
+				script := extensionPath(metadata, stage.RelativeScript)
+				stage = core.NewExecStageForRelativeScript(script)
+			}
+			ctx.Metadata.SetExecStage(name, stage)
 		}
 		for _, d := range metadata.Depends {
 			found := false

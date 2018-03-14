@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/state"
 	"github.com/ankyra/escape/model/dependency_resolvers"
 	"github.com/ankyra/escape/model/paths"
@@ -35,7 +36,7 @@ type ScriptStep struct {
 	Step                    string
 	Inputs                  func(ctx *RunnerContext, stage string) (map[string]interface{}, error)
 	LoadOutputs             bool
-	ScriptPath              string
+	Script                  *core.ExecStage
 	Commit                  func(ctx *RunnerContext, d *state.DeploymentState, stage string) error
 }
 
@@ -47,7 +48,7 @@ func NewScriptStep(ctx *RunnerContext, stage, step string, shouldBeDeployed bool
 		Step:                    step,
 		Inputs:                  nil,
 		LoadOutputs:             shouldBeDeployed,
-		ScriptPath:              ctx.GetReleaseMetadata().GetScript(step),
+		Script:                  ctx.GetReleaseMetadata().GetExecStage(step),
 		Commit:                  nil,
 		ModifiesOutputVariables: false,
 	}
@@ -131,12 +132,10 @@ func postCommit(ctx *RunnerContext, deploymentState *state.DeploymentState, stag
 
 func (b *ScriptStep) Run(ctx *RunnerContext) error {
 	ctx.GetPath().EnsureEscapeDirectoryExists()
-	if b.ScriptPath != "" {
-		scriptPath, err := b.initScript(ctx)
-		if err != nil {
+	if b.Script != nil && !b.Script.IsEmpty() {
+		if err := b.initScript(ctx); err != nil {
 			return err
 		}
-		b.ScriptPath = scriptPath
 	}
 	deploymentState, err := b.initDeploymentState(ctx)
 	if err != nil {
@@ -145,7 +144,7 @@ func (b *ScriptStep) Run(ctx *RunnerContext) error {
 	if err := b.handleDownloads(ctx); err != nil {
 		return err
 	}
-	if b.ScriptPath != "" {
+	if b.Script != nil && !b.Script.IsEmpty() {
 		if err := b.runScript(ctx); err != nil {
 			return err
 		}
@@ -156,19 +155,19 @@ func (b *ScriptStep) Run(ctx *RunnerContext) error {
 	return nil
 }
 
-func (b *ScriptStep) initScript(ctx *RunnerContext) (string, error) {
-	script := ctx.GetPath().Script(b.ScriptPath)
+func (b *ScriptStep) initScript(ctx *RunnerContext) error {
 	ctx.Logger().Log(b.Stage+".step", map[string]string{
 		"step":   b.Step,
-		"script": script,
+		"script": b.Script.String(),
 	})
+	if b.Script.RelativeScript == "" {
+		return nil
+	}
+	script := b.Script.RelativeScript
 	if !util.PathExists(script) {
-		return "", fmt.Errorf("Referenced %s script '%s' does not exist", b.Step, script)
+		return fmt.Errorf("Referenced %s script '%s' does not exist", b.Step, script)
 	}
-	if err := util.MakeExecutable(script); err != nil {
-		return "", err
-	}
-	return script, nil
+	return util.MakeExecutable(script)
 }
 
 func (b *ScriptStep) initDeploymentState(ctx *RunnerContext) (*state.DeploymentState, error) {
@@ -231,10 +230,8 @@ func (b *ScriptStep) getCmd(ctx *RunnerContext) ([]string, error) {
 		if err := writeOutputsToFile(ctx.GetBuildOutputs()); err != nil {
 			return nil, err
 		}
-		outputsJsonLocation := ctx.GetPath().OutputsFile()
-		return []string{b.ScriptPath, outputsJsonLocation}, nil
 	}
-	return []string{b.ScriptPath}, nil
+	return b.Script.GetAsCommand(), nil
 }
 
 func (b *ScriptStep) runScript(ctx *RunnerContext) error {

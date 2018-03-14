@@ -19,6 +19,7 @@ package build
 import (
 	"os"
 
+	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/state"
 	. "gopkg.in/check.v1"
 )
@@ -38,7 +39,7 @@ func (s *testSuite) Test_TestRunner_no_test_script_defined(c *C) {
 
 func (s *testSuite) Test_TestRunner_missing_test_file(c *C) {
 	runCtx := getRunContext(c, "testdata/test_state.json", "testdata/plan.yml")
-	runCtx.GetReleaseMetadata().SetStage("test", "testdata/doesnt_exist.sh")
+	runCtx.GetReleaseMetadata().SetExecStage("test", core.NewExecStageForRelativeScript("testdata/doesnt_exist.sh"))
 	c.Assert(NewTestRunner().Run(runCtx), Not(IsNil))
 	checkStatus(c, runCtx, state.TestFailure)
 }

@@ -32,10 +32,6 @@ import (
 	"github.com/ankyra/escape-core/variables"
 )
 
-type ExecStage struct {
-	Script string `json:"script"`
-}
-
 type ProviderConfig struct {
 	Name string `json:"name"`
 }
@@ -181,6 +177,11 @@ func validate(m *ReleaseMetadata) error {
 			return err
 		}
 	}
+	for field, s := range m.Stages {
+		if err := s.ValidateAndFix(); err != nil {
+			return fmt.Errorf("Found a problem in the '%s' field: %s", field, err.Error())
+		}
+	}
 	return nil
 }
 
@@ -236,16 +237,12 @@ func (m *ReleaseMetadata) GetStage(stage string) *ExecStage {
 	return result
 }
 
-func (m *ReleaseMetadata) SetStage(stage, script string) {
-	if script == "" {
-		return
-	}
-	st := m.GetStage(stage)
-	st.Script = script
+func (m *ReleaseMetadata) SetExecStage(stage string, exec *ExecStage) {
+	m.Stages[stage] = exec
 }
 
-func (m *ReleaseMetadata) GetScript(stage string) string {
-	return m.GetStage(stage).Script
+func (m *ReleaseMetadata) GetExecStage(stage string) *ExecStage {
+	return m.Stages[stage]
 }
 
 func (m *ReleaseMetadata) AddInputVariable(input *variables.Variable) {

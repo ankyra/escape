@@ -26,10 +26,6 @@ Returns its argument
 
 # Functions acting on lists
 
-## list_slice(i :: integer, j :: integer)
-
-Slice a list. Usually accessed implicitly using slice syntax (eg. `list[0:5]`)
-
 ## env_lookup(key :: string)
 
 Lookup key in environment. Usually called implicitly when using '$'
@@ -42,40 +38,56 @@ Join concatenates the elements of a to create a single string. The separator str
 
 Index a list at position `n`. Usually accessed implicitly using indexing syntax (eg. `list[0]`)
 
+## list_slice(i :: integer, j :: integer)
+
+Slice a list. Usually accessed implicitly using slice syntax (eg. `list[0:5]`)
+
 
 # Functions acting on strings
 
-## replace(old :: string, new :: string, n :: integer)
+## trim()
 
-Replace returns a copy of the string s with the first n non-overlapping instances of old replaced by new. If old is empty, it matches at the beginning of the string and after each UTF-8 sequence, yielding up to k+1 replacements for a k-rune string. If n < 0, there is no limit on the number of replacements.
-
-## base64_encode()
-
-Encode string to base64
-
-## base64_decode()
-
-Decode string from base64
+Returns a slice of the string s, with all leading and trailing white space removed, as defined by Unicode. 
 
 ## track_major_version()
 
 Track major version
 
-## upper(v :: string)
+## title(v :: string)
 
-Returns a copy of the string v with all Unicode characters mapped to their upper case
+Returns a copy of the string v with all Unicode characters mapped to their title case
+
+## track_version()
+
+Track version
 
 ## track_patch_version()
 
 Track patch version
 
+## split(sep :: string)
+
+Split slices s into all substrings separated by sep and returns a slice of the substrings between those separators. If sep is empty, Split splits after each UTF-8 sequence.
+
+## base64_encode()
+
+Encode string to base64
+
 ## lower(v :: string)
 
 Returns a copy of the string v with all Unicode characters mapped to their lower case
 
-## split(sep :: string)
+## upper(v :: string)
 
-Split slices s into all substrings separated by sep and returns a slice of the substrings between those separators. If sep is empty, Split splits after each UTF-8 sequence.
+Returns a copy of the string v with all Unicode characters mapped to their upper case
+
+## replace(old :: string, new :: string, n :: integer)
+
+Replace returns a copy of the string s with the first n non-overlapping instances of old replaced by new. If old is empty, it matches at the beginning of the string and after each UTF-8 sequence, yielding up to k+1 replacements for a k-rune string. If n < 0, there is no limit on the number of replacements.
+
+## base64_decode()
+
+Decode string from base64
 
 ## read_file()
 
@@ -85,21 +97,9 @@ Read the contents of a file
 
 Track minor version
 
-## track_version()
-
-Track version
-
 ## concat(v1 :: string, v2 :: string, ...)
 
 Concatate stringable arguments
-
-## title(v :: string)
-
-Returns a copy of the string v with all Unicode characters mapped to their title case
-
-## trim()
-
-Returns a slice of the string s, with all leading and trailing white space removed, as defined by Unicode. 
 
 
 # Functions acting on integers
