@@ -135,24 +135,33 @@ func retryAction(context Context, depl *state.DeploymentState) error {
 
 func convergeSmoke(context Context, depl *state.DeploymentState, releaseId, logKey string) error {
 	context.Log(logKey, map[string]string{
-		"deployment": depl.Name,
-		"release":    releaseId,
+		"project":     depl.GetEnvironmentState().GetProjectName(),
+		"environment": depl.GetEnvironmentState().Name,
+		"deployment":  depl.Name,
+		"release":     releaseId,
+		"action":      "smoke",
 	})
 	return SmokeController{}.FetchAndSmoke(context, releaseId)
 }
 
 func convergeDestroy(context Context, depl *state.DeploymentState, releaseId, logKey string) error {
 	context.Log(logKey, map[string]string{
-		"deployment": depl.Name,
-		"release":    releaseId,
+		"project":     depl.GetEnvironmentState().GetProjectName(),
+		"environment": depl.GetEnvironmentState().Name,
+		"deployment":  depl.Name,
+		"release":     releaseId,
+		"action":      "destroy",
 	})
 	return DestroyController{}.FetchAndDestroy(context, releaseId, false, true)
 }
 
 func convergeDeploy(context Context, depl *state.DeploymentState, releaseId, logKey string) error {
 	context.Log(logKey, map[string]string{
-		"deployment": depl.Name,
-		"release":    releaseId,
+		"project":     depl.GetEnvironmentState().GetProjectName(),
+		"environment": depl.GetEnvironmentState().Name,
+		"deployment":  depl.Name,
+		"release":     releaseId,
+		"action":      "deploy",
 	})
 	return DeployController{}.FetchAndDeploy(context, releaseId, nil, nil)
 }
