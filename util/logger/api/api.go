@@ -77,5 +77,5 @@ type Logger interface {
 }
 
 type LogConsumer interface {
-	Consume(*LogEntry) error
+	Consume(*LogEntry) (string, error)
 }

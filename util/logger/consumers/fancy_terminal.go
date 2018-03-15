@@ -45,10 +45,10 @@ func NewFancyTerminalOutputLogConsumer(collapse bool) *fancyTerminalOutput {
 	}
 }
 
-func (t *fancyTerminalOutput) Consume(entry *api.LogEntry) error {
+func (t *fancyTerminalOutput) Consume(entry *api.LogEntry) (string, error) {
 
 	if entry.Message == "" {
-		return nil
+		return "", nil
 	}
 
 	if !t.CollapseSections {
@@ -107,10 +107,10 @@ func (t *fancyTerminalOutput) Consume(entry *api.LogEntry) error {
 	for i, section := range entry.SectionStack {
 		t.PreviousSectionStack[i] = section
 	}
-	return nil
+	return "", nil
 }
 
-func (t *fancyTerminalOutput) plainOutput(entry *api.LogEntry) error {
+func (t *fancyTerminalOutput) plainOutput(entry *api.LogEntry) (string, error) {
 	indent := len(entry.SectionStack) - 1
 	if indent < 0 {
 		indent = 0
@@ -131,7 +131,7 @@ func (t *fancyTerminalOutput) plainOutput(entry *api.LogEntry) error {
 	msg := entry.Message
 	fmt.Fprintln(os.Stderr, msg)
 	fmt.Fprint(os.Stderr, "\x1b[0m")
-	return nil
+	return "", nil
 }
 
 func (t *fancyTerminalOutput) makeWhiteSpace(n int) string {

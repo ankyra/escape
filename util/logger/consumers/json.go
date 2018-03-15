@@ -38,7 +38,7 @@ type JSONMessage struct {
 	LogValues map[string]string `json:"log_values"`
 }
 
-func (t *jsonLogConsumer) Consume(entry *api.LogEntry) error {
+func (t *jsonLogConsumer) Consume(entry *api.LogEntry) (string, error) {
 	msg := JSONMessage{
 		Timestamp: entry.Timestamp,
 		Message:   entry.Message,
@@ -48,8 +48,9 @@ func (t *jsonLogConsumer) Consume(entry *api.LogEntry) error {
 	}
 	bytes, err := json.Marshal(msg)
 	if err != nil {
-		return err
+		return "", err
 	}
-	fmt.Println(string(bytes))
-	return nil
+	str := string(bytes)
+	fmt.Println(str)
+	return str, nil
 }

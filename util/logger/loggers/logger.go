@@ -78,7 +78,7 @@ func (l *logger) Log(key string, values map[string]string) {
 		Timestamp:    time.Now(),
 	}
 	for _, c := range l.consumers {
-		if err := c.Consume(entry); err != nil {
+		if _, err := c.Consume(entry); err != nil {
 			panic(err)
 		}
 	}
