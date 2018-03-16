@@ -2,13 +2,24 @@
 
 [![Build status](https://circleci.com/gh/ankyra/escape.svg?style=shield&circle-token=2f7f6d97a01eefe7b3d1967ce11bb183034c963d)](https://circleci.com/gh/ankyra/escape) 
 
-Escape is a tool that can help with the building, testing, versioning,
-deploying and operating of software platforms. Its goal is to provide best
-practices in release engineering to make it easier to perform these tasks
-across environments and layers. More information can be found in the [Escape
-Documentation](https://escape.ankyra.io/docs/).
+![Escape Logo](/header.png)
 
-![Escape Logo](/logo.png)
+Escape is a tool that can help with building, testing, versioning, deploying,
+composing and operating software platforms. Its goal is to provide best
+practices in release engineering to make it easier to perform these tasks
+across environments and layers. 
+
+Some things you can do with Escape:
+
+* Create repeatable builds with predictable versioning, packaging and distribution 
+* Use the same delivery process for different tools and layers: deploy your
+  infrastructure and container code like you deploy your application code.
+* Manage multiple environments: promote from Dev to Prod.
+* Composition: break your platform up into logical components and compose them
+  into a cohesive platform.
+* Simplify configuration management
+* Operate running deployments
+* Create self-documenting environments and releases
 
 This repository contains the official Escape client. The Escape Inventory can
 be found [here](https://github.com/ankyra/escape-inventory).
@@ -30,6 +41,13 @@ Docker hub](https://hub.docker.com/r/ankyra/escape/).
 ## Usage and Documentation
 
 See the [Escape Docs](https://escape.ankyra.io/docs/) for the full documentation.
+
+## Support and Contact
+
+Issues and general enquiries can be raised on the Github issue tracker. 
+You can also join our [Community Slack
+channel](https://join.slack.com/t/ankyra-escape/shared_invite/enQtMzI4NDU4NDUwMDk2LTYwNjQ5Nzc1ZThlYTEyMjJkMTYzMDMxNzkxYzg0ZTE3ZjNlNWM2MmExNWFlYzU1NTQ2MTM2NjVlMGI0NjhhMmY)
+for realtime interaction.
 
 ## License
 
