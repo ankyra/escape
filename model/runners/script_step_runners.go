@@ -233,7 +233,15 @@ func (b *ScriptStep) getCmd(ctx *RunnerContext) ([]string, error) {
 			return nil, err
 		}
 	}
-	return b.Script.GetAsCommand(), nil
+	env, err := ctx.GetScriptEnvironment(b.Stage)
+	if err != nil {
+		return nil, err
+	}
+	script, err := b.Script.Eval(env)
+	if err != nil {
+		return nil, err
+	}
+	return script.GetAsCommand(), nil
 }
 
 func (b *ScriptStep) runScript(ctx *RunnerContext) error {

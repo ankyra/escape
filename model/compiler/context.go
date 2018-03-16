@@ -23,7 +23,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strconv"
 
 	"github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/script"
@@ -103,31 +102,10 @@ func (c *CompilerContext) addDirectoryFileDigests(path string) error {
 }
 
 func (c *CompilerContext) RunScriptForCompileStep(scriptStr string) (string, error) {
-	parsedScript, err := script.ParseScript(scriptStr)
-	if err != nil {
-		return "", err
-	}
 	env := map[string]script.Script{}
 	for key, metadata := range c.VariableCtx {
 		env[key] = metadata.ToScript()
 	}
-	val, err := parsedScript.Eval(script.NewScriptEnvironmentWithGlobals(env))
-	if err != nil {
-		return "", err
-	}
-	if val.Type().IsString() {
-		v, err := val.Value()
-		if err != nil {
-			return "", err
-		}
-		return v.(string), nil
-	}
-	if val.Type().IsInteger() {
-		v, err := val.Value()
-		if err != nil {
-			return "", err
-		}
-		return strconv.Itoa(v.(int)), nil
-	}
-	return "", fmt.Errorf("Expression '%s' did not return a string value", scriptStr)
+	scriptEnv := script.NewScriptEnvironmentWithGlobals(env)
+	return script.ParseAndEvalToString(scriptStr, scriptEnv)
 }

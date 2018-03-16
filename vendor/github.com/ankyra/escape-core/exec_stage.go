@@ -19,7 +19,13 @@ package core
 import (
 	"fmt"
 	"strings"
+
+	"github.com/ankyra/escape-core/script"
 )
+
+func ExpectingTypeForExecStageError(typ, field string, val interface{}) error {
+	return fmt.Errorf("Expecting %s for exec stage field %s; got '%T'", typ, field, val)
+}
 
 type ExecStage struct {
 
@@ -38,8 +44,10 @@ type ExecStage struct {
 	RelativeScript string `json:"script,omitempty"`
 }
 
-func ExpectingTypeForExecStageError(typ, field string, val interface{}) error {
-	return fmt.Errorf("Expecting %s for exec stage field %s; got '%T'", typ, field, val)
+func NewExecStageForRelativeScript(script string) *ExecStage {
+	return &ExecStage{
+		RelativeScript: script,
+	}
 }
 
 func NewExecStageFromDict(values map[interface{}]interface{}) (*ExecStage, error) {
@@ -86,9 +94,16 @@ func NewExecStageFromDict(values map[interface{}]interface{}) (*ExecStage, error
 	return &result, nil
 }
 
-func NewExecStageForRelativeScript(script string) *ExecStage {
+func (e *ExecStage) Copy() *ExecStage {
+	args := []string{}
+	for _, arg := range e.Args {
+		args = append(args, arg)
+	}
 	return &ExecStage{
-		RelativeScript: script,
+		Cmd:            e.Cmd,
+		Args:           args,
+		RelativeScript: e.RelativeScript,
+		Inline:         e.Inline,
 	}
 }
 
@@ -139,4 +154,33 @@ func (e *ExecStage) String() string {
 	} else {
 		return e.Inline
 	}
+}
+
+func (e *ExecStage) Eval(env *script.ScriptEnvironment) (*ExecStage, error) {
+	result := e.Copy()
+	relative, err := script.ParseAndEvalToString(e.RelativeScript, env)
+	if err != nil {
+		return nil, err
+	}
+	cmd, err := script.ParseAndEvalToString(e.Cmd, env)
+	if err != nil {
+		return nil, err
+	}
+	inline, err := script.ParseAndEvalToString(e.Inline, env)
+	if err != nil {
+		return nil, err
+	}
+	args := []string{}
+	for _, arg := range e.Args {
+		a, err := script.ParseAndEvalToString(arg, env)
+		if err != nil {
+			return nil, err
+		}
+		args = append(args, a)
+	}
+	result.RelativeScript = relative
+	result.Cmd = cmd
+	result.Inline = inline
+	result.Args = args
+	return result, nil
 }

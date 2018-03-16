@@ -18,6 +18,7 @@ package script
 
 import (
 	"fmt"
+	"strconv"
 )
 
 type Script interface {
@@ -44,4 +45,30 @@ func ParseAndEvalToGoValue(scriptStr string, env *ScriptEnvironment) (interface{
 		return "", fmt.Errorf("Failed to evaluate '%s': %s", scriptStr, err.Error())
 	}
 	return evaled, nil
+}
+
+func ParseAndEvalToString(scriptStr string, env *ScriptEnvironment) (string, error) {
+	parsed, err := ParseScript(scriptStr)
+	if err != nil {
+		return "", err
+	}
+	val, err := parsed.Eval(env)
+	if err != nil {
+		return "", err
+	}
+	if val.Type().IsString() {
+		v, err := val.Value()
+		if err != nil {
+			return "", err
+		}
+		return v.(string), nil
+	}
+	if val.Type().IsInteger() {
+		v, err := val.Value()
+		if err != nil {
+			return "", err
+		}
+		return strconv.Itoa(v.(int)), nil
+	}
+	return "", fmt.Errorf("Expression '%s' did not return a string value", scriptStr)
 }

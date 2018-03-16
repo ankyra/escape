@@ -17,6 +17,7 @@ limitations under the License.
 package core
 
 import (
+	"github.com/ankyra/escape-core/script"
 	. "gopkg.in/check.v1"
 )
 
@@ -60,4 +61,39 @@ func (s *execSuite) Test_ExecStage_from_dict(c *C) {
 	c.Assert(unit.Inline, Equals, "inline")
 	c.Assert(unit.Cmd, Equals, "docker")
 	c.Assert(unit.Args, DeepEquals, []string{"clean"})
+}
+
+func (s *execSuite) Test_ExecStage_Eval_no_script_used(c *C) {
+	globals := map[string]script.Script{
+		"$": script.LiftDict(map[string]script.Script{
+			"test": script.LiftString("testing"),
+		}),
+	}
+	unit := NewExecStageForRelativeScript("test.sh")
+	env := script.NewScriptEnvironmentFromMap(globals)
+	newUnit, err := unit.Eval(env)
+	c.Assert(err, IsNil)
+	c.Assert(newUnit.RelativeScript, Equals, "test.sh")
+}
+
+func (s *execSuite) Test_ExecStage_Eval_all_fields(c *C) {
+	globals := map[string]script.Script{
+		"$": script.LiftDict(map[string]script.Script{
+			"test": script.LiftString("testing"),
+		}),
+	}
+	unit, err := NewExecStageFromDict(map[interface{}]interface{}{
+		"script": "$test",
+		"cmd":    "$test",
+		"args":   []interface{}{"$test", "123", "$test"},
+		"inline": "$test",
+	})
+	c.Assert(err, IsNil)
+	env := script.NewScriptEnvironmentFromMap(globals)
+	newUnit, err := unit.Eval(env)
+	c.Assert(err, IsNil)
+	c.Assert(newUnit.RelativeScript, Equals, "testing")
+	c.Assert(newUnit.Cmd, Equals, "testing")
+	c.Assert(newUnit.Inline, Equals, "testing")
+	c.Assert(newUnit.Args, DeepEquals, []string{"testing", "123", "testing"})
 }
