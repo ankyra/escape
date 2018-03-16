@@ -176,10 +176,6 @@ func (e *ExecStage) Eval(env *script.ScriptEnvironment) (*ExecStage, error) {
 	if err != nil {
 		return nil, err
 	}
-	inline, err := script.ParseAndEvalToString(e.Inline, env)
-	if err != nil {
-		return nil, err
-	}
 	args := []string{}
 	for _, arg := range e.Args {
 		a, err := script.ParseAndEvalToString(arg, env)
@@ -190,7 +186,6 @@ func (e *ExecStage) Eval(env *script.ScriptEnvironment) (*ExecStage, error) {
 	}
 	result.RelativeScript = relative
 	result.Cmd = cmd
-	result.Inline = inline
 	result.Args = args
 	return result, nil
 }

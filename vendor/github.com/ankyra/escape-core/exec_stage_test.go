@@ -101,7 +101,7 @@ func (s *execSuite) Test_ExecStage_Eval_all_fields(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(newUnit.RelativeScript, Equals, "testing")
 	c.Assert(newUnit.Cmd, Equals, "testing")
-	c.Assert(newUnit.Inline, Equals, "testing")
+	c.Assert(newUnit.Inline, Equals, "$test") // Inline uses shell already
 	c.Assert(newUnit.Args, DeepEquals, []string{"testing", "123", "testing"})
 }
 
