@@ -2,7 +2,7 @@
 
 [![Build status](https://circleci.com/gh/ankyra/escape.svg?style=shield&circle-token=2f7f6d97a01eefe7b3d1967ce11bb183034c963d)](https://circleci.com/gh/ankyra/escape) 
 
-![Escape Logo](/header.png)
+![Escape Logo](/hero.png)
 
 Escape is a tool that can help with building, testing, versioning, deploying,
 composing and operating software platforms. Its goal is to provide best
