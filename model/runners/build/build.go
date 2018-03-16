@@ -34,7 +34,10 @@ func NewPostBuildRunner() Runner {
 	return NewPostScriptStepRunner(Stage, "post_build", state.RunningPostStep, state.Failure)
 }
 func NewTestRunner() Runner {
-	return NewScriptRunner(Stage, "test", state.OK, state.TestFailure)
+	return NewCompoundRunner(
+		NewStatusCodeRunner(Stage, state.RunningTestStep),
+		NewScriptRunner(Stage, "test", state.OK, state.TestFailure),
+	)
 }
 
 func NewBuildRunner() Runner {

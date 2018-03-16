@@ -35,7 +35,10 @@ func NewPostDeployRunner() Runner {
 }
 
 func NewSmokeRunner() Runner {
-	return NewScriptRunner(Stage, "smoke", state.OK, state.TestFailure)
+	return NewCompoundRunner(
+		NewStatusCodeRunner(Stage, state.RunningTestStep),
+		NewScriptRunner(Stage, "smoke", state.OK, state.TestFailure),
+	)
 }
 
 func NewDeployRunner() Runner {
