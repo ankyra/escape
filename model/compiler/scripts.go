@@ -18,11 +18,25 @@ package compiler
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 
 	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape/util"
 )
+
+func ScriptFieldError(field string, err error) error {
+	return fmt.Errorf("In field %s: %s", field, err.Error())
+}
+
+func RelativeScriptOutsideOfBaseDirError(script string) error {
+	return fmt.Errorf("The file '%s' is outside of this package's base directory and can't be added.", script)
+}
+
+func ScriptDoesNotExistError(script, str string) error {
+	return fmt.Errorf("The path to script '%s' does not exist (in '%s')", script, str)
+}
 
 func compileScripts(ctx *CompilerContext) error {
 	plan := ctx.Plan
@@ -41,7 +55,7 @@ func compileScripts(ctx *CompilerContext) error {
 	}
 	for _, script := range cases {
 		if err := setStage(ctx, script[0].(string), script[1]); err != nil {
-			return fmt.Errorf("In field %s: %s", script[0], err.Error())
+			return ScriptFieldError(script[0].(string), err)
 		}
 	}
 	return nil
@@ -63,15 +77,39 @@ func setStage(ctx *CompilerContext, field string, script interface{}) error {
 		}
 		parts := strings.Fields(str)
 		firstArg := parts[0]
-		if util.PathExists(firstArg) {
-			ctx.AddFileDigest(firstArg)
-			stage = core.NewExecStageForRelativeScript(str)
-		} else if strings.HasPrefix(firstArg, ".") {
-			return fmt.Errorf("The relative path to script '%s' doesn't exist (in %s)", firstArg, str)
-		} else {
+
+		// e.g. /bin/ls -al
+		if filepath.IsAbs(firstArg) {
 			stage = &core.ExecStage{
 				Cmd:  firstArg,
 				Args: parts[1:],
+			}
+		} else {
+			if util.PathExists(firstArg) {
+				cwd, err := os.Getwd()
+				if err != nil {
+					return err
+				}
+				path, err := filepath.Abs(firstArg)
+				if err != nil {
+					return err
+				}
+				rel, err := filepath.Rel(cwd, path)
+				if err != nil {
+					return err
+				}
+				if strings.HasPrefix(rel, "..") {
+					return RelativeScriptOutsideOfBaseDirError(firstArg)
+				}
+				ctx.AddFileDigest(firstArg)
+				stage = core.NewExecStageForRelativeScript(str)
+			} else if strings.HasPrefix(firstArg, ".") {
+				return ScriptDoesNotExistError(firstArg, str)
+			} else {
+				stage = &core.ExecStage{
+					Cmd:  firstArg,
+					Args: parts[1:],
+				}
 			}
 		}
 	case map[interface{}]interface{}:
