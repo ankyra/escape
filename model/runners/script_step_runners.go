@@ -241,7 +241,7 @@ func (b *ScriptStep) getCmd(ctx *RunnerContext) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	return script.GetAsCommand(), nil
+	return script.GetAsCommand()
 }
 
 func (b *ScriptStep) runScript(ctx *RunnerContext) error {

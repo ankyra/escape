@@ -17,7 +17,9 @@ limitations under the License.
 package core
 
 import (
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"strings"
 
 	"github.com/ankyra/escape-core/script"
@@ -111,10 +113,10 @@ func (e *ExecStage) IsEmpty() bool {
 	return e.Cmd == "" && e.RelativeScript == "" && e.Inline == ""
 }
 
-func (e *ExecStage) GetAsCommand() []string {
+func (e *ExecStage) GetAsCommand() ([]string, error) {
 	if e.Cmd != "" {
 		result := []string{e.Cmd}
-		return append(result, e.Args...)
+		return append(result, e.Args...), nil
 	} else if e.RelativeScript != "" {
 		script := e.RelativeScript + " .escape/outputs.json"
 		if !strings.HasPrefix(e.RelativeScript, ".") &&
@@ -122,11 +124,18 @@ func (e *ExecStage) GetAsCommand() []string {
 			!strings.HasPrefix(e.RelativeScript, "\\") {
 			script = "./" + e.RelativeScript + " .escape/outputs.json"
 		}
-		return []string{"sh", "-c", script}
+		return []string{"sh", "-c", script}, nil
 	} else if e.Inline != "" {
-		panic("not yet supported")
+		file, err := ioutil.TempFile("", "escape-inline")
+		if err != nil {
+			return nil, errors.New("Could not create temporary file for inline script.")
+		}
+		if err := ioutil.WriteFile(file.Name(), []byte(e.Inline), 0755); err != nil {
+			return nil, err
+		}
+		return []string{"sh", file.Name()}, nil
 	}
-	return []string{}
+	return []string{}, nil
 }
 
 func (e *ExecStage) ValidateAndFix() error {
@@ -152,7 +161,8 @@ func (e *ExecStage) String() string {
 	} else if e.RelativeScript != "" {
 		return e.RelativeScript
 	} else {
-		return e.Inline
+		firstLine := strings.Split(e.Inline, "\n")[0]
+		return fmt.Sprintf("<inline script starting with '%s'>", firstLine)
 	}
 }
 
