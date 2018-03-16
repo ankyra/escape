@@ -178,6 +178,12 @@
 			"revisionTime": "2016-09-04T16:08:59Z"
 		},
 		{
+			"checksumSHA1": "40vJyUB4ezQSn/NSadsKEOrudMc=",
+			"path": "github.com/inconshreveable/mousetrap",
+			"revision": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75",
+			"revisionTime": "2014-10-17T20:07:13Z"
+		},
+		{
 			"checksumSHA1": "K79H77/Wj89RB1no+o+G8ePeRDE=",
 			"path": "github.com/russross/blackfriday",
 			"revision": "b253417e1cb644d645a0a3bb1fa5034c8030127c",
@@ -223,6 +229,12 @@
 			"path": "golang.org/x/sys/unix",
 			"revision": "d4266bc12aae0b4128952c889b769442fce5d2f1",
 			"revisionTime": "2017-11-06T10:13:21Z"
+		},
+		{
+			"checksumSHA1": "eQq+ZoTWPjyizS9XalhZwfGjQao=",
+			"path": "golang.org/x/sys/windows",
+			"revision": "cc7307a45468e49eaf2997c890f14aa03a26917b",
+			"revisionTime": "2018-03-15T08:13:33Z"
 		},
 		{
 			"checksumSHA1": "ziMb9+ANGRJSSIuxYdRbA+cDRBQ=",

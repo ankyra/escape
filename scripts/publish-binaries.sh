@@ -2,7 +2,7 @@
 
 set -e -o pipefail
 
-PLATFORMS="darwin linux"
+PLATFORMS="windows darwin linux"
 ARCHS="386 amd64"
 
 BASE_DIR=$(dirname "$(readlink -f "$0")")
