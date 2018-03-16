@@ -66,5 +66,5 @@ func deleteCommit(ctx *RunnerContext, depl *state.DeploymentState, stage string)
 	if err := depl.UpdateOutputs(stage, nil); err != nil {
 		return err
 	}
-	return ctx.GetDeploymentState().UpdateStatus(stage, state.NewStatus(state.Pending))
+	return ctx.GetDeploymentState().UpdateStatus(stage, state.NewStatus(state.Empty))
 }
