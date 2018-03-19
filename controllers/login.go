@@ -97,7 +97,7 @@ func authUserSelection(reader *bufio.Reader, authMethods map[string]*types.AuthM
 		sortedAuthMethods = append(sortedAuthMethods, authMethods[key])
 	}
 
-	fmt.Println("Available authentication methods:\n")
+	fmt.Printf("Available authentication methods:\n\n")
 	i := 1
 	methods := []*types.AuthMethod{}
 	for key, authMethod := range sortedAuthMethods {
@@ -216,7 +216,7 @@ func getEscapeTokenWithRedeemToken(context Context, url, redeemToken, redeemURL 
 			return nil
 		}
 		if resp.StatusCode != 404 {
-			return fmt.Errorf("Couldn't retrieve token from server. Got status code %d", resp.Status)
+			return fmt.Errorf("Couldn't retrieve token from server. Got status code %d", resp.StatusCode)
 		}
 		time.Sleep(timeOut * time.Second)
 		currentTry++

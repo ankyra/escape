@@ -126,7 +126,7 @@ func (s *suite) Test_QueryReleaseMetadata_Errors(c *C) {
 
 func (s *suite) Test_QueryReleaseMetadata_fails_if_server_doesnt_respond(c *C) {
 	s.test_ConnectionError(c, s.queryReleaseMetadata, func(url string) string {
-		err := fmt.Sprintf("Get %s%s: dial tcp %s: getsockopt: connection refused", url, queryReleaseMetadataURL, url[7:])
+		err := fmt.Sprintf("Get %s%s: dial tcp %s: connect: connection refused", url, queryReleaseMetadataURL, url[7:])
 		return fmt.Sprintf(error_QueryReleaseMetadata+error_InventoryConnection, "query-project/name-v1.0.0", url+"/", err)
 	})
 }
@@ -203,7 +203,7 @@ func (s *suite) Test_QueryNextVersion_Errors(c *C) {
 
 func (s *suite) Test_QueryNextVersion_fails_if_server_doesnt_respond(c *C) {
 	s.test_ConnectionError(c, s.queryNextVersion, func(url string) string {
-		err := fmt.Sprintf("Get %s%s: dial tcp %s: getsockopt: connection refused", url, queryNextVersionURL+"?prefix=1.0.1", url[7:])
+		err := fmt.Sprintf("Get %s%s: dial tcp %s: connect: connection refused", url, queryNextVersionURL+"?prefix=1.0.1", url[7:])
 		return fmt.Sprintf(error_QueryNextVersion+error_InventoryConnection, "query-project/name-v1.0.1", url+"/", err)
 	})
 }
@@ -256,7 +256,7 @@ func (s *suite) Test_ListProjects_Errors(c *C) {
 
 func (s *suite) Test_ListProjects_fails_if_server_doesnt_respond(c *C) {
 	s.test_ConnectionError(c, s.listProjects, func(url string) string {
-		err := fmt.Sprintf("Get %s%s: dial tcp %s: getsockopt: connection refused", url, listProjectsURL, url[7:])
+		err := fmt.Sprintf("Get %s%s: dial tcp %s: connect: connection refused", url, listProjectsURL, url[7:])
 		return fmt.Sprintf(error_ListProjects+error_InventoryConnection, url+"/", err)
 	})
 }
@@ -312,7 +312,7 @@ func (s *suite) Test_ListApplications_Errors(c *C) {
 
 func (s *suite) Test_ListApplications_fails_if_server_doesnt_respond(c *C) {
 	s.test_ConnectionError(c, s.listApplications, func(url string) string {
-		err := fmt.Sprintf("Get %s%s: dial tcp %s: getsockopt: connection refused", url, listApplicationsURL, url[7:])
+		err := fmt.Sprintf("Get %s%s: dial tcp %s: connect: connection refused", url, listApplicationsURL, url[7:])
 		return fmt.Sprintf(error_ListApplications+error_InventoryConnection, "test", url+"/", err)
 	})
 }
@@ -368,7 +368,7 @@ func (s *suite) Test_ListVersions_Errors(c *C) {
 
 func (s *suite) Test_ListVersions_fails_if_server_doesnt_respond(c *C) {
 	s.test_ConnectionError(c, s.listVersions, func(url string) string {
-		err := fmt.Sprintf("Get %s%s: dial tcp %s: getsockopt: connection refused", url, listVersionsURL, url[7:])
+		err := fmt.Sprintf("Get %s%s: dial tcp %s: connect: connection refused", url, listVersionsURL, url[7:])
 		return fmt.Sprintf(error_ListVersions+error_InventoryConnection, "app", "test", url+"/", err)
 	})
 }
@@ -435,7 +435,7 @@ func (s *suite) Test_GetAuthMethods_Errors(c *C) {
 
 func (s *suite) Test_GetAuthMethods_fails_if_server_doesnt_respond(c *C) {
 	s.test_ConnectionError(c, s.getAuthMethods, func(url string) string {
-		err := fmt.Sprintf("Get %s%s: dial tcp %s: getsockopt: connection refused", url, authMethodsURL, url[7:])
+		err := fmt.Sprintf("Get %s%s: dial tcp %s: connect: connection refused", url, authMethodsURL, url[7:])
 		return fmt.Sprintf(error_AuthMethods+error_InventoryConnection, url, err)
 	})
 }
@@ -486,7 +486,7 @@ func (s *suite) Test_Login_Errors(c *C) {
 
 func (s *suite) Test_Login_fails_if_server_doesnt_respond(c *C) {
 	s.test_ConnectionError(c, s.login, func(url string) string {
-		err := fmt.Sprintf("Post %s: dial tcp %s: getsockopt: connection refused", url, url[7:])
+		err := fmt.Sprintf("Post %s: dial tcp %s: connect: connection refused", url, url[7:])
 		return fmt.Sprintf(error_Login+error_InventoryConnection, url, err)
 	})
 }
@@ -542,7 +542,7 @@ func (s *suite) Test_Download_Errors(c *C) {
 
 func (s *suite) Test_Download_fails_if_server_doesnt_respond(c *C) {
 	s.test_ConnectionError(c, s.download, func(url string) string {
-		err := fmt.Sprintf("Get %s%s: dial tcp %s: getsockopt: connection refused", url, downloadURL, url[7:])
+		err := fmt.Sprintf("Get %s%s: dial tcp %s: connect: connection refused", url, downloadURL, url[7:])
 		return fmt.Sprintf(error_Download+error_InventoryConnection, "prj/name-v1.0", url+"/", err)
 	})
 }
@@ -574,7 +574,7 @@ func (s *suite) Test_UploadRelease_Happy_path(c *C) {
 
 func (s *suite) Test_UploadRelease_fails_if_server_doesnt_respond(c *C) {
 	s.test_ConnectionError(c, s.upload, func(url string) string {
-		err := fmt.Sprintf("Post %s%s: dial tcp %s: getsockopt: connection refused", url, registerURL, url[7:])
+		err := fmt.Sprintf("Post %s%s: dial tcp %s: connect: connection refused", url, registerURL, url[7:])
 		return fmt.Sprintf(error_Register+error_InventoryConnection, "prj", "name-v1.0", url+"/", err)
 	})
 }
@@ -617,7 +617,7 @@ func (s *suite) Test_Register_Errors(c *C) {
 
 func (s *suite) Test_Register_fails_if_server_doesnt_respond(c *C) {
 	s.test_ConnectionError(c, s.register, func(url string) string {
-		err := fmt.Sprintf("Post %s%s: dial tcp %s: getsockopt: connection refused", url, registerURL, url[7:])
+		err := fmt.Sprintf("Post %s%s: dial tcp %s: connect: connection refused", url, registerURL, url[7:])
 		return fmt.Sprintf(error_Register+error_InventoryConnection, "prj", "name-v1.0", url+"/", err)
 	})
 }
