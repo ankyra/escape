@@ -24,10 +24,14 @@ import (
 	"github.com/ankyra/escape/util/logger/api"
 )
 
-type jsonLogConsumer struct{}
+type jsonLogConsumer struct {
+	Silent bool
+}
 
 func NewJSONLogConsumer() *jsonLogConsumer {
-	return &jsonLogConsumer{}
+	return &jsonLogConsumer{
+		Silent: false,
+	}
 }
 
 type JSONMessage struct {
