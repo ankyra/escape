@@ -18,9 +18,10 @@ package script
 
 import (
 	"fmt"
-	"github.com/ankyra/escape-core/parsers"
 	"strings"
 	"unicode"
+
+	"github.com/ankyra/escape-core/parsers"
 )
 
 type parseResult struct {
@@ -146,7 +147,7 @@ func parseString(str string) *parseResult {
 			} else if str[0] == '\\' {
 				result = append(result, '\\')
 			} else {
-				return parseError(fmt.Errorf("Unexpected escape character '%s' in '%s'", str[0], str))
+				return parseError(fmt.Errorf("Unexpected escape character '%v' in '%s'", str[0], str))
 			}
 		} else {
 			result = append(result, str[0])

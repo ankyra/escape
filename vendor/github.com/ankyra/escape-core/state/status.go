@@ -106,7 +106,7 @@ type Status struct {
 	UpdatedAt  time.Time  `json:"updated_at,omitempty"`
 	UpdatedBy  string     `json:"updated_by,omitempty"`
 	Data       string     `json:"data,omitempty"`
-	TryAgainAt time.Time  `json:"try_again_at,omitempty"`
+	TryAgainAt *time.Time `json:"try_again_at,omitempty"`
 	Tried      int        `json:"tried,omitempty"`
 }
 
