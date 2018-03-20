@@ -55,6 +55,8 @@ func (t *jsonLogConsumer) Consume(entry *api.LogEntry) (string, error) {
 		return "", err
 	}
 	str := string(bytes)
-	fmt.Println(str)
+	if !t.Silent {
+		fmt.Println(str)
+	}
 	return str, nil
 }
