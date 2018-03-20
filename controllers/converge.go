@@ -79,9 +79,9 @@ func handleExponentialBackoff(context Context, depl *state.DeploymentState, stat
 
 	// The action has not been retried so set an initial retry time and save
 	// the new status.
-	if status.TryAgainAt != nil && status.TryAgainAt.IsZero() {
+	if status.TryAgainAt == nil || status.TryAgainAt.IsZero() {
 		backOff := time.Duration(BackoffStart) * time.Second
-		now.Add(backOff)
+		now = now.Add(backOff)
 		status.TryAgainAt = &now
 		context.Log("converge.mark_retry", map[string]string{
 			"deployment": depl.Name,
@@ -91,7 +91,7 @@ func handleExponentialBackoff(context Context, depl *state.DeploymentState, stat
 	}
 
 	// Retry action
-	if status.TryAgainAt != nil && status.TryAgainAt.Before(now) {
+	if status.TryAgainAt.Before(now) {
 		return retryAction(context, depl)
 	}
 
@@ -123,7 +123,7 @@ func retryAction(context Context, depl *state.DeploymentState) error {
 	now := time.Now()
 	status.Tried += 1
 	backOff := time.Duration(BackoffStart*math.Exp(float64(status.Tried))) * time.Second
-	now.Add(backOff)
+	now = now.Add(backOff)
 	status.TryAgainAt = &now
 	context.Log("converge.mark_retry", map[string]string{
 		"deployment": depl.Name,
