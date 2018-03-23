@@ -93,6 +93,15 @@ func (e *EnvironmentState) LookupDeploymentState(deploymentName string) (*Deploy
 	return val, nil
 }
 
+func (e *EnvironmentState) DeleteDeployment(deploymentName string) error {
+	_, ok := e.Deployments[deploymentName]
+	if !ok {
+		return DeploymentDoesNotExistError(deploymentName)
+	}
+	delete(e.Deployments, deploymentName)
+	return e.Project.CommitDeleteDeployment(e.Name, deploymentName)
+}
+
 func (e *EnvironmentState) ResolveDeploymentPath(stage, deploymentPath string) (*DeploymentState, error) {
 	parts := strings.Split(deploymentPath, ":")
 	if len(parts) == 0 {

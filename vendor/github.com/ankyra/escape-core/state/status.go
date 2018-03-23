@@ -48,10 +48,11 @@ const (
 	TestFailure = "test_failure"
 
 	// Destroy phase
-	DestroyPending         = "destroy_pending"
-	RunningPreDestroyStep  = "running_pre_destroy_step"
-	RunningMainDestroyStep = "running_main_destroy_step"
-	RunningPostDestroyStep = "running_post_destroy_step"
+	DestroyPending          = "destroy_pending"
+	DestroyAndDeletePending = "destroy_and_delete_pending"
+	RunningPreDestroyStep   = "running_pre_destroy_step"
+	RunningMainDestroyStep  = "running_main_destroy_step"
+	RunningPostDestroyStep  = "running_post_destroy_step"
 
 	// Destroy failure
 	DestroyFailure = "destroy_failure"
@@ -61,10 +62,10 @@ const (
 var StatusTransitions = map[StatusCode][]StatusCode{
 	Empty:          []StatusCode{RunningPreStep, Pending},
 	Pending:        []StatusCode{RunningPreStep},
-	OK:             []StatusCode{RunningPreStep, RunningTestStep, DestroyPending, TestPending, Pending, RunningPreDestroyStep},
-	Failure:        []StatusCode{RunningPreStep, Pending, DestroyPending, RunningPreDestroyStep},
-	TestFailure:    []StatusCode{RunningTestStep, RunningPreStep, DestroyPending, TestPending, Pending, RunningPreDestroyStep},
-	DestroyFailure: []StatusCode{RunningPreDestroyStep, DestroyPending, Pending, RunningPreStep},
+	OK:             []StatusCode{RunningPreStep, RunningTestStep, DestroyPending, DestroyAndDeletePending, TestPending, Pending, RunningPreDestroyStep},
+	Failure:        []StatusCode{RunningPreStep, Pending, DestroyPending, DestroyAndDeletePending, RunningPreDestroyStep},
+	TestFailure:    []StatusCode{RunningTestStep, RunningPreStep, DestroyPending, DestroyAndDeletePending, TestPending, Pending, RunningPreDestroyStep},
+	DestroyFailure: []StatusCode{RunningPreDestroyStep, DestroyPending, DestroyAndDeletePending, Pending, RunningPreStep},
 
 	RunningPreStep:  []StatusCode{RunningMainStep, Failure},
 	RunningMainStep: []StatusCode{RunningPostStep, Failure},
@@ -72,10 +73,11 @@ var StatusTransitions = map[StatusCode][]StatusCode{
 
 	RunningTestStep: []StatusCode{OK, TestFailure},
 
-	DestroyPending:         []StatusCode{RunningPreDestroyStep},
-	RunningPreDestroyStep:  []StatusCode{RunningMainDestroyStep, DestroyFailure},
-	RunningMainDestroyStep: []StatusCode{RunningPostDestroyStep, DestroyFailure},
-	RunningPostDestroyStep: []StatusCode{Empty, DestroyFailure},
+	DestroyPending:          []StatusCode{RunningPreDestroyStep},
+	DestroyAndDeletePending: []StatusCode{RunningPreDestroyStep},
+	RunningPreDestroyStep:   []StatusCode{RunningMainDestroyStep, DestroyFailure},
+	RunningMainDestroyStep:  []StatusCode{RunningPostDestroyStep, DestroyFailure},
+	RunningPostDestroyStep:  []StatusCode{Empty, DestroyFailure},
 }
 
 // Can you go from s1 -> s2?

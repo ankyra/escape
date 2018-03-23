@@ -87,3 +87,6 @@ func (s *ServerEndpoints) ProjectEnvironmentState(project, environment string) s
 func (s *ServerEndpoints) UpdateDeploymentState(project, environment, deployment string) string {
 	return s.ApiServer() + "api/v1/state/" + project + "/environments/" + environment + "/deployments/?deployment=" + url.QueryEscape(deployment)
 }
+func (s *ServerEndpoints) DeleteDeploymentState(project, environment, deployment string) string {
+	return s.ApiServer() + "api/v1/state/" + project + "/environments/" + environment + "/deployments/?deployment=" + url.QueryEscape(deployment)
+}

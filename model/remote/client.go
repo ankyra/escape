@@ -132,3 +132,13 @@ func (c *InventoryClient) GET(url string) (*http.Response, error) {
 	}
 	return c.GetHTTPClient().Do(req)
 }
+
+func (c *InventoryClient) DELETE_with_authentication(url string) (*http.Response, error) {
+	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("X-Escape-Token", c.EscapeToken)
+	return c.GetHTTPClient().Do(req)
+}

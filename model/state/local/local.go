@@ -56,6 +56,14 @@ func (l *localStateProvider) Load(project, env string) (*EnvironmentState, error
 }
 
 func (l *localStateProvider) Save(depl *DeploymentState) error {
+	return l.writeStateToDisk()
+}
+
+func (l *localStateProvider) DeleteDeployment(project, env, depl string) error {
+	return l.writeStateToDisk()
+}
+
+func (l *localStateProvider) writeStateToDisk() error {
 	if l.saveLocation == "" {
 		return fmt.Errorf("Save location has not been set. Inexplicably")
 	}

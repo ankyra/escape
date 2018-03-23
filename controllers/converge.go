@@ -61,6 +61,13 @@ func ConvergeDeployment(context Context, depl *state.DeploymentState, refresh bo
 	if status.Code == state.DestroyPending {
 		return convergeDestroy(context, depl, releaseId, "converge.destroy_pending")
 	}
+	if status.Code == state.DestroyAndDeletePending {
+		err := convergeDestroy(context, depl, releaseId, "converge.destroy_pending")
+		if err == nil {
+			return context.GetEnvironmentState().DeleteDeployment(depl.Name)
+		}
+		return err
+	}
 	if status.IsError() {
 		return handleExponentialBackoff(context, depl, status)
 	}
