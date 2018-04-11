@@ -224,10 +224,14 @@ var LogMessages = map[string]map[string]string{
 	},
 	"converge.skip_ok": map[string]string{
 		"msg":   "Skipping deployment {{ .deployment }}; already deployed (use --refresh to redeploy)",
-		"level": "info",
+		"level": "debug",
 	},
 	"converge.skip_retry_later": map[string]string{
 		"msg":   "Skipping deployment {{ .deployment }}; will be retried in {{ .retriedIn }}.",
+		"level": "info",
+	},
+	"converge.skip_other": map[string]string{
+		"msg":   "Skipping deployment {{ .deployment }}, because its status is set to '{{ .status }}'.",
 		"level": "info",
 	},
 	"deploy.deploy_dependency": map[string]string{

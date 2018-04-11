@@ -78,7 +78,15 @@ func ConvergeDeployment(context Context, depl *state.DeploymentState, refresh bo
 		})
 		return nil
 	}
-	return convergeDeploy(context, depl, releaseId, "converge")
+	if state.StatusTransitionAllowed(status.Code, state.RunningPreStep) {
+		return convergeDeploy(context, depl, releaseId, "converge")
+	}
+	context.Log("converge.skip_other", map[string]string{
+		"deployment": depl.Name,
+		"release":    releaseId,
+		"status":     string(status.Code),
+	})
+	return nil
 }
 
 func handleExponentialBackoff(context Context, depl *state.DeploymentState, status *state.Status) error {
