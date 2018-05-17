@@ -36,9 +36,9 @@ type inventory struct {
 	endpoints *remote.ServerEndpoints
 }
 
-func NewRemoteInventory(apiServer, escapeToken string, insecureSkipVerify bool) *inventory {
+func NewRemoteInventory(apiServer, escapeToken, basicAuthUsername, basicAuthPassword string, insecureSkipVerify bool) *inventory {
 	inv := &inventory{
-		client:    remote.NewRemoteClient(escapeToken, insecureSkipVerify),
+		client:    remote.NewRemoteClient(escapeToken, basicAuthUsername, basicAuthPassword, insecureSkipVerify),
 		endpoints: remote.NewServerEndpoints(apiServer),
 	}
 	inv.apiServer = inv.endpoints.ApiServer()

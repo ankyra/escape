@@ -27,13 +27,17 @@ import (
 )
 
 type InventoryClient struct {
-	InsecureSkipVerify bool
 	EscapeToken        string
+	BasicAuthUsername  string
+	BasicAuthPassword  string
+	InsecureSkipVerify bool
 }
 
-func NewRemoteClient(escapeToken string, insecureSkipVerify bool) *InventoryClient {
+func NewRemoteClient(escapeToken, basicAuthUsername, basicAuthPassword string, insecureSkipVerify bool) *InventoryClient {
 	return &InventoryClient{
 		EscapeToken:        escapeToken,
+		BasicAuthUsername:  basicAuthUsername,
+		BasicAuthPassword:  basicAuthPassword,
 		InsecureSkipVerify: insecureSkipVerify,
 	}
 }
@@ -47,12 +51,23 @@ func (c *InventoryClient) GetHTTPClient() *http.Client {
 	}
 }
 
+func (c *InventoryClient) NewRequest(method, url string, reader io.Reader) (*http.Request, error) {
+	req, err := http.NewRequest(method, url, reader)
+	if err != nil {
+		return nil, err
+	}
+	if c.BasicAuthPassword != "" {
+		req.SetBasicAuth(c.BasicAuthUsername, c.BasicAuthPassword)
+	}
+	return req, nil
+}
+
 func (c *InventoryClient) POST_json(url string, data interface{}) (*http.Response, error) {
 	payload, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest("POST", url, bytes.NewReader(payload))
+	req, err := c.NewRequest("POST", url, bytes.NewReader(payload))
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +80,7 @@ func (c *InventoryClient) POST_json_with_authentication(url string, data interfa
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest("POST", url, bytes.NewReader(payload))
+	req, err := c.NewRequest("POST", url, bytes.NewReader(payload))
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +107,7 @@ func (c *InventoryClient) POST_file_with_authentication(url, path string) (*http
 	contentType := bodyWriter.FormDataContentType()
 	bodyWriter.Close()
 
-	req, err := http.NewRequest("POST", url, bodyBuf)
+	req, err := c.NewRequest("POST", url, bodyBuf)
 	if err != nil {
 		return nil, err
 	}
@@ -106,28 +121,17 @@ func (c *InventoryClient) PUT_json_with_authentication(url string, data interfac
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest("PUT", url, bytes.NewReader(payload))
+	req, err := c.NewRequest("PUT", url, bytes.NewReader(payload))
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("X-Escape-Token", c.EscapeToken)
-	return c.GetHTTPClient().Do(req)
-}
-
-func (c *InventoryClient) GET_with_basic_authentication(url, username, password string) (*http.Response, error) {
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.SetBasicAuth(username, password)
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("X-Escape-Token", c.EscapeToken)
 	return c.GetHTTPClient().Do(req)
 }
 
 func (c *InventoryClient) GET_with_authentication(url string) (*http.Response, error) {
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := c.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +141,7 @@ func (c *InventoryClient) GET_with_authentication(url string) (*http.Response, e
 }
 
 func (c *InventoryClient) GET(url string) (*http.Response, error) {
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := c.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -145,10 +149,22 @@ func (c *InventoryClient) GET(url string) (*http.Response, error) {
 }
 
 func (c *InventoryClient) DELETE_with_authentication(url string) (*http.Response, error) {
-	req, err := http.NewRequest("DELETE", url, nil)
+	req, err := c.NewRequest("DELETE", url, nil)
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("X-Escape-Token", c.EscapeToken)
+	return c.GetHTTPClient().Do(req)
+}
+
+// This function is only used to check credentials (for LoginWithBasicAuth in the inventory).
+func (c *InventoryClient) GET_with_basic_authentication(url, username, password string) (*http.Response, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.SetBasicAuth(username, password)
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("X-Escape-Token", c.EscapeToken)
 	return c.GetHTTPClient().Do(req)

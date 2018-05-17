@@ -41,6 +41,6 @@ func NewLocalInventory() Inventory {
 	return local.NewLocalInventory()
 }
 
-func NewRemoteInventory(apiServer, authToken string, insecureSkipVerify bool) Inventory {
-	return remote.NewRemoteInventory(apiServer, authToken, insecureSkipVerify)
+func NewRemoteInventory(apiServer, authToken, basicAuthUsername, basicAuthPassword string, insecureSkipVerify bool) Inventory {
+	return remote.NewRemoteInventory(apiServer, authToken, basicAuthUsername, basicAuthPassword, insecureSkipVerify)
 }

@@ -11,6 +11,8 @@ import (
 type EscapeConfigProfile struct {
 	ApiServer          string `json:"api_server"`
 	AuthToken          string `json:"escape_auth_token"`
+	BasicAuthUsername  string `json:"basic_auth_username"`
+	BasicAuthPassword  string `json:"basic_auth_password"`
 	InsecureSkipVerify bool   `json:"insecure_skip_verify"`
 	StatePath          string `json:"state_path"`
 	parent             *EscapeConfig
@@ -18,8 +20,10 @@ type EscapeConfigProfile struct {
 
 func newEscapeConfigProfile(cfg *EscapeConfig) *EscapeConfigProfile {
 	profile := &EscapeConfigProfile{
-		ApiServer: os.Getenv("ESCAPE_API_SERVER"),
-		AuthToken: os.Getenv("ESCAPE_AUTH_TOKEN"),
+		ApiServer:         os.Getenv("ESCAPE_API_SERVER"),
+		AuthToken:         os.Getenv("ESCAPE_AUTH_TOKEN"),
+		BasicAuthUsername: os.Getenv("BASIC_AUTH_USERNAME"),
+		BasicAuthPassword: os.Getenv("BASIC_AUTH_PASSWORD"),
 	}
 	return profile.fix(cfg)
 }
@@ -44,7 +48,7 @@ func (t *EscapeConfigProfile) ToJson() string {
 }
 
 func (t *EscapeConfigProfile) GetInventory() inventory.Inventory {
-	return inventory.NewRemoteInventory(t.ApiServer, t.AuthToken, t.InsecureSkipVerify)
+	return inventory.NewRemoteInventory(t.ApiServer, t.AuthToken, t.BasicAuthUsername, t.BasicAuthPassword, t.InsecureSkipVerify)
 }
 
 func (t *EscapeConfigProfile) Save() error {
@@ -67,6 +71,10 @@ func (t *EscapeConfigProfile) GetInsecureSkipVerify() bool {
 }
 func (t *EscapeConfigProfile) SetInsecureSkipVerify(v bool) {
 	t.InsecureSkipVerify = v
+}
+func (t *EscapeConfigProfile) SetBasicAuthCredentials(username, password string) {
+	t.BasicAuthUsername = username
+	t.BasicAuthPassword = password
 }
 func (t *EscapeConfigProfile) GetStatePath() string {
 	return t.StatePath

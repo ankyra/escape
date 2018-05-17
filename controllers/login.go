@@ -52,6 +52,7 @@ func (LoginController) Login(context Context, url, authMethodRequested, username
 
 	if authMethods == nil {
 		fmt.Printf("Authentication not required.\n\nSuccessfully logged in to %s\n", url)
+		context.GetEscapeConfig().GetCurrentProfile().SetBasicAuthCredentials("", "")
 		context.GetEscapeConfig().GetCurrentProfile().SetAuthToken("")
 		context.GetEscapeConfig().GetCurrentProfile().SetApiServer(url)
 		return context.GetEscapeConfig().Save()
@@ -142,6 +143,7 @@ func secretTokenAuth(reader *bufio.Reader, context Context, url, loginUrl, usern
 	if err != nil {
 		return err
 	}
+	context.GetEscapeConfig().GetCurrentProfile().SetBasicAuthCredentials("", "")
 	context.GetEscapeConfig().GetCurrentProfile().SetAuthToken(authToken)
 	context.GetEscapeConfig().GetCurrentProfile().SetApiServer(url)
 	context.GetEscapeConfig().Save()
@@ -157,8 +159,11 @@ func basicAuth(reader *bufio.Reader, context Context, url, loginUrl, username, p
 	if err := context.GetInventory().LoginWithBasicAuth(loginUrl, username, password); err != nil {
 		return err
 	}
+	context.GetEscapeConfig().GetCurrentProfile().SetBasicAuthCredentials(username, password)
 	context.GetEscapeConfig().GetCurrentProfile().SetApiServer(url)
-	context.GetEscapeConfig().Save()
+	if err := context.GetEscapeConfig().Save(); err != nil {
+		return err
+	}
 	fmt.Printf("\nSuccessfully logged in using basic authentication. Credentials were stored in the current configuration profile (see `escape config profile`)\n")
 	return nil
 }
@@ -228,6 +233,7 @@ func getEscapeTokenWithRedeemToken(context Context, url, redeemToken, redeemURL 
 			if err != nil {
 				return fmt.Errorf("Couldn't read response from server '%s': %s", redeemURL, resp.Status)
 			}
+			context.GetEscapeConfig().GetCurrentProfile().SetBasicAuthCredentials("", "")
 			context.GetEscapeConfig().GetCurrentProfile().SetAuthToken(string(authToken))
 			context.GetEscapeConfig().GetCurrentProfile().SetApiServer(url)
 			context.GetEscapeConfig().Save()

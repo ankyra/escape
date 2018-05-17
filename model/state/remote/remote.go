@@ -32,7 +32,7 @@ type remoteStateProvider struct {
 
 func NewRemoteStateProvider(apiServer, escapeToken string, insecureSkipVerify bool) *remoteStateProvider {
 	return &remoteStateProvider{
-		client:    remote.NewRemoteClient(escapeToken, insecureSkipVerify),
+		client:    remote.NewRemoteClient(escapeToken, "", "", insecureSkipVerify),
 		endpoints: remote.NewServerEndpoints(apiServer),
 	}
 }
