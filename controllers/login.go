@@ -103,6 +103,11 @@ func authUserSelection(reader *bufio.Reader, authMethods map[string]*types.AuthM
 		sortedAuthMethods = append(sortedAuthMethods, authMethods[key])
 	}
 
+	if len(sortedAuthMethods) == 1 {
+		fmt.Printf("Using only authentication method available '%s'\n", sortedKeys[0])
+		return sortedAuthMethods[0]
+	}
+
 	fmt.Printf("Available authentication methods:\n\n")
 	i := 1
 	methods := []*types.AuthMethod{}
