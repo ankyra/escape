@@ -53,6 +53,9 @@ func (m *mockInventory) GetAuthMethods(url string) (map[string]*types.AuthMethod
 func (m *mockInventory) Login(url, username, password string) (string, error) {
 	return "", nil
 }
+func (m *mockInventory) LoginWithBasicAuth(url, username, password string) error {
+	return nil
+}
 func (r *mockInventory) ListProjects() ([]string, error) {
 	return []string{}, nil
 }

@@ -60,7 +60,7 @@ const (
 
 // Can you go from one state to another?
 var StatusTransitions = map[StatusCode][]StatusCode{
-	Empty:          []StatusCode{RunningPreStep, Pending},
+	Empty:          []StatusCode{Pending},
 	Pending:        []StatusCode{RunningPreStep},
 	OK:             []StatusCode{RunningPreStep, RunningTestStep, DestroyPending, DestroyAndDeletePending, TestPending, Pending, RunningPreDestroyStep},
 	Failure:        []StatusCode{RunningPreStep, Pending, DestroyPending, DestroyAndDeletePending, RunningPreDestroyStep},

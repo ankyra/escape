@@ -56,7 +56,7 @@ func (s *suite) Test_QueryReleaseMetadata_happy_path(c *C) {
 	server := NewMockServer().WithBody(validMetadata).Start(c)
 	defer server.Stop()
 
-	unit := NewRemoteInventory(server.URL, "token", false)
+	unit := NewRemoteInventory(server.URL, "token", "", "", false)
 	metadata, err := unit.QueryReleaseMetadata("query-project", "name", "1.0.0")
 	server.ExpectCalled(c, true, queryReleaseMetadataURL)
 	c.Assert(err, IsNil)
@@ -70,7 +70,7 @@ func (s *suite) Test_QueryReleaseMetadata_happy_path_for_latest(c *C) {
 	server := NewMockServer().WithBody(validMetadata).Start(c)
 	defer server.Stop()
 
-	unit := NewRemoteInventory(server.URL, "token", false)
+	unit := NewRemoteInventory(server.URL, "token", "", "", false)
 	metadata, err := unit.QueryReleaseMetadata("query-project", "name", "latest")
 	server.ExpectCalled(c, true, queryReleaseMetadataLatestURL)
 	c.Assert(err, IsNil)
@@ -84,7 +84,7 @@ func (s *suite) Test_QueryReleaseMetadata_happy_path_versions_prefixed_with_v(c 
 	server := NewMockServer().WithBody(validMetadata).Start(c)
 	defer server.Stop()
 
-	unit := NewRemoteInventory(server.URL, "token", false)
+	unit := NewRemoteInventory(server.URL, "token", "", "", false)
 	metadata, err := unit.QueryReleaseMetadata("query-project", "name", "v1.0.0")
 	server.ExpectCalled(c, true, queryReleaseMetadataURL)
 	c.Assert(err, IsNil)
@@ -95,7 +95,7 @@ func (s *suite) Test_QueryReleaseMetadata_happy_path_versions_prefixed_with_v(c 
 }
 
 func (s *suite) queryReleaseMetadata(url string) error {
-	unit := NewRemoteInventory(url, "token", false)
+	unit := NewRemoteInventory(url, "token", "", "", false)
 	_, err := unit.QueryReleaseMetadata("query-project", "name", "1.0.0")
 	return err
 }
@@ -167,7 +167,7 @@ func (s *suite) Test_QueryNextVersion_happy_path(c *C) {
 	server := NewMockServer().WithBody(`1.0`).Start(c)
 	defer server.Stop()
 
-	unit := NewRemoteInventory(server.URL, "token", false)
+	unit := NewRemoteInventory(server.URL, "token", "", "", false)
 	version, err := unit.QueryNextVersion("query-project", "name", "1.@")
 	server.ExpectCalled(c, true, queryNextVersionURL)
 	c.Assert(err, IsNil)
@@ -175,7 +175,7 @@ func (s *suite) Test_QueryNextVersion_happy_path(c *C) {
 }
 
 func (s *suite) queryNextVersion(url string) error {
-	unit := NewRemoteInventory(url, "token", false)
+	unit := NewRemoteInventory(url, "token", "", "", false)
 	_, err := unit.QueryNextVersion("query-project", "name", "1.0.1")
 	return err
 }
@@ -218,7 +218,7 @@ func (s *suite) Test_ListProjects_happy_path(c *C) {
 	server := NewMockServer().WithBody(`{"prj": {}, "prj2": {}}`).Start(c)
 	defer server.Stop()
 
-	unit := NewRemoteInventory(server.URL, "token", false)
+	unit := NewRemoteInventory(server.URL, "token", "", "", false)
 	projects, err := unit.ListProjects()
 	server.ExpectCalled(c, true, listProjectsURL)
 	c.Assert(err, IsNil)
@@ -228,7 +228,7 @@ func (s *suite) Test_ListProjects_happy_path(c *C) {
 }
 
 func (s *suite) listProjects(url string) error {
-	unit := NewRemoteInventory(url, "token", false)
+	unit := NewRemoteInventory(url, "token", "", "", false)
 	_, err := unit.ListProjects()
 	return err
 }
@@ -271,7 +271,7 @@ func (s *suite) Test_ListApplications_happy_path(c *C) {
 	server := NewMockServer().WithBody(`{"prj": {}, "prj2": {}}`).Start(c)
 	defer server.Stop()
 
-	unit := NewRemoteInventory(server.URL, "token", false)
+	unit := NewRemoteInventory(server.URL, "token", "", "", false)
 	apps, err := unit.ListApplications("test")
 	server.ExpectCalled(c, true, listApplicationsURL)
 	c.Assert(err, IsNil)
@@ -281,7 +281,7 @@ func (s *suite) Test_ListApplications_happy_path(c *C) {
 }
 
 func (s *suite) listApplications(url string) error {
-	unit := NewRemoteInventory(url, "token", false)
+	unit := NewRemoteInventory(url, "token", "", "", false)
 	_, err := unit.ListApplications("test")
 	return err
 }
@@ -327,7 +327,7 @@ func (s *suite) Test_ListVersions_happy_path(c *C) {
 	server := NewMockServer().WithBody(`{"versions": ["1.0", "1.1"]}`).Start(c)
 	defer server.Stop()
 
-	unit := NewRemoteInventory(server.URL, "token", false)
+	unit := NewRemoteInventory(server.URL, "token", "", "", false)
 	versions, err := unit.ListVersions("test", "app")
 	server.ExpectCalled(c, true, listVersionsURL)
 	c.Assert(err, IsNil)
@@ -337,7 +337,7 @@ func (s *suite) Test_ListVersions_happy_path(c *C) {
 }
 
 func (s *suite) listVersions(url string) error {
-	unit := NewRemoteInventory(url, "token", false)
+	unit := NewRemoteInventory(url, "token", "", "", false)
 	_, err := unit.ListVersions("test", "app")
 	return err
 }
@@ -393,7 +393,7 @@ func (s *suite) Test_GetAuthMethods_happy_path(c *C) {
 	server := NewMockServer().WithBody(validAuthMethods).Start(c)
 	defer server.Stop()
 
-	unit := NewRemoteInventory(server.URL, "token", false)
+	unit := NewRemoteInventory(server.URL, "token", "", "", false)
 	authMethods, err := unit.GetAuthMethods(server.URL)
 	server.ExpectCalled(c, true, authMethodsURL)
 	c.Assert(err, IsNil)
@@ -403,7 +403,7 @@ func (s *suite) Test_GetAuthMethods_happy_path(c *C) {
 }
 
 func (s *suite) getAuthMethods(url string) error {
-	unit := NewRemoteInventory(url, "token", false)
+	unit := NewRemoteInventory(url, "token", "", "", false)
 	_, err := unit.GetAuthMethods(url)
 	return err
 }
@@ -411,7 +411,7 @@ func (s *suite) getAuthMethods(url string) error {
 func (s *suite) Test_GetAuthMethods_NotFound_does_not_return_error_but_nil(c *C) {
 	server := NewMockServer().WithResponseCode(404).Start(c)
 	defer server.Stop()
-	unit := NewRemoteInventory(server.URL, "token", false)
+	unit := NewRemoteInventory(server.URL, "token", "", "", false)
 	authMethods, err := unit.GetAuthMethods(server.URL)
 	server.ExpectCalled(c, true, authMethodsURL)
 	c.Assert(err, IsNil)
@@ -450,7 +450,7 @@ func (s *suite) Test_Login_happy_path(c *C) {
 	server := NewMockServer().WithHeader("X-Escape-Token", "my-auth-token").Start(c)
 	defer server.Stop()
 
-	unit := NewRemoteInventory(server.URL, "token", false)
+	unit := NewRemoteInventory(server.URL, "token", "", "", false)
 	token, err := unit.Login(server.URL, "user", "password")
 	server.ExpectCalled(c, true, "/")
 	c.Assert(err, IsNil)
@@ -458,7 +458,7 @@ func (s *suite) Test_Login_happy_path(c *C) {
 }
 
 func (s *suite) login(url string) error {
-	unit := NewRemoteInventory(url, "token", false)
+	unit := NewRemoteInventory(url, "token", "", "", false)
 	_, err := unit.Login(url, "user", "password")
 	return err
 }
@@ -512,7 +512,7 @@ func (s *suite) Test_Download_happy_path(c *C) {
 }
 
 func (s *suite) download(url string) error {
-	unit := NewRemoteInventory(url, "token", false)
+	unit := NewRemoteInventory(url, "token", "", "", false)
 	return unit.DownloadRelease("prj", "name", "1.0", "testdata.txt")
 }
 
@@ -554,7 +554,7 @@ func (s *suite) Test_Download_fails_if_server_doesnt_respond(c *C) {
 */
 
 func (s *suite) upload(url string) error {
-	unit := NewRemoteInventory(url, "token", false)
+	unit := NewRemoteInventory(url, "token", "", "", false)
 	metadata := core.NewReleaseMetadata("name", "1.0")
 	return unit.UploadRelease("prj", "testdata.txt", metadata)
 }
@@ -586,7 +586,7 @@ func (s *suite) Test_UploadRelease_fails_if_server_doesnt_respond(c *C) {
 */
 
 func (s *suite) register(url string) error {
-	unit := NewRemoteInventory(url, "token", false)
+	unit := NewRemoteInventory(url, "token", "", "", false)
 	metadata := core.NewReleaseMetadata("name", "1.0")
 	return unit.register("prj", metadata)
 }

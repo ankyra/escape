@@ -1,14 +1,14 @@
 {
    "api_version": 13,
-   "built_with_core_version": "0.13.22",
-   "built_with_escape_version": "0.25.19",
+   "built_with_core_version": "0.13.26",
+   "built_with_escape_version": "0.25.27",
    "description": "Core library containing datastructures for working with Release Metadata, State and the Escape Scripting Language.\nPlease see https://escape.ankyra.io/docs/ for the full documentation.",
    "files": {
       "LICENSE": "2a944942e1496af1886903d274dedb13",
       "README.md": "72bda3a0e4c579e06e1f459d53eb2076",
       "consumer.go": "181f5a757142e5ef338d1c94d2ac4204",
       "consumer_test.go": "e49077a8242e9e16a2b90ae6468fb886",
-      "core.go": "8e388f56b61266f43416c9198cf24092",
+      "core.go": "aa20a462cde76eef14d209f49f6bd122",
       "core.go.tpl": "4099a7b2c6c7798799ea2819f8cf5c27",
       "dependency.go": "824ac7f427ead64864ee36bc8431564a",
       "dependency_config.go": "c46c4ae749505ceea1a3ff4c02e670e2",
@@ -18,14 +18,6 @@
       "diff_test.go": "d79d4972a32348ed0ef1a654a3e58963",
       "docs/generate_pages.go": "b91f9ba9a39e48cf1ac86d5964842509",
       "docs/generate_stdlib_docs.go": "672a40c6b105e634e880d5447d5b30f0",
-      "docs/generated/dependencies.md": "8441bf6434d924fe0f69808d68a1cb2d",
-      "docs/generated/downloads.md": "b011e854e3797e40483d92862872d164",
-      "docs/generated/errands.md": "862fbaa5edaabccd0e7f1bf257ebfb75",
-      "docs/generated/extensions.md": "9f3ea5257f865d6bcee6e39e7cf841c7",
-      "docs/generated/input-and-output-variables.md": "96f743ace9fba65778864daeae14c9cd",
-      "docs/generated/providers-and-consumers.md": "51705ae407d4698ce5a7032280fe3d32",
-      "docs/generated/stdlib.md": "f0e17a57ec24bd975c609c023fb9d647",
-      "docs/generated/templates.md": "2a70ab1c736e2b16864717e424a8c03b",
       "docs/scripting_language.md": "79ffa91ba9dad432b9c3810b474036d8",
       "download_config.go": "e1f64beb02a3f1825d428280976d209a",
       "errand.go": "9a6714f0143390faa5644c8d6f6b735c",
@@ -61,7 +53,6 @@
       "script/type.go": "c88eddb4a80f4d702b510875e89380f1",
       "semantic_version.go": "540ee432414ff0ca2ade4589d92e468f",
       "semantic_version_test.go": "86fc9503487720093f3b4e5990630bdf",
-      "state/.project.go.swp": "d91dfe3d629e60f101f910edbe43f05d",
       "state/dag.go": "4f62beb03f412911c6091fc89de76bda",
       "state/dag_test.go": "cf04f6227846b07542e0599bf9df8869",
       "state/deployment.go": "d9179ff55abfac35b4e0ac502933414d",
@@ -74,7 +65,7 @@
       "state/script_test.go": "ca7e648c05e876105bae9bc9c82282a7",
       "state/stage.go": "1fc9285011dedd504e311fdeafe7b59b",
       "state/stage_test.go": "ebe2d62065ba8d96db3f5cf14e131964",
-      "state/status.go": "399d11236a508796f830bdfabd196b2d",
+      "state/status.go": "4ec6ee15f11eac47eda07b612d68899a",
       "state/status_test.go": "2f7563992c534ea33c578e727b598e74",
       "state/testdata/project.json": "6a60c9206d05ae6ead95fc07efcbd174",
       "state/testdata/project_script.json": "11012c64310f65b862d917df6007f1d4",
@@ -145,43 +136,29 @@
    "license": "",
    "logo": "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",
    "name": "escape-core",
-   "repository": "git@github.com:ankyra/escape-core.git",
+   "repository": "https://github.com/ankyra/escape-core.git",
    "branch": "master",
-   "git_revision": "bdf504bb7f11fc86d33cd80ec0d13daf9daac5f7",
-   "revision_message": "Add DeleteDeployment to EnvironmentState. See ankyra/esape#26",
+   "git_revision": "5ab5e9b692ea366e8324e0b41801c29a76c806d4",
+   "revision_message": "Don't allow to transition from 'empty' status directly to 'pre_running_step', go through 'pending' first.",
    "revision_author": "Bart Spaans \u003cbart.spaans@gmail.com\u003e",
    "metadata": {
       "release_metadata_api_version": "13"
    },
-   "version": "0.13.26",
+   "version": "0.13.29",
    "consumes": [],
    "downloads": null,
    "depends": [],
    "errands": {},
    "extends": [
       {
-         "release_id": "_/extension-golang-binary-v0.0.29"
+         "release_id": "_/extension-golang-binary-v1.0.1"
       }
    ],
    "inputs": [
       {
-         "id": "go_docker_image",
-         "type": "string",
-         "default": "golang:1.10.0",
-         "description": "The go Docker image to use.",
-         "visible": true,
-         "items": null,
-         "eval_before_dependencies": true,
-         "scopes": [
-            "build",
-            "deploy"
-         ]
-      },
-      {
          "id": "package_name",
          "type": "string",
          "default": "github.com/ankyra/escape-core",
-         "description": "The name of the Go package we're building",
          "visible": false,
          "items": null,
          "eval_before_dependencies": true,
@@ -191,50 +168,13 @@
          ]
       },
       {
-         "id": "binary_name",
-         "type": "string",
-         "default": "",
-         "description": "The name of the produced binary.",
+         "id": "escape_go_dependencies",
+         "type": "list",
+         "default": [],
          "visible": false,
-         "items": null,
-         "eval_before_dependencies": true,
-         "scopes": [
-            "build",
-            "deploy"
-         ]
-      },
-      {
-         "id": "build_command",
-         "type": "string",
-         "default": "go build \u0026\u0026 go run docs/generate_stdlib_docs.go \u0026\u0026 go run docs/generate_pages.go",
-         "description": "Setting this overrides the default build command.",
-         "visible": false,
-         "items": null,
-         "eval_before_dependencies": true,
-         "scopes": [
-            "build",
-            "deploy"
-         ]
-      },
-      {
-         "id": "test_command",
-         "type": "string",
-         "default": "go test -cover -v $(/usr/local/go/bin/go list ./... | grep -v docs )",
-         "description": "Setting this overrides the default test command.",
-         "visible": false,
-         "items": null,
-         "eval_before_dependencies": true,
-         "scopes": [
-            "build",
-            "deploy"
-         ]
-      },
-      {
-         "id": "go_vendor_path",
-         "type": "string",
-         "default": "vendor/",
-         "description": "The location of the vendor directory (used for escape_go_dependencies)",
-         "visible": false,
+         "options": {
+            "string": true
+         },
          "items": null,
          "eval_before_dependencies": true,
          "scopes": [
@@ -248,7 +188,6 @@
          "default": [
             "docs/generated:docs/"
          ],
-         "description": "Copy files and directories out of the Docker volume into the current\ndirectory after the build has completed. The format is `SRC:DEST`.  For\nexample: \n- README.md:file_in_root.txt\n",
          "visible": false,
          "items": null,
          "eval_before_dependencies": true,
@@ -258,14 +197,22 @@
          ]
       },
       {
-         "id": "escape_go_dependencies",
-         "type": "list",
-         "default": [],
-         "description": "Copy Escape dependencies into the $go_vendor_path directory before building.\nThe format is `DEP:DEST`.  For example: \n- _/escape-core:github.com/ankyra/escape-core\n",
+         "id": "build_command",
+         "type": "string",
+         "default": "go build \u0026\u0026 go run docs/generate_stdlib_docs.go \u0026\u0026 go run docs/generate_pages.go",
          "visible": false,
-         "options": {
-            "string": true
-         },
+         "items": null,
+         "eval_before_dependencies": true,
+         "scopes": [
+            "build",
+            "deploy"
+         ]
+      },
+      {
+         "id": "test_command",
+         "type": "string",
+         "default": "go test -cover -v $(/usr/local/go/bin/go list ./... | grep -v docs )",
+         "visible": false,
          "items": null,
          "eval_before_dependencies": true,
          "scopes": [
@@ -278,14 +225,8 @@
    "project": "_",
    "provides": [],
    "stages": {
-      "build": {
-         "script": "deps/_/extension-golang-binary/build.sh"
-      },
       "pre_build": {
          "script": "prebuild.sh"
-      },
-      "test": {
-         "script": "deps/_/extension-golang-binary/test.sh"
       }
    },
    "templates": [
@@ -296,14 +237,11 @@
             "build"
          ],
          "mapping": {
-            "binary_name": "$this.inputs.binary_name",
             "branch": "$this.branch",
             "build_command": "$this.inputs.build_command",
             "copy_files_after_build": "$this.inputs.copy_files_after_build",
             "description": "$this.description",
             "escape_go_dependencies": "$this.inputs.escape_go_dependencies",
-            "go_docker_image": "$this.inputs.go_docker_image",
-            "go_vendor_path": "$this.inputs.go_vendor_path",
             "id": "$this.id",
             "logo": "$this.logo",
             "metadata_api_version": "$this.metadata.release_metadata_api_version",
