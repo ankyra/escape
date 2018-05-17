@@ -56,6 +56,9 @@ func (r *LocalInventory) GetAuthMethods(url string) (map[string]*types.AuthMetho
 func (r *LocalInventory) Login(url, username, password string) (string, error) {
 	return "", nil
 }
+func (r *LocalInventory) LoginWithBasicAuth(url, username, password string) error {
+	return nil
+}
 func (r *LocalInventory) ListProjects() ([]string, error) {
 	return []string{}, nil
 }

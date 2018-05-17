@@ -115,6 +115,17 @@ func (c *InventoryClient) PUT_json_with_authentication(url string, data interfac
 	return c.GetHTTPClient().Do(req)
 }
 
+func (c *InventoryClient) GET_with_basic_authentication(url, username, password string) (*http.Response, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.SetBasicAuth(username, password)
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("X-Escape-Token", c.EscapeToken)
+	return c.GetHTTPClient().Do(req)
+}
+
 func (c *InventoryClient) GET_with_authentication(url string) (*http.Response, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

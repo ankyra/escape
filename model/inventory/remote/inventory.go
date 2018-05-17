@@ -213,6 +213,17 @@ func (r *inventory) GetAuthMethods(url string) (map[string]*types.AuthMethod, er
 
 	if resp.StatusCode == 400 {
 		return nil, fmt.Errorf(error_AuthMethods+error_InventoryUserSide, url, body)
+	} else if resp.StatusCode == 401 {
+		realm := resp.Header.Get("WWW-Authenticate")
+		if strings.HasPrefix(realm, `Basic realm`) {
+			result := map[string]*types.AuthMethod{}
+			result["Basic Authentication"] = &types.AuthMethod{
+				URL:  url,
+				Type: "basic-auth",
+			}
+			return result, nil
+		}
+		return nil, fmt.Errorf(error_AuthMethods+error_InventoryUnknownStatus, url, resp.StatusCode, body)
 	} else if resp.StatusCode == 404 {
 		return nil, nil
 	} else if resp.StatusCode == 500 {
@@ -225,6 +236,27 @@ func (r *inventory) GetAuthMethods(url string) (map[string]*types.AuthMethod, er
 		return nil, err
 	}
 	return result, nil
+}
+
+func (r *inventory) LoginWithBasicAuth(url, username, password string) error {
+	resp, err := r.client.GET_with_basic_authentication(url, username, password)
+	if err != nil {
+		return fmt.Errorf(error_Login+error_InventoryConnection, url, err.Error())
+	}
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(resp.Body)
+	body := buf.String()
+
+	if resp.StatusCode == 400 {
+		return fmt.Errorf(error_Login+error_InventoryUserSide, url, body)
+	} else if resp.StatusCode == 401 {
+		return fmt.Errorf(error_Login + error_LoginCredentials)
+	} else if resp.StatusCode == 500 {
+		return fmt.Errorf(error_Login+error_InventoryServerSide, url)
+	} else if resp.StatusCode != 200 {
+		return fmt.Errorf(error_Login+error_InventoryUnknownStatus, url, resp.StatusCode, body)
+	}
+	return nil
 }
 
 func (r *inventory) Login(url, username, password string) (string, error) {
