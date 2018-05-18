@@ -19,13 +19,15 @@ package consumers
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"time"
 
 	"github.com/ankyra/escape/util/logger/api"
 )
 
 type jsonLogConsumer struct {
-	Silent bool
+	PreviousSectionStack []string
+	Silent               bool
 }
 
 func NewJSONLogConsumer() *jsonLogConsumer {
@@ -35,20 +37,25 @@ func NewJSONLogConsumer() *jsonLogConsumer {
 }
 
 type JSONMessage struct {
-	Timestamp time.Time         `json:"timestamp"`
-	Message   string            `json:"message"`
-	Level     string            `json:"level"`
-	LogKey    string            `json:"log_key"`
-	LogValues map[string]string `json:"log_values"`
+	Timestamp         time.Time         `json:"timestamp"`
+	Message           string            `json:"message"`
+	Level             string            `json:"level"`
+	LogKey            string            `json:"log_key"`
+	LogValues         map[string]string `json:"log_values"`
+	LogSectionChanged bool              `json:"log_section_changed"`
+	LogSections       []string          `json:"log_sections"`
 }
 
 func (t *jsonLogConsumer) Consume(entry *api.LogEntry) (string, error) {
+	sectionChanged := !reflect.DeepEqual(t.PreviousSectionStack, entry.SectionStack)
 	msg := JSONMessage{
-		Timestamp: entry.Timestamp,
-		Message:   entry.Message,
-		Level:     entry.LogLevel.String(),
-		LogKey:    entry.LogKey,
-		LogValues: entry.LogValues,
+		Timestamp:         entry.Timestamp,
+		Message:           entry.Message,
+		Level:             entry.LogLevel.String(),
+		LogKey:            entry.LogKey,
+		LogValues:         entry.LogValues,
+		LogSectionChanged: sectionChanged,
+		LogSections:       entry.SectionStack,
 	}
 	bytes, err := json.Marshal(msg)
 	if err != nil {
