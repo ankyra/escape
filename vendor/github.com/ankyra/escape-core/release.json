@@ -8,7 +8,7 @@
       "README.md": "72bda3a0e4c579e06e1f459d53eb2076",
       "consumer.go": "181f5a757142e5ef338d1c94d2ac4204",
       "consumer_test.go": "e49077a8242e9e16a2b90ae6468fb886",
-      "core.go": "aa20a462cde76eef14d209f49f6bd122",
+      "core.go": "b93b1fd50d894a20be1f051b321431e8",
       "core.go.tpl": "4099a7b2c6c7798799ea2819f8cf5c27",
       "dependency.go": "824ac7f427ead64864ee36bc8431564a",
       "dependency_config.go": "c46c4ae749505ceea1a3ff4c02e670e2",
@@ -18,6 +18,14 @@
       "diff_test.go": "d79d4972a32348ed0ef1a654a3e58963",
       "docs/generate_pages.go": "b91f9ba9a39e48cf1ac86d5964842509",
       "docs/generate_stdlib_docs.go": "672a40c6b105e634e880d5447d5b30f0",
+      "docs/generated/dependencies.md": "8441bf6434d924fe0f69808d68a1cb2d",
+      "docs/generated/downloads.md": "b011e854e3797e40483d92862872d164",
+      "docs/generated/errands.md": "862fbaa5edaabccd0e7f1bf257ebfb75",
+      "docs/generated/extensions.md": "9f3ea5257f865d6bcee6e39e7cf841c7",
+      "docs/generated/input-and-output-variables.md": "96f743ace9fba65778864daeae14c9cd",
+      "docs/generated/providers-and-consumers.md": "51705ae407d4698ce5a7032280fe3d32",
+      "docs/generated/stdlib.md": "8158a304ca436ff3afd67d632f6e78e8",
+      "docs/generated/templates.md": "2a70ab1c736e2b16864717e424a8c03b",
       "docs/scripting_language.md": "79ffa91ba9dad432b9c3810b474036d8",
       "download_config.go": "e1f64beb02a3f1825d428280976d209a",
       "errand.go": "9a6714f0143390faa5644c8d6f6b735c",
@@ -144,21 +152,35 @@
    "metadata": {
       "release_metadata_api_version": "13"
    },
-   "version": "0.13.29",
+   "version": "0.13.1",
    "consumes": [],
    "downloads": null,
    "depends": [],
    "errands": {},
    "extends": [
       {
-         "release_id": "_/extension-golang-binary-v1.0.1"
+         "release_id": "_/extension-golang-binary-v1.0.0"
       }
    ],
    "inputs": [
       {
+         "id": "go_docker_image",
+         "type": "string",
+         "default": "golang:1.10.0",
+         "description": "The go Docker image to use.",
+         "visible": true,
+         "items": null,
+         "eval_before_dependencies": true,
+         "scopes": [
+            "build",
+            "deploy"
+         ]
+      },
+      {
          "id": "package_name",
          "type": "string",
          "default": "github.com/ankyra/escape-core",
+         "description": "The name of the Go package we're building",
          "visible": false,
          "items": null,
          "eval_before_dependencies": true,
@@ -168,13 +190,50 @@
          ]
       },
       {
-         "id": "escape_go_dependencies",
-         "type": "list",
-         "default": [],
+         "id": "binary_name",
+         "type": "string",
+         "default": "",
+         "description": "The name of the produced binary.",
          "visible": false,
-         "options": {
-            "string": true
-         },
+         "items": null,
+         "eval_before_dependencies": true,
+         "scopes": [
+            "build",
+            "deploy"
+         ]
+      },
+      {
+         "id": "build_command",
+         "type": "string",
+         "default": "go build \u0026\u0026 go run docs/generate_stdlib_docs.go \u0026\u0026 go run docs/generate_pages.go",
+         "description": "Setting this overrides the default build command.",
+         "visible": false,
+         "items": null,
+         "eval_before_dependencies": true,
+         "scopes": [
+            "build",
+            "deploy"
+         ]
+      },
+      {
+         "id": "test_command",
+         "type": "string",
+         "default": "go test -cover -v $(/usr/local/go/bin/go list ./... | grep -v docs )",
+         "description": "Setting this overrides the default test command.",
+         "visible": false,
+         "items": null,
+         "eval_before_dependencies": true,
+         "scopes": [
+            "build",
+            "deploy"
+         ]
+      },
+      {
+         "id": "go_vendor_path",
+         "type": "string",
+         "default": "vendor/",
+         "description": "The location of the vendor directory (used for escape_go_dependencies)",
+         "visible": false,
          "items": null,
          "eval_before_dependencies": true,
          "scopes": [
@@ -188,6 +247,7 @@
          "default": [
             "docs/generated:docs/"
          ],
+         "description": "Copy files and directories out of the Docker volume into the current\ndirectory after the build has completed. The format is `SRC:DEST`.  For\nexample: \n- README.md:file_in_root.txt\n",
          "visible": false,
          "items": null,
          "eval_before_dependencies": true,
@@ -197,22 +257,14 @@
          ]
       },
       {
-         "id": "build_command",
-         "type": "string",
-         "default": "go build \u0026\u0026 go run docs/generate_stdlib_docs.go \u0026\u0026 go run docs/generate_pages.go",
+         "id": "escape_go_dependencies",
+         "type": "list",
+         "default": [],
+         "description": "Copy Escape dependencies into the $go_vendor_path directory before building.\nThe format is `DEP:DEST`.  For example: \n- _/escape-core:github.com/ankyra/escape-core\n",
          "visible": false,
-         "items": null,
-         "eval_before_dependencies": true,
-         "scopes": [
-            "build",
-            "deploy"
-         ]
-      },
-      {
-         "id": "test_command",
-         "type": "string",
-         "default": "go test -cover -v $(/usr/local/go/bin/go list ./... | grep -v docs )",
-         "visible": false,
+         "options": {
+            "string": true
+         },
          "items": null,
          "eval_before_dependencies": true,
          "scopes": [
@@ -225,8 +277,14 @@
    "project": "_",
    "provides": [],
    "stages": {
+      "build": {
+         "script": "deps/_/extension-golang-binary/build.sh"
+      },
       "pre_build": {
          "script": "prebuild.sh"
+      },
+      "test": {
+         "script": "deps/_/extension-golang-binary/test.sh"
       }
    },
    "templates": [
@@ -237,11 +295,14 @@
             "build"
          ],
          "mapping": {
+            "binary_name": "$this.inputs.binary_name",
             "branch": "$this.branch",
             "build_command": "$this.inputs.build_command",
             "copy_files_after_build": "$this.inputs.copy_files_after_build",
             "description": "$this.description",
             "escape_go_dependencies": "$this.inputs.escape_go_dependencies",
+            "go_docker_image": "$this.inputs.go_docker_image",
+            "go_vendor_path": "$this.inputs.go_vendor_path",
             "id": "$this.id",
             "logo": "$this.logo",
             "metadata_api_version": "$this.metadata.release_metadata_api_version",
