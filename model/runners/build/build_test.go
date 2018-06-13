@@ -21,6 +21,7 @@ import (
 
 	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/state"
+	"github.com/ankyra/escape-core/variables"
 	"github.com/ankyra/escape/model"
 	"github.com/ankyra/escape/model/runners"
 	. "gopkg.in/check.v1"
@@ -31,6 +32,18 @@ func (s *testSuite) Test_BuildRunner_no_script_defined(c *C) {
 	runCtx := getRunContext(c, "testdata/escape_state", "testdata/build_plan.yml")
 	c.Assert(NewBuildRunner().Run(runCtx), IsNil)
 	checkStatus(c, runCtx, state.OK)
+}
+
+func (s *testSuite) Test_BuildRunner_sets_output(c *C) {
+	os.RemoveAll("testdata/escape_state")
+	runCtx := getRunContext(c, "testdata/escape_state", "testdata/build_plan.yml")
+	output, err := variables.NewVariableFromString("test_output", "string")
+	c.Assert(err, IsNil)
+	output.Default = "output"
+	runCtx.GetReleaseMetadata().AddOutputVariable(output)
+	c.Assert(NewBuildRunner().Run(runCtx), IsNil)
+	checkStatus(c, runCtx, state.OK)
+	checkOutput(c, runCtx, "test_output", "output")
 }
 
 func (s *testSuite) Test_BuildRunner_missing_test_file(c *C) {
@@ -86,6 +99,13 @@ func (s *testSuite) Test_BuildRunner_has_access_to_previous_outputs(c *C) {
 func checkStatus(c *C, runCtx *runners.RunnerContext, code state.StatusCode) {
 	deploymentState := runCtx.GetDeploymentState()
 	c.Assert(deploymentState.GetStatus(Stage).Code, Equals, state.StatusCode(code))
+}
+
+func checkOutput(c *C, runCtx *runners.RunnerContext, key string, value interface{}) {
+	deploymentState := runCtx.GetDeploymentState()
+	stage := deploymentState.GetStageOrCreateNew(Stage)
+	outputs := stage.Outputs
+	c.Assert(outputs[key], DeepEquals, value)
 }
 
 func getRunContext(c *C, stateFile, escapePlan string) *runners.RunnerContext {
