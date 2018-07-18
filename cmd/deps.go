@@ -48,5 +48,5 @@ var depsFetchCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(depsCmd)
 	depsCmd.AddCommand(depsFetchCmd)
-	setEscapePlanLocationFlag(depsCmd)
+	setEscapePlanLocationFlag(depsFetchCmd)
 }
