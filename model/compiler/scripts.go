@@ -117,6 +117,9 @@ func setStage(ctx *CompilerContext, field string, script interface{}) error {
 		if err != nil {
 			return err
 		}
+		if returnedStage.RelativeScript != "" {
+			ctx.AddFileDigest(returnedStage.RelativeScript)
+		}
 		stage = returnedStage
 	default:
 		return fmt.Errorf("Expecting dict or string type. Got '%T'", script)
