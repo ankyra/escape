@@ -54,12 +54,12 @@ var showDeploymentCmd = &cobra.Command{
 	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if deployment == "" {
-			if err := ProcessFlagsForContext(true); err != nil {
+			if err := ProcessFlagsForContextAndLoadEscapePlan(); err != nil {
 				return err
 			}
 			return controllers.StateController{}.ShowDeployment(context, context.GetRootDeploymentName())
 		}
-		if err := ProcessFlagsForContext(false); err != nil {
+		if err := ProcessFlagsForContext(); err != nil {
 			return err
 		}
 		return controllers.StateController{}.ShowDeployment(context, deployment)
@@ -71,7 +71,7 @@ var showProvidersCmd = &cobra.Command{
 	Short:   "Show the providers available in the environment",
 	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := ProcessFlagsForContext(false); err != nil {
+		if err := ProcessFlagsForContext(); err != nil {
 			return err
 		}
 		result := controllers.StateController{}.ShowProviders(context)
@@ -85,7 +85,7 @@ var createStateCmd = &cobra.Command{
 	Short: "Create state for the given escape plan",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		useEscapePlan := len(args) == 0
-		if err := ProcessFlagsForContext(useEscapePlan); err != nil {
+		if err := processFlagsForContext(useEscapePlan, ""); err != nil {
 			return err
 		}
 		stage := "build"

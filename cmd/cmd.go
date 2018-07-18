@@ -39,7 +39,18 @@ func LoadState() error {
 	return context.LoadLocalState(state, environment, useProfileState)
 }
 
-func ProcessFlagsForContext(loadLocalEscapePlan bool) error {
+func ProcessFlagsForContextAndLoadEscapePlanWithVersionOverride(versionOverride string) error {
+	return processFlagsForContext(true, versionOverride)
+}
+
+func ProcessFlagsForContextAndLoadEscapePlan() error {
+	return processFlagsForContext(true, "")
+}
+func ProcessFlagsForContext() error {
+	return processFlagsForContext(false, "")
+}
+
+func processFlagsForContext(loadLocalEscapePlan bool, versionOverride string) error {
 	if environment == "" {
 		return fmt.Errorf("Missing 'environment'")
 	}
@@ -49,6 +60,9 @@ func ProcessFlagsForContext(loadLocalEscapePlan bool) error {
 	if loadLocalEscapePlan {
 		if err := context.LoadEscapePlan(escapePlanLocation); err != nil {
 			return err
+		}
+		if versionOverride != "" {
+			context.GetEscapePlan().Version = versionOverride
 		}
 		if err := context.CompileEscapePlan(); err != nil {
 			return err

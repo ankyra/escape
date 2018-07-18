@@ -67,7 +67,7 @@ var diffCmd = &cobra.Command{
 	Short:   "Diff compiled Escape plan against latest version",
 	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := ProcessFlagsForContext(true); err != nil {
+		if err := ProcessFlagsForContextAndLoadEscapePlan(); err != nil {
 			return err
 		}
 		return controllers.PlanController{}.Diff(context)
@@ -92,7 +92,7 @@ var previewCmd = &cobra.Command{
 	Short:   "Preview the Escape plan",
 	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := ProcessFlagsForContext(true); err != nil {
+		if err := ProcessFlagsForContextAndLoadEscapePlan(); err != nil {
 			return err
 		}
 
