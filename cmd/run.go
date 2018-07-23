@@ -70,7 +70,7 @@ var runConvergeCmd = &cobra.Command{
 	Short:   "Bring the environment into its desired state",
 	PreRunE: NoExtraArgsPreRunE,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := ProcessFlagsForContextAndLoadEscapePlan(); err != nil {
+		if err := ProcessFlagsForContext(); err != nil {
 			return err
 		}
 		return controllers.ConvergeController{}.Converge(context, refresh)
@@ -82,7 +82,7 @@ var runDeployCmd = &cobra.Command{
 	Short: "Deploy a release unit.",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		loadLocalEscapePlan := len(args) == 0
-		if err := ProcessFlagsForContextAndLoadEscapePlan(); err != nil {
+		if err := processFlagsForContext(loadLocalEscapePlan, ""); err != nil {
 			return err
 		}
 
