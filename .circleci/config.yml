@@ -3,7 +3,7 @@ version: 2
 jobs:
   build:
     docker:
-    - image: ankyra/escape:latest
+    - image: ankyra/escape:v0.25.23
 
     steps:
     - checkout
