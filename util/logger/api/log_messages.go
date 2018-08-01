@@ -319,6 +319,11 @@ var LogMessages = map[string]map[string]string{
 		"level":    "error",
 		"collapse": "false",
 	},
+	"info": map[string]string{
+		"msg":      "{{ .message }}",
+		"level":    "info",
+		"collapse": "false",
+	},
 	"fetch.download_from_gcs": map[string]string{
 		"msg":   "Downloading {{ .release }} from {{ .gcs_path }} into {{ .target_dir }}.",
 		"level": "info",
