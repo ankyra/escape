@@ -64,12 +64,12 @@ func NewDependencyRunner(logKey, stage string, depRunner func() Runner, errorCod
 func NewProviderActivationRunner(stage string) Runner {
 	return NewRunner(func(ctx *RunnerContext) error {
 		metadata := ctx.GetReleaseMetadata()
+		if err := ctx.deploymentState.ConfigureProviders(metadata, stage, nil); err != nil {
+			return err
+		}
 		for _, consume := range metadata.Consumes {
 			if consume.InScope(stage) {
-				ctx.Logger().Log("provider.activate", map[string]string{
-					"variable": consume.VariableName,
-					"consumes": consume.Name,
-				})
+				return runProvider(stage, "activate", ctx, consume)
 			}
 		}
 		return nil
@@ -79,16 +79,41 @@ func NewProviderActivationRunner(stage string) Runner {
 func NewProviderDeactivationRunner(stage string) Runner {
 	return NewRunner(func(ctx *RunnerContext) error {
 		metadata := ctx.GetReleaseMetadata()
+		if err := ctx.deploymentState.ConfigureProviders(metadata, stage, nil); err != nil {
+			return err
+		}
 		for _, consume := range metadata.Consumes {
 			if consume.InScope(stage) {
-				ctx.Logger().Log("provider.deactivate", map[string]string{
-					"variable": consume.VariableName,
-					"consumes": consume.Name,
-				})
+				return runProvider(stage, "deactivate", ctx, consume)
 			}
 		}
 		return nil
 	})
+}
+
+func runProvider(stage, action string, ctx *RunnerContext, consume *core.ConsumerConfig) error {
+	ctx.Logger().Log("provider."+action, map[string]string{
+		"variable": consume.VariableName,
+		"consumes": consume.Name,
+	})
+	deploymentName := ctx.deploymentState.GetStageOrCreateNew(stage).Providers[consume.VariableName]
+	depl, found := ctx.environmentState.Deployments[deploymentName]
+	if !found {
+		return fmt.Errorf("Deployment %s which is the configured provider for '%s' ($%s) could not be found",
+			deploymentName, consume.Name, consume.VariableName)
+	}
+	releaseId := depl.GetReleaseId("deploy")
+	ctx.Logger().PushSection("Provider " + releaseId + ", implements " + consume.Name)
+	ctx.Logger().PushRelease(releaseId)
+
+	// TODO: move into provider directory
+	// TODO: prepare a ScriptRunner
+	// TODO: call activate/deactivate script
+	// TODO: skip if script is not set
+
+	ctx.Logger().PopRelease()
+	ctx.Logger().PopSection()
+	return nil
 }
 
 func runDependency(ctx *RunnerContext, depCfg *core.DependencyConfig, logKey, stage string, runner Runner, parentInputs map[string]interface{}) error {
