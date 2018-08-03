@@ -84,3 +84,5 @@ post_destroy:
   - run
   - nginx
   cmd: docker
+activate_provider: activate.sh
+deactivate_provider: deactivate.sh

@@ -152,10 +152,13 @@ type EscapePlan struct {
 	// and output variables.
 	PostBuild interface{} `yaml:"post_build,omitempty"`
 
-	// Test script.
+	// Test script.  Generally run after a build as part of the release
+	// process, but can be triggered separately using `escape run test`.  The
+	// script has access to all the build scoped input and output variables.
 	Test interface{} `yaml:"test,omitempty"`
 
-	// Deploy script.
+	// Deploy script. The script has access to the deployment input variables,
+	// and can define outputs by writing a JSON object to .escape/outputs.json.
 	Deploy interface{} `yaml:"deploy,omitempty"`
 
 	// Pre-deploy script. The script has access to all the deploy scoped input
@@ -165,6 +168,17 @@ type EscapePlan struct {
 	// Post-deploy script. The script has access to all the deploy scoped input
 	// and output variables.
 	PostDeploy interface{} `yaml:"post_deploy,omitempty"`
+
+	// Activate provider script. This script is run when this release is being
+	// consumed as a provider by another release during a build or deployment.
+	// The script has access to all the deploy scoped input and output
+	// variables.
+	ActivateProvider interface{} `yaml:"activate_provider,omitempty"`
+
+	// Deactive provider script. This script is run when this release is being
+	// done being consumed by another release using it as a provider. The
+	// script has access to all the deploy scoped input and output variables.
+	DeactivateProvider interface{} `yaml:"deactivate_provider,omitempty"`
 
 	// Smoke script.
 	Smoke interface{} `yaml:"smoke,omitempty"`

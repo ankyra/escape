@@ -89,6 +89,8 @@ deploy: deploy.sh
 post_deploy: post_deploy.sh
 pre_destroy: pre_destroy.sh
 destroy: destroy.sh
+activate_provider: activate.sh
+deactivate_provider: deactivate.sh
 post_destroy:
   cmd: docker
   args:

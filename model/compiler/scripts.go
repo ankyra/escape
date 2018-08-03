@@ -52,6 +52,8 @@ func compileScripts(ctx *CompilerContext) error {
 		[]interface{}{"post_destroy", plan.PostDestroy},
 		[]interface{}{"test", plan.Test},
 		[]interface{}{"smoke", plan.Smoke},
+		[]interface{}{"activate_provider", plan.ActivateProvider},
+		[]interface{}{"deactivate_provider", plan.DeactivateProvider},
 	}
 	for _, script := range cases {
 		if err := setStage(ctx, script[0].(string), script[1]); err != nil {
