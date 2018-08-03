@@ -61,6 +61,36 @@ func NewDependencyRunner(logKey, stage string, depRunner func() Runner, errorCod
 	})
 }
 
+func NewProviderActivationRunner(stage string) Runner {
+	return NewRunner(func(ctx *RunnerContext) error {
+		metadata := ctx.GetReleaseMetadata()
+		for _, consume := range metadata.Consumes {
+			if consume.InScope(stage) {
+				ctx.Logger().Log("provider.activate", map[string]string{
+					"variable": consume.VariableName,
+					"consumes": consume.Name,
+				})
+			}
+		}
+		return nil
+	})
+}
+
+func NewProviderDeactivationRunner(stage string) Runner {
+	return NewRunner(func(ctx *RunnerContext) error {
+		metadata := ctx.GetReleaseMetadata()
+		for _, consume := range metadata.Consumes {
+			if consume.InScope(stage) {
+				ctx.Logger().Log("provider.deactivate", map[string]string{
+					"variable": consume.VariableName,
+					"consumes": consume.Name,
+				})
+			}
+		}
+		return nil
+	})
+}
+
 func runDependency(ctx *RunnerContext, depCfg *core.DependencyConfig, logKey, stage string, runner Runner, parentInputs map[string]interface{}) error {
 	dependency := depCfg.ReleaseId
 	ctx.Logger().PushSection("Dependency " + dependency)

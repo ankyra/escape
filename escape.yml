@@ -1,5 +1,5 @@
 name: escape
-version: 0.25.@
+version: 0.26.@
 description: |
   The Escape client. This release includes the source and one binary for
   Linux/AMD64.  For full documentation see https://escape.ankyra.io/docs/

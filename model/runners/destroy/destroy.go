@@ -23,9 +23,11 @@ import (
 
 func NewDestroyRunner(stage string) Runner {
 	return NewCompoundRunner(
+		NewProviderActivationRunner(stage),
 		NewPreDestroyRunner(stage),
 		NewMainDestroyRunner(stage),
 		NewPostDestroyRunner(stage),
+		NewProviderDeactivationRunner(stage),
 	)
 }
 

@@ -42,10 +42,12 @@ func NewTestRunner() Runner {
 
 func NewBuildRunner() Runner {
 	return NewCompoundRunner(
+		NewProviderActivationRunner(Stage),
 		NewDependencyRunner(deploy.Stage, Stage, deploy.NewDeployRunner, state.Failure),
 		NewPreBuildRunner(),
 		NewMainBuildRunner(),
 		NewPostBuildRunner(),
 		NewStatusCodeRunner(Stage, state.OK),
+		NewProviderDeactivationRunner(Stage),
 	)
 }
