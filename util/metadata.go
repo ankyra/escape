@@ -1,3 +1,3 @@
 package util
 
-const EscapeVersion = "0.26.0"
+const EscapeVersion = "0.26.2"

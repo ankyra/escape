@@ -118,6 +118,21 @@ func (r *RunnerContext) GetScriptEnvironmentForPreDependencyStep(stage string) (
 	return state.ToScriptEnvironmentForDependencyStep(r.GetDeploymentState(), r.GetReleaseMetadata(), stage, r.context)
 }
 
+func (r *RunnerContext) NewContextForProvider(stage string, depl *state.DeploymentState, metadata *core.ReleaseMetadata) (*RunnerContext, error) {
+
+	return &RunnerContext{
+		environmentState:    r.environmentState,
+		deploymentState:     depl,
+		path:                r.path.NewPathForDependency(metadata),
+		releaseMetadata:     metadata,
+		logger:              r.logger,
+		inputs:              r.inputs,
+		outputs:             r.outputs,
+		context:             r.context,
+		toScriptEnvironment: r.toScriptEnvironment,
+	}, depl.ConfigureProviders(metadata, "deploy", nil)
+}
+
 func (r *RunnerContext) NewContextForDependency(stage, deploymentName string, metadata *core.ReleaseMetadata, consumerMapping map[string]string) (*RunnerContext, error) {
 	depl, err := r.deploymentState.GetDeploymentOrMakeNew(stage, deploymentName)
 	if err != nil {

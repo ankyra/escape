@@ -92,11 +92,6 @@ func NewProviderDeactivationRunner(stage string) Runner {
 }
 
 func runProvider(stage, action string, ctx *RunnerContext, consume *core.ConsumerConfig) error {
-	ctx.Logger().Log("provider."+action, map[string]string{
-		"variable": consume.VariableName,
-		"consumes": consume.Name,
-	})
-	fmt.Println(ctx.deploymentState.Name)
 	deploymentPath := ctx.deploymentState.GetStageOrCreateNew(stage).Providers[consume.VariableName]
 
 	depl, err := ctx.environmentState.ResolveDeploymentPath(ctx.deploymentState.GetRootDeploymentStage(), deploymentPath)
@@ -105,13 +100,56 @@ func runProvider(stage, action string, ctx *RunnerContext, consume *core.Consume
 			consume.Name, consume.VariableName, ctx.deploymentState.GetRootDeploymentStage(), deploymentPath, err.Error())
 	}
 	releaseId := depl.GetReleaseId("deploy")
-	ctx.Logger().PushSection("Provider " + releaseId + ", implements " + consume.Name)
+	ctx.Logger().PushSection("Provider " + releaseId + "($" + consume.Name + ")")
 	ctx.Logger().PushRelease(releaseId)
 
-	// TODO: move into provider directory
-	// TODO: prepare a ScriptRunner
-	// TODO: call activate/deactivate script
-	// TODO: skip if script is not set
+	// move into provider directory
+	depCfg := core.NewDependencyConfig(releaseId)
+	metadata, err := ctx.context.GetDependencyMetadata(depCfg)
+	if err != nil {
+		return err
+	}
+
+	execStage := metadata.GetExecStage(action + "_provider")
+	if execStage == nil {
+		return nil
+	}
+
+	dep, err := core.NewDependencyFromString(releaseId)
+	if err != nil {
+		return err
+	}
+	location := ctx.GetPath().UnpackedDepDirectory(dep)
+
+	ctx.Logger().Log("provider."+action, map[string]string{
+		"variable": consume.VariableName,
+		"consumes": consume.Name,
+	})
+
+	newCtx, err := ctx.NewContextForProvider(stage, depl, metadata)
+	if err != nil {
+		return err
+	}
+
+	currentDir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	if err := os.Chdir(location); err != nil {
+		return err
+	}
+	runner := NewScriptRunner(stage, action+"_provider", state.OK, state.Failure)
+	if err := runner.Run(newCtx); err != nil {
+		return err
+	}
+	if err := os.Chdir(currentDir); err != nil {
+		return err
+	}
+
+	ctx.Logger().Log("provider."+action+".finished", map[string]string{
+		"variable": consume.VariableName,
+		"consumes": consume.Name,
+	})
 
 	ctx.Logger().PopRelease()
 	ctx.Logger().PopSection()

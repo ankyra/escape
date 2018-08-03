@@ -384,6 +384,14 @@ var LogMessages = map[string]map[string]string{
 		"msg":   "Deactivating provider {{ .consumes }} (${{ .variable}})",
 		"level": "info",
 	},
+	"provider.activate.finished": map[string]string{
+		"msg":   "Activated provider {{ .consumes }} (${{ .variable}})",
+		"level": "success",
+	},
+	"provider.deactivate.finished": map[string]string{
+		"msg":   "Deactivated provider {{ .consumes }} (${{ .variable}})",
+		"level": "success",
+	},
 	"push.finished": map[string]string{
 		"msg":   "Push successful.",
 		"level": "success",
