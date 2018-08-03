@@ -37,7 +37,7 @@ var _ = Suite(&testSuite{})
 
 func (s *testSuite) Test_NewRunnerContext_fails_if_metadata_is_missing(c *C) {
 	ctx := model.NewContext()
-	_, err := NewRunnerContext(ctx, "deploy")
+	_, err := NewRunnerContext(ctx)
 	c.Assert(err, Not(IsNil))
 	c.Assert(err.Error(), Equals, "Missing metadata in context. This is a bug in Escape.")
 }
@@ -48,7 +48,7 @@ func (s *testSuite) Test_NewRunnerContext(c *C) {
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/escape_state", "dev", "testdata/plan.yml")
 	ctx.RootDeploymentName = "test-name"
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx, "deploy")
+	runCtx, err := NewRunnerContext(ctx)
 	c.Assert(runCtx, Not(IsNil))
 	c.Assert(runCtx.GetEnvironmentState(), Equals, ctx.GetEnvironmentState())
 	c.Assert(runCtx.GetReleaseMetadata(), Equals, ctx.GetReleaseMetadata())
@@ -63,7 +63,7 @@ func (s *testSuite) Test_GetScriptEnvironment_no_depends(c *C) {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/escape_state", "dev", "testdata/plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx, "deploy")
+	runCtx, err := NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
 	c.Assert(runCtx, Not(IsNil))
 	scriptEnv, err := runCtx.GetScriptEnvironment("deploy")
@@ -76,23 +76,27 @@ func (s *testSuite) Test_NewContextForDependency(c *C) {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/escape_state", "dev", "testdata/plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx, "deploy")
+	runCtx, err := NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
 	metadata := core.NewReleaseMetadata("test", "1.0")
 	consumers := map[string]string{}
-	depl, err := runCtx.deploymentState.GetDeploymentOrMakeNew("deploy",
+
+	depl, err := runCtx.deploymentState.GetDeploymentOrMakeNew("build",
 		metadata.GetVersionlessReleaseId())
+
 	c.Assert(err, IsNil)
-	depRunCtx, err := runCtx.NewContextForDependency(metadata.GetVersionlessReleaseId(), metadata, consumers)
+	depRunCtx, err := runCtx.NewContextForDependency("build", metadata.GetVersionlessReleaseId(), metadata, consumers)
 	c.Assert(err, IsNil)
 	c.Assert(depRunCtx.GetEnvironmentState(), Equals, runCtx.environmentState)
 	c.Assert(depRunCtx.GetReleaseMetadata(), Equals, metadata)
+	c.Assert(depRunCtx.deploymentState.Name, Equals, "_/test")
+	c.Assert(depRunCtx.GetRootDeploymentName(), Equals, "_/name")
 	c.Assert(depRunCtx.GetRootDeploymentName(), Equals, runCtx.GetRootDeploymentName())
+	c.Assert(depRunCtx.deploymentState.GetRootDeploymentStage(), Equals, "build")
 	c.Assert(depRunCtx.GetDeploymentState(), Equals, depl)
 	c.Assert(depRunCtx.GetPath(), DeepEquals, runCtx.path.NewPathForDependency(metadata))
 	c.Assert(depRunCtx.Logger(), Equals, runCtx.logger)
 	c.Assert(depRunCtx.context, Equals, ctx)
-	c.Assert(depRunCtx.stage, Equals, "deploy")
 }
 
 func (s *testSuite) Test_NewContextForDependency_with_consumers(c *C) {
@@ -100,7 +104,7 @@ func (s *testSuite) Test_NewContextForDependency_with_consumers(c *C) {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/escape_state", "dev", "testdata/plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx, "deploy")
+	runCtx, err := NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
 	metadata := core.NewReleaseMetadata("test", "1.0")
 	metadata.Consumes = []*core.ConsumerConfig{
@@ -109,7 +113,7 @@ func (s *testSuite) Test_NewContextForDependency_with_consumers(c *C) {
 	consumers := map[string]string{
 		"provider1": "otherdepl",
 	}
-	depRunCtx, err := runCtx.NewContextForDependency(metadata.GetVersionlessReleaseId(), metadata, consumers)
+	depRunCtx, err := runCtx.NewContextForDependency("build", metadata.GetVersionlessReleaseId(), metadata, consumers)
 	c.Assert(err, IsNil)
 	c.Assert(depRunCtx.GetDeploymentState().GetProviders("deploy")["provider1"], Equals, "otherdepl")
 }
@@ -119,7 +123,7 @@ func (s *testSuite) Test_NewContextForDependency_evaluates_consumers(c *C) {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/escape_state", "dev", "testdata/consumer_plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx, "deploy")
+	runCtx, err := NewRunnerContext(ctx)
 	runCtx.GetDeploymentState().SetProvider("deploy", "provider1", "somedepl")
 	runCtx.toScriptEnvironment = func(d *state.DeploymentState, metadata *core.ReleaseMetadata, stage string, context state.DeploymentResolver) (*script.ScriptEnvironment, error) {
 		m := map[string]script.Script{
@@ -139,7 +143,7 @@ func (s *testSuite) Test_NewContextForDependency_evaluates_consumers(c *C) {
 	consumers := map[string]string{
 		"provider1": "$provider1.deployment",
 	}
-	depRunCtx, err := runCtx.NewContextForDependency(metadata.GetVersionlessReleaseId(), metadata, consumers)
+	depRunCtx, err := runCtx.NewContextForDependency("deploy", metadata.GetVersionlessReleaseId(), metadata, consumers)
 	c.Assert(err, IsNil)
 	c.Assert(depRunCtx.GetDeploymentState().GetProviders("deploy")["provider1"], Equals, "otherdepl")
 }
@@ -149,7 +153,7 @@ func (s *testSuite) Test_NewContextForDependency_fails_if_toScriptEnviroment_fai
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/escape_state", "dev", "testdata/consumer_plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx, "deploy")
+	runCtx, err := NewRunnerContext(ctx)
 	runCtx.GetDeploymentState().SetProvider("deploy", "provider1", "somedepl")
 	runCtx.toScriptEnvironment = func(d *state.DeploymentState, metadata *core.ReleaseMetadata, stage string, context state.DeploymentResolver) (*script.ScriptEnvironment, error) {
 		env := script.NewScriptEnvironment()
@@ -162,7 +166,7 @@ func (s *testSuite) Test_NewContextForDependency_fails_if_toScriptEnviroment_fai
 	consumers := map[string]string{
 		"provider1": "$provider1.deployment",
 	}
-	_, err = runCtx.NewContextForDependency(metadata.GetVersionlessReleaseId(), metadata, consumers)
+	_, err = runCtx.NewContextForDependency("deploy", metadata.GetVersionlessReleaseId(), metadata, consumers)
 	c.Assert(err, DeepEquals, errors.New("Failed to evaluate '$provider1.deployment': Field '$' was not found in environment."))
 }
 
@@ -171,7 +175,7 @@ func (s *testSuite) Test_NewContextForDependency_fails_if_toScriptEnviroment_fai
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/escape_state", "dev", "testdata/consumer_plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx, "deploy")
+	runCtx, err := NewRunnerContext(ctx)
 	runCtx.GetDeploymentState().SetProvider("deploy", "provider1", "somedepl")
 	runCtx.toScriptEnvironment = func(d *state.DeploymentState, metadata *core.ReleaseMetadata, stage string, context state.DeploymentResolver) (*script.ScriptEnvironment, error) {
 		return nil, errors.New("Nope")
@@ -183,7 +187,7 @@ func (s *testSuite) Test_NewContextForDependency_fails_if_toScriptEnviroment_fai
 	consumers := map[string]string{
 		"provider1": "$provider1.deployment",
 	}
-	_, err = runCtx.NewContextForDependency(metadata.GetVersionlessReleaseId(), metadata, consumers)
+	_, err = runCtx.NewContextForDependency("deploy", metadata.GetVersionlessReleaseId(), metadata, consumers)
 	c.Assert(err, DeepEquals, errors.New("Nope"))
 }
 
@@ -192,14 +196,14 @@ func (s *testSuite) Test_NewContextForDependency_fails_if_missing_consumer(c *C)
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState("testdata/escape_state", "dev", "testdata/plan.yml")
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx, "deploy")
+	runCtx, err := NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
 	metadata := core.NewReleaseMetadata("test", "1.0")
 	metadata.Consumes = []*core.ConsumerConfig{
 		core.NewConsumerConfig("provider1"),
 	}
 	consumers := map[string]string{}
-	_, err = runCtx.NewContextForDependency(metadata.GetVersionlessReleaseId(), metadata, consumers)
+	_, err = runCtx.NewContextForDependency("deploy", metadata.GetVersionlessReleaseId(), metadata, consumers)
 	c.Assert(err, Not(IsNil))
 	c.Assert(err, DeepEquals, fmt.Errorf("Missing provider of type 'provider1'. This can be configured using the -p / --extra-provider flag."))
 }

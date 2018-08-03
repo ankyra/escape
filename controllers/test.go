@@ -29,7 +29,7 @@ func (TestController) Test(context Context) error {
 	context.PushLogSection("Test")
 	context.Log("test.start", nil)
 	runner := build.NewTestRunner()
-	runnerContext, err := runners.NewRunnerContext(context, "test")
+	runnerContext, err := runners.NewRunnerContext(context)
 	if err != nil {
 		return err
 	}

@@ -65,7 +65,7 @@ func (ErrandsController) Run(context Context, errandStr string, extraVars map[st
 		return fmt.Errorf("The errand '%s' could not be found in deployment '%s'. You can use 'escape errands list' to see the available errands.", errandStr, context.GetRootDeploymentName())
 	}
 	runner := errand.NewErrandRunner(errandObj, extraVars)
-	runnerContext, err := runners.NewRunnerContext(context, "deploy")
+	runnerContext, err := runners.NewRunnerContext(context)
 	if err != nil {
 		return err
 	}

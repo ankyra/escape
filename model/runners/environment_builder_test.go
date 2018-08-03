@@ -25,7 +25,7 @@ func getRunContext(c *C, stateFile, escapePlan string) *RunnerContext {
 	ctx := model.NewContext()
 	err := ctx.InitFromLocalEscapePlanAndState(stateFile, "dev", escapePlan)
 	c.Assert(err, IsNil)
-	runCtx, err := NewRunnerContext(ctx, "deploy")
+	runCtx, err := NewRunnerContext(ctx)
 	c.Assert(err, IsNil)
 	return runCtx
 }

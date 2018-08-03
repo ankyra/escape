@@ -32,7 +32,7 @@ func (DestroyController) Destroy(context Context, destroyBuild, destroyDeploymen
 	context.PushLogSection("Destroy")
 	context.Log("destroy.start", nil)
 	if destroyBuild {
-		runnerContext, err := runners.NewRunnerContext(context, "build")
+		runnerContext, err := runners.NewRunnerContext(context)
 		if err != nil {
 			return err
 		}
@@ -41,7 +41,7 @@ func (DestroyController) Destroy(context Context, destroyBuild, destroyDeploymen
 		}
 	}
 	if destroyDeployment {
-		runnerContext, err := runners.NewRunnerContext(context, "deploy")
+		runnerContext, err := runners.NewRunnerContext(context)
 		if err != nil {
 			return MarkDeploymentFailed(context, err, state.DestroyFailure)
 		}

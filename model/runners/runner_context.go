@@ -36,12 +36,11 @@ type RunnerContext struct {
 	outputs          map[string]interface{}
 	logger           api.Logger
 	context          Context
-	stage            string
 
 	toScriptEnvironment func(d *state.DeploymentState, metadata *core.ReleaseMetadata, stage string, context state.DeploymentResolver) (*script.ScriptEnvironment, error)
 }
 
-func NewRunnerContext(context Context, rootStage string) (*RunnerContext, error) {
+func NewRunnerContext(context Context) (*RunnerContext, error) {
 	metadata := context.GetReleaseMetadata()
 	if metadata == nil {
 		return nil, fmt.Errorf("Missing metadata in context. This is a bug in Escape.")
@@ -58,7 +57,6 @@ func NewRunnerContext(context Context, rootStage string) (*RunnerContext, error)
 		releaseMetadata:     metadata,
 		logger:              context.GetLogger(),
 		context:             context,
-		stage:               rootStage,
 		toScriptEnvironment: state.ToScriptEnvironment,
 	}, nil
 }
@@ -120,14 +118,14 @@ func (r *RunnerContext) GetScriptEnvironmentForPreDependencyStep(stage string) (
 	return state.ToScriptEnvironmentForDependencyStep(r.GetDeploymentState(), r.GetReleaseMetadata(), stage, r.context)
 }
 
-func (r *RunnerContext) NewContextForDependency(deploymentName string, metadata *core.ReleaseMetadata, consumerMapping map[string]string) (*RunnerContext, error) {
-	depl, err := r.deploymentState.GetDeploymentOrMakeNew(r.stage, deploymentName)
+func (r *RunnerContext) NewContextForDependency(stage, deploymentName string, metadata *core.ReleaseMetadata, consumerMapping map[string]string) (*RunnerContext, error) {
+	depl, err := r.deploymentState.GetDeploymentOrMakeNew(stage, deploymentName)
 	if err != nil {
 		return nil, err
 	}
 	depl.Release = metadata.GetVersionlessReleaseId()
 
-	scriptEnv, err := r.GetScriptEnvironment(r.stage)
+	scriptEnv, err := r.GetScriptEnvironment(stage)
 	if err != nil {
 		return nil, err
 	}
@@ -151,7 +149,6 @@ func (r *RunnerContext) NewContextForDependency(deploymentName string, metadata 
 		inputs:              r.inputs,
 		outputs:             r.outputs,
 		context:             r.context,
-		stage:               "deploy",
 		toScriptEnvironment: r.toScriptEnvironment,
 	}, depl.ConfigureProviders(metadata, "deploy", consumerMapping)
 }

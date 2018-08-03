@@ -182,6 +182,42 @@ func (s *scriptSuite) Test_ToScriptEnvironment_adds_consumers(c *C) {
 	test_helper_check_script_environment(c, dict["test"], dicts, "archive-full")
 }
 
+func (s *scriptSuite) Test_ToScriptEnvironment_adds_consumers_for_dependency(c *C) {
+	resolver := newResolverFromMap(map[string]*core.ReleaseMetadata{
+		"archive-full-v1.0": core.NewReleaseMetadata("test", "1.0"),
+		"dep-provider-v":    core.NewReleaseMetadata("test", "1.0"),
+	})
+
+	proj, err := NewProjectState("project_name")
+	c.Assert(err, IsNil)
+	environment, err := NewEnvironmentState("dev", proj)
+	c.Assert(err, IsNil)
+	superParent, err := environment.GetOrCreateDeploymentState("super")
+	c.Assert(err, IsNil)
+	parent, err := superParent.GetDeploymentOrMakeNew(BuildStage, "parent")
+	c.Assert(err, IsNil)
+	_, err = parent.GetDeploymentOrMakeNew(DeployStage, "dep-provider")
+	c.Assert(err, IsNil)
+	depConsumer, err := parent.GetDeploymentOrMakeNew(DeployStage, "dep-consumer")
+	c.Assert(err, IsNil)
+	depConsumer.SetProvider(DeployStage, "test", "super:parent:dep-provider")
+
+	metadata := core.NewReleaseMetadata("test", "1.0")
+	metadata.SetConsumes([]string{"test"})
+
+	env, err := ToScriptEnvironment(depConsumer, metadata, DeployStage, resolver)
+	c.Assert(err, IsNil)
+	c.Assert(script.IsDictAtom((*env)["$"]), Equals, true)
+	dict := script.ExpectDictAtom((*env)["$"])
+	dicts := map[string][]string{
+		"inputs":   []string{},
+		"outputs":  []string{},
+		"metadata": []string{},
+	}
+	test_helper_check_script_environment(c, dict["this"], dicts, "super:parent:dep-consumer")
+	test_helper_check_script_environment(c, dict["test"], dicts, "super:parent:dep-provider")
+}
+
 func (s *scriptSuite) Test_ToScriptEnvironment_adds_renamed_consumers(c *C) {
 	resolver := newResolverFromMap(map[string]*core.ReleaseMetadata{
 		"archive-full-v1.0": core.NewReleaseMetadata("test", "1.0"),

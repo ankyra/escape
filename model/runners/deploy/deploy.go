@@ -48,7 +48,7 @@ func NewDeployRunner() Runner {
 		NewPreDeployRunner(),
 		NewMainDeployRunner(),
 		NewPostDeployRunner(),
-		NewStatusCodeRunner(Stage, state.OK),
 		NewProviderDeactivationRunner(Stage),
+		NewStatusCodeRunner(Stage, state.OK),
 	)
 }

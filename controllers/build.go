@@ -31,7 +31,7 @@ func (BuildController) Build(context Context, buildFatPackage bool, extraVars, e
 	if err := SaveExtraInputsAndProvidersInDeploymentState(context, "build", extraVars, extraProviders); err != nil {
 		return err
 	}
-	runnerContext, err := runners.NewRunnerContext(context, "build")
+	runnerContext, err := runners.NewRunnerContext(context)
 	if err != nil {
 		return err
 	}

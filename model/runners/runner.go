@@ -45,16 +45,16 @@ func NewStatusCodeRunner(stage string, status state.StatusCode) Runner {
 	})
 }
 
-func NewDependencyRunner(logKey, stage string, depRunner func() Runner, errorCode state.StatusCode) Runner {
+func NewDependencyRunner(logKey, parentStage string, depRunner func() Runner, errorCode state.StatusCode) Runner {
 	return NewRunner(func(ctx *RunnerContext) error {
-		parentInputs, err := NewEnvironmentBuilder().GetPreDependencyInputs(ctx, stage)
+		parentInputs, err := NewEnvironmentBuilder().GetPreDependencyInputs(ctx, parentStage)
 		if err != nil {
-			return ReportFailure(ctx, stage, err, errorCode)
+			return ReportFailure(ctx, parentStage, err, errorCode)
 		}
 		metadata := ctx.GetReleaseMetadata()
 		for _, depend := range metadata.Depends {
-			if err := runDependency(ctx, depend, logKey, stage, depRunner(), parentInputs); err != nil {
-				return ReportFailure(ctx, stage, err, errorCode)
+			if err := runDependency(ctx, depend, logKey, parentStage, depRunner(), parentInputs); err != nil {
+				return ReportFailure(ctx, parentStage, err, errorCode)
 			}
 		}
 		return nil
@@ -96,11 +96,13 @@ func runProvider(stage, action string, ctx *RunnerContext, consume *core.Consume
 		"variable": consume.VariableName,
 		"consumes": consume.Name,
 	})
-	deploymentName := ctx.deploymentState.GetStageOrCreateNew(stage).Providers[consume.VariableName]
-	depl, found := ctx.environmentState.Deployments[deploymentName]
-	if !found {
-		return fmt.Errorf("Deployment %s which is the configured provider for '%s' ($%s) could not be found",
-			deploymentName, consume.Name, consume.VariableName)
+	fmt.Println(ctx.deploymentState.Name)
+	deploymentPath := ctx.deploymentState.GetStageOrCreateNew(stage).Providers[consume.VariableName]
+
+	depl, err := ctx.environmentState.ResolveDeploymentPath(ctx.deploymentState.GetRootDeploymentStage(), deploymentPath)
+	if err != nil {
+		return fmt.Errorf("Failed to load configured provider for '%s' ($%s), root stage %s, path %s: %s",
+			consume.Name, consume.VariableName, ctx.deploymentState.GetRootDeploymentStage(), deploymentPath, err.Error())
 	}
 	releaseId := depl.GetReleaseId("deploy")
 	ctx.Logger().PushSection("Provider " + releaseId + ", implements " + consume.Name)
@@ -116,18 +118,18 @@ func runProvider(stage, action string, ctx *RunnerContext, consume *core.Consume
 	return nil
 }
 
-func runDependency(ctx *RunnerContext, depCfg *core.DependencyConfig, logKey, stage string, runner Runner, parentInputs map[string]interface{}) error {
+func runDependency(ctx *RunnerContext, depCfg *core.DependencyConfig, logKey, parentStage string, runner Runner, parentInputs map[string]interface{}) error {
 	dependency := depCfg.ReleaseId
 	ctx.Logger().PushSection("Dependency " + dependency)
 	ctx.Logger().Log(logKey+"."+logKey+"_dependency", map[string]string{
 		"dependency": dependency,
 	})
 	ctx.Logger().PushRelease(dependency)
-	mapping := depCfg.GetMapping(stage)
+	mapping := depCfg.GetMapping(parentStage)
 	if mapping == nil {
-		return fmt.Errorf("Invalid stage '%s'", stage)
+		return fmt.Errorf("Invalid stage '%s'", parentStage)
 	}
-	inputs, err := NewEnvironmentBuilder().GetInputsForDependency(ctx, stage, mapping, parentInputs)
+	inputs, err := NewEnvironmentBuilder().GetInputsForDependency(ctx, parentStage, mapping, parentInputs)
 	if err != nil {
 		return err
 	}
@@ -140,7 +142,7 @@ func runDependency(ctx *RunnerContext, depCfg *core.DependencyConfig, logKey, st
 	if err != nil {
 		return err
 	}
-	depCtx, err := ctx.NewContextForDependency(depCfg.DeploymentName, metadata, depCfg.Consumes)
+	depCtx, err := ctx.NewContextForDependency(parentStage, depCfg.DeploymentName, metadata, depCfg.Consumes)
 	if err != nil {
 		return err
 	}

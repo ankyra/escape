@@ -31,7 +31,7 @@ func (SmokeController) Smoke(context Context) error {
 	context.PushLogRelease(context.GetReleaseMetadata().GetReleaseId())
 	context.PushLogSection("Smoke tests")
 	context.Log("smoke.start", nil)
-	runnerContext, err := runners.NewRunnerContext(context, "build")
+	runnerContext, err := runners.NewRunnerContext(context)
 	if err != nil {
 		return MarkDeploymentFailed(context, err, state.TestFailure)
 	}

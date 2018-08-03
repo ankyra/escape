@@ -60,7 +60,7 @@ func (d DeployController) Deploy(context Context, extraVars, extraProviders map[
 	if err := SaveExtraInputsAndProvidersInDeploymentState(context, "deploy", extraVars, extraProviders); err != nil {
 		return MarkDeploymentFailed(context, err, state.Failure)
 	}
-	runnerContext, err := runners.NewRunnerContext(context, "deploy")
+	runnerContext, err := runners.NewRunnerContext(context)
 	if err != nil {
 		return MarkDeploymentFailed(context, err, state.Failure)
 	}
