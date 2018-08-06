@@ -89,7 +89,7 @@ func NewProviderActivationRunner(stage string) Runner {
 					return err
 				}
 				// Activate the provider's providers
-				if err := NewProviderActivationRunner(stage).Run(newCtx); err != nil {
+				if err := NewProviderActivationRunner("deploy").Run(newCtx); err != nil {
 					return err
 				}
 				if err := runProviderForDeployment("activate", ctx, consume, depl, metadata); err != nil {
@@ -132,7 +132,7 @@ func NewProviderDeactivationRunner(stage string) Runner {
 					return err
 				}
 				// Deactivate the provider's providers
-				if err := NewProviderDeactivationRunner(stage).Run(newCtx); err != nil {
+				if err := NewProviderDeactivationRunner("deploy").Run(newCtx); err != nil {
 					return err
 				}
 				ctx.Logger().PopRelease()
