@@ -147,6 +147,7 @@ func (r *RunnerContext) NewContextForDependency(stage, deploymentName string, me
 	if err != nil {
 		return nil, err
 	}
+	compiledConsumerMapping := map[string]string{}
 	for iface, providerDepl := range consumerMapping {
 		val, err := script.ParseAndEvalToGoValue(providerDepl, scriptEnv)
 		if err != nil {
@@ -156,7 +157,8 @@ func (r *RunnerContext) NewContextForDependency(stage, deploymentName string, me
 		if !ok {
 			return nil, fmt.Errorf("Expecting string for provider mapping '%s', but got '%v'", iface, val)
 		}
-		consumerMapping[iface] = valStr
+		fmt.Printf("Mapped provider %s %s %s\n", iface, providerDepl, valStr)
+		compiledConsumerMapping[iface] = valStr
 	}
 	return &RunnerContext{
 		environmentState:    r.environmentState,
@@ -168,5 +170,5 @@ func (r *RunnerContext) NewContextForDependency(stage, deploymentName string, me
 		outputs:             r.outputs,
 		context:             r.context,
 		toScriptEnvironment: r.toScriptEnvironment,
-	}, depl.ConfigureProviders(metadata, "deploy", consumerMapping)
+	}, depl.ConfigureProviders(metadata, "deploy", compiledConsumerMapping)
 }
