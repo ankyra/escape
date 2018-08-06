@@ -119,9 +119,25 @@ func NewProviderDeactivationRunner(stage string) Runner {
 				if err != nil {
 					return err
 				}
-				return runProviderForDeployment("deactivate", ctx, consume, depl, metadata)
+
+				releaseId := depl.GetReleaseId("deploy")
+				ctx.Logger().PushSection("Provider " + releaseId + " ($" + consume.Name + ")")
+				ctx.Logger().PushRelease(releaseId)
+
+				if err := runProviderForDeployment("deactivate", ctx, consume, depl, metadata); err != nil {
+					return err
+				}
+				newCtx, err := ctx.NewContextForProvider(depl, metadata)
+				if err != nil {
+					return err
+				}
+				// Deactivate the provider's providers
+				if err := NewProviderDeactivationRunner(stage).Run(newCtx); err != nil {
+					return err
+				}
+				ctx.Logger().PopRelease()
+				ctx.Logger().PopSection()
 			}
-			// TODO: recursively deactivate the provider's providers
 		}
 		return nil
 	})
