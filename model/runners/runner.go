@@ -103,7 +103,6 @@ func runProvider(stage, action string, ctx *RunnerContext, consume *core.Consume
 	ctx.Logger().PushSection("Provider " + releaseId + "($" + consume.Name + ")")
 	ctx.Logger().PushRelease(releaseId)
 
-	// move into provider directory
 	depCfg := core.NewDependencyConfig(releaseId)
 	metadata, err := ctx.context.GetDependencyMetadata(depCfg)
 	if err != nil {
@@ -126,7 +125,7 @@ func runProvider(stage, action string, ctx *RunnerContext, consume *core.Consume
 		"consumes": consume.Name,
 	})
 
-	newCtx, err := ctx.NewContextForProvider(stage, depl, metadata)
+	newCtx, err := ctx.NewContextForProvider(depl, metadata)
 	if err != nil {
 		return err
 	}
@@ -138,7 +137,7 @@ func runProvider(stage, action string, ctx *RunnerContext, consume *core.Consume
 	if err := os.Chdir(location); err != nil {
 		return err
 	}
-	runner := NewScriptRunner(stage, action+"_provider", state.OK, state.Failure)
+	runner := NewScriptRunner("deploy", action+"_provider", state.OK, state.Failure)
 	if err := runner.Run(newCtx); err != nil {
 		return err
 	}
