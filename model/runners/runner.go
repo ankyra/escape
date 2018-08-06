@@ -75,7 +75,7 @@ func NewProviderActivationRunner(stage string) Runner {
 					return err
 				}
 
-				metadata, err := depl.GetReleaseMetadata(stage, ctx.context.GetDependencyMetadata)
+				metadata, err := depl.GetReleaseMetadata("deploy", ctx.context.GetDependencyMetadata)
 				if err != nil {
 					return err
 				}
@@ -115,7 +115,7 @@ func NewProviderDeactivationRunner(stage string) Runner {
 				if err != nil {
 					return err
 				}
-				metadata, err := depl.GetReleaseMetadata(stage, ctx.context.GetDependencyMetadata)
+				metadata, err := depl.GetReleaseMetadata("deploy", ctx.context.GetDependencyMetadata)
 				if err != nil {
 					return err
 				}
