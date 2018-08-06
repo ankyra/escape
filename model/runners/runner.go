@@ -8,6 +8,7 @@ import (
 	"github.com/ankyra/escape-core/state"
 	"github.com/ankyra/escape/model"
 	"github.com/ankyra/escape/model/paths"
+	"github.com/ankyra/escape/util"
 )
 
 type Runner interface {
@@ -186,8 +187,10 @@ func runProviderForDeployment(action string, ctx *RunnerContext, consume *core.C
 	if err != nil {
 		return err
 	}
-	if err := model.EnsurePackageIsUnpacked(ctx.context, releaseId); err != nil {
-		return err
+	if !util.PathExists(location) {
+		if err := model.EnsurePackageIsUnpacked(ctx.context, releaseId); err != nil {
+			return err
+		}
 	}
 	if err := os.Chdir(location); err != nil {
 		return err
