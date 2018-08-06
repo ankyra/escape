@@ -17,7 +17,7 @@ limitations under the License.
 package controllers
 
 import (
-	core "github.com/ankyra/escape-core"
+	"github.com/ankyra/escape/model"
 	. "github.com/ankyra/escape/model/interfaces"
 )
 
@@ -25,18 +25,7 @@ type PullController struct{}
 
 func (PullController) PullReleases(context Context, packages []string) error {
 	for _, pkg := range packages {
-		depCfg := core.NewDependencyConfig(pkg)
-		if err := depCfg.EnsureConfigIsParsed(); err != nil {
-			return err
-		}
-		if depCfg.NeedsResolving() {
-			metadata, err := context.QueryReleaseMetadata(depCfg)
-			if err != nil {
-				return err
-			}
-			depCfg = core.NewDependencyConfig(metadata.GetQualifiedReleaseId())
-		}
-		if _, err := context.GetDependencyMetadata(depCfg); err != nil {
+		if err := model.EnsurePackageIsUnpacked(context, pkg); err != nil {
 			return err
 		}
 	}

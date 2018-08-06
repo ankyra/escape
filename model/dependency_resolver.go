@@ -22,6 +22,7 @@ import (
 	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape/model/config"
 	"github.com/ankyra/escape/model/dependency_resolvers"
+	"github.com/ankyra/escape/model/interfaces"
 	"github.com/ankyra/escape/model/paths"
 )
 
@@ -105,4 +106,33 @@ func escapeServerReleaseFetcherStrategy(cfg *config.EscapeConfig, path *paths.Pa
 		return false, err
 	}
 	return archiveReleaseFetcherStrategy(cfg, path, dep)
+}
+
+func EnsurePackageIsUnpacked(context interfaces.Context, pkg string) error {
+	depCfg := core.NewDependencyConfig(pkg)
+	if err := depCfg.EnsureConfigIsParsed(); err != nil {
+		return err
+	}
+	if depCfg.NeedsResolving() {
+		metadata, err := context.QueryReleaseMetadata(depCfg)
+		if err != nil {
+			return err
+		}
+		depCfg = core.NewDependencyConfig(metadata.GetQualifiedReleaseId())
+	}
+	context.Log("fetch.start", map[string]string{"dependency": pkg})
+	err := DependencyResolver{}.Resolve(context.GetEscapeConfig(), []*core.DependencyConfig{depCfg})
+	if err != nil {
+		return err
+	}
+	dep, err := core.NewDependencyFromString(pkg)
+	if err != nil {
+		return err
+	}
+	unpacked := paths.NewPath().UnpackedDepDirectoryReleaseMetadata(dep)
+	context.Log("fetch.finished", map[string]string{"dependency": pkg})
+	if _, err := core.NewReleaseMetadataFromFile(unpacked); err != nil {
+		return err
+	}
+	return nil
 }

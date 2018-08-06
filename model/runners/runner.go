@@ -6,6 +6,7 @@ import (
 
 	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/state"
+	"github.com/ankyra/escape/model"
 	"github.com/ankyra/escape/model/paths"
 )
 
@@ -183,6 +184,9 @@ func runProviderForDeployment(action string, ctx *RunnerContext, consume *core.C
 
 	currentDir, err := os.Getwd()
 	if err != nil {
+		return err
+	}
+	if err := model.EnsurePackageIsUnpacked(ctx.context, releaseId); err != nil {
 		return err
 	}
 	if err := os.Chdir(location); err != nil {
