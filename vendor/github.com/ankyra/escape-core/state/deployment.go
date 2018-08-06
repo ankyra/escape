@@ -160,6 +160,14 @@ func (d *DeploymentState) UpdateOutputs(stage string, outputs map[string]interfa
 	return d.Save()
 }
 
+type DependencyResolver func(*core.DependencyConfig) (*core.ReleaseMetadata, error)
+
+func (d *DeploymentState) GetReleaseMetadata(stage string, resolver DependencyResolver) (*core.ReleaseMetadata, error) {
+	releaseId := d.GetReleaseId(stage)
+	depCfg := core.NewDependencyConfig(releaseId)
+	return resolver(depCfg)
+}
+
 func (d *DeploymentState) CommitVersion(stage string, metadata *core.ReleaseMetadata) error {
 	d.GetStageOrCreateNew(stage).SetVersion(metadata.Version)
 	d.GetStageOrCreateNew(stage).Provides = metadata.GetProvides()

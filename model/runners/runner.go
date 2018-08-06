@@ -69,7 +69,34 @@ func NewProviderActivationRunner(stage string) Runner {
 		}
 		for _, consume := range metadata.Consumes {
 			if consume.InScope(stage) {
-				return runProvider(stage, "activate", ctx, consume)
+
+				depl, err := getProviderDeployment(stage, ctx, consume)
+				if err != nil {
+					return err
+				}
+
+				metadata, err := depl.GetReleaseMetadata(stage, ctx.context.GetDependencyMetadata)
+				if err != nil {
+					return err
+				}
+
+				releaseId := depl.GetReleaseId("deploy")
+				ctx.Logger().PushSection("Provider " + releaseId + " ($" + consume.Name + ")")
+				ctx.Logger().PushRelease(releaseId)
+
+				newCtx, err := ctx.NewContextForProvider(depl, metadata)
+				if err != nil {
+					return err
+				}
+				// Activate the provider's providers
+				if err := NewProviderActivationRunner(stage).Run(newCtx); err != nil {
+					return err
+				}
+				if err := runProviderForDeployment("activate", ctx, consume, depl, metadata); err != nil {
+					return err
+				}
+				ctx.Logger().PopRelease()
+				ctx.Logger().PopSection()
 			}
 		}
 		return nil
@@ -84,32 +111,40 @@ func NewProviderDeactivationRunner(stage string) Runner {
 		}
 		for _, consume := range metadata.Consumes {
 			if consume.InScope(stage) {
-				return runProvider(stage, "deactivate", ctx, consume)
+				depl, err := getProviderDeployment(stage, ctx, consume)
+				if err != nil {
+					return err
+				}
+				metadata, err := depl.GetReleaseMetadata(stage, ctx.context.GetDependencyMetadata)
+				if err != nil {
+					return err
+				}
+				return runProviderForDeployment("deactivate", ctx, consume, depl, metadata)
 			}
+			// TODO: recursively deactivate the provider's providers
 		}
 		return nil
 	})
 }
 
-func runProvider(stage, action string, ctx *RunnerContext, consume *core.ConsumerConfig) error {
-	deploymentPath := ctx.deploymentState.GetStageOrCreateNew(stage).Providers[consume.VariableName]
-
+func getProviderDeployment(stage string, ctx *RunnerContext, consume *core.ConsumerConfig) (*state.DeploymentState, error) {
+	deploymentPath, found := ctx.deploymentState.GetStageOrCreateNew(stage).Providers[consume.VariableName]
+	if !found {
+		return nil, fmt.Errorf("Missing provider of type '%s' ($%s) in %s %s. Escape should have already caught this before so this is a definite bug. Please raise.", consume.Name, consume.VariableName,
+			ctx.deploymentState.Name, stage)
+	}
 	depl, err := ctx.environmentState.ResolveDeploymentPath(ctx.deploymentState.GetRootDeploymentStage(), deploymentPath)
 	if err != nil {
-		return fmt.Errorf("Failed to load configured provider for '%s' ($%s), root stage %s, path %s: %s",
+		return nil, fmt.Errorf("Failed to load configured provider for '%s' ($%s), root stage %s, path %s: %s",
 			consume.Name, consume.VariableName, ctx.deploymentState.GetRootDeploymentStage(), deploymentPath, err.Error())
 	}
+	return depl, nil
+}
+
+func runProviderForDeployment(action string, ctx *RunnerContext, consume *core.ConsumerConfig, depl *state.DeploymentState, providerMetadata *core.ReleaseMetadata) error {
 	releaseId := depl.GetReleaseId("deploy")
-	ctx.Logger().PushSection("Provider " + releaseId + "($" + consume.Name + ")")
-	ctx.Logger().PushRelease(releaseId)
 
-	depCfg := core.NewDependencyConfig(releaseId)
-	metadata, err := ctx.context.GetDependencyMetadata(depCfg)
-	if err != nil {
-		return err
-	}
-
-	execStage := metadata.GetExecStage(action + "_provider")
+	execStage := providerMetadata.GetExecStage(action + "_provider")
 	if execStage == nil {
 		return nil
 	}
@@ -125,7 +160,7 @@ func runProvider(stage, action string, ctx *RunnerContext, consume *core.Consume
 		"consumes": consume.Name,
 	})
 
-	newCtx, err := ctx.NewContextForProvider(depl, metadata)
+	newCtx, err := ctx.NewContextForProvider(depl, providerMetadata)
 	if err != nil {
 		return err
 	}
@@ -149,9 +184,6 @@ func runProvider(stage, action string, ctx *RunnerContext, consume *core.Consume
 		"variable": consume.VariableName,
 		"consumes": consume.Name,
 	})
-
-	ctx.Logger().PopRelease()
-	ctx.Logger().PopSection()
 	return nil
 }
 
