@@ -234,7 +234,6 @@ func runDependency(ctx *RunnerContext, depCfg *core.DependencyConfig, logKey, pa
 	if err != nil {
 		return err
 	}
-	fmt.Println(depCfg)
 	depCtx, err := ctx.NewContextForDependency(parentStage, depCfg.VariableName, metadata, depCfg.Consumes)
 	if err != nil {
 		return err
