@@ -190,3 +190,103 @@ func (s *exprSuite) Test_Builtin_slice(c *C) {
 	c.Assert(lstResult, HasLen, 1)
 	c.Assert(ExpectStringAtom(lstResult[0]), Equals, "second")
 }
+
+func (s *exprSuite) Test_Builtin_length(c *C) {
+	lst := LiftList([]Script{LiftString("first"), LiftString("second")})
+	apply := NewApply(LiftFunction(builtinListLength), []Script{lst})
+	result, err := apply.Eval(nil)
+	c.Assert(err, IsNil)
+	c.Assert(IsIntegerAtom(result), Equals, true)
+	intResult := ExpectIntegerAtom(result)
+	c.Assert(intResult, Equals, 2)
+}
+
+func (s *exprSuite) Test_Builtin_length_empty_list(c *C) {
+	lst := LiftList(nil)
+	apply := NewApply(LiftFunction(builtinListLength), []Script{lst})
+	result, err := apply.Eval(nil)
+	c.Assert(err, IsNil)
+	c.Assert(IsIntegerAtom(result), Equals, true)
+	intResult := ExpectIntegerAtom(result)
+	c.Assert(intResult, Equals, 0)
+}
+
+func (s *exprSuite) Test_Builtin_length_on_strings(c *C) {
+	lst := LiftString("hello")
+	apply := NewApply(LiftFunction(builtinListLength), []Script{lst})
+	result, err := apply.Eval(nil)
+	c.Assert(err, IsNil)
+	c.Assert(IsIntegerAtom(result), Equals, true)
+	intResult := ExpectIntegerAtom(result)
+	c.Assert(intResult, Equals, 5)
+}
+
+func (s *exprSuite) Test_Builtin_path_exists_true(c *C) {
+	for _, f := range Stdlib {
+		if f.Id == "path_exists" {
+			apply := NewApply(f.Func, []Script{LiftString("builtins_test.go")})
+			result, err := apply.Eval(nil)
+			c.Assert(err, IsNil)
+			c.Assert(IsBoolAtom(result), Equals, true)
+			c.Assert(ExpectBoolAtom(result), Equals, true)
+		}
+	}
+}
+
+func (s *exprSuite) Test_Builtin_path_exists_false(c *C) {
+	for _, f := range Stdlib {
+		if f.Id == "path_exists" {
+			apply := NewApply(f.Func, []Script{LiftString("non_existent_path")})
+			result, err := apply.Eval(nil)
+			c.Assert(err, IsNil)
+			c.Assert(IsBoolAtom(result), Equals, true)
+			c.Assert(ExpectBoolAtom(result), Equals, false)
+		}
+	}
+}
+
+func (s *exprSuite) Test_Builtin_file_exists_true(c *C) {
+	for _, f := range Stdlib {
+		if f.Id == "file_exists" {
+			apply := NewApply(f.Func, []Script{LiftString("builtins_test.go")})
+			result, err := apply.Eval(nil)
+			c.Assert(err, IsNil)
+			c.Assert(IsBoolAtom(result), Equals, true)
+			c.Assert(ExpectBoolAtom(result), Equals, true)
+		}
+	}
+}
+func (s *exprSuite) Test_Builtin_file_exists_false(c *C) {
+	for _, f := range Stdlib {
+		if f.Id == "file_exists" {
+			apply := NewApply(f.Func, []Script{LiftString("non_existent_path")})
+			result, err := apply.Eval(nil)
+			c.Assert(err, IsNil)
+			c.Assert(IsBoolAtom(result), Equals, true)
+			c.Assert(ExpectBoolAtom(result), Equals, false)
+		}
+	}
+}
+
+func (s *exprSuite) Test_Builtin_dir_exists_true(c *C) {
+	for _, f := range Stdlib {
+		if f.Id == "dir_exists" {
+			apply := NewApply(f.Func, []Script{LiftString("builtins_test.go")})
+			result, err := apply.Eval(nil)
+			c.Assert(err, IsNil)
+			c.Assert(IsBoolAtom(result), Equals, true)
+			c.Assert(ExpectBoolAtom(result), Equals, false)
+		}
+	}
+}
+func (s *exprSuite) Test_Builtin_dir_exists_false(c *C) {
+	for _, f := range Stdlib {
+		if f.Id == "dir_exists" {
+			apply := NewApply(f.Func, []Script{LiftString("non_existent_path")})
+			result, err := apply.Eval(nil)
+			c.Assert(err, IsNil)
+			c.Assert(IsBoolAtom(result), Equals, true)
+			c.Assert(ExpectBoolAtom(result), Equals, false)
+		}
+	}
+}

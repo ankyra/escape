@@ -28,6 +28,10 @@ func PathExists(path string) bool {
 	return !os.IsNotExist(err)
 }
 
+func FileExists(path string) bool {
+	return PathExists(path) && !IsDir(path)
+}
+
 func IsDir(path string) bool {
 	st, err := os.Stat(path)
 	if err != nil {
