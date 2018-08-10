@@ -17,11 +17,12 @@ limitations under the License.
 package script
 
 import (
-	. "gopkg.in/check.v1"
 	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
+
+	. "gopkg.in/check.v1"
 )
 
 type exprSuite struct{}
@@ -176,6 +177,72 @@ func (s *exprSuite) Test_Eval_String(c *C) {
 	result, err := EvalToGoValue(v, nil)
 	c.Assert(err, IsNil)
 	c.Assert(result, Equals, "test")
+}
+
+func (s *exprSuite) Test_Equals_String(c *C) {
+	v := LiftString("test")
+	v2 := LiftString("test2")
+	v3 := LiftString("test")
+	c.Assert(v.Equals(v2), Equals, false)
+	c.Assert(v3.Equals(v2), Equals, false)
+	c.Assert(v.Equals(v3), Equals, true)
+}
+func (s *exprSuite) Test_Equals_Bool(c *C) {
+	v := LiftBool(true)
+	v2 := LiftBool(false)
+	v3 := LiftBool(true)
+	c.Assert(v.Equals(v2), Equals, false)
+	c.Assert(v3.Equals(v2), Equals, false)
+	c.Assert(v.Equals(v3), Equals, true)
+}
+
+func (s *exprSuite) Test_Equals_Integer(c *C) {
+	v := LiftInteger(1)
+	v2 := LiftInteger(2)
+	v3 := LiftInteger(1)
+	c.Assert(v.Equals(v2), Equals, false)
+	c.Assert(v3.Equals(v2), Equals, false)
+	c.Assert(v.Equals(v3), Equals, true)
+}
+
+func (s *exprSuite) Test_Equals_List(c *C) {
+	v := LiftList([]Script{})
+	v2 := LiftList([]Script{LiftString("test"), LiftString("test2")})
+	v3 := LiftList([]Script{})
+	v4 := LiftList([]Script{LiftString("test"), LiftString("test2")})
+	v5 := LiftList([]Script{LiftString("test")})
+	v6 := LiftList([]Script{LiftString("test"), LiftString("test5")})
+	c.Assert(v.Equals(v2), Equals, false)
+	c.Assert(v3.Equals(v2), Equals, false)
+	c.Assert(v.Equals(v3), Equals, true)
+	c.Assert(v2.Equals(v4), Equals, true)
+	c.Assert(v2.Equals(v5), Equals, false)
+	c.Assert(v2.Equals(v6), Equals, false)
+	c.Assert(v5.Equals(v2), Equals, false)
+}
+
+func (s *exprSuite) Test_Equals_Dict(c *C) {
+	v := LiftDict(map[string]Script{})
+	v2 := LiftDict(map[string]Script{
+		"test": LiftString("yo"),
+	})
+	v3 := LiftDict(map[string]Script{})
+	v4 := LiftDict(map[string]Script{
+		"test": LiftInteger(1),
+	})
+	v5 := LiftDict(map[string]Script{
+		"test": LiftString("yo"),
+	})
+	v6 := LiftDict(map[string]Script{
+		"test":  LiftString("yo"),
+		"test2": LiftString("yop"),
+	})
+	c.Assert(v.Equals(v2), Equals, false)
+	c.Assert(v3.Equals(v2), Equals, false)
+	c.Assert(v.Equals(v3), Equals, true)
+	c.Assert(v2.Equals(v4), Equals, false)
+	c.Assert(v2.Equals(v5), Equals, true)
+	c.Assert(v2.Equals(v6), Equals, false)
 }
 
 func (s *exprSuite) Test_IsStringAtom(c *C) {

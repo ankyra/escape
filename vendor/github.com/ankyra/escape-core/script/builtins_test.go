@@ -221,6 +221,35 @@ func (s *exprSuite) Test_Builtin_length_on_strings(c *C) {
 	c.Assert(intResult, Equals, 5)
 }
 
+func (s *exprSuite) Test_Builtin_not(c *C) {
+	lst := LiftBool(true)
+	apply := NewApply(LiftFunction(builtinNot), []Script{lst})
+	result, err := apply.Eval(nil)
+	c.Assert(err, IsNil)
+	c.Assert(IsBoolAtom(result), Equals, true)
+	c.Assert(ExpectBoolAtom(result), Equals, false)
+}
+
+func (s *exprSuite) Test_Builtin_equals(c *C) {
+	v1 := LiftBool(true)
+	v2 := LiftBool(false)
+	apply := NewApply(LiftFunction(builtinEquals), []Script{v1, v2})
+	result, err := apply.Eval(nil)
+	c.Assert(err, IsNil)
+	c.Assert(IsBoolAtom(result), Equals, true)
+	c.Assert(ExpectBoolAtom(result), Equals, false)
+}
+
+func (s *exprSuite) Test_Builtin_equals_true(c *C) {
+	v1 := LiftString("test")
+	v2 := LiftString("test")
+	apply := NewApply(LiftFunction(builtinEquals), []Script{v1, v2})
+	result, err := apply.Eval(nil)
+	c.Assert(err, IsNil)
+	c.Assert(IsBoolAtom(result), Equals, true)
+	c.Assert(ExpectBoolAtom(result), Equals, true)
+}
+
 func (s *exprSuite) Test_Builtin_path_exists_true(c *C) {
 	for _, f := range Stdlib {
 		if f.Id == "path_exists" {

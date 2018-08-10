@@ -146,6 +146,13 @@ func (s *stringAtom) Value() (interface{}, error) {
 func (s *stringAtom) Type() ValueType {
 	return NewType("string")
 }
+func (s *stringAtom) Equals(s2 Script) bool {
+	if !s2.Type().IsString() {
+		return false
+	}
+	s2Str := ExpectStringAtom(s2)
+	return s.String == s2Str
+}
 func IsStringAtom(s Script) (ok bool) {
 	_, ok = s.(*stringAtom)
 	return ok
@@ -177,6 +184,13 @@ func (i *boolAtom) Value() (interface{}, error) {
 func (i *boolAtom) Type() ValueType {
 	return NewType("bool")
 }
+func (s *boolAtom) Equals(s2 Script) bool {
+	if !s2.Type().IsBool() {
+		return false
+	}
+	s2Val := ExpectBoolAtom(s2)
+	return s.Bool == s2Val
+}
 
 func IsBoolAtom(s Script) (ok bool) {
 	_, ok = s.(*boolAtom)
@@ -207,6 +221,13 @@ func (i *integerAtom) Value() (interface{}, error) {
 }
 func (i *integerAtom) Type() ValueType {
 	return NewType("integer")
+}
+func (s *integerAtom) Equals(s2 Script) bool {
+	if !s2.Type().IsInteger() {
+		return false
+	}
+	s2Val := ExpectIntegerAtom(s2)
+	return s.Integer == s2Val
 }
 func IsIntegerAtom(s Script) (ok bool) {
 	_, ok = s.(*integerAtom)
@@ -254,6 +275,21 @@ func (l *list) Value() (interface{}, error) {
 func (l *list) Type() ValueType {
 	return NewType("list")
 }
+func (s *list) Equals(s2 Script) bool {
+	if !s2.Type().IsList() {
+		return false
+	}
+	s2Val := ExpectListAtom(s2)
+	if len(s2Val) != len(s.List) {
+		return false
+	}
+	for i := 0; i < len(s.List); i++ {
+		if !s.List[i].Equals(s2Val[i]) {
+			return false
+		}
+	}
+	return true
+}
 func IsListAtom(s Script) (ok bool) {
 	_, ok = s.(*list)
 	return ok
@@ -283,6 +319,25 @@ func (d *dict) Value() (interface{}, error) {
 }
 func (d *dict) Type() ValueType {
 	return NewType("map")
+}
+func (s *dict) Equals(s2 Script) bool {
+	if !s2.Type().IsMap() {
+		return false
+	}
+	s2Val := ExpectDictAtom(s2)
+	if len(s2Val) != len(s.Dict) {
+		return false
+	}
+	for key, value := range s.Dict {
+		value2, found := s2Val[key]
+		if !found {
+			return false
+		}
+		if !value.Equals(value2) {
+			return false
+		}
+	}
+	return true
 }
 func IsDictAtom(s Script) bool {
 	_, ok := s.(*dict)
@@ -329,6 +384,9 @@ func (f *Function) Value() (interface{}, error) {
 func (f *Function) Type() ValueType {
 	return NewType("func")
 }
+func (s *Function) Equals(s2 Script) bool {
+	return false
+}
 func IsFunctionAtom(s Script) bool {
 	_, ok := s.(*Function)
 	return ok
@@ -371,6 +429,9 @@ func (l *lambda) Type() ValueType {
 
 func (l *lambda) Value() (interface{}, error) {
 	return nil, fmt.Errorf("Function application can not be converted to Go value (forgot to eval?)")
+}
+func (s *lambda) Equals(s2 Script) bool {
+	return false
 }
 
 func IsLambdaAtom(v Script) bool {
@@ -521,6 +582,10 @@ func (f *apply) Value() (interface{}, error) {
 
 func (f *apply) Type() ValueType {
 	return f.To.Type() // TODO
+}
+
+func (s *apply) Equals(s2 Script) bool {
+	return false
 }
 
 func builtinFileStringFunc(str string) (string, error) {

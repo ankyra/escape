@@ -44,6 +44,7 @@ var trackVersion = ShouldParse(`$func(v) { $v.concat(".@") }`)
 
 var Stdlib = []StdlibFunc{
 	StdlibFunc{"id", LiftFunction(builtinId), "Returns its argument", "everything", "parameter :: *"},
+	StdlibFunc{"equals", LiftFunction(builtinEquals), "Returns true if the arguments are of the same type and have the same value", "everything", "parameter :: *"},
 	StdlibFunc{"env_lookup", LiftFunction(builtinEnvLookup), "Lookup key in environment. Usually called implicitly when using '$'", "lists", "key :: string"},
 	StdlibFunc{"concat", LiftFunction(builtinConcat), "Concatate stringable arguments", "strings", "v1 :: string, v2 :: string, ..."},
 	StdlibFunc{"lower", ShouldLift(strings.ToLower), "Returns a copy of the string v with all Unicode characters mapped to their lower case", "strings", "v :: string"},
@@ -68,6 +69,7 @@ var Stdlib = []StdlibFunc{
 	StdlibFunc{"track_minor_version", trackMinorVersion, "Track minor version", "strings", ""},
 	StdlibFunc{"track_patch_version", trackPatchVersion, "Track patch version", "strings", ""},
 	StdlibFunc{"track_version", trackVersion, "Track version", "strings", ""},
+	StdlibFunc{"not", LiftFunction(builtinNot), "Logical NOT operation", "bool", ""},
 }
 
 func LiftGoFunc(f interface{}) Script {
@@ -256,6 +258,27 @@ func builtinListSlice(env *ScriptEnvironment, inputValues []Script) (Script, err
 		return Lift(lst[index:endIndex])
 	}
 	return Lift(lst[index:])
+}
+
+func builtinEquals(env *ScriptEnvironment, inputValues []Script) (Script, error) {
+	if err := builtinArgCheck(2, "equals", inputValues); err != nil {
+		return nil, err
+	}
+	i1 := inputValues[0]
+	i2 := inputValues[1]
+	return Lift(i1.Equals(i2))
+}
+
+func builtinNot(env *ScriptEnvironment, inputValues []Script) (Script, error) {
+	if err := builtinArgCheck(1, "not", inputValues); err != nil {
+		return nil, err
+	}
+	boolArg := inputValues[0]
+	if !IsBoolAtom(boolArg) {
+		return nil, fmt.Errorf("Expecting bool argument in not call, but got '%s'", boolArg.Type().Name())
+	}
+	bool := ExpectBoolAtom(boolArg)
+	return Lift(!bool)
 }
 
 func builtinReadfile(arg string) (string, error) {

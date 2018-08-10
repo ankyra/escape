@@ -25,6 +25,7 @@ type Script interface {
 	Eval(*ScriptEnvironment) (Script, error)
 	Value() (interface{}, error)
 	Type() ValueType
+	Equals(Script) bool
 }
 
 func EvalToGoValue(script Script, env *ScriptEnvironment) (interface{}, error) {

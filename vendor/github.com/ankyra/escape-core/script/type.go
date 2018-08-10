@@ -16,13 +16,12 @@ limitations under the License.
 
 package script
 
-import ()
-
 type ValueType interface {
 	Name() string
 	IsFunc() bool
 	IsInteger() bool
 	IsList() bool
+	IsBool() bool
 	IsMap() bool
 	IsString() bool
 	IsLambda() bool
@@ -52,6 +51,9 @@ func (typ *valueType) IsString() bool {
 }
 func (typ *valueType) IsInteger() bool {
 	return typ.Type == "integer"
+}
+func (typ *valueType) IsBool() bool {
+	return typ.Type == "bool"
 }
 func (typ *valueType) IsList() bool {
 	return typ.Type == "list"
