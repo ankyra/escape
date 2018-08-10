@@ -90,11 +90,31 @@ func NewProviderActivationRunner(stage string) Runner {
 				if err != nil {
 					return err
 				}
+				currentDir, err := os.Getwd()
+				if err != nil {
+					return err
+				}
+				dep, err := core.NewDependencyFromString(releaseId)
+				if err != nil {
+					return err
+				}
+				location := ctx.GetPath().UnpackedDepDirectory(dep)
+				if !util.PathExists(location) {
+					if err := model.EnsurePackageIsUnpacked(ctx.context, releaseId); err != nil {
+						return err
+					}
+				}
+				if err := os.Chdir(location); err != nil {
+					return err
+				}
 				// Activate the provider's providers
 				if err := NewProviderActivationRunner("deploy").Run(newCtx); err != nil {
 					return err
 				}
 				if err := runProviderForDeployment("activate", ctx, consume, depl, metadata); err != nil {
+					return err
+				}
+				if err := os.Chdir(currentDir); err != nil {
 					return err
 				}
 				ctx.Logger().PopRelease()
@@ -133,8 +153,28 @@ func NewProviderDeactivationRunner(stage string) Runner {
 				if err != nil {
 					return err
 				}
+				currentDir, err := os.Getwd()
+				if err != nil {
+					return err
+				}
+				dep, err := core.NewDependencyFromString(releaseId)
+				if err != nil {
+					return err
+				}
+				location := ctx.GetPath().UnpackedDepDirectory(dep)
+				if !util.PathExists(location) {
+					if err := model.EnsurePackageIsUnpacked(ctx.context, releaseId); err != nil {
+						return err
+					}
+				}
+				if err := os.Chdir(location); err != nil {
+					return err
+				}
 				// Deactivate the provider's providers
 				if err := NewProviderDeactivationRunner("deploy").Run(newCtx); err != nil {
+					return err
+				}
+				if err := os.Chdir(currentDir); err != nil {
 					return err
 				}
 				ctx.Logger().PopRelease()
@@ -160,18 +200,11 @@ func getProviderDeployment(stage string, ctx *RunnerContext, consume *core.Consu
 }
 
 func runProviderForDeployment(action string, ctx *RunnerContext, consume *core.ConsumerConfig, depl *state.DeploymentState, providerMetadata *core.ReleaseMetadata) error {
-	releaseId := depl.GetReleaseId("deploy")
 
 	execStage := providerMetadata.GetExecStage(action + "_provider")
 	if execStage == nil {
 		return nil
 	}
-
-	dep, err := core.NewDependencyFromString(releaseId)
-	if err != nil {
-		return err
-	}
-	location := ctx.GetPath().UnpackedDepDirectory(dep)
 
 	ctx.Logger().Log("provider."+action, map[string]string{
 		"variable": consume.VariableName,
@@ -182,24 +215,8 @@ func runProviderForDeployment(action string, ctx *RunnerContext, consume *core.C
 	if err != nil {
 		return err
 	}
-
-	currentDir, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	if !util.PathExists(location) {
-		if err := model.EnsurePackageIsUnpacked(ctx.context, releaseId); err != nil {
-			return err
-		}
-	}
-	if err := os.Chdir(location); err != nil {
-		return err
-	}
 	runner := NewScriptRunner("deploy", action+"_provider", state.OK, state.Failure)
 	if err := runner.Run(newCtx); err != nil {
-		return err
-	}
-	if err := os.Chdir(currentDir); err != nil {
 		return err
 	}
 
