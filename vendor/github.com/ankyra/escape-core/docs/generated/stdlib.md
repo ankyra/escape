@@ -17,6 +17,17 @@ h2 {
 Standard library functions for the [Escape Scripting Language](../scripting-language/)
 
 
+# Functions acting on everything
+
+## equals(parameter :: *)
+
+Returns true if the arguments are of the same type and have the same value
+
+## id(parameter :: *)
+
+Returns its argument
+
+
 # Functions acting on lists
 
 ## env_lookup(key :: string)
@@ -42,25 +53,41 @@ Slice a list. Usually accessed implicitly using slice syntax (eg. `list[0:5]`)
 
 # Functions acting on strings
 
-## track_patch_version()
+## concat(v1 :: string, v2 :: string, ...)
 
-Track patch version
+Concatate stringable arguments
 
 ## lower(v :: string)
 
 Returns a copy of the string v with all Unicode characters mapped to their lower case
 
-## track_minor_version()
+## base64_encode()
 
-Track minor version
+Encode string to base64
+
+## split(sep :: string)
+
+Split slices s into all substrings separated by sep and returns a slice of the substrings between those separators. If sep is empty, Split splits after each UTF-8 sequence.
 
 ## replace(old :: string, new :: string, n :: integer)
 
 Replace returns a copy of the string s with the first n non-overlapping instances of old replaced by new. If old is empty, it matches at the beginning of the string and after each UTF-8 sequence, yielding up to k+1 replacements for a k-rune string. If n < 0, there is no limit on the number of replacements.
 
+## track_minor_version()
+
+Track minor version
+
+## track_version()
+
+Track version
+
 ## base64_decode()
 
 Decode string from base64
+
+## trim()
+
+Returns a slice of the string s, with all leading and trailing white space removed, as defined by Unicode. 
 
 ## read_file()
 
@@ -70,45 +97,29 @@ Read the contents of a file
 
 Returns a copy of the string v with all Unicode characters mapped to their upper case
 
-## split(sep :: string)
+## title(v :: string)
 
-Split slices s into all substrings separated by sep and returns a slice of the substrings between those separators. If sep is empty, Split splits after each UTF-8 sequence.
+Returns a copy of the string v with all Unicode characters mapped to their title case
 
 ## file_exists()
 
 Returns true if the path exists and if it's not a directory, false otherwise
 
-## base64_encode()
+## dir_exists()
 
-Encode string to base64
-
-## track_major_version()
-
-Track major version
-
-## track_version()
-
-Track version
-
-## concat(v1 :: string, v2 :: string, ...)
-
-Concatate stringable arguments
-
-## title(v :: string)
-
-Returns a copy of the string v with all Unicode characters mapped to their title case
-
-## trim()
-
-Returns a slice of the string s, with all leading and trailing white space removed, as defined by Unicode. 
+Returns true if the path exists and if it is a directory, false otherwise
 
 ## path_exists()
 
 Returns true if the path exists, false if not
 
-## dir_exists()
+## track_major_version()
 
-Returns true if the path exists and if it is a directory, false otherwise
+Track major version
+
+## track_patch_version()
+
+Track patch version
 
 
 # Functions acting on integers
@@ -131,14 +142,11 @@ Returns a UNIX timestamp
 
 Logical NOT operation
 
+## and(b2 :: bool)
 
-# Functions acting on everything
+Logical AND operation
 
-## id(parameter :: *)
+## or(b2 :: bool)
 
-Returns its argument
-
-## equals(parameter :: *)
-
-Returns true if the arguments are of the same type and have the same value
+Logical OR operation
 

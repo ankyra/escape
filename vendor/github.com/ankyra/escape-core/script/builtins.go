@@ -69,7 +69,9 @@ var Stdlib = []StdlibFunc{
 	StdlibFunc{"track_minor_version", trackMinorVersion, "Track minor version", "strings", ""},
 	StdlibFunc{"track_patch_version", trackPatchVersion, "Track patch version", "strings", ""},
 	StdlibFunc{"track_version", trackVersion, "Track version", "strings", ""},
-	StdlibFunc{"not", LiftFunction(builtinNot), "Logical NOT operation", "bool", ""},
+	StdlibFunc{"not", LiftFunction(builtinNOT), "Logical NOT operation", "bool", ""},
+	StdlibFunc{"and", LiftFunction(builtinAND), "Logical AND operation", "bool", "b2 :: bool"},
+	StdlibFunc{"or", LiftFunction(builtinOR), "Logical OR operation", "bool", "b2 :: bool"},
 }
 
 func LiftGoFunc(f interface{}) Script {
@@ -269,7 +271,7 @@ func builtinEquals(env *ScriptEnvironment, inputValues []Script) (Script, error)
 	return Lift(i1.Equals(i2))
 }
 
-func builtinNot(env *ScriptEnvironment, inputValues []Script) (Script, error) {
+func builtinNOT(env *ScriptEnvironment, inputValues []Script) (Script, error) {
 	if err := builtinArgCheck(1, "not", inputValues); err != nil {
 		return nil, err
 	}
@@ -279,6 +281,34 @@ func builtinNot(env *ScriptEnvironment, inputValues []Script) (Script, error) {
 	}
 	bool := ExpectBoolAtom(boolArg)
 	return Lift(!bool)
+}
+
+func builtinAND(env *ScriptEnvironment, inputValues []Script) (Script, error) {
+	if err := builtinArgCheck(2, "and", inputValues); err != nil {
+		return nil, err
+	}
+	boolArg1 := inputValues[0]
+	boolArg2 := inputValues[1]
+	if !IsBoolAtom(boolArg1) || !IsBoolAtom(boolArg2) {
+		return nil, fmt.Errorf("Expecting bool arguments in and call, but got '%s' and '%s'", boolArg1.Type().Name(), boolArg2.Type().Name())
+	}
+	bool1 := ExpectBoolAtom(boolArg1)
+	bool2 := ExpectBoolAtom(boolArg2)
+	return Lift(bool1 && bool2)
+}
+
+func builtinOR(env *ScriptEnvironment, inputValues []Script) (Script, error) {
+	if err := builtinArgCheck(2, "and", inputValues); err != nil {
+		return nil, err
+	}
+	boolArg1 := inputValues[0]
+	boolArg2 := inputValues[1]
+	if !IsBoolAtom(boolArg1) || !IsBoolAtom(boolArg2) {
+		return nil, fmt.Errorf("Expecting bool arguments in and call, but got '%s' and '%s'", boolArg1.Type().Name(), boolArg2.Type().Name())
+	}
+	bool1 := ExpectBoolAtom(boolArg1)
+	bool2 := ExpectBoolAtom(boolArg2)
+	return Lift(bool1 || bool2)
 }
 
 func builtinReadfile(arg string) (string, error) {

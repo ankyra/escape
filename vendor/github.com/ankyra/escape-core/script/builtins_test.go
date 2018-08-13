@@ -223,7 +223,7 @@ func (s *exprSuite) Test_Builtin_length_on_strings(c *C) {
 
 func (s *exprSuite) Test_Builtin_not(c *C) {
 	lst := LiftBool(true)
-	apply := NewApply(LiftFunction(builtinNot), []Script{lst})
+	apply := NewApply(LiftFunction(builtinNOT), []Script{lst})
 	result, err := apply.Eval(nil)
 	c.Assert(err, IsNil)
 	c.Assert(IsBoolAtom(result), Equals, true)
