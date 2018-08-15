@@ -157,7 +157,6 @@ func (r *RunnerContext) NewContextForDependency(stage, deploymentName string, me
 		if !ok {
 			return nil, fmt.Errorf("Expecting string for provider mapping '%s', but got '%v'", iface, val)
 		}
-		fmt.Printf("Mapped provider %s %s %s\n", iface, providerDepl, valStr)
 		compiledConsumerMapping[iface] = valStr
 	}
 	return &RunnerContext{

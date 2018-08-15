@@ -112,7 +112,7 @@ func (e *environmentBuilder) GetInputsForDependency(ctx *RunnerContext, parentSt
 	return inputs, nil
 }
 
-func (e *environmentBuilder) GetInputsForErrand(ctx *RunnerContext, errand *core.Errand, extraVars map[string]string) (map[string]interface{}, error) {
+func (e *environmentBuilder) GetInputsForErrand(ctx *RunnerContext, errand *core.Errand, extraVars map[string]interface{}) (map[string]interface{}, error) {
 	deplState := ctx.GetDeploymentState()
 	inputs := deplState.GetCalculatedInputs("deploy")
 	for key, val := range extraVars {

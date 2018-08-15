@@ -29,7 +29,7 @@ import (
 
 type PromoteController struct{}
 
-func (PromoteController) Promote(context Context, state, toEnv, toDeployment, fromEnv, fromDeployment string, extraVars, extraProviders map[string]string, useProfileState, force bool) error {
+func (PromoteController) Promote(context Context, state, toEnv, toDeployment, fromEnv, fromDeployment string, extraVars map[string]interface{}, extraProviders map[string]string, useProfileState, force bool) error {
 	if fromDeployment == "" {
 		return fmt.Errorf("Missing deployment name.")
 	}

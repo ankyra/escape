@@ -57,7 +57,7 @@ var runBuildCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		parsedExtraProviders, err := ParseExtraVars(extraProviders)
+		parsedExtraProviders, err := ParseExtraProviders(extraProviders)
 		if err != nil {
 			return err
 		}
@@ -92,7 +92,7 @@ var runDeployCmd = &cobra.Command{
 			return err
 		}
 
-		parsedExtraProviders, err := ParseExtraVars(extraProviders)
+		parsedExtraProviders, err := ParseExtraProviders(extraProviders)
 		if err != nil {
 			return err
 		}
@@ -145,7 +145,7 @@ var runReleaseCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		parsedExtraProviders, err := ParseExtraVars(extraProviders)
+		parsedExtraProviders, err := ParseExtraProviders(extraProviders)
 		if err != nil {
 			return err
 		}
@@ -193,7 +193,7 @@ var runPromoteCmd = &cobra.Command{
 			return err
 		}
 
-		parsedExtraProviders, err := ParseExtraVars(extraProviders)
+		parsedExtraProviders, err := ParseExtraProviders(extraProviders)
 		if err != nil {
 			return err
 		}

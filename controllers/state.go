@@ -71,7 +71,7 @@ func (p StateController) ShowProviders(context Context) *ControllerResult {
 	return result
 }
 
-func (p StateController) CreateState(context Context, stage string, extraVars, extraProviders map[string]string) error {
+func (p StateController) CreateState(context Context, stage string, extraVars map[string]interface{}, extraProviders map[string]string) error {
 	envState := context.GetEnvironmentState()
 	metadata := context.GetReleaseMetadata()
 	deplState, err := envState.GetOrCreateDeploymentState(context.GetRootDeploymentName())

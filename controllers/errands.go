@@ -54,7 +54,7 @@ func (ErrandsController) List(context Context) *ControllerResult {
 	return result
 }
 
-func (ErrandsController) Run(context Context, errandStr string, extraVars map[string]string) error {
+func (ErrandsController) Run(context Context, errandStr string, extraVars map[string]interface{}) error {
 	//        applog("errand.start", errand=errand, release=escape_plan.get_versionless_build_id())
 	metadata := context.GetReleaseMetadata()
 	if metadata.GetErrands() == nil {
@@ -72,7 +72,7 @@ func (ErrandsController) Run(context Context, errandStr string, extraVars map[st
 	return runner.Run(runnerContext)
 }
 
-func (e ErrandsController) RunRemoteErrand(context Context, errandStr string, extraVars map[string]string) error {
+func (e ErrandsController) RunRemoteErrand(context Context, errandStr string, extraVars map[string]interface{}) error {
 	name, err := ioutil.TempDir("", "escape-errand")
 	if err != nil {
 		return fmt.Errorf("Could not create temporary directory for errand: %s", err.Error())

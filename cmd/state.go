@@ -96,7 +96,7 @@ var createStateCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		parsedExtraProviders, err := ParseExtraVars(extraProviders)
+		parsedExtraProviders, err := ParseExtraProviders(extraProviders)
 		if err != nil {
 			return err
 		}

@@ -23,7 +23,7 @@
                      "version": "0.0.1",
                      "status": {
                         "status": "failure",
-                        "updated_at": "2018-08-06T17:25:18.994377627+01:00",
+                        "updated_at": "2018-08-15T21:12:32.120200236+01:00",
                         "data": "Referenced pre_deploy script 'testdata/doesnt_exist.sh' does not exist"
                      }
                   }

@@ -24,7 +24,7 @@ import (
 
 type BuildController struct{}
 
-func (BuildController) Build(context Context, buildFatPackage bool, extraVars, extraProviders map[string]string) error {
+func (BuildController) Build(context Context, buildFatPackage bool, extraVars map[string]interface{}, extraProviders map[string]string) error {
 	context.PushLogRelease(context.GetReleaseMetadata().GetReleaseId())
 	context.PushLogSection("Build")
 	context.Log("build.start", nil)

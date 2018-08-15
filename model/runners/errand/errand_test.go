@@ -43,7 +43,7 @@ func getRunContext(c *C, stateFile, escapePlan string) *runners.RunnerContext {
 func (s *testSuite) Test_ErrandRunner(c *C) {
 	runCtx := getRunContext(c, "testdata/errand_state.json", "testdata/errand_plan.yml")
 	errand := runCtx.GetReleaseMetadata().GetErrands()["my-errand"]
-	extraVars := map[string]string{
+	extraVars := map[string]interface{}{
 		"errand_variable": "yo",
 	}
 	c.Assert(NewErrandRunner(errand, extraVars).Run(runCtx), IsNil)

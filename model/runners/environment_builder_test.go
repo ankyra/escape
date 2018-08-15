@@ -56,7 +56,7 @@ func (s *testSuite) Test_GetInputsForPreStep_calculated_inputs(c *C) {
 func (s *testSuite) Test_GetInputsForErrand(c *C) {
 	runCtx := getRunContext(c, "testdata/errand.json", "testdata/errand.yml")
 	errand := runCtx.GetReleaseMetadata().Errands["my-errand"]
-	extraVars := map[string]string{}
+	extraVars := map[string]interface{}{}
 	inputs, err := NewEmptyEnvEnvironmentBuilder().GetInputsForErrand(runCtx, errand, extraVars)
 	c.Assert(err, IsNil)
 	c.Assert(inputs, HasLen, 4)
@@ -70,7 +70,7 @@ func (s *testSuite) Test_GetInputsForErrand_default_inputs(c *C) {
 	runCtx := getRunContext(c, "testdata/errand.json", "testdata/errand.yml")
 	errand := runCtx.GetReleaseMetadata().Errands["my-errand"]
 	errand.Inputs = nil
-	extraVars := map[string]string{}
+	extraVars := map[string]interface{}{}
 	inputs, err := NewEmptyEnvEnvironmentBuilder().GetInputsForErrand(runCtx, errand, extraVars)
 	c.Assert(err, IsNil)
 	c.Assert(inputs, HasLen, 2)
@@ -81,7 +81,7 @@ func (s *testSuite) Test_GetInputsForErrand_default_inputs(c *C) {
 func (s *testSuite) Test_GetInputsForErrand_extravars_override(c *C) {
 	runCtx := getRunContext(c, "testdata/errand.json", "testdata/errand.yml")
 	errand := runCtx.GetReleaseMetadata().Errands["my-errand"]
-	extraVars := map[string]string{
+	extraVars := map[string]interface{}{
 		"input_variable": "aight",
 		"override":       "yo",
 	}

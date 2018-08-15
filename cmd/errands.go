@@ -109,7 +109,7 @@ var errandsRunCmd = &cobra.Command{
 	},
 }
 
-func RunDeployedErrand(deployment, errand string, parsedExtraVars map[string]string) error {
+func RunDeployedErrand(deployment, errand string, parsedExtraVars map[string]interface{}) error {
 	deplState := context.GetEnvironmentState().Deployments[deployment]
 	if deplState == nil {
 		return fmt.Errorf("The deployment '%s' could not be found in environment '%s'.", deployment, context.GetEnvironmentState().Name)
@@ -125,7 +125,7 @@ func RunDeployedErrand(deployment, errand string, parsedExtraVars map[string]str
 	return controllers.ErrandsController{}.RunRemoteErrand(context, errand, parsedExtraVars)
 }
 
-func RunLocalErrand(deployment, errand string, parsedExtraVars map[string]string) error {
+func RunLocalErrand(deployment, errand string, parsedExtraVars map[string]interface{}) error {
 	if err := ProcessFlagsForContextAndLoadEscapePlan(); err != nil {
 		return err
 	}

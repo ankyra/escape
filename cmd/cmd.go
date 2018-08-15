@@ -116,8 +116,8 @@ func setPlanAndStateFlags(c *cobra.Command) {
 	setEscapeRemoteStateFlag(c)
 }
 
-func ParseExtraVars(extraVars []string) (result map[string]string, err error) {
-	result = map[string]string{}
+func ParseExtraVars(extraVars []string) (result map[string]interface{}, err error) {
+	result = map[string]interface{}{}
 	for _, extraVar := range extraVars {
 		err = fmt.Errorf("Invalid extra variable format '%s'", extraVar)
 		parts := strings.Split(extraVar, "=")
@@ -138,16 +138,7 @@ func ParseExtraVars(extraVars []string) (result map[string]string, err error) {
 					return nil, fmt.Errorf("Coulnd't read file '%s' into JSON map: %s", key[1:], err.Error())
 				}
 				for key, val := range unmarshalled {
-					switch val.(type) {
-					case string:
-						result[key] = val.(string)
-					default:
-						marshalled, err := json.Marshal(val)
-						if err != nil {
-							return nil, err
-						}
-						result[key] = string(marshalled)
-					}
+					result[key] = val
 				}
 			} else {
 				result[key] = ""
@@ -160,6 +151,23 @@ func ParseExtraVars(extraVars []string) (result map[string]string, err error) {
 			result[key] = string(v)
 		} else {
 			result[key] = value
+		}
+	}
+	return result, nil
+}
+
+func ParseExtraProviders(extraVars []string) (map[string]string, error) {
+	result := map[string]string{}
+	parsed, err := ParseExtraVars(extraVars)
+	if err != nil {
+		return nil, err
+	}
+	for key, val := range parsed {
+		switch val.(type) {
+		case string:
+			result[key] = val.(string)
+		default:
+			return nil, fmt.Errorf("Expecting a string value for extra provider '%s' got %v", key, val)
 		}
 	}
 	return result, nil
