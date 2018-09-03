@@ -42,8 +42,8 @@ func NewTestRunner() Runner {
 
 func NewBuildRunner() Runner {
 	return NewCompoundRunner(
-		NewProviderActivationRunner(Stage),
 		NewDependencyRunner("build", "build", deploy.NewDeployRunner, state.Failure),
+		NewProviderActivationRunner(Stage),
 		NewPreBuildRunner(),
 		NewMainBuildRunner(),
 		NewPostBuildRunner(),
