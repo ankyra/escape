@@ -58,6 +58,10 @@ includes:
 - file1.txt
 - '*.txt'
 
+generates:
+- file2.txt
+- '*.exe'
+
 errands:
   errand1:
     description: Errand 1 description

@@ -48,6 +48,10 @@ includes:
 - file1.txt
 - "*.txt"
 
+generates: 
+- file2.txt
+- "*.exe"
+
 inputs:
 - input1
 - id: input2

@@ -46,7 +46,7 @@ func (s *printSuite) Test_PrettyPrint_KeyVal(c *C) {
 
 func (s *printSuite) Test_PrettyPrint_ListVal(c *C) {
 	unit := NewPrettyPrinter(includeEmpty(true))
-	keys := []string{"depends", "consumes", "provides", "includes", "inputs", "outputs", "templates"}
+	keys := []string{"depends", "consumes", "provides", "includes", "generates", "inputs", "outputs", "templates"}
 	for _, key := range keys {
 		pretty := unit.prettyPrintValue(key, []string{})
 		c.Assert(string(pretty), Equals, key+": []")

@@ -107,9 +107,15 @@ type EscapePlan struct {
 
 	// The files to includes in this release. The files don't have to exist and can
 	// be produced during build time. Globbing patterns are supported. Directories
-	// will be added recursively.
+	// are added recursively.
 	//
 	Includes []string `yaml:"includes,omitempty"`
+
+	// Files that are generated during the build phase. Globbing patterns are
+	// supported.  Directories are added recursively. The main reason to use
+	// this over `includes` is that the `generates` field is copied to the
+	// parent release, when a release gets extended, but `includes` aren't.
+	Generates []string `yaml:"generates,omitempty"`
 
 	// The release can declare zero or more providers so that consumers
 	// can loosely depend on it at deploy time.
@@ -180,7 +186,7 @@ type EscapePlan struct {
 	// script has access to all the deploy scoped input and output variables.
 	DeactivateProvider interface{} `yaml:"deactivate_provider,omitempty"`
 
-	// Smoke script.
+	// Smoke test script.
 	Smoke interface{} `yaml:"smoke,omitempty"`
 
 	// Destroy script.
