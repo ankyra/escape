@@ -408,6 +408,14 @@ var LogMessages = map[string]map[string]string{
 		"msg":   "Successfully released {{.release}}",
 		"level": "success",
 	},
+	"release.tag": map[string]string{
+		"msg":   "Tagging current git commit with 'v{{.version}}.'",
+		"level": "info",
+	},
+	"release.tag_push": map[string]string{
+		"msg":   "Pushing git tags.",
+		"level": "info",
+	},
 	"release.start": map[string]string{
 		"msg":   "Releasing {{.release}}",
 		"level": "info",

@@ -72,6 +72,10 @@ var Stdlib = []StdlibFunc{
 	StdlibFunc{"not", LiftFunction(builtinNOT), "Logical NOT operation", "bool", ""},
 	StdlibFunc{"and", LiftFunction(builtinAND), "Logical AND operation", "bool", "b2 :: bool"},
 	StdlibFunc{"or", LiftFunction(builtinOR), "Logical OR operation", "bool", "b2 :: bool"},
+	StdlibFunc{"lt", LiftFunction(builtinLT), "Returns true if first argument is less than the second argument", "integer", "i2 :: integer"},
+	StdlibFunc{"lte", LiftFunction(builtinLTE), "Returns true if first argument is less than or equal to the second argument", "integer", "i2 :: integer"},
+	StdlibFunc{"gt", LiftFunction(builtinGT), "Returns true if first argument is greater than second argument", "integer", "i2 :: integer"},
+	StdlibFunc{"gte", LiftFunction(builtinGTE), "Returns true if first argument is greater than or equal to second argument", "integer", "i2 :: integer"},
 }
 
 func LiftGoFunc(f interface{}) Script {
@@ -298,7 +302,7 @@ func builtinAND(env *ScriptEnvironment, inputValues []Script) (Script, error) {
 }
 
 func builtinOR(env *ScriptEnvironment, inputValues []Script) (Script, error) {
-	if err := builtinArgCheck(2, "and", inputValues); err != nil {
+	if err := builtinArgCheck(2, "or", inputValues); err != nil {
 		return nil, err
 	}
 	boolArg1 := inputValues[0]
@@ -309,6 +313,62 @@ func builtinOR(env *ScriptEnvironment, inputValues []Script) (Script, error) {
 	bool1 := ExpectBoolAtom(boolArg1)
 	bool2 := ExpectBoolAtom(boolArg2)
 	return Lift(bool1 || bool2)
+}
+
+func builtinLT(env *ScriptEnvironment, inputValues []Script) (Script, error) {
+	if err := builtinArgCheck(2, "lt", inputValues); err != nil {
+		return nil, err
+	}
+	arg1 := inputValues[0]
+	arg2 := inputValues[1]
+	if !IsIntegerAtom(arg1) || !IsIntegerAtom(arg2) {
+		return nil, fmt.Errorf("Expecting integer arguments in lt call, but got '%s' and '%s'", arg1.Type().Name(), arg2.Type().Name())
+	}
+	i1 := ExpectIntegerAtom(arg1)
+	i2 := ExpectIntegerAtom(arg2)
+	return Lift(i1 < i2)
+}
+
+func builtinLTE(env *ScriptEnvironment, inputValues []Script) (Script, error) {
+	if err := builtinArgCheck(2, "lte", inputValues); err != nil {
+		return nil, err
+	}
+	arg1 := inputValues[0]
+	arg2 := inputValues[1]
+	if !IsIntegerAtom(arg1) || !IsIntegerAtom(arg2) {
+		return nil, fmt.Errorf("Expecting integer arguments in lte call, but got '%s' and '%s'", arg1.Type().Name(), arg2.Type().Name())
+	}
+	i1 := ExpectIntegerAtom(arg1)
+	i2 := ExpectIntegerAtom(arg2)
+	return Lift(i1 <= i2)
+}
+
+func builtinGT(env *ScriptEnvironment, inputValues []Script) (Script, error) {
+	if err := builtinArgCheck(2, "gt", inputValues); err != nil {
+		return nil, err
+	}
+	arg1 := inputValues[0]
+	arg2 := inputValues[1]
+	if !IsIntegerAtom(arg1) || !IsIntegerAtom(arg2) {
+		return nil, fmt.Errorf("Expecting integer arguments in gt call, but got '%s' and '%s'", arg1.Type().Name(), arg2.Type().Name())
+	}
+	i1 := ExpectIntegerAtom(arg1)
+	i2 := ExpectIntegerAtom(arg2)
+	return Lift(i1 > i2)
+}
+
+func builtinGTE(env *ScriptEnvironment, inputValues []Script) (Script, error) {
+	if err := builtinArgCheck(2, "gte", inputValues); err != nil {
+		return nil, err
+	}
+	arg1 := inputValues[0]
+	arg2 := inputValues[1]
+	if !IsIntegerAtom(arg1) || !IsIntegerAtom(arg2) {
+		return nil, fmt.Errorf("Expecting integer arguments in gte call, but got '%s' and '%s'", arg1.Type().Name(), arg2.Type().Name())
+	}
+	i1 := ExpectIntegerAtom(arg1)
+	i2 := ExpectIntegerAtom(arg2)
+	return Lift(i1 >= i2)
 }
 
 func builtinReadfile(arg string) (string, error) {

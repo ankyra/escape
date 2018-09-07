@@ -32,6 +32,7 @@ var skipBuild, skipTests bool
 var skipCache, skipPush bool
 var skipDeploy, skipSmoke bool
 var skipDestroyBuild, skipDestroyDeploy, skipDestroy bool
+var tagGit, pushGitTags bool
 var skipIfExists bool
 var toEnv, toDeployment string
 
@@ -151,7 +152,7 @@ var runReleaseCmd = &cobra.Command{
 		}
 		return controllers.ReleaseController{}.Release(context, uber, skipBuild, skipTests,
 			skipCache, skipPush, skipDestroyBuild, skipDeploy, skipSmoke, skipDestroyDeploy,
-			skipDestroy, skipIfExists, force, parsedExtraVars, parsedExtraProviders)
+			skipDestroy, skipIfExists, tagGit, pushGitTags, force, parsedExtraVars, parsedExtraProviders)
 	},
 }
 
@@ -243,6 +244,8 @@ func init() {
 	runReleaseCmd.Flags().BoolVarP(&skipDestroyBuild, "skip-build-destroy", "", false, "Skip build destroy step")
 	runReleaseCmd.Flags().BoolVarP(&skipDestroyDeploy, "skip-deploy-destroy", "", false, "Skip deploy destroy step")
 	runReleaseCmd.Flags().BoolVarP(&skipIfExists, "skip-if-exists", "", false, "Skip all the steps if the version that would be released already exists in the Inventory")
+	runReleaseCmd.Flags().BoolVarP(&tagGit, "tag-git", "", false, "Following a successful release tag the current commit with the version number.")
+	runReleaseCmd.Flags().BoolVarP(&pushGitTags, "push-git-tags", "", true, "Push git tags. Only used when --tag-git is set.")
 	runReleaseCmd.Flags().BoolVarP(&force, "force", "f", false, "Overwrite output file if it exists")
 	runReleaseCmd.Flags().StringArrayVarP(&extraVars, "extra-vars", "v", []string{}, "Extra variables (format: key=value, key=@value.txt, @values.json)")
 	runReleaseCmd.Flags().StringArrayVarP(&extraProviders, "extra-providers", "p", []string{}, "Extra providers (format: provider=deployment, provider=@deployment.txt, @values.json)")

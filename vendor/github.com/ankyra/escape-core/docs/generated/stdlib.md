@@ -17,26 +17,23 @@ h2 {
 Standard library functions for the [Escape Scripting Language](../scripting-language/)
 
 
-# Unary functions
+# Functions acting on integer
 
-## timestamp()
+## lt(i2 :: integer)
 
-Returns a UNIX timestamp
+Returns true if first argument is less than the second argument
 
+## lte(i2 :: integer)
 
-# Functions acting on bool
+Returns true if first argument is less than or equal to the second argument
 
-## not()
+## gt(i2 :: integer)
 
-Logical NOT operation
+Returns true if first argument is greater than second argument
 
-## and(b2 :: bool)
+## gte(i2 :: integer)
 
-Logical AND operation
-
-## or(b2 :: bool)
-
-Logical OR operation
+Returns true if first argument is greater than or equal to second argument
 
 
 # Functions acting on everything
@@ -75,49 +72,29 @@ Slice a list. Usually accessed implicitly using slice syntax (eg. `list[0:5]`)
 
 # Functions acting on strings
 
-## split(sep :: string)
+## path_exists()
 
-Split slices s into all substrings separated by sep and returns a slice of the substrings between those separators. If sep is empty, Split splits after each UTF-8 sequence.
-
-## file_exists()
-
-Returns true if the path exists and if it's not a directory, false otherwise
+Returns true if the path exists, false if not
 
 ## base64_encode()
 
 Encode string to base64
 
-## base64_decode()
+## track_minor_version()
 
-Decode string from base64
-
-## trim()
-
-Returns a slice of the string s, with all leading and trailing white space removed, as defined by Unicode. 
-
-## read_file()
-
-Read the contents of a file
-
-## concat(v1 :: string, v2 :: string, ...)
-
-Concatate stringable arguments
-
-## lower(v :: string)
-
-Returns a copy of the string v with all Unicode characters mapped to their lower case
-
-## track_major_version()
-
-Track major version
+Track minor version
 
 ## track_patch_version()
 
 Track patch version
 
-## path_exists()
+## upper(v :: string)
 
-Returns true if the path exists, false if not
+Returns a copy of the string v with all Unicode characters mapped to their upper case
+
+## split(sep :: string)
+
+Split slices s into all substrings separated by sep and returns a slice of the substrings between those separators. If sep is empty, Split splits after each UTF-8 sequence.
 
 ## dir_exists()
 
@@ -127,21 +104,41 @@ Returns true if the path exists and if it is a directory, false otherwise
 
 Replace returns a copy of the string s with the first n non-overlapping instances of old replaced by new. If old is empty, it matches at the beginning of the string and after each UTF-8 sequence, yielding up to k+1 replacements for a k-rune string. If n < 0, there is no limit on the number of replacements.
 
-## track_minor_version()
+## trim()
 
-Track minor version
+Returns a slice of the string s, with all leading and trailing white space removed, as defined by Unicode. 
+
+## concat(v1 :: string, v2 :: string, ...)
+
+Concatate stringable arguments
+
+## title(v :: string)
+
+Returns a copy of the string v with all Unicode characters mapped to their title case
+
+## read_file()
+
+Read the contents of a file
+
+## track_major_version()
+
+Track major version
 
 ## track_version()
 
 Track version
 
-## upper(v :: string)
+## lower(v :: string)
 
-Returns a copy of the string v with all Unicode characters mapped to their upper case
+Returns a copy of the string v with all Unicode characters mapped to their lower case
 
-## title(v :: string)
+## base64_decode()
 
-Returns a copy of the string v with all Unicode characters mapped to their title case
+Decode string from base64
+
+## file_exists()
+
+Returns true if the path exists and if it's not a directory, false otherwise
 
 
 # Functions acting on integers
@@ -149,4 +146,26 @@ Returns a copy of the string v with all Unicode characters mapped to their title
 ## add(y :: integer)
 
 Add two integers
+
+
+# Unary functions
+
+## timestamp()
+
+Returns a UNIX timestamp
+
+
+# Functions acting on bool
+
+## not()
+
+Logical NOT operation
+
+## and(b2 :: bool)
+
+Logical AND operation
+
+## or(b2 :: bool)
+
+Logical OR operation
 

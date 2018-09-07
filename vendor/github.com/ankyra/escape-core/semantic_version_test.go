@@ -53,3 +53,12 @@ func (s *semverSuite) Test_IncrementSmallest(c *C) {
 	unit.IncrementSmallest()
 	c.Assert(unit.ToString(), Equals, "1")
 }
+
+func (s *semverSuite) Test_OnlyKeepLeadingVersionPart(c *C) {
+	unit := NewSemanticVersion("0.0.3")
+	unit.OnlyKeepLeadingVersionPart()
+	c.Assert(unit.ToString(), Equals, "0")
+	unit = NewSemanticVersion("10.23.33")
+	unit.OnlyKeepLeadingVersionPart()
+	c.Assert(unit.ToString(), Equals, "10")
+}

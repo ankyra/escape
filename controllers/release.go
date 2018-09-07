@@ -18,16 +18,18 @@ package controllers
 
 import (
 	"fmt"
+	"os"
 
 	core "github.com/ankyra/escape-core"
 	. "github.com/ankyra/escape/model/interfaces"
 	"github.com/ankyra/escape/model/paths"
 	"github.com/ankyra/escape/util"
+	"github.com/ankyra/escape/util/logger/loggers"
 )
 
 type ReleaseController struct{}
 
-func (r ReleaseController) Release(context Context, buildFatPackage, skipBuild, skipTests, skipCache, skipPush, skipDestroyBuild, skipDeploy, skipSmoke, skipDestroyDeploy, skipDestroy, skipIfExists, forceOverwrite bool, extraVars map[string]interface{}, extraProviders map[string]string) error {
+func (r ReleaseController) Release(context Context, buildFatPackage, skipBuild, skipTests, skipCache, skipPush, skipDestroyBuild, skipDeploy, skipSmoke, skipDestroyDeploy, skipDestroy, skipIfExists, tagGit, pushGitTags, forceOverwrite bool, extraVars map[string]interface{}, extraProviders map[string]string) error {
 	context.PushLogRelease(context.GetReleaseMetadata().GetQualifiedReleaseId())
 	context.PushLogSection("Release")
 	context.Log("release.start", nil)
@@ -86,6 +88,11 @@ func (r ReleaseController) Release(context Context, buildFatPackage, skipBuild, 
 			return err
 		}
 	}
+	if tagGit {
+		if err := r.CreateAndPushGitTag(context, pushGitTags); err != nil {
+			return err
+		}
+	}
 	context.Log("release.finished", nil)
 	context.PopLogRelease()
 	context.PopLogSection()
@@ -106,5 +113,28 @@ func (r ReleaseController) cacheRelease(context Context, forceOverwrite bool) er
 	if err := util.CopyFile(packagePath, userPackageCachePath); err != nil {
 		return err
 	}
+	return nil
+}
+
+func (r ReleaseController) CreateAndPushGitTag(context Context, push bool) error {
+	rec := util.NewProcessRecorder()
+	metadata := context.GetReleaseMetadata()
+	context.PushLogSection("Tag")
+	context.Log("release.tag", map[string]string{
+		"version": metadata.Version,
+	})
+	_, err := rec.Record([]string{"git", "tag", "-a", "v" + metadata.Version,
+		"-m", "Escape release " + metadata.GetQualifiedReleaseId()}, os.Environ(), loggers.NewLoggerDummy())
+	if err != nil {
+		return err
+	}
+	if push {
+		context.Log("release.tag_push", nil)
+		_, err := rec.Record([]string{"git", "push", "origin", "v" + metadata.Version}, os.Environ(), loggers.NewLoggerDummy())
+		if err != nil {
+			return err
+		}
+	}
+	context.PopLogSection()
 	return nil
 }

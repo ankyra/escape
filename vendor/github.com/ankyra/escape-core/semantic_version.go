@@ -31,6 +31,12 @@ func NewSemanticVersion(v string) *SemanticVersion {
 	}
 }
 
+func (s *SemanticVersion) OnlyKeepLeadingVersionPart() {
+	if len(s.versionParts) > 1 {
+		s.versionParts = s.versionParts[0:1]
+	}
+}
+
 func (s *SemanticVersion) IncrementSmallest() error {
 	lastIx := len(s.versionParts) - 1
 	last := s.versionParts[lastIx]
