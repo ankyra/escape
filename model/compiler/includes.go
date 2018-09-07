@@ -22,23 +22,15 @@ import (
 )
 
 func compileIncludesAndGenerates(ctx *CompilerContext) error {
-	for _, globPattern := range ctx.Plan.Includes {
-		paths, err := filepath.Glob(globPattern)
-		if err != nil {
-			fmt.Println("Warning: ignoring pattern error: " + err.Error())
-			continue
-		}
-		if paths == nil {
-			continue
-		}
-		for _, path := range paths {
-			err = ctx.AddFileDigest(path)
-			if err != nil {
-				fmt.Println("Ignoring problem with path " + path + ": " + err.Error())
-			}
-		}
+	if err := doGlobPatterns(ctx, ctx.Plan.Includes); err != nil {
+		return err
 	}
-	for _, globPattern := range ctx.Plan.Generates {
+	ctx.Metadata.Generates = ctx.Plan.Generates
+	return doGlobPatterns(ctx, ctx.Plan.Generates)
+}
+
+func doGlobPatterns(ctx *CompilerContext, globPatterns []string) error {
+	for _, globPattern := range globPatterns {
 		paths, err := filepath.Glob(globPattern)
 		if err != nil {
 			fmt.Println("Warning: ignoring pattern error: " + err.Error())

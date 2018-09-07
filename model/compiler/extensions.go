@@ -33,6 +33,9 @@ func compileExtensions(ctx *CompilerContext) error {
 		if err != nil {
 			return err
 		}
+		if err := doGlobPatterns(ctx, metadata.Generates); err != nil {
+			return err
+		}
 		for _, consume := range metadata.Consumes {
 			ctx.Metadata.AddConsumes(consume)
 		}

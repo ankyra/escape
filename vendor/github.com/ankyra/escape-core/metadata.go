@@ -56,6 +56,7 @@ type ReleaseMetadata struct {
 	RevisionAuthor         string            `json:"revision_author"`
 	Metadata               map[string]string `json:"metadata"`
 	Version                string            `json:"version"`
+	Generates              []string          `json:"generates"`
 
 	Consumes  []*ConsumerConfig     `json:"consumes"`
 	Downloads []*DownloadConfig     `json:"downloads"`
@@ -82,6 +83,7 @@ func NewEmptyReleaseMetadata() *ReleaseMetadata {
 		BuiltWithCoreVersion: CoreVersion,
 		Files:                map[string]string{},
 		Metadata:             map[string]string{},
+		Generates:            []string{},
 
 		Consumes:    []*ConsumerConfig{},
 		Depends:     []*DependencyConfig{},
@@ -142,6 +144,9 @@ func validate(m *ReleaseMetadata) error {
 	}
 	if m.Project == "" {
 		m.Project = "_"
+	}
+	if m.Generates == nil {
+		m.Generates = []string{}
 	}
 	if err := ValidateProjectName(m.Project); err != nil {
 		return err
@@ -439,6 +444,10 @@ func (m *ReleaseMetadata) WriteJsonFile(path string) error {
 
 func (m *ReleaseMetadata) AddFileWithDigest(path, hexDigest string) {
 	m.Files[path] = hexDigest
+}
+
+func (m *ReleaseMetadata) AddGlobPatternToGenerates(globPattern string) {
+	m.Generates = append(m.Generates, globPattern)
 }
 
 func (m *ReleaseMetadata) ToDependency() *Dependency {
