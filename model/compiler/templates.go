@@ -59,12 +59,10 @@ func compileTemplate(ctx *CompilerContext, tpl interface{}, scope string) (*temp
 		template.Scopes = []string{scope}
 	}
 	mapping := template.Mapping
-	for _, scope := range template.Scopes {
-		for _, i := range ctx.Metadata.GetInputs(scope) {
-			_, exists := mapping[i.Id]
-			if !exists {
-				mapping[i.Id] = "$this.inputs." + i.Id
-			}
+	for _, i := range ctx.Metadata.GetInputsInScopes(template.Scopes) {
+		_, exists := mapping[i.Id]
+		if !exists {
+			mapping[i.Id] = "$this.inputs." + i.Id
 		}
 	}
 	extraVars := []string{"branch", "description", "logo", "name",
