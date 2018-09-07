@@ -47,7 +47,7 @@ func Compile(plan *escape_plan.EscapePlan,
 		compileOutputs,
 		compileErrands,
 		compileTemplates,
-		compileIncludes,
+		compileIncludesAndGenerates,
 		compileLogo,
 	}
 	for _, step := range compilerSteps {

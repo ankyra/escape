@@ -21,8 +21,24 @@ import (
 	"path/filepath"
 )
 
-func compileIncludes(ctx *CompilerContext) error {
+func compileIncludesAndGenerates(ctx *CompilerContext) error {
 	for _, globPattern := range ctx.Plan.Includes {
+		paths, err := filepath.Glob(globPattern)
+		if err != nil {
+			fmt.Println("Warning: ignoring pattern error: " + err.Error())
+			continue
+		}
+		if paths == nil {
+			continue
+		}
+		for _, path := range paths {
+			err = ctx.AddFileDigest(path)
+			if err != nil {
+				fmt.Println("Ignoring problem with path " + path + ": " + err.Error())
+			}
+		}
+	}
+	for _, globPattern := range ctx.Plan.Generates {
 		paths, err := filepath.Glob(globPattern)
 		if err != nil {
 			fmt.Println("Warning: ignoring pattern error: " + err.Error())
