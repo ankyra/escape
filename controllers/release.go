@@ -123,14 +123,14 @@ func (r ReleaseController) CreateAndPushGitTag(context Context, push bool) error
 	context.Log("release.tag", map[string]string{
 		"version": metadata.Version,
 	})
-	_, err := rec.Record([]string{"git", "tag", "-a", "v" + metadata.Version,
+	_, err := rec.Record([]string{"git", "tag", "-a", "v" + metadata.GetQualifiedReleaseId(),
 		"-m", "Escape release " + metadata.GetQualifiedReleaseId()}, os.Environ(), loggers.NewLoggerDummy())
 	if err != nil {
 		return err
 	}
 	if push {
 		context.Log("release.tag_push", nil)
-		_, err := rec.Record([]string{"git", "push", "origin", "v" + metadata.Version}, os.Environ(), loggers.NewLoggerDummy())
+		_, err := rec.Record([]string{"git", "push", "origin", "v" + metadata.GetQualifiedReleaseId()}, os.Environ(), loggers.NewLoggerDummy())
 		if err != nil {
 			return err
 		}
