@@ -165,6 +165,25 @@ func (s *metadataSuite) Test_InputVariables(c *C) {
 	c.Assert(vars[0], Equals, v1)
 }
 
+func (s *metadataSuite) Test_GetInputsInScopes(c *C) {
+	v1, _ := variables.NewVariableFromString("input_variable1", "string")
+	v2, _ := variables.NewVariableFromString("input_variable2", "string")
+	v2.Scopes = []string{"deploy"}
+	m := NewReleaseMetadata("test-release", "0.1")
+	m.AddInputVariable(v1)
+	m.AddInputVariable(v2)
+	vars := m.GetInputsInScopes([]string{"deploy"})
+	c.Assert(vars, HasLen, 2)
+	c.Assert(vars[0], Equals, v1)
+	c.Assert(vars[1], Equals, v2)
+	vars = m.GetInputsInScopes([]string{"build"})
+	c.Assert(vars, HasLen, 1)
+	c.Assert(vars[0], Equals, v1)
+	vars = m.GetInputsInScopes([]string{"build", "deploy"})
+	c.Assert(vars, HasLen, 1)
+	c.Assert(vars[0], Equals, v1)
+}
+
 func (s *metadataSuite) Test_OutputVariables(c *C) {
 	v1, _ := variables.NewVariableFromString("output_variable1", "string")
 	v2, _ := variables.NewVariableFromString("output_variable2", "string")

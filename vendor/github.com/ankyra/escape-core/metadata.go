@@ -339,6 +339,20 @@ func (m *ReleaseMetadata) GetInputs(stage string) []*variables.Variable {
 	return result
 }
 
+func (m *ReleaseMetadata) GetInputsInScopes(stages []string) []*variables.Variable {
+	result := []*variables.Variable{}
+	for _, i := range m.Inputs {
+		inScope := true
+		for _, stage := range stages {
+			inScope = inScope && i.InScope(stage)
+		}
+		if inScope {
+			result = append(result, i)
+		}
+	}
+	return result
+}
+
 func (m *ReleaseMetadata) GetOutputs(stage string) []*variables.Variable {
 	result := []*variables.Variable{}
 	for _, i := range m.Outputs {
