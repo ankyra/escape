@@ -25,7 +25,7 @@ import (
 type TestController struct{}
 
 func (TestController) Test(context Context) error {
-	context.PushLogRelease(context.GetReleaseMetadata().GetReleaseId())
+	context.PushLogRelease(context.GetReleaseMetadata().GetQualifiedReleaseId())
 	context.PushLogSection("Test")
 	context.Log("test.start", nil)
 	runner := build.NewTestRunner()

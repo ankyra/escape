@@ -25,7 +25,7 @@ import (
 type BuildController struct{}
 
 func (BuildController) Build(context Context, buildFatPackage bool, extraVars map[string]interface{}, extraProviders map[string]string) error {
-	context.PushLogRelease(context.GetReleaseMetadata().GetReleaseId())
+	context.PushLogRelease(context.GetReleaseMetadata().GetQualifiedReleaseId())
 	context.PushLogSection("Build")
 	context.Log("build.start", nil)
 	if err := SaveExtraInputsAndProvidersInDeploymentState(context, "build", extraVars, extraProviders); err != nil {

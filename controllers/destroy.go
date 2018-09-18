@@ -28,7 +28,7 @@ import (
 type DestroyController struct{}
 
 func (DestroyController) Destroy(context Context, destroyBuild, destroyDeployment bool) error {
-	context.PushLogRelease(context.GetReleaseMetadata().GetReleaseId())
+	context.PushLogRelease(context.GetReleaseMetadata().GetQualifiedReleaseId())
 	context.PushLogSection("Destroy")
 	context.Log("destroy.start", nil)
 	if destroyBuild {

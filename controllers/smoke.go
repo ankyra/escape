@@ -28,7 +28,7 @@ import (
 type SmokeController struct{}
 
 func (SmokeController) Smoke(context Context) error {
-	context.PushLogRelease(context.GetReleaseMetadata().GetReleaseId())
+	context.PushLogRelease(context.GetReleaseMetadata().GetQualifiedReleaseId())
 	context.PushLogSection("Smoke tests")
 	context.Log("smoke.start", nil)
 	runnerContext, err := runners.NewRunnerContext(context)

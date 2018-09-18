@@ -54,7 +54,7 @@ func SaveExtraInputsAndProvidersInDeploymentState(context Context, stage string,
 }
 
 func (d DeployController) Deploy(context Context, extraVars map[string]interface{}, extraProviders map[string]string) error {
-	context.PushLogRelease(context.GetReleaseMetadata().GetReleaseId())
+	context.PushLogRelease(context.GetReleaseMetadata().GetQualifiedReleaseId())
 	context.PushLogSection("Deploy")
 	context.Log("deploy.start", nil)
 	if err := SaveExtraInputsAndProvidersInDeploymentState(context, "deploy", extraVars, extraProviders); err != nil {

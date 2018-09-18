@@ -24,7 +24,7 @@ import (
 type PushController struct{}
 
 func (p PushController) Push(context Context, buildFatPackage bool) error {
-	context.PushLogRelease(context.GetReleaseMetadata().GetReleaseId())
+	context.PushLogRelease(context.GetReleaseMetadata().GetQualifiedReleaseId())
 	context.PushLogSection("Push")
 	if err := p.saveLocally(context); err != nil {
 		return err
