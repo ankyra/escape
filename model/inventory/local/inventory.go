@@ -18,16 +18,23 @@ package local
 
 import (
 	"fmt"
+	"io/ioutil"
+	"path/filepath"
+	"sort"
 	"strings"
 
 	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape/model/inventory/types"
 )
 
-type LocalInventory struct{}
+type LocalInventory struct {
+	BaseDir string
+}
 
-func NewLocalInventory() *LocalInventory {
-	return &LocalInventory{}
+func NewLocalInventory(baseDir string) *LocalInventory {
+	return &LocalInventory{
+		BaseDir: baseDir,
+	}
 }
 
 func (r *LocalInventory) QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
@@ -49,22 +56,60 @@ func (r *LocalInventory) UploadRelease(project, releasePath string, metadata *co
 	return nil
 }
 
-func (r *LocalInventory) GetAuthMethods(url string) (map[string]*types.AuthMethod, error) {
-	return nil, nil
+func (r *LocalInventory) ListProjects() ([]string, error) {
+	path := r.BaseDir
+	result := []string{}
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		return result, err
+	}
+	for _, file := range files {
+		if file.IsDir() {
+			name := file.Name()
+			if !strings.HasPrefix(name, ".") {
+				result = append(result, name)
+			}
+		}
+	}
+	sort.Strings(result)
+	return result, nil
 }
 
-func (r *LocalInventory) Login(url, username, password string) (string, error) {
-	return "", nil
-}
-func (r *LocalInventory) LoginWithBasicAuth(url, username, password string) error {
-	return nil
-}
-func (r *LocalInventory) ListProjects() ([]string, error) {
-	return []string{}, nil
-}
 func (r *LocalInventory) ListApplications(project string) ([]string, error) {
-	return []string{}, nil
+	path := filepath.Join(r.BaseDir, project)
+	result := []string{}
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		return result, err
+	}
+	appMap := map[string]bool{}
+	for _, file := range files {
+		if !file.IsDir() {
+			name := file.Name()
+			if strings.HasSuffix(name, ".json") {
+				metadata, err := core.NewReleaseMetadataFromFile(filepath.Join(path, name))
+				if err != nil {
+					fmt.Printf("WARN: Could not read release metadata from file %s: %s\n", name, err.Error())
+					continue
+				}
+				appMap[metadata.Name] = true
+			}
+		}
+	}
+	for app, _ := range appMap {
+		result = append(result, app)
+	}
+	sort.Strings(result)
+	return result, nil
 }
+
 func (r *LocalInventory) ListVersions(project, app string) ([]string, error) {
 	return []string{}, nil
+}
+
+// Not required.
+func (r *LocalInventory) Login(url, username, password string) (string, error)    { return "", nil }
+func (r *LocalInventory) LoginWithBasicAuth(url, username, password string) error { return nil }
+func (r *LocalInventory) GetAuthMethods(url string) (map[string]*types.AuthMethod, error) {
+	return nil, nil
 }

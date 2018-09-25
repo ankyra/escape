@@ -37,8 +37,8 @@ type Inventory interface {
 	ListVersions(project, app string) ([]string, error)
 }
 
-func NewLocalInventory() Inventory {
-	return local.NewLocalInventory()
+func NewLocalInventory(baseDir string) Inventory {
+	return local.NewLocalInventory(baseDir)
 }
 
 func NewRemoteInventory(apiServer, authToken, basicAuthUsername, basicAuthPassword string, insecureSkipVerify bool) Inventory {
