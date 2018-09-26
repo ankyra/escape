@@ -56,7 +56,10 @@ func compileDependencyConfig(ctx *CompilerContext, depend *core.DependencyConfig
 			}
 		}
 		if !found {
-			ctx.Metadata.AddConsumes(consume.Copy())
+			consumerForDep := consume.Copy()
+			consumerForDep.SkipActivate = true
+			consumerForDep.SkipDeactivate = true
+			ctx.Metadata.AddConsumes(consumerForDep)
 		}
 	}
 	for _, input := range metadata.Inputs {
