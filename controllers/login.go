@@ -30,14 +30,14 @@ import (
 	"syscall"
 	"time"
 
-	. "github.com/ankyra/escape/model/interfaces"
+	"github.com/ankyra/escape/model"
 	"github.com/ankyra/escape/model/inventory/types"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
 type LoginController struct{}
 
-func (LoginController) Login(context Context, url, authMethodRequested, username, password string, insecureSkipVerify bool, targetProfile string) error {
+func (LoginController) Login(context *model.Context, url, authMethodRequested, username, password string, insecureSkipVerify bool, targetProfile string) error {
 
 	if targetProfile != "" {
 		context.GetEscapeConfig().NewProfile(targetProfile)
@@ -139,7 +139,7 @@ func authUserSelection(reader *bufio.Reader, authMethods map[string]*types.AuthM
 	return methods[ix-1]
 }
 
-func secretTokenAuth(reader *bufio.Reader, context Context, url, loginUrl, username, password string) error {
+func secretTokenAuth(reader *bufio.Reader, context *model.Context, url, loginUrl, username, password string) error {
 	err := credentialsUserInput(reader, &username, &password)
 	if err != nil {
 		return err
@@ -156,7 +156,7 @@ func secretTokenAuth(reader *bufio.Reader, context Context, url, loginUrl, usern
 	return nil
 }
 
-func basicAuth(reader *bufio.Reader, context Context, url, loginUrl, username, password string) error {
+func basicAuth(reader *bufio.Reader, context *model.Context, url, loginUrl, username, password string) error {
 	err := credentialsUserInput(reader, &username, &password)
 	if err != nil {
 		return err
@@ -213,7 +213,7 @@ func openBrowser(url string) {
 	}
 }
 
-func getEscapeTokenWithRedeemToken(context Context, url, redeemToken, redeemURL string) error {
+func getEscapeTokenWithRedeemToken(context *model.Context, url, redeemToken, redeemURL string) error {
 
 	currentTry := 0
 	tries := 25

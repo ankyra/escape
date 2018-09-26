@@ -19,6 +19,7 @@ package variables
 import (
 	"testing"
 
+	"github.com/ankyra/escape-core/scopes"
 	"github.com/ankyra/escape-core/script"
 	. "gopkg.in/check.v1"
 )
@@ -62,7 +63,7 @@ func (s *variableSuite) Test_NewVariableFromString(c *C) {
 	c.Assert(v.Type, Equals, "string")
 	c.Assert(v.Visible, Equals, true)
 	c.Assert(v.EvalBeforeDependencies, Equals, true)
-	c.Assert(v.Scopes, DeepEquals, []string{"build", "deploy"})
+	c.Assert(v.Scopes, DeepEquals, scopes.AllScopes)
 }
 
 func (s *variableSuite) Test_NewVariableFromDict(c *C) {
@@ -78,7 +79,24 @@ func (s *variableSuite) Test_NewVariableFromDict(c *C) {
 	c.Assert(v.EvalBeforeDependencies, Equals, false)
 	c.Assert(v.Visible, Equals, false)
 	c.Assert(v.Type, Equals, "list")
-	c.Assert(v.Scopes, DeepEquals, []string{"build"})
+	c.Assert(v.Scopes, DeepEquals, scopes.BuildScopes)
+}
+
+func (s *variableSuite) Test_Variable_Copy(c *C) {
+	dict := map[interface{}]interface{}{
+		"id":                       "test",
+		"scopes":                   []interface{}{"build"},
+		"eval_before_dependencies": false,
+		"visible":                  false,
+		"type":                     "list[string]",
+	}
+	v, err := NewVariableFromDict(dict)
+	c.Assert(err, IsNil)
+	v = v.Copy()
+	c.Assert(v.EvalBeforeDependencies, Equals, false)
+	c.Assert(v.Visible, Equals, false)
+	c.Assert(v.Type, Equals, "list")
+	c.Assert(v.Scopes, DeepEquals, scopes.BuildScopes)
 }
 
 func (s *variableSuite) Test_NewVariableFromDict_Sets_Default_Scopes_If_Nil(c *C) {
@@ -87,7 +105,7 @@ func (s *variableSuite) Test_NewVariableFromDict_Sets_Default_Scopes_If_Nil(c *C
 	}
 	v, err := NewVariableFromDict(dict)
 	c.Assert(err, IsNil)
-	c.Assert(v.Scopes, DeepEquals, []string{"build", "deploy"})
+	c.Assert(v.Scopes, DeepEquals, scopes.AllScopes)
 }
 
 func (s *variableSuite) Test_NewVariable_Default_Visible_and_EvalBeforeDependencies(c *C) {
@@ -103,7 +121,7 @@ func (s *variableSuite) Test_NewVariableFromDict_Sets_Default_Scopes_If_Empty(c 
 	}
 	v, err := NewVariableFromDict(dict)
 	c.Assert(err, IsNil)
-	c.Assert(v.Scopes, DeepEquals, []string{"build", "deploy"})
+	c.Assert(v.Scopes, DeepEquals, scopes.AllScopes)
 }
 
 func (s *variableSuite) Test_NewVariableFromDict_Default_Visible_and_EvalBeforeDependencies(c *C) {

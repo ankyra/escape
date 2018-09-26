@@ -22,7 +22,7 @@ import (
 	"github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/script"
 	"github.com/ankyra/escape-core/state"
-	. "github.com/ankyra/escape/model/interfaces"
+	"github.com/ankyra/escape/model"
 	"github.com/ankyra/escape/model/paths"
 	"github.com/ankyra/escape/util/logger/api"
 )
@@ -35,12 +35,12 @@ type RunnerContext struct {
 	inputs           map[string]interface{}
 	outputs          map[string]interface{}
 	logger           api.Logger
-	context          Context
+	context          *model.Context
 
 	toScriptEnvironment func(d *state.DeploymentState, metadata *core.ReleaseMetadata, stage string, context state.DeploymentResolver) (*script.ScriptEnvironment, error)
 }
 
-func NewRunnerContext(context Context) (*RunnerContext, error) {
+func NewRunnerContext(context *model.Context) (*RunnerContext, error) {
 	metadata := context.GetReleaseMetadata()
 	if metadata == nil {
 		return nil, fmt.Errorf("Missing metadata in context. This is a bug in Escape.")

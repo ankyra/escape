@@ -21,6 +21,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
+	"github.com/ankyra/escape-core/scopes"
 	"github.com/ankyra/escape-core/script"
 	"github.com/cbroglie/mustache"
 )
@@ -50,7 +51,7 @@ type Template struct {
 
 	// A list of scopes (`build`, `deploy`) that defines during which stage(s)
 	// the template should be rendered.
-	Scopes []string `json:"scopes"`
+	Scopes scopes.Scopes `json:"scopes"`
 
 	// This mapping can be used to relate template variables to Escape variables.
 	Mapping map[string]interface{} `json:"mapping"`
@@ -59,7 +60,7 @@ type Template struct {
 func NewTemplate() *Template {
 	return &Template{
 		Mapping: map[string]interface{}{},
-		Scopes:  []string{"build", "deploy"},
+		Scopes:  scopes.AllScopes,
 	}
 }
 
@@ -93,6 +94,17 @@ func NewTemplateFromInterface(obj interface{}) (*Template, error) {
 	return nil, fmt.Errorf("Unexpected type '%T' for template", obj)
 }
 
+func (t *Template) Copy() *Template {
+	result := NewTemplate()
+	result.File = t.File
+	result.Target = t.Target
+	result.Scopes = t.Scopes.Copy()
+	for k, v := range t.Mapping {
+		result.Mapping[k] = v
+	}
+	return result
+}
+
 func (t *Template) SetFileFromInterface(obj interface{}) error {
 	file, ok := obj.(string)
 	if !ok {
@@ -112,24 +124,11 @@ func (t *Template) SetTargetFromInterface(obj interface{}) error {
 }
 
 func (t *Template) SetScopesFromInterface(obj interface{}) error {
-	strScope, ok := obj.(string)
-	if ok {
-		t.SetScopes([]string{strScope})
-		return nil
+	sc, err := scopes.NewScopesFromInterface(obj)
+	if err != nil {
+		return err
 	}
-	listScope, ok := obj.([]interface{})
-	if !ok {
-		return fmt.Errorf("Unexpected type '%T'", obj)
-	}
-	scopes := []string{}
-	for _, scopeObj := range listScope {
-		scopeStr, ok := scopeObj.(string)
-		if !ok {
-			return fmt.Errorf("Unexpected type '%T'", obj)
-		}
-		scopes = append(scopes, scopeStr)
-	}
-	t.SetScopes(scopes)
+	t.SetScopes(sc)
 	return nil
 }
 

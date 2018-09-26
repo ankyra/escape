@@ -20,12 +20,12 @@ import (
 	"fmt"
 	"strings"
 
-	. "github.com/ankyra/escape/model/interfaces"
+	"github.com/ankyra/escape/model"
 )
 
 type StateController struct{}
 
-func (p StateController) ListDeployments(context Context) *ControllerResult {
+func (p StateController) ListDeployments(context *model.Context) *ControllerResult {
 	result := NewControllerResult()
 	envState := context.GetEnvironmentState()
 
@@ -40,7 +40,7 @@ func (p StateController) ListDeployments(context Context) *ControllerResult {
 	return result
 }
 
-func (p StateController) ShowDeployment(context Context, dep string) error {
+func (p StateController) ShowDeployment(context *model.Context, dep string) error {
 	envState := context.GetEnvironmentState()
 	for _, depl := range envState.GetDeployments() {
 		if depl.GetName() == dep {
@@ -51,7 +51,7 @@ func (p StateController) ShowDeployment(context Context, dep string) error {
 	return fmt.Errorf("Deployment '%s' not found", dep)
 }
 
-func (p StateController) ShowProviders(context Context) *ControllerResult {
+func (p StateController) ShowProviders(context *model.Context) *ControllerResult {
 	result := NewControllerResult()
 	envState := context.GetEnvironmentState()
 	exists := false
@@ -71,7 +71,7 @@ func (p StateController) ShowProviders(context Context) *ControllerResult {
 	return result
 }
 
-func (p StateController) CreateState(context Context, stage string, extraVars map[string]interface{}, extraProviders map[string]string) error {
+func (p StateController) CreateState(context *model.Context, stage string, extraVars map[string]interface{}, extraProviders map[string]string) error {
 	envState := context.GetEnvironmentState()
 	metadata := context.GetReleaseMetadata()
 	deplState, err := envState.GetOrCreateDeploymentState(context.GetRootDeploymentName())

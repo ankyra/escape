@@ -39,5 +39,5 @@ Field | Type | Description
 |sensitive|`bool`|Is this sensitive data? 
 |items|`any`|If set, this should contain all the valid values for this variable. 
 |eval_before_dependencies|`bool`|Should the variables be evaluated before the dependencies are deployed? 
-|scopes|`[string]`|A list of scopes (`build`, `deploy`) that defines during which stage(s) this variable should be active. You wouldn't usually use this field directly, but use something like [`build_inputs`](/docs/escape-plan/#build_inputs) or [`deploy_inputs`](/docs/escape-plan/#deploy_inputs), which usually express intent better. 
+|scopes|`scopes.Scopes`|A list of scopes (`build`, `deploy`) that defines during which stage(s) this variable should be active. You wouldn't usually use this field directly, but use something like [`build_inputs`](/docs/escape-plan/#build_inputs) or [`deploy_inputs`](/docs/escape-plan/#deploy_inputs), which usually express intent better. 
 

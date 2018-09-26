@@ -21,7 +21,7 @@ import (
 	"os"
 
 	core "github.com/ankyra/escape-core"
-	. "github.com/ankyra/escape/model/interfaces"
+	"github.com/ankyra/escape/model"
 	"github.com/ankyra/escape/model/paths"
 	"github.com/ankyra/escape/util"
 	"github.com/ankyra/escape/util/logger/loggers"
@@ -29,7 +29,7 @@ import (
 
 type ReleaseController struct{}
 
-func (r ReleaseController) Release(context Context, buildFatPackage, skipBuild, skipTests, skipCache, skipPush, skipDestroyBuild, skipDeploy, skipSmoke, skipDestroyDeploy, skipDestroy, skipIfExists, tagGit, pushGitTags, forceOverwrite bool, extraVars map[string]interface{}, extraProviders map[string]string) error {
+func (r ReleaseController) Release(context *model.Context, buildFatPackage, skipBuild, skipTests, skipCache, skipPush, skipDestroyBuild, skipDeploy, skipSmoke, skipDestroyDeploy, skipDestroy, skipIfExists, tagGit, pushGitTags, forceOverwrite bool, extraVars map[string]interface{}, extraProviders map[string]string) error {
 	context.PushLogRelease(context.GetReleaseMetadata().GetQualifiedReleaseId())
 	context.PushLogSection("Release")
 	context.Log("release.start", nil)
@@ -99,7 +99,7 @@ func (r ReleaseController) Release(context Context, buildFatPackage, skipBuild, 
 	return nil
 }
 
-func (r ReleaseController) cacheRelease(context Context, forceOverwrite bool) error {
+func (r ReleaseController) cacheRelease(context *model.Context, forceOverwrite bool) error {
 	path := paths.NewPath()
 	metadata := context.GetReleaseMetadata()
 	packagePath := path.ReleaseLocation(metadata)
@@ -116,7 +116,7 @@ func (r ReleaseController) cacheRelease(context Context, forceOverwrite bool) er
 	return nil
 }
 
-func (r ReleaseController) CreateAndPushGitTag(context Context, push bool) error {
+func (r ReleaseController) CreateAndPushGitTag(context *model.Context, push bool) error {
 	rec := util.NewProcessRecorder()
 	metadata := context.GetReleaseMetadata()
 	context.PushLogSection("Tag")

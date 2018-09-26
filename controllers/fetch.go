@@ -21,13 +21,12 @@ import (
 
 	"github.com/ankyra/escape-core"
 	"github.com/ankyra/escape/model"
-	. "github.com/ankyra/escape/model/interfaces"
 	"github.com/ankyra/escape/model/paths"
 )
 
 type FetchController struct{}
 
-func (FetchController) Fetch(context Context, releaseIds []string) error {
+func (FetchController) Fetch(context *model.Context, releaseIds []string) error {
 	for _, releaseId := range releaseIds {
 		err := model.DependencyResolver{}.Resolve(context.GetEscapeConfig(), []*core.DependencyConfig{core.NewDependencyConfig(releaseId)})
 		if err != nil {
@@ -37,7 +36,7 @@ func (FetchController) Fetch(context Context, releaseIds []string) error {
 	return nil
 }
 
-func (f FetchController) ResolveFetchAndLoad(context Context, releaseId string) error {
+func (f FetchController) ResolveFetchAndLoad(context *model.Context, releaseId string) error {
 	// TODO cd into temp directory ?
 	parsed := core.NewDependencyConfig(releaseId)
 	if err := parsed.EnsureConfigIsParsed(); err != nil {

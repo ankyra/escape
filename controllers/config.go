@@ -19,13 +19,13 @@ package controllers
 import (
 	"fmt"
 
-	. "github.com/ankyra/escape/model/interfaces"
+	"github.com/ankyra/escape/model"
 	"github.com/ankyra/escape/util"
 )
 
 type ConfigController struct{}
 
-func (ConfigController) ShowProfile(context Context, json bool) *ControllerResult {
+func (ConfigController) ShowProfile(context *model.Context, json bool) *ControllerResult {
 	result := NewControllerResult()
 
 	result.HumanOutput.AddLine("Profile: %s", context.GetEscapeConfig().ActiveProfile)
@@ -38,7 +38,7 @@ func (ConfigController) ShowProfile(context Context, json bool) *ControllerResul
 	return result
 }
 
-func (ConfigController) ShowProfileField(context Context, field string) *ControllerResult {
+func (ConfigController) ShowProfileField(context *model.Context, field string) *ControllerResult {
 	result := NewControllerResult()
 
 	configMap := util.StructToMapStringInterface(*context.GetEscapeConfig().GetCurrentProfile(), "json")
@@ -53,7 +53,7 @@ func (ConfigController) ShowProfileField(context Context, field string) *Control
 	return result
 }
 
-func (ConfigController) ActiveProfile(context Context) *ControllerResult {
+func (ConfigController) ActiveProfile(context *model.Context) *ControllerResult {
 	result := NewControllerResult()
 
 	result.HumanOutput.AddLine(context.GetEscapeConfig().ActiveProfile)
@@ -62,7 +62,7 @@ func (ConfigController) ActiveProfile(context Context) *ControllerResult {
 	return result
 }
 
-func (ConfigController) ListProfiles(context Context) *ControllerResult {
+func (ConfigController) ListProfiles(context *model.Context) *ControllerResult {
 	result := NewControllerResult()
 
 	profileNames := []interface{}{}
@@ -76,7 +76,7 @@ func (ConfigController) ListProfiles(context Context) *ControllerResult {
 	return result
 }
 
-func (ConfigController) SetProfile(context Context, profile string) *ControllerResult {
+func (ConfigController) SetProfile(context *model.Context, profile string) *ControllerResult {
 	result := NewControllerResult()
 
 	err := context.GetEscapeConfig().SetActiveProfile(profile)
@@ -92,7 +92,7 @@ func (ConfigController) SetProfile(context Context, profile string) *ControllerR
 	return result
 }
 
-func (ConfigController) CreateProfile(context Context, targetName string) *ControllerResult {
+func (ConfigController) CreateProfile(context *model.Context, targetName string) *ControllerResult {
 	result := NewControllerResult()
 
 	if targetName == "" {

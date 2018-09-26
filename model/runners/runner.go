@@ -70,7 +70,7 @@ func NewProviderActivationRunner(stage string) Runner {
 			return err
 		}
 		for _, consume := range metadata.Consumes {
-			if consume.InScope(stage) {
+			if consume.InScope(stage) && !consume.SkipActivate {
 
 				depl, err := getProviderDeployment(stage, ctx, consume)
 				if err != nil {
@@ -132,7 +132,7 @@ func NewProviderDeactivationRunner(stage string) Runner {
 			return err
 		}
 		for _, consume := range metadata.Consumes {
-			if consume.InScope(stage) {
+			if consume.InScope(stage) && !consume.SkipActivate && !consume.SkipDeactivate {
 				depl, err := getProviderDeployment(stage, ctx, consume)
 				if err != nil {
 					return err

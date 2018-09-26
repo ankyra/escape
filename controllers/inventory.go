@@ -17,12 +17,12 @@ limitations under the License.
 package controllers
 
 import (
-	. "github.com/ankyra/escape/model/interfaces"
+	"github.com/ankyra/escape/model"
 )
 
 type InventoryController struct{}
 
-func (r InventoryController) Query(context Context, project, application, appVersion string) *ControllerResult {
+func (r InventoryController) Query(context *model.Context, project, application, appVersion string) *ControllerResult {
 	result := NewControllerResult()
 
 	inventory := context.GetInventory()

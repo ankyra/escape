@@ -22,14 +22,14 @@ import (
 	"time"
 
 	"github.com/ankyra/escape-core/state"
-	. "github.com/ankyra/escape/model/interfaces"
+	"github.com/ankyra/escape/model"
 )
 
 const BackoffStart = 1
 
 type ConvergeController struct{}
 
-func (ConvergeController) Converge(context Context, refresh bool) error {
+func (ConvergeController) Converge(context *model.Context, refresh bool) error {
 	context.PushLogSection("Converge")
 	dag, err := context.GetEnvironmentState().GetDeploymentStateDAG("deploy")
 	dag.Walk(func(d *state.DeploymentState) {
@@ -42,7 +42,7 @@ func (ConvergeController) Converge(context Context, refresh bool) error {
 	return err
 }
 
-func ConvergeDeployment(context Context, depl *state.DeploymentState, refresh bool) error {
+func ConvergeDeployment(context *model.Context, depl *state.DeploymentState, refresh bool) error {
 	if depl.Release == "" {
 		return fmt.Errorf("No release set for deployment '%s'", depl.Name)
 	}
@@ -89,7 +89,7 @@ func ConvergeDeployment(context Context, depl *state.DeploymentState, refresh bo
 	return nil
 }
 
-func handleExponentialBackoff(context Context, depl *state.DeploymentState, status *state.Status) error {
+func handleExponentialBackoff(context *model.Context, depl *state.DeploymentState, status *state.Status) error {
 	now := time.Now()
 
 	// The action has not been retried so set an initial retry time and save
@@ -118,7 +118,7 @@ func handleExponentialBackoff(context Context, depl *state.DeploymentState, stat
 	return nil
 }
 
-func retryAction(context Context, depl *state.DeploymentState) error {
+func retryAction(context *model.Context, depl *state.DeploymentState) error {
 	stage := depl.GetStageOrCreateNew(state.DeployStage)
 	status := stage.Status
 	releaseId := depl.Release + "-v" + stage.Version
@@ -150,7 +150,7 @@ func retryAction(context Context, depl *state.DeploymentState) error {
 	return err
 }
 
-func convergeSmoke(context Context, depl *state.DeploymentState, releaseId, logKey string) error {
+func convergeSmoke(context *model.Context, depl *state.DeploymentState, releaseId, logKey string) error {
 	context.Log(logKey, map[string]string{
 		"project":     depl.GetEnvironmentState().GetProjectName(),
 		"environment": depl.GetEnvironmentState().Name,
@@ -161,7 +161,7 @@ func convergeSmoke(context Context, depl *state.DeploymentState, releaseId, logK
 	return SmokeController{}.FetchAndSmoke(context, releaseId)
 }
 
-func convergeDestroy(context Context, depl *state.DeploymentState, releaseId, logKey string) error {
+func convergeDestroy(context *model.Context, depl *state.DeploymentState, releaseId, logKey string) error {
 	context.Log(logKey, map[string]string{
 		"project":     depl.GetEnvironmentState().GetProjectName(),
 		"environment": depl.GetEnvironmentState().Name,
@@ -172,7 +172,7 @@ func convergeDestroy(context Context, depl *state.DeploymentState, releaseId, lo
 	return DestroyController{}.FetchAndDestroy(context, releaseId, false, true)
 }
 
-func convergeDeploy(context Context, depl *state.DeploymentState, releaseId, logKey string) error {
+func convergeDeploy(context *model.Context, depl *state.DeploymentState, releaseId, logKey string) error {
 	context.Log(logKey, map[string]string{
 		"project":     depl.GetEnvironmentState().GetProjectName(),
 		"environment": depl.GetEnvironmentState().Name,

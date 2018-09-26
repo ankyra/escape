@@ -24,12 +24,12 @@ import (
 
 	"github.com/ankyra/escape-core/parsers"
 	"github.com/ankyra/escape-core/state"
-	. "github.com/ankyra/escape/model/interfaces"
+	"github.com/ankyra/escape/model"
 )
 
 type PromoteController struct{}
 
-func (PromoteController) Promote(context Context, state, toEnv, toDeployment, fromEnv, fromDeployment string, extraVars map[string]interface{}, extraProviders map[string]string, useProfileState, force bool) error {
+func (PromoteController) Promote(context *model.Context, state, toEnv, toDeployment, fromEnv, fromDeployment string, extraVars map[string]interface{}, extraProviders map[string]string, useProfileState, force bool) error {
 	if fromDeployment == "" {
 		return fmt.Errorf("Missing deployment name.")
 	}

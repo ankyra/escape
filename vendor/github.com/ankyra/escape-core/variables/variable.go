@@ -22,6 +22,7 @@ import (
 	"fmt"
 
 	"github.com/ankyra/escape-core/parsers"
+	"github.com/ankyra/escape-core/scopes"
 	"github.com/ankyra/escape-core/script"
 	"github.com/ankyra/escape-core/variables/variable_types"
 	"gopkg.in/yaml.v2"
@@ -92,7 +93,23 @@ type Variable struct {
 	// [`build_inputs`](/docs/escape-plan/#build_inputs) or
 	// [`deploy_inputs`](/docs/escape-plan/#deploy_inputs), which usually
 	// express intent better.
-	Scopes []string `json:"scopes"`
+	Scopes scopes.Scopes `json:"scopes"`
+}
+
+func (v *Variable) Copy() *Variable {
+	result := NewVariable()
+	result.Id = v.Id
+	result.Type = v.Type
+	result.Default = v.Default
+	result.Description = v.Description
+	result.Friendly = v.Friendly
+	result.Visible = v.Visible
+	result.Options = v.Options
+	result.Sensitive = v.Sensitive
+	result.Items = v.Items
+	result.EvalBeforeDependencies = v.EvalBeforeDependencies
+	result.Scopes = v.Scopes.Copy()
+	return result
 }
 
 type UntypedVariable map[interface{}]interface{}
@@ -101,7 +118,7 @@ func NewVariable() *Variable {
 	return &Variable{
 		Visible:                true,
 		EvalBeforeDependencies: true,
-		Scopes:                 []string{"build", "deploy"},
+		Scopes:                 scopes.AllScopes,
 	}
 }
 
@@ -159,12 +176,7 @@ func (v *Variable) Validate() error {
 }
 
 func (v *Variable) InScope(scope string) bool {
-	for _, s := range v.Scopes {
-		if s == scope {
-			return true
-		}
-	}
-	return false
+	return v.Scopes.InScope(scope)
 }
 
 func (v *Variable) HasDefault() bool {

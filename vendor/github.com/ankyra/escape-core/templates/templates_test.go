@@ -17,11 +17,13 @@ limitations under the License.
 package templates
 
 import (
-	"github.com/ankyra/escape-core/script"
-	. "gopkg.in/check.v1"
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/ankyra/escape-core/scopes"
+	"github.com/ankyra/escape-core/script"
+	. "gopkg.in/check.v1"
 )
 
 type testSuite struct{}
@@ -29,6 +31,25 @@ type testSuite struct{}
 var _ = Suite(&testSuite{})
 
 func Test(t *testing.T) { TestingT(t) }
+
+func (s *testSuite) Test_Template_Copy(c *C) {
+	dict := map[interface{}]interface{}{
+		"file":   "test.sh.tpl",
+		"target": "result.sh",
+		"mapping": map[interface{}]interface{}{
+			"variable": "$this.inputs",
+		},
+		"scopes": []interface{}{"build"},
+	}
+	unit, err := NewTemplateFromInterface(dict)
+	c.Assert(err, IsNil)
+	unit = unit.Copy()
+	c.Assert(unit.File, Equals, "test.sh.tpl")
+	c.Assert(unit.Target, Equals, "result.sh")
+	c.Assert(unit.Mapping, HasLen, 1)
+	c.Assert(unit.Mapping["variable"], Equals, "$this.inputs")
+	c.Assert(unit.Scopes, DeepEquals, scopes.BuildScopes)
+}
 
 func (s *testSuite) Test_Template_renderToString(c *C) {
 	mapping := map[string]interface{}{
@@ -106,7 +127,7 @@ func (s *testSuite) Test_NewTemplateFromInterfaceMap_file(c *C) {
 	c.Assert(unit.File, Equals, "test.sh.tpl")
 	c.Assert(unit.Target, Equals, "test.sh")
 	c.Assert(unit.Mapping, HasLen, 0)
-	c.Assert(unit.Scopes, DeepEquals, []string{"build", "deploy"})
+	c.Assert(unit.Scopes, DeepEquals, scopes.AllScopes)
 }
 
 func (s *testSuite) Test_NewTemplateFromInterfaceMap_file_fails_on_wrong_type(c *C) {
@@ -126,7 +147,7 @@ func (s *testSuite) Test_NewTemplateFromInterfaceMap_target(c *C) {
 	c.Assert(unit.File, Equals, "")
 	c.Assert(unit.Target, Equals, "test.sh")
 	c.Assert(unit.Mapping, HasLen, 0)
-	c.Assert(unit.Scopes, DeepEquals, []string{"build", "deploy"})
+	c.Assert(unit.Scopes, DeepEquals, scopes.AllScopes)
 }
 
 func (s *testSuite) Test_NewTemplateFromInterfaceMap_target_fails_on_wrong_type(c *C) {
@@ -149,7 +170,7 @@ func (s *testSuite) Test_NewTemplateFromInterfaceMap_mapping(c *C) {
 	c.Assert(unit.Target, Equals, "")
 	c.Assert(unit.Mapping, HasLen, 1)
 	c.Assert(unit.Mapping["variable"], Equals, "$this.inputs.hello")
-	c.Assert(unit.Scopes, DeepEquals, []string{"build", "deploy"})
+	c.Assert(unit.Scopes, DeepEquals, scopes.AllScopes)
 }
 
 func (s *testSuite) Test_NewTemplateFromInterfaceMap_mapping_fails_on_wrong_type(c *C) {
@@ -172,14 +193,14 @@ func (s *testSuite) Test_NewTemplateFromInterfaceMap_mapping_fails_on_wrong_key_
 
 func (s *testSuite) Test_NewTemplateFromInterfaceMap_scopes(c *C) {
 	dict := map[string]interface{}{
-		"scopes": []interface{}{"build", "some_stage"},
+		"scopes": []interface{}{"build"},
 	}
 	unit, err := NewTemplateFromInterfaceMap(dict)
 	c.Assert(err, IsNil)
 	c.Assert(unit.File, Equals, "")
 	c.Assert(unit.Target, Equals, "")
 	c.Assert(unit.Mapping, HasLen, 0)
-	c.Assert(unit.Scopes, DeepEquals, []string{"build", "some_stage"})
+	c.Assert(unit.Scopes, DeepEquals, scopes.BuildScopes)
 }
 
 func (s *testSuite) Test_NewTemplateFromInterfaceMap_scope_as_string(c *C) {
@@ -191,7 +212,7 @@ func (s *testSuite) Test_NewTemplateFromInterfaceMap_scope_as_string(c *C) {
 	c.Assert(unit.File, Equals, "")
 	c.Assert(unit.Target, Equals, "")
 	c.Assert(unit.Mapping, HasLen, 0)
-	c.Assert(unit.Scopes, DeepEquals, []string{"build"})
+	c.Assert(unit.Scopes, DeepEquals, scopes.BuildScopes)
 }
 
 func (s *testSuite) Test_NewTemplateFromInterfaceMap_scopes_fails_on_wrong_type(c *C) {
@@ -208,7 +229,7 @@ func (s *testSuite) Test_NewTemplateFromInterface_from_string(c *C) {
 	c.Assert(unit.File, Equals, "testfile.txt")
 	c.Assert(unit.Target, Equals, "testfile")
 	c.Assert(unit.Mapping, HasLen, 0)
-	c.Assert(unit.Scopes, DeepEquals, []string{"build", "deploy"})
+	c.Assert(unit.Scopes, DeepEquals, scopes.AllScopes)
 }
 
 func (s *testSuite) Test_NewTemplateFromInterface_from_map_fails_if_key_not_string(c *C) {
@@ -226,7 +247,7 @@ func (s *testSuite) Test_NewTemplateFromInterface_from_map(c *C) {
 		"mapping": map[interface{}]interface{}{
 			"variable": "$this.inputs",
 		},
-		"scopes": []interface{}{"lol", "test"},
+		"scopes": []interface{}{"deploy"},
 	}
 	unit, err := NewTemplateFromInterface(dict)
 	c.Assert(err, IsNil)
@@ -234,7 +255,7 @@ func (s *testSuite) Test_NewTemplateFromInterface_from_map(c *C) {
 	c.Assert(unit.Target, Equals, "result.sh")
 	c.Assert(unit.Mapping, HasLen, 1)
 	c.Assert(unit.Mapping["variable"], Equals, "$this.inputs")
-	c.Assert(unit.Scopes, DeepEquals, []string{"lol", "test"})
+	c.Assert(unit.Scopes, DeepEquals, scopes.DeployScopes)
 }
 
 func (s *testSuite) Test_NewTemplateFromInterface_fails_with_unknown_type(c *C) {

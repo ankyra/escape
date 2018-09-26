@@ -17,14 +17,14 @@ limitations under the License.
 package controllers
 
 import (
-	. "github.com/ankyra/escape/model/interfaces"
+	"github.com/ankyra/escape/model"
 	"github.com/ankyra/escape/model/runners"
 	"github.com/ankyra/escape/model/runners/build"
 )
 
 type BuildController struct{}
 
-func (BuildController) Build(context Context, buildFatPackage bool, extraVars map[string]interface{}, extraProviders map[string]string) error {
+func (BuildController) Build(context *model.Context, buildFatPackage bool, extraVars map[string]interface{}, extraProviders map[string]string) error {
 	context.PushLogRelease(context.GetReleaseMetadata().GetQualifiedReleaseId())
 	context.PushLogSection("Build")
 	context.Log("build.start", nil)

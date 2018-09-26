@@ -22,7 +22,6 @@ import (
 	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape/model/config"
 	"github.com/ankyra/escape/model/dependency_resolvers"
-	"github.com/ankyra/escape/model/interfaces"
 	"github.com/ankyra/escape/model/paths"
 )
 
@@ -108,7 +107,7 @@ func escapeServerReleaseFetcherStrategy(cfg *config.EscapeConfig, path *paths.Pa
 	return archiveReleaseFetcherStrategy(cfg, path, dep)
 }
 
-func EnsurePackageIsUnpacked(context interfaces.Context, pkg string) error {
+func EnsurePackageIsUnpacked(context *Context, pkg string) error {
 	depCfg := core.NewDependencyConfig(pkg)
 	if err := depCfg.EnsureConfigIsParsed(); err != nil {
 		return err

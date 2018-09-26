@@ -20,14 +20,14 @@ import (
 	"os"
 
 	"github.com/ankyra/escape-core/state"
-	. "github.com/ankyra/escape/model/interfaces"
+	"github.com/ankyra/escape/model"
 	"github.com/ankyra/escape/model/runners"
 	"github.com/ankyra/escape/model/runners/deploy"
 )
 
 type SmokeController struct{}
 
-func (SmokeController) Smoke(context Context) error {
+func (SmokeController) Smoke(context *model.Context) error {
 	context.PushLogRelease(context.GetReleaseMetadata().GetQualifiedReleaseId())
 	context.PushLogSection("Smoke tests")
 	context.Log("smoke.start", nil)
@@ -44,7 +44,7 @@ func (SmokeController) Smoke(context Context) error {
 	return nil
 }
 
-func (s SmokeController) FetchAndSmoke(context Context, releaseId string) error {
+func (s SmokeController) FetchAndSmoke(context *model.Context, releaseId string) error {
 	currentDir, err := os.Getwd()
 	if err != nil {
 		return MarkDeploymentFailed(context, err, state.TestFailure)

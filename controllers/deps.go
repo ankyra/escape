@@ -17,11 +17,11 @@ limitations under the License.
 package controllers
 
 import (
-	. "github.com/ankyra/escape/model/interfaces"
+	"github.com/ankyra/escape/model"
 )
 
 type DepsController struct{}
 
-func (DepsController) Fetch(context Context) error {
+func (DepsController) Fetch(context *model.Context) error {
 	return nil
 }

@@ -18,12 +18,11 @@ package controllers
 
 import (
 	"github.com/ankyra/escape/model"
-	. "github.com/ankyra/escape/model/interfaces"
 )
 
 type PackageController struct{}
 
-func (PackageController) Package(context Context, forceOverwrite bool) error {
+func (PackageController) Package(context *model.Context, forceOverwrite bool) error {
 	context.PushLogRelease(context.GetReleaseMetadata().GetQualifiedReleaseId())
 	context.PushLogSection("Package")
 	context.Log("package.start", nil)

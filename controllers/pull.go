@@ -18,12 +18,11 @@ package controllers
 
 import (
 	"github.com/ankyra/escape/model"
-	. "github.com/ankyra/escape/model/interfaces"
 )
 
 type PullController struct{}
 
-func (PullController) PullReleases(context Context, packages []string) error {
+func (PullController) PullReleases(context *model.Context, packages []string) error {
 	for _, pkg := range packages {
 		if err := model.EnsurePackageIsUnpacked(context, pkg); err != nil {
 			return err

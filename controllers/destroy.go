@@ -20,14 +20,14 @@ import (
 	"os"
 
 	"github.com/ankyra/escape-core/state"
-	. "github.com/ankyra/escape/model/interfaces"
+	"github.com/ankyra/escape/model"
 	"github.com/ankyra/escape/model/runners"
 	"github.com/ankyra/escape/model/runners/destroy"
 )
 
 type DestroyController struct{}
 
-func (DestroyController) Destroy(context Context, destroyBuild, destroyDeployment bool) error {
+func (DestroyController) Destroy(context *model.Context, destroyBuild, destroyDeployment bool) error {
 	context.PushLogRelease(context.GetReleaseMetadata().GetQualifiedReleaseId())
 	context.PushLogSection("Destroy")
 	context.Log("destroy.start", nil)
@@ -55,7 +55,7 @@ func (DestroyController) Destroy(context Context, destroyBuild, destroyDeploymen
 	return nil
 }
 
-func (d DestroyController) FetchAndDestroy(context Context, releaseId string, destroyBuild, destroyDeployment bool) error {
+func (d DestroyController) FetchAndDestroy(context *model.Context, releaseId string, destroyBuild, destroyDeployment bool) error {
 	currentDir, err := os.Getwd()
 	if err != nil {
 		return MarkDeploymentFailed(context, err, state.DestroyFailure)

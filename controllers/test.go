@@ -17,14 +17,14 @@ limitations under the License.
 package controllers
 
 import (
-	. "github.com/ankyra/escape/model/interfaces"
+	"github.com/ankyra/escape/model"
 	"github.com/ankyra/escape/model/runners"
 	"github.com/ankyra/escape/model/runners/build"
 )
 
 type TestController struct{}
 
-func (TestController) Test(context Context) error {
+func (TestController) Test(context *model.Context) error {
 	context.PushLogRelease(context.GetReleaseMetadata().GetQualifiedReleaseId())
 	context.PushLogSection("Test")
 	context.Log("test.start", nil)

@@ -20,7 +20,6 @@ import (
 	"os"
 
 	"github.com/ankyra/escape/model"
-	. "github.com/ankyra/escape/model/interfaces"
 	"github.com/ankyra/escape/util"
 	"github.com/ankyra/escape/util/logger"
 	"github.com/spf13/cobra"
@@ -28,7 +27,7 @@ import (
 
 var cfgFile, cfgProfile, cfgLogLevel, cfgLogger string
 var cfgLogCollapse, jsonFlag bool
-var context Context
+var context *model.Context
 
 var RootCmd = &cobra.Command{
 	Use:           "escape",

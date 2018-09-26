@@ -21,18 +21,18 @@ import (
 	"io/ioutil"
 
 	"github.com/ankyra/escape-core"
+	"github.com/ankyra/escape/model"
 	"github.com/ankyra/escape/model/escape_plan"
-	. "github.com/ankyra/escape/model/interfaces"
 	"github.com/ankyra/escape/util"
 )
 
 type PlanController struct{}
 
-func (p PlanController) Compile(context Context) {
+func (p PlanController) Compile(context *model.Context) {
 	fmt.Println(context.GetReleaseMetadata().ToJson())
 }
 
-func (p PlanController) Diff(context Context) error {
+func (p PlanController) Diff(context *model.Context) error {
 	metadata := context.GetReleaseMetadata()
 	inventory := context.GetInventory()
 	previous, err := inventory.QueryReleaseMetadata(metadata.Project, metadata.Name, "latest")
@@ -48,7 +48,7 @@ func (p PlanController) Diff(context Context) error {
 	return nil
 }
 
-func (p PlanController) Format(context Context, outputLocation string) error {
+func (p PlanController) Format(context *model.Context, outputLocation string) error {
 	yaml := context.GetEscapePlan().ToYaml()
 	fmt.Print(string(yaml))
 	if outputLocation != "" {
@@ -57,7 +57,7 @@ func (p PlanController) Format(context Context, outputLocation string) error {
 	return nil
 }
 
-func (p PlanController) Minify(context Context, outputLocation string) error {
+func (p PlanController) Minify(context *model.Context, outputLocation string) error {
 	yaml := context.GetEscapePlan().ToMinifiedYaml()
 	fmt.Print(string(yaml))
 	if outputLocation != "" {
@@ -66,7 +66,7 @@ func (p PlanController) Minify(context Context, outputLocation string) error {
 	return nil
 }
 
-func (p PlanController) Init(context Context, build_id, output_file string, force, minify bool) error {
+func (p PlanController) Init(context *model.Context, build_id, output_file string, force, minify bool) error {
 	if util.PathExists(output_file) && !force {
 		return fmt.Errorf("'%s' already exists. Use --force / -f to overwrite.", output_file)
 	}
@@ -77,7 +77,7 @@ func (p PlanController) Init(context Context, build_id, output_file string, forc
 	return ioutil.WriteFile(output_file, plan.ToInitTemplate(), 0644)
 }
 
-func (p PlanController) Get(context Context, field string) error {
+func (p PlanController) Get(context *model.Context, field string) error {
 	var output string
 	switch field {
 	case "name":

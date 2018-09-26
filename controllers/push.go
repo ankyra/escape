@@ -17,13 +17,13 @@ limitations under the License.
 package controllers
 
 import (
-	. "github.com/ankyra/escape/model/interfaces"
+	"github.com/ankyra/escape/model"
 	"github.com/ankyra/escape/model/paths"
 )
 
 type PushController struct{}
 
-func (p PushController) Push(context Context, buildFatPackage bool) error {
+func (p PushController) Push(context *model.Context, buildFatPackage bool) error {
 	context.PushLogRelease(context.GetReleaseMetadata().GetQualifiedReleaseId())
 	context.PushLogSection("Push")
 	if err := p.saveLocally(context); err != nil {
@@ -38,7 +38,7 @@ func (p PushController) Push(context Context, buildFatPackage bool) error {
 	return nil
 }
 
-func (p PushController) saveLocally(context Context) error {
+func (p PushController) saveLocally(context *model.Context) error {
 	path := paths.NewPath()
 	metadata := context.GetReleaseMetadata()
 	if err := path.EnsureDependencyCacheDirectoryExists(metadata.Project); err != nil {
@@ -51,7 +51,7 @@ func (p PushController) saveLocally(context Context) error {
 	return nil
 }
 
-func (p PushController) upload(context Context) error {
+func (p PushController) upload(context *model.Context) error {
 	context.Log("upload.start", nil)
 	releasePath := paths.NewPath().ReleaseLocation(context.GetReleaseMetadata())
 	metadata := context.GetReleaseMetadata()
