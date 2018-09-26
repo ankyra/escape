@@ -37,16 +37,16 @@ func compileExtensions(ctx *CompilerContext) error {
 			return err
 		}
 		for _, consume := range metadata.Consumes {
-			ctx.Metadata.AddConsumes(consume)
+			ctx.Metadata.AddConsumes(consume.Copy())
 		}
 		for _, provide := range metadata.GetProvides() {
 			ctx.Metadata.AddProvides(provide)
 		}
 		for _, input := range metadata.Inputs {
-			ctx.Metadata.AddInputVariable(input)
+			ctx.Metadata.AddInputVariable(input.Copy())
 		}
 		for _, output := range metadata.Outputs {
-			ctx.Metadata.AddOutputVariable(output)
+			ctx.Metadata.AddOutputVariable(output.Copy())
 		}
 		for name, newErrand := range metadata.GetErrands() {
 			_, exists := ctx.Metadata.Errands[name]
@@ -60,6 +60,7 @@ func compileExtensions(ctx *CompilerContext) error {
 			ctx.Metadata.Metadata[key] = val
 		}
 		for _, tpl := range metadata.Templates {
+			tpl = tpl.Copy()
 			tpl.File = extensionPath(metadata, tpl.File)
 			tpl.Target = extensionPath(metadata, tpl.Target)
 			ctx.Metadata.Templates = append(ctx.Metadata.Templates, tpl)
@@ -75,7 +76,7 @@ func compileExtensions(ctx *CompilerContext) error {
 				newScript = append(newScript, fields[1:]...)
 				stage = core.NewExecStageForRelativeScript(strings.Join(newScript, " "))
 			}
-			ctx.Metadata.SetExecStage(name, stage)
+			ctx.Metadata.SetExecStage(name, stage.Copy())
 		}
 		for _, d := range metadata.Depends {
 			found := false
@@ -89,7 +90,7 @@ func compileExtensions(ctx *CompilerContext) error {
 				}
 			}
 			if !found {
-				if err := ctx.Plan.AddDependency(d); err != nil {
+				if err := ctx.Plan.AddDependency(d.Copy()); err != nil {
 					return err
 				}
 			}
