@@ -71,6 +71,7 @@ type Logger interface {
 	Log(string, map[string]string)
 	PushSection(string)
 	PopSection()
+	Close()
 	PushRelease(string)
 	PopRelease()
 	SetLogLevel(string)
@@ -78,4 +79,5 @@ type Logger interface {
 
 type LogConsumer interface {
 	Consume(*LogEntry) (string, error)
+	Close()
 }

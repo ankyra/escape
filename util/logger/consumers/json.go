@@ -75,3 +75,5 @@ func (t *jsonLogConsumer) Consume(entry *api.LogEntry) (string, error) {
 	}
 	return str, nil
 }
+func (t *jsonLogConsumer) Close() {
+}

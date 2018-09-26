@@ -30,6 +30,9 @@ func (l *LoggerDummy) Log(key string, values map[string]string) {
 func (l *LoggerDummy) PushSection(s string) {
 }
 
+func (l *LoggerDummy) Close() {
+}
+
 func (l *LoggerDummy) PopSection() {
 }
 

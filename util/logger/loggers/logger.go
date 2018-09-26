@@ -88,6 +88,12 @@ func (l *logger) PushSection(s string) {
 	l.sections = append(l.sections, s)
 }
 
+func (l *logger) Close() {
+	for _, c := range l.consumers {
+		c.Close()
+	}
+}
+
 func (l *logger) PopSection() {
 	l.sections = l.sections[:len(l.sections)-1]
 }

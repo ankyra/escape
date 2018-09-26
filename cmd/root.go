@@ -63,11 +63,13 @@ func Execute() {
 			context.Log("error", map[string]string{
 				"error": err.Error(),
 			})
+			context.Logger.Close()
 		} else {
 			RootCmd.UsageFunc()(RootCmd)
 		}
 		os.Exit(1)
 	}
+	context.Logger.Close()
 }
 
 func init() {

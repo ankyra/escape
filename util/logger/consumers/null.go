@@ -27,3 +27,6 @@ func NewNullLogConsumer() *nullLogConsumer {
 func (t *nullLogConsumer) Consume(entry *api.LogEntry) error {
 	return nil
 }
+
+func (t *nullLogConsumer) Close() {
+}

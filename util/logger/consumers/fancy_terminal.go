@@ -134,6 +134,10 @@ func (t *fancyTerminalOutput) plainOutput(entry *api.LogEntry) (string, error) {
 	return "", nil
 }
 
+func (t *fancyTerminalOutput) Close() {
+	fmt.Fprintln(os.Stderr, "")
+}
+
 func (t *fancyTerminalOutput) makeWhiteSpace(n int) string {
 	if n <= 0 {
 		return ""

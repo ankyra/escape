@@ -17,6 +17,10 @@ limitations under the License.
 package api
 
 var LogMessages = map[string]map[string]string{
+	"application.exit": map[string]string{
+		"msg":   "",
+		"level": "success",
+	},
 	"package.finished": map[string]string{
 		"msg":   "Packaged {{ .release }} at {{ .path }}",
 		"level": "success",
