@@ -69,7 +69,9 @@ func Execute() {
 		}
 		os.Exit(1)
 	}
-	context.Logger.Close()
+	if context != nil {
+		context.Logger.Close()
+	}
 }
 
 func init() {
