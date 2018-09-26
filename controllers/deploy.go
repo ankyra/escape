@@ -94,6 +94,9 @@ func (d DeployController) FetchAndDeploy(context Context, releaseId string, extr
 }
 
 func MarkDeploymentFailed(context Context, err error, errorCode state.StatusCode) error {
+	if context.GetReleaseMetadata() == nil { // there's a bug here. Root deployment name can be set, in which case it's fine to set the error.
+		return err
+	}
 	envState := context.GetEnvironmentState()
 	deplState, err2 := envState.GetOrCreateDeploymentState(context.GetRootDeploymentName())
 	if err2 != nil {
