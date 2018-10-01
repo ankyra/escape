@@ -59,6 +59,14 @@ func (r *LocalInventory) UploadRelease(project, releasePath string, metadata *co
 	if err := os.MkdirAll(path, 0755); err != nil {
 		return fmt.Errorf("Could not create application directory '%s': %s", path, err.Error())
 	}
+	dstPath := filepath.Join(path, metadata.GetReleaseId()+".tgz")
+	if err := util.CopyFile(releasePath, dstPath); err != nil {
+		return fmt.Errorf("Couldn't copy %s to %s: %s", releasePath, dstPath, err.Error())
+	}
+	metaPath := filepath.Join(path, metadata.GetReleaseId()+".json")
+	if err := metadata.WriteJsonFile(metaPath); err != nil {
+		return fmt.Errorf("Could not write release metadata file %s: %s", metaPath, err.Error())
+	}
 	indexPath := filepath.Join(r.BaseDir, project, metadata.Name, "index.json")
 	index, err := LoadVersionIndexFromFileOrCreateNew(metadata.Name, indexPath)
 	if err != nil {
