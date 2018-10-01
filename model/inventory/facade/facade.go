@@ -34,23 +34,21 @@ func NewInventoriesFacade() types.Inventory {
 	}
 }
 
-func (r *inventories) WalkInventories(f func(types.Inventory) (interface{}, error)) (interface{}, error) {
-	return nil, fmt.Errorf("No inventory was able to handle the request.")
-}
-
+// Gets the release metadata for project/app-version from the first inventory
+// that has it.  Ignores other errors so could potentially do something
+// unexpected.
 func (r *inventories) QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
-	return nil, nil
-}
-
-func (r *inventories) QueryNextVersion(project, name, versionPrefix string) (string, error) {
-	return "", nil
+	for _, inv := range r.Inventories {
+		result, err := inv.QueryReleaseMetadata(project, name, version)
+		if err != nil {
+			continue
+		}
+		return result, nil
+	}
+	return nil, fmt.Errorf("Couldn't get release metadata for '%s/%s-%s'", project, name, version)
 }
 
 func (r *inventories) DownloadRelease(project, name, version, targetFile string) error {
-	return nil
-}
-
-func (r *inventories) UploadRelease(project, releasePath string, metadata *core.ReleaseMetadata) error {
 	return nil
 }
 
@@ -94,12 +92,28 @@ func (r *inventories) ListApplications(project string) ([]string, error) {
 	return result, nil
 }
 
+// Lists the versions for project/app from the first inventory that has it.
+// Ignore errors so could cause interesting behaviour...
 func (r *inventories) ListVersions(project, app string) ([]string, error) {
-	return nil, nil
+	for _, inv := range r.Inventories {
+		result, err := inv.ListVersions(project, app)
+		if err != nil {
+			continue
+		}
+		return result, nil
+	}
+	return nil, fmt.Errorf("Couldn't list versions for application '%s' in project '%s', because the project '%s' or application '%s' could not be found in any of the configured Inventories.", app, project, project, app)
 }
 
+// These methods are only implemented for the actual Inventory types.
 func (r *inventories) Login(url, username, password string) (string, error)    { return "", nil }
 func (r *inventories) LoginWithBasicAuth(url, username, password string) error { return nil }
 func (r *inventories) GetAuthMethods(url string) (map[string]*types.AuthMethod, error) {
 	return nil, nil
+}
+func (r *inventories) QueryNextVersion(project, name, versionPrefix string) (string, error) {
+	return "", nil
+}
+func (r *inventories) UploadRelease(project, releasePath string, metadata *core.ReleaseMetadata) error {
+	return nil
 }

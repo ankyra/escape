@@ -17,10 +17,6 @@ limitations under the License.
 package inventory
 
 import (
-	"fmt"
-	"sort"
-
-	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape/model/inventory/local"
 	"github.com/ankyra/escape/model/inventory/remote"
 	"github.com/ankyra/escape/model/inventory/types"
@@ -32,63 +28,4 @@ func NewLocalInventory(baseDir string) types.Inventory {
 
 func NewRemoteInventory(apiServer, authToken, basicAuthUsername, basicAuthPassword string, insecureSkipVerify bool) types.Inventory {
 	return remote.NewRemoteInventory(apiServer, authToken, basicAuthUsername, basicAuthPassword, insecureSkipVerify)
-}
-
-type inventories struct {
-	Inventories []types.Inventory
-}
-
-func NewInventoriesFacade() types.Inventory {
-	return &inventories{
-		Inventories: []types.Inventory{},
-	}
-}
-
-func (r *inventories) WalkInventories(f func(types.Inventory) (interface{}, error)) (interface{}, error) {
-	return nil, fmt.Errorf("No inventory was able to handle the request.")
-}
-
-func (r *inventories) QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
-	return nil, nil
-}
-func (r *inventories) QueryNextVersion(project, name, versionPrefix string) (string, error) {
-	return "", nil
-}
-func (r *inventories) DownloadRelease(project, name, version, targetFile string) error {
-	return nil
-}
-func (r *inventories) UploadRelease(project, releasePath string, metadata *core.ReleaseMetadata) error {
-	return nil
-}
-func (r *inventories) ListProjects() ([]string, error) {
-	if len(r.Inventories) == 1 {
-		return r.Inventories[0].ListProjects()
-	}
-	projectSet := map[string]bool{}
-	for _, inv := range r.Inventories {
-		result, err := inv.ListProjects()
-		if err != nil {
-			return nil, err
-		}
-		for _, prj := range result {
-			projectSet[prj] = true
-		}
-	}
-	result := []string{}
-	for key, _ := range projectSet {
-		result = append(result, key)
-	}
-	sort.Strings(result)
-	return result, nil
-}
-func (r *inventories) ListApplications(project string) ([]string, error) {
-	return nil, nil
-}
-func (r *inventories) ListVersions(project, app string) ([]string, error) {
-	return nil, nil
-}
-func (r *inventories) Login(url, username, password string) (string, error)    { return "", nil }
-func (r *inventories) LoginWithBasicAuth(url, username, password string) error { return nil }
-func (r *inventories) GetAuthMethods(url string) (map[string]*types.AuthMethod, error) {
-	return nil, nil
 }
