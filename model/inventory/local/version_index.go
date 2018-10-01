@@ -87,5 +87,12 @@ func (v *VersionIndex) AddRelease(m *core.ReleaseMetadata) error {
 	}
 	v.Versions[m.Version] = m
 	return nil
+}
 
+func (v *VersionIndex) GetVersions() []string {
+	versions := []string{}
+	for version := range v.Versions {
+		versions = append(versions, version)
+	}
+	return versions
 }

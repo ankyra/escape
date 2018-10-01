@@ -25,6 +25,7 @@ import (
 	"strings"
 
 	core "github.com/ankyra/escape-core"
+	"github.com/ankyra/escape-core/parsers"
 	"github.com/ankyra/escape/model/inventory/types"
 	"github.com/ankyra/escape/util"
 )
@@ -40,24 +41,58 @@ func NewLocalInventory(baseDir string) *LocalInventory {
 }
 
 func (r *LocalInventory) QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
-	if version == "latest" || strings.HasSuffix(version, ".@") {
-		return nil, fmt.Errorf("Dynamic version release querying not implemented in local inventory. The inventory can be configured in the Global Escape configuration (see `escape config`)")
+	version, err := r.resolveReleaseVersion(project, name, version)
+	if err != nil {
+		return nil, err
 	}
-	metaPath := filepath.Join(r.BaseDir, project, name, name+"-"+version+".json")
+	metaPath := filepath.Join(r.BaseDir, project, name, name+"-v"+version+".json")
+	if !util.PathExists(metaPath) {
+		return nil, fmt.Errorf("The release %s/%s-v%s could not be found in the local inventory at %s. You may have to release it first?", project, name, version, r.BaseDir)
+	}
 	return core.NewReleaseMetadataFromFile(metaPath)
 }
 
+func (r *LocalInventory) resolveReleaseVersion(project, name, version string) (string, error) {
+	releaseIdString := name + "-v" + version
+	if strings.HasPrefix(version, "v") || version == "latest" {
+		releaseIdString = name + "-" + version
+	}
+	releaseId, err := parsers.ParseReleaseId(releaseIdString)
+	if err != nil {
+		return "", err
+	}
+	if releaseId.Version == "latest" {
+		return r.getLastVersionForPrefix(project, name, "")
+	} else if strings.HasSuffix(releaseId.Version, ".@") {
+		prefix := releaseId.Version[:len(releaseId.Version)-1]
+		return r.getLastVersionForPrefix(project, name, prefix)
+	}
+	return releaseId.Version, nil
+}
+
+func (r *LocalInventory) getLastVersionForPrefix(project, name, prefix string) (string, error) {
+	indexPath := filepath.Join(r.BaseDir, project, name, "index.json")
+	if !util.PathExists(indexPath) {
+		return prefix + "0", nil
+	}
+	index, err := LoadVersionIndexFromFile(indexPath)
+	if err != nil {
+		return "", fmt.Errorf("Failed to load application index for local inventory: %s", err.Error())
+	}
+	return prefix + getMaxFromVersions(index.GetVersions(), prefix).ToString(), nil
+}
+
 func (r *LocalInventory) QueryNextVersion(project, name, versionPrefix string) (string, error) {
+	path := filepath.Join(r.BaseDir, project, name)
+	if err := os.MkdirAll(path, 0755); err != nil {
+		return "", fmt.Errorf("Could not create application directory '%s': %s", path, err.Error())
+	}
 	indexPath := filepath.Join(r.BaseDir, project, name, "index.json")
 	index, err := LoadVersionIndexFromFileOrCreateNew(name, indexPath)
 	if err != nil {
 		return "", fmt.Errorf("Failed to load application index for local inventory: %s", err.Error())
 	}
-	versions := []string{}
-	for version := range index.Versions {
-		versions = append(versions, version)
-	}
-	semver := getMaxFromVersions(versions, versionPrefix)
+	semver := getMaxFromVersions(index.GetVersions(), versionPrefix)
 	semver.OnlyKeepLeadingVersionPart()
 	if err := semver.IncrementSmallest(); err != nil {
 		return "", err
