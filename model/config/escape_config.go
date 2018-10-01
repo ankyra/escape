@@ -25,7 +25,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ankyra/escape/model/inventory"
+	"github.com/ankyra/escape/model/inventory/types"
 	"github.com/ankyra/escape/util"
 )
 
@@ -52,7 +52,7 @@ func (c *EscapeConfig) NewProfile(profileName string) error {
 	return nil
 }
 
-func (c *EscapeConfig) GetInventory() inventory.Inventory {
+func (c *EscapeConfig) GetInventory() types.Inventory {
 	return c.GetCurrentProfile().GetInventory()
 }
 

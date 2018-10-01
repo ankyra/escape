@@ -51,7 +51,11 @@ func (r *LocalInventory) QueryNextVersion(project, name, versionPrefix string) (
 }
 
 func (r *LocalInventory) DownloadRelease(project, name, version, targetFile string) error {
-	return fmt.Errorf("Release download not implemented in local inventory. The inventory can be configured in the Global Escape configuration (see `escape config`)")
+	path := filepath.Join(r.BaseDir, project, name, name+"-"+version+".tgz")
+	if !util.PathExists(path) {
+		return fmt.Errorf("The release %s/%s-%s could not be found in the local inventory (expected at %s)", project, name, version, path)
+	}
+	return util.CopyFile(path, targetFile)
 }
 
 func (r *LocalInventory) UploadRelease(project, releasePath string, metadata *core.ReleaseMetadata) error {

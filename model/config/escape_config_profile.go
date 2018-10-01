@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/ankyra/escape/model/inventory"
+	"github.com/ankyra/escape/model/inventory/types"
 	"github.com/ankyra/escape/model/paths"
 )
 
@@ -47,7 +48,8 @@ func (t *EscapeConfigProfile) ToJson() string {
 	return string(str)
 }
 
-func (t *EscapeConfigProfile) GetInventory() inventory.Inventory {
+func (t *EscapeConfigProfile) GetInventory() types.Inventory {
+	//return inventory.NewLocalInventory("/home/bspaans/workspace/inventory")
 	return inventory.NewRemoteInventory(t.ApiServer, t.AuthToken, t.BasicAuthUsername, t.BasicAuthPassword, t.InsecureSkipVerify)
 }
 
