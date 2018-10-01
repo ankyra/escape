@@ -20,11 +20,11 @@ import (
 	"errors"
 
 	"github.com/ankyra/escape-core"
-	types "github.com/ankyra/escape-core/state"
+	coreState "github.com/ankyra/escape-core/state"
 	"github.com/ankyra/escape/model/compiler"
 	"github.com/ankyra/escape/model/config"
 	"github.com/ankyra/escape/model/escape_plan"
-	"github.com/ankyra/escape/model/inventory"
+	"github.com/ankyra/escape/model/inventory/types"
 	"github.com/ankyra/escape/model/paths"
 	"github.com/ankyra/escape/model/state"
 	"github.com/ankyra/escape/util/logger/api"
@@ -35,7 +35,7 @@ type Context struct {
 	EscapeConfig       *config.EscapeConfig
 	EscapePlan         *escape_plan.EscapePlan
 	ReleaseMetadata    *core.ReleaseMetadata
-	EnvironmentState   *types.EnvironmentState
+	EnvironmentState   *coreState.EnvironmentState
 	Logger             api.Logger
 	LogConsumers       []api.LogConsumer
 	DependencyMetadata map[string]*core.ReleaseMetadata
@@ -108,7 +108,7 @@ func (c *Context) PopLogRelease() {
 	c.Logger.PopRelease()
 }
 
-func (c *Context) GetInventory() inventory.Inventory {
+func (c *Context) GetInventory() types.Inventory {
 	return c.EscapeConfig.GetInventory()
 }
 
@@ -120,7 +120,7 @@ func (c *Context) GetReleaseMetadata() *core.ReleaseMetadata {
 	return c.ReleaseMetadata
 }
 
-func (c *Context) GetEnvironmentState() *types.EnvironmentState {
+func (c *Context) GetEnvironmentState() *coreState.EnvironmentState {
 	return c.EnvironmentState
 }
 

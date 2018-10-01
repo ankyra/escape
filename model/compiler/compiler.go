@@ -19,14 +19,14 @@ package compiler
 import (
 	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape/model/escape_plan"
-	"github.com/ankyra/escape/model/inventory"
+	"github.com/ankyra/escape/model/inventory/types"
 	"github.com/ankyra/escape/util/logger/api"
 )
 
 type CompilerFunc func(*CompilerContext) error
 
 func Compile(plan *escape_plan.EscapePlan,
-	reg inventory.Inventory,
+	reg types.Inventory,
 	depFetcher func(*core.DependencyConfig) (*core.ReleaseMetadata, error),
 	releaseQuery func(*core.DependencyConfig) (*core.ReleaseMetadata, error),
 	logger api.Logger) (*core.ReleaseMetadata, error) {

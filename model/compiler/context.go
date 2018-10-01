@@ -27,7 +27,7 @@ import (
 	"github.com/ankyra/escape-core"
 	"github.com/ankyra/escape-core/script"
 	"github.com/ankyra/escape/model/escape_plan"
-	"github.com/ankyra/escape/model/inventory"
+	"github.com/ankyra/escape/model/inventory/types"
 	"github.com/ankyra/escape/util"
 	"github.com/ankyra/escape/util/logger/api"
 )
@@ -38,11 +38,11 @@ type CompilerContext struct {
 	VariableCtx       map[string]*core.ReleaseMetadata
 	DependencyFetcher func(*core.DependencyConfig) (*core.ReleaseMetadata, error)
 	ReleaseQuery      func(*core.DependencyConfig) (*core.ReleaseMetadata, error)
-	Inventory         inventory.Inventory
+	Inventory         types.Inventory
 	Logger            api.Logger
 }
 
-func NewCompilerContext(plan *escape_plan.EscapePlan, inventory inventory.Inventory) *CompilerContext {
+func NewCompilerContext(plan *escape_plan.EscapePlan, inventory types.Inventory) *CompilerContext {
 	return &CompilerContext{
 		Metadata:    core.NewEmptyReleaseMetadata(),
 		Plan:        plan,
@@ -51,7 +51,7 @@ func NewCompilerContext(plan *escape_plan.EscapePlan, inventory inventory.Invent
 	}
 }
 
-func NewCompilerContextWithLogger(plan *escape_plan.EscapePlan, inventory inventory.Inventory, logger api.Logger) *CompilerContext {
+func NewCompilerContextWithLogger(plan *escape_plan.EscapePlan, inventory types.Inventory, logger api.Logger) *CompilerContext {
 	ctx := NewCompilerContext(plan, inventory)
 	ctx.Logger = logger
 	return ctx
