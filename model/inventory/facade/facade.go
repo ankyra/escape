@@ -14,25 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package inventory
+package facade
 
 import (
 	"fmt"
 	"sort"
 
 	core "github.com/ankyra/escape-core"
-	"github.com/ankyra/escape/model/inventory/local"
-	"github.com/ankyra/escape/model/inventory/remote"
 	"github.com/ankyra/escape/model/inventory/types"
 )
-
-func NewLocalInventory(baseDir string) types.Inventory {
-	return local.NewLocalInventory(baseDir)
-}
-
-func NewRemoteInventory(apiServer, authToken, basicAuthUsername, basicAuthPassword string, insecureSkipVerify bool) types.Inventory {
-	return remote.NewRemoteInventory(apiServer, authToken, basicAuthUsername, basicAuthPassword, insecureSkipVerify)
-}
 
 type inventories struct {
 	Inventories []types.Inventory
@@ -51,19 +41,21 @@ func (r *inventories) WalkInventories(f func(types.Inventory) (interface{}, erro
 func (r *inventories) QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
 	return nil, nil
 }
+
 func (r *inventories) QueryNextVersion(project, name, versionPrefix string) (string, error) {
 	return "", nil
 }
+
 func (r *inventories) DownloadRelease(project, name, version, targetFile string) error {
 	return nil
 }
+
 func (r *inventories) UploadRelease(project, releasePath string, metadata *core.ReleaseMetadata) error {
 	return nil
 }
+
+// Combines the projects found in each inventory into a list.
 func (r *inventories) ListProjects() ([]string, error) {
-	if len(r.Inventories) == 1 {
-		return r.Inventories[0].ListProjects()
-	}
 	projectSet := map[string]bool{}
 	for _, inv := range r.Inventories {
 		result, err := inv.ListProjects()
@@ -81,12 +73,31 @@ func (r *inventories) ListProjects() ([]string, error) {
 	sort.Strings(result)
 	return result, nil
 }
+
+// Combines the applications found in each inventory into a list.
 func (r *inventories) ListApplications(project string) ([]string, error) {
-	return nil, nil
+	applicationSet := map[string]bool{}
+	for _, inv := range r.Inventories {
+		result, err := inv.ListApplications(project)
+		if err != nil {
+			return nil, err
+		}
+		for _, app := range result {
+			applicationSet[app] = true
+		}
+	}
+	result := []string{}
+	for key, _ := range applicationSet {
+		result = append(result, key)
+	}
+	sort.Strings(result)
+	return result, nil
 }
+
 func (r *inventories) ListVersions(project, app string) ([]string, error) {
 	return nil, nil
 }
+
 func (r *inventories) Login(url, username, password string) (string, error)    { return "", nil }
 func (r *inventories) LoginWithBasicAuth(url, username, password string) error { return nil }
 func (r *inventories) GetAuthMethods(url string) (map[string]*types.AuthMethod, error) {
