@@ -9,14 +9,21 @@ import (
 	"github.com/ankyra/escape/model/paths"
 )
 
+type InventoryType string
+
+var LocalInventory InventoryType = "local"
+var RemoteInventory InventoryType = "remote"
+
 type EscapeConfigProfile struct {
-	ApiServer          string `json:"api_server"`
-	AuthToken          string `json:"escape_auth_token"`
-	BasicAuthUsername  string `json:"basic_auth_username"`
-	BasicAuthPassword  string `json:"basic_auth_password"`
-	InsecureSkipVerify bool   `json:"insecure_skip_verify"`
-	StatePath          string `json:"state_path"`
-	parent             *EscapeConfig
+	InventoryType         InventoryType `json:"inventory_type"`
+	ApiServer             string        `json:"api_server"`
+	AuthToken             string        `json:"escape_auth_token"`
+	BasicAuthUsername     string        `json:"basic_auth_username"`
+	BasicAuthPassword     string        `json:"basic_auth_password"`
+	InsecureSkipVerify    bool          `json:"insecure_skip_verify"`
+	StatePath             string        `json:"state_path"`
+	LocalInventoryBaseDir string        `json:"local_inventory_base_dir"`
+	parent                *EscapeConfig
 }
 
 func newEscapeConfigProfile(cfg *EscapeConfig) *EscapeConfigProfile {
@@ -31,6 +38,9 @@ func newEscapeConfigProfile(cfg *EscapeConfig) *EscapeConfigProfile {
 
 func (t *EscapeConfigProfile) fix(cfg *EscapeConfig) *EscapeConfigProfile {
 	t.parent = cfg
+	if t.InventoryType == "" {
+		t.InventoryType = RemoteInventory
+	}
 	if t.ApiServer == "" {
 		t.ApiServer = "https://escape.ankyra.io"
 	}
@@ -49,7 +59,9 @@ func (t *EscapeConfigProfile) ToJson() string {
 }
 
 func (t *EscapeConfigProfile) GetInventory() types.Inventory {
-	//return inventory.NewLocalInventory("/home/bspaans/workspace/inventory")
+	if t.InventoryType == LocalInventory {
+		return inventory.NewLocalInventory(t.LocalInventoryBaseDir)
+	}
 	return inventory.NewRemoteInventory(t.ApiServer, t.AuthToken, t.BasicAuthUsername, t.BasicAuthPassword, t.InsecureSkipVerify)
 }
 
