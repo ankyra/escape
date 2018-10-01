@@ -43,11 +43,40 @@ func (r *LocalInventory) QueryReleaseMetadata(project, name, version string) (*c
 	if version == "latest" || strings.HasSuffix(version, ".@") {
 		return nil, fmt.Errorf("Dynamic version release querying not implemented in local inventory. The inventory can be configured in the Global Escape configuration (see `escape config`)")
 	}
-	return nil, fmt.Errorf("Not implemented")
+	metaPath := filepath.Join(r.BaseDir, project, name, name+"-"+version+".json")
+	return core.NewReleaseMetadataFromFile(metaPath)
 }
 
 func (r *LocalInventory) QueryNextVersion(project, name, versionPrefix string) (string, error) {
-	return "", fmt.Errorf("Auto versioning is not implemented in local inventory. The inventory can be configured in the global Escape configuration (see `escape config`)")
+	indexPath := filepath.Join(r.BaseDir, project, name, "index.json")
+	index, err := LoadVersionIndexFromFileOrCreateNew(name, indexPath)
+	if err != nil {
+		return "", fmt.Errorf("Failed to load application index for local inventory: %s", err.Error())
+	}
+	versions := []string{}
+	for version := range index.Versions {
+		versions = append(versions, version)
+	}
+	semver := getMaxFromVersions(versions, versionPrefix)
+	semver.OnlyKeepLeadingVersionPart()
+	if err := semver.IncrementSmallest(); err != nil {
+		return "", err
+	}
+	return versionPrefix + semver.ToString(), nil
+}
+
+func getMaxFromVersions(versions []string, prefix string) *core.SemanticVersion {
+	current := core.NewSemanticVersion("-1")
+	for _, v := range versions {
+		if strings.HasPrefix(v, prefix) {
+			release_version := v[len(prefix):]
+			newver := core.NewSemanticVersion(release_version)
+			if current.LessOrEqual(newver) {
+				current = newver
+			}
+		}
+	}
+	return current
 }
 
 func (r *LocalInventory) DownloadRelease(project, name, version, targetFile string) error {
