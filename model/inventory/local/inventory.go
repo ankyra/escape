@@ -17,6 +17,7 @@ limitations under the License.
 package local
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
@@ -25,6 +26,7 @@ import (
 
 	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape/model/inventory/types"
+	"github.com/ankyra/escape/util"
 )
 
 type LocalInventory struct {
@@ -77,34 +79,53 @@ func (r *LocalInventory) ListProjects() ([]string, error) {
 
 func (r *LocalInventory) ListApplications(project string) ([]string, error) {
 	path := filepath.Join(r.BaseDir, project)
+	if !util.PathExists(path) {
+		return nil, fmt.Errorf("The project '%s' could not be found in the local inventory at %s.", project, r.BaseDir)
+	}
 	result := []string{}
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
 		return result, err
 	}
-	appMap := map[string]bool{}
 	for _, file := range files {
-		if !file.IsDir() {
+		if file.IsDir() {
 			name := file.Name()
-			if strings.HasSuffix(name, ".json") {
-				metadata, err := core.NewReleaseMetadataFromFile(filepath.Join(path, name))
-				if err != nil {
-					fmt.Printf("WARN: Could not read release metadata from file %s: %s\n", name, err.Error())
-					continue
-				}
-				appMap[metadata.Name] = true
+			indexPath := filepath.Join(r.BaseDir, project, name, "index.json")
+			if util.PathExists(indexPath) {
+				result = append(result, name)
 			}
 		}
-	}
-	for app, _ := range appMap {
-		result = append(result, app)
 	}
 	sort.Strings(result)
 	return result, nil
 }
 
+type VersionIndex struct {
+	Name          string
+	EscapeVersion string
+	CoreVersion   string
+	Versions      map[string]*core.ReleaseMetadata
+}
+
 func (r *LocalInventory) ListVersions(project, app string) ([]string, error) {
-	return []string{}, nil
+	path := filepath.Join(r.BaseDir, project, app, "index.json")
+	if !util.PathExists(path) {
+		return nil, fmt.Errorf("The application '%s/%s' could not be found in the local inventory at %s.", project, app, r.BaseDir)
+	}
+	content, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	index := VersionIndex{}
+	if err := json.Unmarshal(content, &index); err != nil {
+		return nil, fmt.Errorf("Could not read local version index at '%s': %s", path, err.Error())
+	}
+
+	result := []string{}
+	for version := range index.Versions {
+		result = append(result, version)
+	}
+	return result, nil
 }
 
 // Not required.
