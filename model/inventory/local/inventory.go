@@ -17,9 +17,9 @@ limitations under the License.
 package local
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -55,7 +55,19 @@ func (r *LocalInventory) DownloadRelease(project, name, version, targetFile stri
 }
 
 func (r *LocalInventory) UploadRelease(project, releasePath string, metadata *core.ReleaseMetadata) error {
-	return nil
+	path := filepath.Join(r.BaseDir, project, metadata.Name)
+	if err := os.MkdirAll(path, 0755); err != nil {
+		return fmt.Errorf("Could not create application directory '%s': %s", path, err.Error())
+	}
+	indexPath := filepath.Join(r.BaseDir, project, metadata.Name, "index.json")
+	index, err := LoadVersionIndexFromFileOrCreateNew(metadata.Name, indexPath)
+	if err != nil {
+		return fmt.Errorf("Failed to load application index for local inventory: %s", err.Error())
+	}
+	if err := index.AddRelease(metadata); err != nil {
+		return err
+	}
+	return index.Save()
 }
 
 func (r *LocalInventory) ListProjects() ([]string, error) {
@@ -100,27 +112,15 @@ func (r *LocalInventory) ListApplications(project string) ([]string, error) {
 	return result, nil
 }
 
-type VersionIndex struct {
-	Name          string
-	EscapeVersion string
-	CoreVersion   string
-	Versions      map[string]*core.ReleaseMetadata
-}
-
 func (r *LocalInventory) ListVersions(project, app string) ([]string, error) {
 	path := filepath.Join(r.BaseDir, project, app, "index.json")
 	if !util.PathExists(path) {
 		return nil, fmt.Errorf("The application '%s/%s' could not be found in the local inventory at %s.", project, app, r.BaseDir)
 	}
-	content, err := ioutil.ReadFile(path)
+	index, err := LoadVersionIndexFromFile(path)
 	if err != nil {
 		return nil, err
 	}
-	index := VersionIndex{}
-	if err := json.Unmarshal(content, &index); err != nil {
-		return nil, fmt.Errorf("Could not read local version index at '%s': %s", path, err.Error())
-	}
-
 	result := []string{}
 	for version := range index.Versions {
 		result = append(result, version)
