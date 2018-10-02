@@ -23,6 +23,7 @@ type EscapeConfigProfile struct {
 	InsecureSkipVerify    bool          `json:"insecure_skip_verify"`
 	StatePath             string        `json:"state_path"`
 	LocalInventoryBaseDir string        `json:"local_inventory_base_dir"`
+	ProxyNamespaces       []string      `json:"proxy_namespaces"`
 	parent                *EscapeConfig
 }
 
@@ -32,6 +33,7 @@ func newEscapeConfigProfile(cfg *EscapeConfig) *EscapeConfigProfile {
 		AuthToken:         os.Getenv("ESCAPE_AUTH_TOKEN"),
 		BasicAuthUsername: os.Getenv("BASIC_AUTH_USERNAME"),
 		BasicAuthPassword: os.Getenv("BASIC_AUTH_PASSWORD"),
+		ProxyNamespaces:   []string{},
 	}
 	return profile.fix(cfg)
 }
@@ -59,10 +61,23 @@ func (t *EscapeConfigProfile) ToJson() string {
 }
 
 func (t *EscapeConfigProfile) GetInventory() types.Inventory {
+	var inv types.Inventory
 	if t.InventoryType == LocalInventory {
-		return inventory.NewLocalInventory(t.LocalInventoryBaseDir)
+		inv = inventory.NewLocalInventory(t.LocalInventoryBaseDir)
+	} else {
+		inv = inventory.NewRemoteInventory(t.ApiServer, t.AuthToken, t.BasicAuthUsername, t.BasicAuthPassword, t.InsecureSkipVerify)
 	}
-	return inventory.NewRemoteInventory(t.ApiServer, t.AuthToken, t.BasicAuthUsername, t.BasicAuthPassword, t.InsecureSkipVerify)
+	if len(t.ProxyNamespaces) == 0 {
+		return inv
+	}
+
+	var proxyInv types.Inventory
+	if t.InventoryType == LocalInventory {
+		proxyInv = inventory.NewRemoteInventory(t.ApiServer, t.AuthToken, t.BasicAuthUsername, t.BasicAuthPassword, t.InsecureSkipVerify)
+	} else {
+		proxyInv = inventory.NewLocalInventory(t.LocalInventoryBaseDir)
+	}
+	return inventory.NewInventoryProxy(inv, t.ProxyNamespaces, proxyInv)
 }
 
 func (t *EscapeConfigProfile) Save() error {

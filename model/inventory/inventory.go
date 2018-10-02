@@ -18,6 +18,7 @@ package inventory
 
 import (
 	"github.com/ankyra/escape/model/inventory/local"
+	"github.com/ankyra/escape/model/inventory/proxy"
 	"github.com/ankyra/escape/model/inventory/remote"
 	"github.com/ankyra/escape/model/inventory/types"
 )
@@ -28,4 +29,8 @@ func NewLocalInventory(baseDir string) types.Inventory {
 
 func NewRemoteInventory(apiServer, authToken, basicAuthUsername, basicAuthPassword string, insecureSkipVerify bool) types.Inventory {
 	return remote.NewRemoteInventory(apiServer, authToken, basicAuthUsername, basicAuthPassword, insecureSkipVerify)
+}
+
+func NewInventoryProxy(inv types.Inventory, proxiedNamespaces []string, proxyInv types.Inventory) types.Inventory {
+	return proxy.NewInventoryProxy(inv, proxyInv, proxiedNamespaces)
 }
