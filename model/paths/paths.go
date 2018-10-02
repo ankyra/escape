@@ -99,6 +99,10 @@ func (p *Path) GetDefaultStateLocation() string {
 	return filepath.Join(p.GetAppConfigDir(), "escape_state.json")
 }
 
+func (p *Path) GetDefaultLocalInventoryLocation() string {
+	return filepath.Join(p.GetAppConfigDir(), ".inventory")
+}
+
 func (p *Path) DependencyReleaseArchive(dependency *core.Dependency) string {
 	return filepath.Join(p.baseDir, dependency.GetReleaseId()+".tgz")
 }

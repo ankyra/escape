@@ -41,10 +41,16 @@ func newEscapeConfigProfile(cfg *EscapeConfig) *EscapeConfigProfile {
 func (t *EscapeConfigProfile) fix(cfg *EscapeConfig) *EscapeConfigProfile {
 	t.parent = cfg
 	if t.InventoryType == "" {
-		t.InventoryType = RemoteInventory
+		if t.ApiServer != "" {
+			t.InventoryType = RemoteInventory
+		} else {
+			t.InventoryType = LocalInventory
+			t.LocalInventoryBaseDir = paths.NewPath().GetDefaultLocalInventoryLocation()
+		}
 	}
 	if t.ApiServer == "" {
 		t.ApiServer = "https://escape.ankyra.io"
+		t.ProxyNamespaces = []string{"examples", "extensions", "providers"}
 	}
 	if t.StatePath == "" {
 		t.StatePath = paths.NewPath().GetDefaultStateLocation()
