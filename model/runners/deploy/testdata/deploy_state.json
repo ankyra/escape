@@ -29,7 +29,7 @@
                      "version": "0.0.1",
                      "status": {
                         "status": "failure",
-                        "updated_at": "2018-10-02T15:50:20.224842581+01:00",
+                        "updated_at": "2018-10-10T16:43:39.075818772+01:00",
                         "data": "Referenced post_deploy script 'testdata/doesnt_exist.sh' does not exist"
                      }
                   }

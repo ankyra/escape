@@ -17,6 +17,7 @@ limitations under the License.
 package compiler
 
 import (
+	core "github.com/ankyra/escape-core"
 	"github.com/ankyra/escape/model/escape_plan"
 	. "gopkg.in/check.v1"
 )
@@ -50,14 +51,14 @@ func (s *suite) Test_Compile_Scripts_relative_script_fails_if_script_doesnt_exis
 	plan := escape_plan.NewEscapePlan()
 	plan.Deploy = "./testdata/script_doesnt_exist.sh"
 	ctx := NewCompilerContext(plan, nil)
-	c.Assert(compileScripts(ctx), DeepEquals, ScriptFieldError("deploy", ScriptDoesNotExistError("./testdata/script_doesnt_exist.sh", "./testdata/script_doesnt_exist.sh")))
+	c.Assert(compileScripts(ctx), DeepEquals, ScriptFieldError("deploy", core.ScriptDoesNotExistError("./testdata/script_doesnt_exist.sh", "./testdata/script_doesnt_exist.sh")))
 }
 
 func (s *suite) Test_Compile_Scripts_relative_script_fails_if_outside_of_basedir(c *C) {
 	plan := escape_plan.NewEscapePlan()
 	plan.Deploy = "../runners/build/testdata/test.sh"
 	ctx := NewCompilerContext(plan, nil)
-	c.Assert(compileScripts(ctx), DeepEquals, ScriptFieldError("deploy", RelativeScriptOutsideOfBaseDirError("../runners/build/testdata/test.sh")))
+	c.Assert(compileScripts(ctx), DeepEquals, ScriptFieldError("deploy", core.RelativeScriptOutsideOfBaseDirError("../runners/build/testdata/test.sh")))
 }
 
 func (s *suite) Test_Compile_Scripts_absolute_path(c *C) {

@@ -130,16 +130,14 @@ func NewErrandFromDict(name string, dict interface{}) (*Errand, error) {
 					}
 					description = str
 				} else if key == "run" {
-					switch val.(type) {
-					case map[interface{}]interface{}:
-						run, err := NewExecStageFromDict(val.(map[interface{}]interface{}))
-						if err != nil {
-							return nil, fmt.Errorf("Failed to parse 'run' field in errand: %s", err.Error())
-						}
-						execRun = run
-					default:
-						return nil, fmt.Errorf("Expecting object for field 'run' in errand. Got '%v'", val)
+					run, err := NewExecStageFromInterface(val)
+					if err != nil {
+						return nil, fmt.Errorf("Failed to parse 'run' field in errand: %s", err.Error())
 					}
+					if run == nil {
+						return nil, fmt.Errorf("Missing value for 'run' field in errand.")
+					}
+					execRun = run
 				} else if key == "script" {
 					str, err := getString(val)
 					if err != nil {

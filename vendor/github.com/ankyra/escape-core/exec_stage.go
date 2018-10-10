@@ -20,9 +20,12 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/ankyra/escape-core/script"
+	"github.com/ankyra/escape-core/util"
 )
 
 func ExpectingTypeForExecStageError(typ, field string, val interface{}) error {
@@ -49,6 +52,68 @@ type ExecStage struct {
 func NewExecStageForRelativeScript(script string) *ExecStage {
 	return &ExecStage{
 		RelativeScript: script,
+	}
+}
+
+func RelativeScriptOutsideOfBaseDirError(script string) error {
+	return fmt.Errorf("The file '%s' is outside of this package's base directory and can't be added.", script)
+}
+func ScriptDoesNotExistError(script, str string) error {
+	return fmt.Errorf("The path to script '%s' does not exist (in '%s')", script, str)
+}
+
+func NewExecStageFromString(str string) (*ExecStage, error) {
+	parts := strings.Fields(str)
+	firstArg := parts[0]
+
+	// e.g. /bin/ls -al
+	if filepath.IsAbs(firstArg) {
+		return &ExecStage{
+			Cmd:  firstArg,
+			Args: parts[1:],
+		}, nil
+	}
+	if util.PathExists(firstArg) {
+		cwd, err := os.Getwd()
+		if err != nil {
+			return nil, err
+		}
+		path, err := filepath.Abs(firstArg)
+		if err != nil {
+			return nil, err
+		}
+		rel, err := filepath.Rel(cwd, path)
+		if err != nil {
+			return nil, err
+		}
+		if strings.HasPrefix(rel, "..") {
+			return nil, RelativeScriptOutsideOfBaseDirError(firstArg)
+		}
+		return NewExecStageForRelativeScript(str), nil
+	} else if strings.HasPrefix(firstArg, ".") {
+		return nil, ScriptDoesNotExistError(firstArg, str)
+	}
+	return &ExecStage{
+		Cmd:  firstArg,
+		Args: parts[1:],
+	}, nil
+}
+
+func NewExecStageFromInterface(script interface{}) (*ExecStage, error) {
+	if script == nil {
+		return nil, nil
+	}
+	switch script.(type) {
+	case string:
+		str := script.(string)
+		if str == "" {
+			return nil, nil
+		}
+		return NewExecStageFromString(str)
+	case map[interface{}]interface{}:
+		return NewExecStageFromDict(script.(map[interface{}]interface{}))
+	default:
+		return nil, fmt.Errorf("Expecting dict or string type. Got '%T'", script)
 	}
 }
 
