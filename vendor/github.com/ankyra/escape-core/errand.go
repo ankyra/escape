@@ -46,13 +46,21 @@ type Errand struct {
 	// An optional description of the errand.
 	Description string `json:"description"`
 
-	// The location of the script performing the actual work.
+	// The script or command performing the errand (deprecated, use 'run' instead).
 	//
 	// The script has access to the deployment inputs and outputs as enviroment
 	// variables. For example: an input with `"id": "input_variable"` will be
 	// accessible as `INPUT_input_variable`; and an output with `"id":
 	// "output_variable"` as `OUTPUT_output_variable`.
 	Script string `json:"script"`
+
+	// The script or command performing the errand.
+	//
+	// The command has access to the deployment inputs and outputs as
+	// enviroment variables. For example: an input with `"id":
+	// "input_variable"` will be accessible as `INPUT_input_variable`; and an
+	// output with `"id": "output_variable"` as `OUTPUT_output_variable`.
+	Run *ExecStage `json:"exec_stage"`
 
 	// A list of [Variables](/docs/reference/input-and-output-variables/). The values
 	// will be made available to the `script` (along with the regular
@@ -67,6 +75,7 @@ func NewErrand(name, script, description string) *Errand {
 		Name:        name,
 		Script:      script,
 		Description: description,
+		Run:         &ExecStage{},
 		Inputs:      []*variables.Variable{},
 	}
 	return result
@@ -83,8 +92,14 @@ func (e *Errand) GetInputs() []*variables.Variable {
 func (e *Errand) Validate() error {
 	if e.Name == "" {
 		return fmt.Errorf("Missing name in errand")
-	} else if e.Script == "" {
-		return fmt.Errorf("Missing script in errand '%s'", e.Name)
+	}
+	if e.Run.IsEmpty() {
+		if e.Script != "" {
+			e.Run = NewExecStageForRelativeScript(e.Script)
+			e.Script = ""
+		} else {
+			return fmt.Errorf("Missing 'run' in errand '%s'", e.Name)
+		}
 	}
 	if e.Inputs == nil {
 		return nil
@@ -100,6 +115,7 @@ func (e *Errand) Validate() error {
 func NewErrandFromDict(name string, dict interface{}) (*Errand, error) {
 	switch dict.(type) {
 	case map[interface{}]interface{}:
+		execRun := &ExecStage{}
 		errandMap := dict.(map[interface{}]interface{})
 		description := ""
 		script := ""
@@ -113,7 +129,17 @@ func NewErrandFromDict(name string, dict interface{}) (*Errand, error) {
 						return nil, errors.New("Expecting string value for description field in errand " + name)
 					}
 					description = str
-
+				} else if key == "run" {
+					switch val.(type) {
+					case map[interface{}]interface{}:
+						run, err := NewExecStageFromDict(val.(map[interface{}]interface{}))
+						if err != nil {
+							return nil, fmt.Errorf("Failed to parse 'run' field in errand: %s", err.Error())
+						}
+						execRun = run
+					default:
+						return nil, fmt.Errorf("Expecting object for field 'run' in errand. Got '%v'", val)
+					}
 				} else if key == "script" {
 					str, err := getString(val)
 					if err != nil {
@@ -145,6 +171,7 @@ func NewErrandFromDict(name string, dict interface{}) (*Errand, error) {
 			Name:        name,
 			Description: description,
 			Script:      script,
+			Run:         execRun,
 			Inputs:      inputs,
 		}
 		return result, result.Validate()

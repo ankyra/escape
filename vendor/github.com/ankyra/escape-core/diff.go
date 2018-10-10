@@ -249,12 +249,36 @@ func diffNil(path []string, oldValue, newValue interface{}) []Change {
 }
 
 func diffPointer(path []string, oldValue, newValue interface{}) []Change {
-	if changes := diffNil(path, oldValue, newValue); len(changes) != 0 {
+	if changes := diffNil(path, oldValue, newValue); len(changes) != 0 || oldValue == nil {
 		return changes
 	}
-	oldVal := reflect.Indirect(reflect.ValueOf(oldValue)).Interface()
-	newVal := reflect.Indirect(reflect.ValueOf(newValue)).Interface()
-	return diff(path, oldVal, newVal)
+	v1 := reflect.ValueOf(oldValue)
+	v2 := reflect.ValueOf(newValue)
+	if !v1.IsValid() {
+		if !v2.IsValid() {
+			return []Change{}
+		} else {
+			v := reflect.Indirect(v2).Interface()
+			return []Change{NewAddition(path, diffValue(v))}
+		}
+	} else if !v2.IsValid() {
+		v := reflect.Indirect(v1).Interface()
+		return []Change{NewRemoval(path, diffValue(v))}
+	}
+	i1 := reflect.Indirect(v1)
+	i2 := reflect.Indirect(v2)
+	if !i1.IsValid() {
+		if !i2.IsValid() {
+			return []Change{}
+		} else {
+			v := i2.Interface()
+			return []Change{NewAddition(path, diffValue(v))}
+		}
+	} else if !i2.IsValid() {
+		v := i1.Interface()
+		return []Change{NewRemoval(path, diffValue(v))}
+	}
+	return diff(path, i1.Interface(), i2.Interface())
 }
 
 func diffValue(v interface{}) interface{} {

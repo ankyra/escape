@@ -17,7 +17,25 @@ h2 {
 Standard library functions for the [Escape Scripting Language](../scripting-language/)
 
 
+# Functions acting on integers
+
+## add(y :: integer)
+
+Add two integers
+
+
+# Unary functions
+
+## timestamp()
+
+Returns a UNIX timestamp
+
+
 # Functions acting on bool
+
+## or(b2 :: bool)
+
+Logical OR operation
 
 ## not()
 
@@ -27,20 +45,8 @@ Logical NOT operation
 
 Logical AND operation
 
-## or(b2 :: bool)
-
-Logical OR operation
-
 
 # Functions acting on integer
-
-## gt(i2 :: integer)
-
-Returns true if first argument is greater than second argument
-
-## gte(i2 :: integer)
-
-Returns true if first argument is greater than or equal to second argument
 
 ## lt(i2 :: integer)
 
@@ -49,6 +55,14 @@ Returns true if first argument is less than the second argument
 ## lte(i2 :: integer)
 
 Returns true if first argument is less than or equal to the second argument
+
+## gt(i2 :: integer)
+
+Returns true if first argument is greater than second argument
+
+## gte(i2 :: integer)
+
+Returns true if first argument is greater than or equal to second argument
 
 
 # Functions acting on everything
@@ -63,10 +77,6 @@ Returns true if the arguments are of the same type and have the same value
 
 
 # Functions acting on lists
-
-## list_slice(i :: integer, j :: integer)
-
-Slice a list. Usually accessed implicitly using slice syntax (eg. `list[0:5]`)
 
 ## env_lookup(key :: string)
 
@@ -84,88 +94,78 @@ Index a list at position `n`. Usually accessed implicitly using indexing syntax 
 
 Returns the length of the list
 
+## list_slice(i :: integer, j :: integer)
+
+Slice a list. Usually accessed implicitly using slice syntax (eg. `list[0:5]`)
+
 
 # Functions acting on strings
-
-## upper(v :: string)
-
-Returns a copy of the string v with all Unicode characters mapped to their upper case
-
-## path_exists()
-
-Returns true if the path exists, false if not
-
-## track_patch_version()
-
-Track patch version
-
-## lower(v :: string)
-
-Returns a copy of the string v with all Unicode characters mapped to their lower case
 
 ## base64_decode()
 
 Decode string from base64
 
-## trim()
-
-Returns a slice of the string s, with all leading and trailing white space removed, as defined by Unicode. 
-
-## track_minor_version()
-
-Track minor version
-
-## replace(old :: string, new :: string, n :: integer)
-
-Replace returns a copy of the string s with the first n non-overlapping instances of old replaced by new. If old is empty, it matches at the beginning of the string and after each UTF-8 sequence, yielding up to k+1 replacements for a k-rune string. If n < 0, there is no limit on the number of replacements.
-
-## title(v :: string)
-
-Returns a copy of the string v with all Unicode characters mapped to their title case
-
-## file_exists()
-
-Returns true if the path exists and if it's not a directory, false otherwise
-
-## dir_exists()
-
-Returns true if the path exists and if it is a directory, false otherwise
-
 ## read_file()
 
 Read the contents of a file
-
-## track_version()
-
-Track version
 
 ## concat(v1 :: string, v2 :: string, ...)
 
 Concatate stringable arguments
 
+## lower(v :: string)
+
+Returns a copy of the string v with all Unicode characters mapped to their lower case
+
+## path_exists()
+
+Returns true if the path exists, false if not
+
+## dir_exists()
+
+Returns true if the path exists and if it is a directory, false otherwise
+
 ## base64_encode()
 
 Encode string to base64
 
-## track_major_version()
+## upper(v :: string)
 
-Track major version
+Returns a copy of the string v with all Unicode characters mapped to their upper case
 
 ## split(sep :: string)
 
 Split slices s into all substrings separated by sep and returns a slice of the substrings between those separators. If sep is empty, Split splits after each UTF-8 sequence.
 
+## file_exists()
 
-# Functions acting on integers
+Returns true if the path exists and if it's not a directory, false otherwise
 
-## add(y :: integer)
+## track_major_version()
 
-Add two integers
+Track major version
 
+## track_minor_version()
 
-# Unary functions
+Track minor version
 
-## timestamp()
+## track_version()
 
-Returns a UNIX timestamp
+Track version
+
+## title(v :: string)
+
+Returns a copy of the string v with all Unicode characters mapped to their title case
+
+## replace(old :: string, new :: string, n :: integer)
+
+Replace returns a copy of the string s with the first n non-overlapping instances of old replaced by new. If old is empty, it matches at the beginning of the string and after each UTF-8 sequence, yielding up to k+1 replacements for a k-rune string. If n < 0, there is no limit on the number of replacements.
+
+## trim()
+
+Returns a slice of the string s, with all leading and trailing white space removed, as defined by Unicode. 
+
+## track_patch_version()
+
+Track patch version
 

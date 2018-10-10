@@ -41,7 +41,7 @@ func NewErrandScriptRunner(errand *core.Errand, extraVars map[string]interface{}
 			}
 			return inputs, nil
 		}
-		step.Script = core.NewExecStageForRelativeScript(errand.Script)
+		step.Script = errand.Run
 		return step.Run(ctx)
 	})
 }

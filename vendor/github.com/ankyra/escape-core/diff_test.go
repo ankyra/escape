@@ -124,7 +124,7 @@ func (s *metadataSuite) Test_Diff_Errands(c *C) {
 	}
 
 	testCases := [][]interface{}{
-		[]interface{}{errand1, errand2, `Change Errands["test"].Script from 'test.sh' to 'test2.sh'`},
+		[]interface{}{errand1, errand2, `Change Errands["test"].Run.RelativeScript from 'test.sh' to 'test2.sh'`},
 		[]interface{}{errand1, errand3, `Change Errands["test"].Description from '' to 'Description'`},
 		[]interface{}{nil, errand1, `Add 'test' to Errands`},
 		[]interface{}{errand1, nil, `Remove 'test' from Errands`},

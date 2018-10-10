@@ -26,8 +26,10 @@ func compileErrands(ctx *CompilerContext) error {
 		if err != nil {
 			return err
 		}
-		if err := ctx.AddFileDigest(newErrand.Script); err != nil {
-			return err
+		if newErrand.Run.RelativeScript != "" {
+			if err := ctx.AddFileDigest(newErrand.Run.RelativeScript); err != nil {
+				return err
+			}
 		}
 		ctx.Metadata.Errands[name] = newErrand
 	}

@@ -37,7 +37,7 @@ type ExecStage struct {
 	// Arguments to the command.
 	Args []string `json:"args,omitempty"`
 
-	// An inline script, which will be executed using bash. It's an error to
+	// An inline script, which will be executed using sh. It's an error to
 	// specify both the "cmd" and "inline" fields.
 	Inline string `json:"inline,omitempty"`
 

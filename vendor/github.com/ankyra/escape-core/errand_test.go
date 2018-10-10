@@ -24,20 +24,55 @@ import (
 func (s *metadataSuite) Test_Diff_NewErrand(c *C) {
 	var1, _ := variables.NewVariableFromString("var1", "string")
 	testCases := [][]interface{}{
-		[]interface{}{map[interface{}]interface{}{
-			"description": "Description",
-			"script":      "test.sh",
-		}, Errand{Description: "Description", Script: "test.sh", Inputs: []*variables.Variable{}}},
-		[]interface{}{map[interface{}]interface{}{
-			"description": "Description",
-			"script":      "test.sh",
-			"inputs":      []interface{}{"var1"},
-		}, Errand{Description: "Description", Script: "test.sh", Inputs: []*variables.Variable{var1}}},
-		[]interface{}{map[interface{}]interface{}{
-			"description": "Description",
-			"script":      "test.sh",
-			"inputs":      []interface{}{map[interface{}]interface{}{"id": "var1"}},
-		}, Errand{Description: "Description", Script: "test.sh", Inputs: []*variables.Variable{var1}}},
+		[]interface{}{
+			map[interface{}]interface{}{
+				"description": "Description",
+				"run": map[interface{}]interface{}{
+					"script": "test.sh",
+				},
+				"inputs": []interface{}{map[interface{}]interface{}{"id": "var1"}},
+			}, Errand{Description: "Description",
+				Run: &ExecStage{
+					RelativeScript: "test.sh",
+				},
+				Inputs: []*variables.Variable{var1},
+			},
+		},
+		[]interface{}{
+			map[interface{}]interface{}{
+				"description": "Description",
+				"script":      "test.sh",
+			}, Errand{Description: "Description",
+				Run: &ExecStage{
+					RelativeScript: "test.sh",
+				},
+				Inputs: []*variables.Variable{},
+			},
+		},
+		[]interface{}{
+			map[interface{}]interface{}{
+				"description": "Description",
+				"script":      "test.sh",
+				"inputs":      []interface{}{"var1"},
+			}, Errand{Description: "Description",
+				Run: &ExecStage{
+					RelativeScript: "test.sh",
+				},
+				Inputs: []*variables.Variable{var1},
+			},
+		},
+		[]interface{}{
+			map[interface{}]interface{}{
+				"description": "Description",
+				"script":      "test.sh",
+				"inputs":      []interface{}{map[interface{}]interface{}{"id": "var1"}},
+			}, Errand{Description: "Description",
+				Run: &ExecStage{
+					RelativeScript: "test.sh",
+				},
+				Inputs: []*variables.Variable{var1},
+			},
+		},
 	}
 	for _, test := range testCases {
 		errand, err := NewErrandFromDict("name", test[0])
@@ -45,7 +80,8 @@ func (s *metadataSuite) Test_Diff_NewErrand(c *C) {
 		expected := test[1].(Errand)
 		c.Assert(errand.Name, Equals, "name")
 		c.Assert(errand.Description, Equals, expected.Description)
-		c.Assert(errand.Script, Equals, expected.Script)
+		c.Assert(errand.Script, Equals, "")
+		c.Assert(errand.Run, DeepEquals, expected.Run)
 		c.Assert(errand.Inputs, DeepEquals, expected.Inputs)
 	}
 }
@@ -54,7 +90,7 @@ func (s *metadataSuite) Test_Diff_NewErrand_invalid(c *C) {
 	testCases := [][]interface{}{
 		[]interface{}{"", map[interface{}]interface{}{}, "Missing name in errand"},
 		[]interface{}{"name", true, "Expecting a dictionary for errand name"},
-		[]interface{}{"name", map[interface{}]interface{}{}, "Missing script in errand 'name'"},
+		[]interface{}{"name", map[interface{}]interface{}{}, "Missing 'run' in errand 'name'"},
 		[]interface{}{"name", map[interface{}]interface{}{
 			true: true,
 		}, "Expecting string key for errand name"},
