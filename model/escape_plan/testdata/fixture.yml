@@ -76,6 +76,12 @@ outputs:
   type: string
   default: $test.outputs.test
 
+build_outputs:
+- build1
+
+deploy_outputs:
+- deploy1
+
 templates:
 - template.yml.tpl
 

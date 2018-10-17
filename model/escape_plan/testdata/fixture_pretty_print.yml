@@ -50,6 +50,12 @@ outputs:
   id: output2
   type: string
 
+build_outputs:
+- build1
+
+deploy_outputs:
+- deploy1
+
 metadata:
   key1: value1
   key2: value2

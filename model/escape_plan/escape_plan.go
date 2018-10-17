@@ -147,6 +147,14 @@ type EscapePlan struct {
 	// Output variables.
 	Outputs []interface{} `yaml:"outputs,omitempty"`
 
+	// Same as `outputs`, but all variables are scoped to the build phase (ie. the
+	// variables won't be required/available at deploy time).
+	BuildOutputs []interface{} `yaml:"build_outputs,omitempty"`
+
+	// Same as `outputs`, but all variables are scoped to the deployment phase (ie. the
+	// variables won't be required/available at build time).
+	DeployOutputs []interface{} `yaml:"deploy_outputs,omitempty"`
+
 	// Build script.
 	Build interface{} `yaml:"build,omitempty"`
 

@@ -58,6 +58,22 @@ func compileOutputs(ctx *CompilerContext) error {
 		}
 		ctx.Metadata.AddOutputVariable(v)
 	}
+	for _, output := range ctx.Plan.BuildOutputs {
+		v, err := compileVariable(ctx, output)
+		if err != nil {
+			return fmt.Errorf("Error compiling 'build_outputs' variable: %s", err.Error())
+		}
+		v.Scopes = []string{"build"}
+		ctx.Metadata.AddOutputVariable(v)
+	}
+	for _, output := range ctx.Plan.DeployOutputs {
+		v, err := compileVariable(ctx, output)
+		if err != nil {
+			return fmt.Errorf("Error compiling 'deploy_outputs' variable: %s", err.Error())
+		}
+		v.Scopes = []string{"deploy"}
+		ctx.Metadata.AddOutputVariable(v)
+	}
 	return nil
 }
 
