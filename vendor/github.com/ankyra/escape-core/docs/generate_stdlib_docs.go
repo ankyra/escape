@@ -35,7 +35,7 @@ func main() {
 	s := `---
 title: "Escape Standard Library Reference"
 slug: scripting-language-stdlib 
-type: "docs"
+type: "reference"
 toc: true
 ---
 

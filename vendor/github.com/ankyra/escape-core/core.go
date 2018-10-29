@@ -1,4 +1,4 @@
 package core
 
 const CurrentApiVersion = 15
-const CoreVersion = "0.15.2"
+const CoreVersion = "0.15.5"

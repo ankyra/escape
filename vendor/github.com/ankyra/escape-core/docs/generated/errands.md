@@ -2,7 +2,7 @@
 date: 2017-11-11 00:00:00
 title: "Errands"
 slug: errands
-type: "docs"
+type: "reference"
 toc: true
 wip: false
 contributeLink: https://github.com/ankyra/escape-core/blob/master/errand.go

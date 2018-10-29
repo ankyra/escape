@@ -31,7 +31,7 @@ const PageHeader = `---
 date: 2017-11-11 00:00:00
 title: "%s"
 slug: %s
-type: "docs"
+type: "reference"
 toc: true
 wip: false
 contributeLink: https://github.com/ankyra/escape-core/blob/master/%s

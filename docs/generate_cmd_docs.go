@@ -21,6 +21,7 @@ date: 2017-11-11 00:00:00
 title: "%s"
 slug: %s
 type: "reference"
+layout: "cmd"
 toc: true
 wip: false
 ---

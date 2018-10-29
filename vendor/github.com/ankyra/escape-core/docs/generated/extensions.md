@@ -2,7 +2,7 @@
 date: 2017-11-11 00:00:00
 title: "Extensions"
 slug: extensions
-type: "docs"
+type: "reference"
 toc: true
 wip: false
 contributeLink: https://github.com/ankyra/escape-core/blob/master/extension_config.go

@@ -2,7 +2,7 @@
 date: 2017-11-11 00:00:00
 title: "Providers and Consumers"
 slug: providers-and-consumers
-type: "docs"
+type: "reference"
 toc: true
 wip: false
 contributeLink: https://github.com/ankyra/escape-core/blob/master/consumer.go

@@ -1,7 +1,7 @@
 ---
 title: "Scripting Language"
 slug: scripting-language 
-type: "docs"
+type: "reference"
 toc: true
 ---
 
