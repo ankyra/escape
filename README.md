@@ -24,14 +24,14 @@ be found [here](https://github.com/ankyra/escape-inventory).
 
 ## Usage and Documentation
 
-See the [Escape Docs](https://escape.ankyra.io/docs/) for the full documentation.
+See the [Escape Docs](https://www.ankyra.io/product/escape/) for the full documentation.
 
 ## Downloads
 
 Cross-platform binaries can be downloaded from [the
-webite](https://escape.ankyra.io/downloads/) where you'll also find the
+webite](https://www.ankyra.io/products/escape/downloads/) where you'll also find the
 [installation
-instructions](https://escape.ankyra.io/docs/escape-installation/).
+instructions](https://www.ankyra.io/products/escape/tutorial/).
 
 ## Docker
 
