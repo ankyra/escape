@@ -109,6 +109,7 @@ func (s *metadataSuite) Test_NewDependencyConfig_fails_if_version_needs_resolvin
 		"my-dependency-v0.@":   "_/my-dependency-v0.@",
 		"my-dependency-v@":     "_/my-dependency-latest",
 		"my-dependency-@":      "_/my-dependency-latest",
+		"my-dependency:tag":    "_/my-dependency:tag",
 	}
 	for test, normalized := range cases {
 		metadata := NewReleaseMetadata("name", "1.0")
@@ -121,10 +122,11 @@ func (s *metadataSuite) Test_NewDependencyConfig_fails_if_version_needs_resolvin
 
 func (s *metadataSuite) Test_NewDependencyConfig_EnsureConfigIsParsed(c *C) {
 	cases := [][]string{
-		[]string{"my-dependency-v1.0", "_/my-dependency-v1.0", "_", "my-dependency", "1.0", ""},
-		[]string{"_/my-dependency-v1.0", "_/my-dependency-v1.0", "_", "my-dependency", "1.0", ""},
-		[]string{"  _/my-dependency-v1.0  ", "_/my-dependency-v1.0", "_", "my-dependency", "1.0", ""},
-		[]string{"my-dependency-v1.0 as dep", "_/my-dependency-v1.0", "_", "my-dependency", "1.0", "dep"},
+		[]string{"my-dependency-v1.0", "_/my-dependency-v1.0", "_", "my-dependency", "1.0", "", ""},
+		[]string{"_/my-dependency-v1.0", "_/my-dependency-v1.0", "_", "my-dependency", "1.0", "", ""},
+		[]string{"  _/my-dependency-v1.0  ", "_/my-dependency-v1.0", "_", "my-dependency", "1.0", "", ""},
+		[]string{"my-dependency-v1.0 as dep", "_/my-dependency-v1.0", "_", "my-dependency", "1.0", "dep", ""},
+		[]string{"my-dependency:tag as dep", "_/my-dependency:tag", "_", "my-dependency", "", "dep", "tag"},
 	}
 	for _, test := range cases {
 		dep := NewDependencyConfig(test[0])
@@ -135,6 +137,7 @@ func (s *metadataSuite) Test_NewDependencyConfig_EnsureConfigIsParsed(c *C) {
 		c.Assert(dep.Name, Equals, test[3])
 		c.Assert(dep.Version, Equals, test[4])
 		c.Assert(dep.VariableName, Equals, test[5])
+		c.Assert(dep.Tag, Equals, test[6])
 		c.Assert(dep.DeploymentName, Equals, "")
 	}
 }

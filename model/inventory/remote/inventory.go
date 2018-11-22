@@ -26,6 +26,7 @@ import (
 	"strings"
 
 	core "github.com/ankyra/escape-core"
+	"github.com/ankyra/escape-core/parsers"
 	"github.com/ankyra/escape/model/inventory/types"
 	"github.com/ankyra/escape/model/remote"
 )
@@ -70,12 +71,14 @@ const error_Upload = "Couldn't upload release '%s/%s'"
 const error_Register = "Couldn't register release '%s/%s'"
 
 func (r *inventory) QueryReleaseMetadata(project, name, version string) (*core.ReleaseMetadata, error) {
-	if !strings.HasPrefix(version, "v") && version != "latest" {
-		version = "v" + version
+	query, err := parsers.ParseVersionQuery(version)
+	if err != nil {
+		return nil, err
 	}
-	releaseQuery := project + "/" + name + "-" + version
+	version = query.ToString()
+	releaseQuery := project + "/" + name + query.ToVersionSuffix()
 	if project == "_" {
-		releaseQuery = name + "-" + version
+		releaseQuery = name + query.ToVersionSuffix()
 	}
 
 	url := r.endpoints.ReleaseQuery(project, name, version)

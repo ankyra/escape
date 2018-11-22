@@ -17,6 +17,7 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/ankyra/escape/model"
@@ -45,6 +46,7 @@ See the documentation at https://escape.ankyra.io/docs/
 		context = model.NewContext()
 		err := context.LoadEscapeConfig(cfgFile, cfgProfile)
 		if err != nil {
+			fmt.Println(err.Error())
 			return err
 		}
 

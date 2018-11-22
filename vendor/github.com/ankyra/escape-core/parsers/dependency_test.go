@@ -42,6 +42,16 @@ func (s *dependencySuite) Test_Dependency_Happy_Path2(c *C) {
 	c.Assert(dep.Project, Equals, "project")
 }
 
+func (s *dependencySuite) Test_Dependency_Happy_Path3(c *C) {
+	dep, err := ParseDependency("name:tag")
+	c.Assert(err, IsNil)
+	c.Assert(dep.Name, Equals, "name")
+	c.Assert(dep.Version, Equals, "")
+	c.Assert(dep.Tag, Equals, "tag")
+	c.Assert(dep.VariableName, Equals, "")
+	c.Assert(dep.Project, Equals, "_")
+}
+
 func (s *dependencySuite) Test_Dependency_WhiteSpace(c *C) {
 	dep, err := ParseDependency("   name-v1.0    as   dep  ")
 	c.Assert(err, IsNil)

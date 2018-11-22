@@ -95,6 +95,10 @@ type DependencyConfig struct {
 	// Parsed out of the release ID. For example: when release id is
 	// `"my-org/my-name-v1.0"` this value is `"1.0"`.
 	Version string `json:"-" yaml:"-"`
+
+	// Parsed out of the release ID. For example: when release id is
+	// `"my-org/my-name:tag"` this value is `"tag"`.
+	Tag string `json:"-" yaml:"-"`
 }
 
 type ResolvedDependencyConfig struct {
@@ -144,6 +148,7 @@ func (d *DependencyConfig) Copy() *DependencyConfig {
 	result.Project = d.Project
 	result.Name = d.Name
 	result.Version = d.Version
+	result.Tag = d.Tag
 	return result
 }
 
@@ -156,6 +161,7 @@ func (d *DependencyConfig) EnsureConfigIsParsed() error {
 	d.Project = parsed.Project
 	d.Name = parsed.Name
 	d.Version = parsed.Version
+	d.Tag = parsed.Tag
 	if d.VariableName == "" {
 		d.VariableName = parsed.VariableName
 	}
@@ -163,10 +169,13 @@ func (d *DependencyConfig) EnsureConfigIsParsed() error {
 }
 
 func (d *DependencyConfig) NeedsResolving() bool {
-	return d.Version == "latest" || strings.HasSuffix(d.Version, ".@")
+	return d.Tag != "" || d.Version == "latest" || strings.HasSuffix(d.Version, ".@")
 }
 
 func (d *DependencyConfig) GetVersionAsString() (version string) {
+	if d.Tag != "" {
+		return d.Tag
+	}
 	version = "v" + d.Version
 	if d.Version == "latest" {
 		version = d.Version

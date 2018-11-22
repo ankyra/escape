@@ -29,4 +29,5 @@ Field | Type | Description
 |-|`string`|Parsed out of the release ID. For example: when release id is `"my-org/my-name-v1.0"` this value is `"my-org"`. 
 |-|`string`|Parsed out of the release ID. For example: when release id is `"my-org/my-name-v1.0"` this value is `"my-name"`. 
 |-|`string`|Parsed out of the release ID. For example: when release id is `"my-org/my-name-v1.0"` this value is `"1.0"`. 
+|-|`string`|Parsed out of the release ID. For example: when release id is `"my-org/my-name:tag"` this value is `"tag"`. 
 

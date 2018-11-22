@@ -38,6 +38,25 @@ func ParseVersionQuery(v string) (*VersionQuery, error) {
 	}, nil
 }
 
+func (v *VersionQuery) ToString() string {
+	if v.LatestVersion {
+		return "latest"
+	} else if v.VersionPrefix != "" {
+		return "v" + v.VersionPrefix + "@"
+	} else if v.SpecificVersion != "" {
+		return "v" + v.SpecificVersion
+	}
+	return v.SpecificTag
+}
+
+func (v *VersionQuery) ToVersionSuffix() string {
+	sep := "-"
+	if v.SpecificTag != "" {
+		sep = ":"
+	}
+	return sep + v.ToString()
+}
+
 func maybeParseVersionQuery(versionQuery string) *VersionQuery {
 	if versionQuery == "" {
 		return nil
