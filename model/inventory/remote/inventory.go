@@ -390,17 +390,30 @@ func (r *inventory) register(project string, metadata *core.ReleaseMetadata) err
 }
 
 func (r *inventory) TagRelease(project, name, version, tag string) error {
+	query, err := parsers.ParseVersionQuery(version)
+	if err != nil {
+		return err
+	}
 	url := r.endpoints.TagRelease(project, name)
 	data := map[string]interface{}{
-		"release_id": project + "/" + name + "-v" + version,
+		"release_id": project + "/" + name + query.ToVersionSuffix(),
 		"tag":        tag,
 	}
 	resp, err := r.client.POST_json_with_authentication(url, data)
 	if err != nil {
 		return err
 	}
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("Couldn't tag")
+	baseError := fmt.Sprintf("Couldn't tag '%s' with '%s'", data["release_id"], data["tag"])
+	if resp.StatusCode == 400 {
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(resp.Body)
+		body := buf.String()
+		return fmt.Errorf(baseError+error_InventoryUserSide, r.apiServer, body)
+	} else if resp.StatusCode != 200 {
+		buf := new(bytes.Buffer)
+		buf.ReadFrom(resp.Body)
+		body := buf.String()
+		return fmt.Errorf(baseError+error_InventoryUnknownStatus, r.apiServer, resp.StatusCode, body)
 	}
 	return nil
 }
