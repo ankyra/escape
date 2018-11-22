@@ -69,21 +69,31 @@ func (r *LocalInventory) TagRelease(project, name, version, tag string) error {
 }
 
 func (r *LocalInventory) resolveReleaseVersion(project, name, version string) (string, error) {
-	releaseIdString := name + "-v" + version
-	if strings.HasPrefix(version, "v") || version == "latest" {
-		releaseIdString = name + "-" + version
-	}
-	releaseId, err := parsers.ParseReleaseId(releaseIdString)
+	query, err := parsers.ParseVersionQuery(version)
 	if err != nil {
 		return "", err
 	}
-	if releaseId.Version == "latest" {
+	if query.LatestVersion {
 		return r.getLastVersionForPrefix(project, name, "")
-	} else if strings.HasSuffix(releaseId.Version, ".@") {
-		prefix := releaseId.Version[:len(releaseId.Version)-1]
-		return r.getLastVersionForPrefix(project, name, prefix)
+	} else if query.VersionPrefix != "" {
+		return r.getLastVersionForPrefix(project, name, query.VersionPrefix)
+	} else if query.SpecificTag != "" {
+		v, err := r.resolveTagToVersion(project, name, query.SpecificTag)
+		if err != nil {
+			return "", fmt.Errorf("The application %s/%s:%s could not be found", project, name, version)
+		}
+		return v, nil
 	}
-	return releaseId.Version, nil
+	return query.SpecificVersion, nil
+}
+
+func (r *LocalInventory) resolveTagToVersion(project, name, tag string) (string, error) {
+	indexPath := filepath.Join(r.BaseDir, project, name, "index.json")
+	index, err := LoadVersionIndexFromFile(indexPath)
+	if err != nil {
+		return "", fmt.Errorf("The application '%s/%s' could not be found: %s", project, name, err.Error())
+	}
+	return index.ResolveTagToVersion(tag)
 }
 
 func (r *LocalInventory) getLastVersionForPrefix(project, name, prefix string) (string, error) {

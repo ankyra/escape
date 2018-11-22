@@ -17,6 +17,8 @@ limitations under the License.
 package controllers
 
 import (
+	"fmt"
+
 	"github.com/ankyra/escape-core/parsers"
 	"github.com/ankyra/escape/model"
 )
@@ -27,6 +29,9 @@ func (t TagController) TagRelease(context *model.Context, releaseID, tag string)
 	parsed, err := parsers.ParseQualifiedReleaseId(releaseID)
 	if err != nil {
 		return err
+	}
+	if !parsers.IsValidTag(tag) {
+		return fmt.Errorf("The tag '%s' is not allowed.", tag)
 	}
 	return context.GetInventory().TagRelease(parsed.Project, parsed.Name, parsed.Version, tag)
 }

@@ -65,12 +65,19 @@ func (s *releaseIdSuite) Test_ReleaseId_Parse_Version(c *C) {
 	c.Assert(id.Version, Equals, "1.0")
 }
 
+func (s *releaseIdSuite) Test_ReleaseId_Parse_Tag(c *C) {
+	id, err := ParseReleaseId("name:tag")
+	c.Assert(err, IsNil)
+	c.Assert(id.Tag, Equals, "tag")
+}
+
 func (s *releaseIdSuite) Test_NeedsResolving_true(c *C) {
 	cases := []string{
 		"name-latest",
 		"name-v@",
 		"name-v0.@",
 		"name-v0.0.0.@",
+		"name:tag",
 	}
 	for _, test := range cases {
 		id, err := ParseReleaseId(test)
@@ -116,6 +123,13 @@ func (s *releaseIdSuite) Test_QualifiedReleaseID(c *C) {
 	c.Assert(q.ToString(), Equals, "project/type-name-v1")
 }
 
+func (s *releaseIdSuite) Test_QualifiedReleaseID_with_tag(c *C) {
+	q, err := ParseQualifiedReleaseId("project/type-name:tag")
+	c.Assert(err, IsNil)
+	c.Assert(q.Project, Equals, "project")
+	c.Assert(q.ToString(), Equals, "project/type-name:tag")
+}
+
 func (s *releaseIdSuite) Test_QualifiedReleaseID_default_project(c *C) {
 	q, err := ParseQualifiedReleaseId("type-name-v1")
 	c.Assert(err, IsNil)
@@ -126,6 +140,7 @@ func (s *releaseIdSuite) Test_QualifiedReleaseID_default_project(c *C) {
 func (s *releaseIdSuite) Test_QualifiedReleaseID_fails_on_invalid_input(c *C) {
 	cases := []string{
 		"",
+		"project",
 		"project/type-name-vnope",
 	}
 	for _, test := range cases {

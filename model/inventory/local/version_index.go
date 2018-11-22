@@ -99,6 +99,14 @@ func (v *VersionIndex) TagRelease(tag, version string) error {
 	return nil
 }
 
+func (v *VersionIndex) ResolveTagToVersion(tag string) (string, error) {
+	version, ok := v.Tags[tag]
+	if !ok {
+		return "", fmt.Errorf("The tag '%s' could not be found", tag)
+	}
+	return version, nil
+}
+
 func (v *VersionIndex) GetVersions() []string {
 	versions := []string{}
 	for version := range v.Versions {

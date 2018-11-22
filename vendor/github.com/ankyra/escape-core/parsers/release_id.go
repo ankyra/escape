@@ -25,6 +25,7 @@ import (
 type ReleaseId struct {
 	Name    string
 	Version string
+	Tag     string
 }
 
 type QualifiedReleaseId struct {
@@ -49,6 +50,21 @@ func InvalidVersionError(version string) error {
 }
 
 func ParseReleaseId(releaseId string) (*ReleaseId, error) {
+	colonSplit := strings.Split(releaseId, ":")
+	if len(colonSplit) == 1 {
+		return parseTagLessReleaseId(releaseId)
+	} else if len(colonSplit) != 2 {
+		return nil, InvalidReleaseFormatError(releaseId)
+	}
+	if !IsValidTag(colonSplit[1]) {
+		return nil, fmt.Errorf("Invalid tag '%s' in release string '%s'", colonSplit[1], releaseId)
+	}
+	result := &ReleaseId{}
+	result.Name = colonSplit[0]
+	result.Tag = colonSplit[1]
+	return result, nil
+}
+func parseTagLessReleaseId(releaseId string) (*ReleaseId, error) {
 	split := strings.Split(releaseId, "-")
 	if len(split) < 2 { // build-version
 		return nil, InvalidReleaseFormatError(releaseId)
@@ -111,13 +127,16 @@ func ValidateVersion(version string) error {
 }
 
 func (r *ReleaseId) ToString() string {
-	version := r.Version
-	if version != "latest" {
-		version = "v" + version
+	version := "-" + r.Version
+	if version != "-latest" {
+		version = "-v" + r.Version
 	}
-	return r.Name + "-" + version
+	if r.Tag != "" {
+		version = ":" + r.Tag
+	}
+	return r.Name + version
 }
 
 func (r *ReleaseId) NeedsResolving() bool {
-	return r.Version == "latest" || strings.HasSuffix(r.Version, ".@")
+	return r.Tag != "" || r.Version == "latest" || strings.HasSuffix(r.Version, ".@")
 }
