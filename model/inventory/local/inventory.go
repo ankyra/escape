@@ -52,6 +52,10 @@ func (r *LocalInventory) QueryReleaseMetadata(project, name, version string) (*c
 	return core.NewReleaseMetadataFromFile(metaPath)
 }
 
+func (r *LocalInventory) TagRelease(project, name, version, tag string) error {
+	return nil
+}
+
 func (r *LocalInventory) resolveReleaseVersion(project, name, version string) (string, error) {
 	releaseIdString := name + "-v" + version
 	if strings.HasPrefix(version, "v") || version == "latest" {

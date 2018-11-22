@@ -69,6 +69,9 @@ func (s *ServerEndpoints) ProjectReleaseQuery(project, name, version string) str
 func (s *ServerEndpoints) RegisterPackage(project string) string {
 	return s.ProjectQuery(project) + "register"
 }
+func (s *ServerEndpoints) TagRelease(project, name string) string {
+	return s.ProjectNameQuery(project, name) + "tags/"
+}
 func (s *ServerEndpoints) UploadRelease(project, name, version string) string {
 	return s.ProjectReleaseQuery(project, name, version) + "upload"
 }

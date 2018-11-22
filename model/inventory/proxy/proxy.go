@@ -65,6 +65,10 @@ func (r *InventoryProxy) UploadRelease(project, releasePath string, metadata *co
 	return r.GetInventory(project).UploadRelease(project, releasePath, metadata)
 }
 
+func (r *InventoryProxy) TagRelease(project, name, version, tag string) error {
+	return r.GetInventory(project).TagRelease(project, name, version, tag)
+}
+
 func (r *InventoryProxy) ListProjects() ([]string, error) {
 	projects, err := r.From.ListProjects()
 	if err != nil {

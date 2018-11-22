@@ -28,6 +28,7 @@ type Inventory interface {
 	GetAuthMethods(url string) (map[string]*AuthMethod, error)
 	Login(url, username, password string) (string, error)
 	LoginWithBasicAuth(url, username, password string) error
+	TagRelease(project, name, version, tag string) error
 
 	ListProjects() ([]string, error)
 	ListApplications(project string) ([]string, error)

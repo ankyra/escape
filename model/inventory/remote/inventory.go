@@ -385,3 +385,19 @@ func (r *inventory) register(project string, metadata *core.ReleaseMetadata) err
 	}
 	return nil
 }
+
+func (r *inventory) TagRelease(project, name, version, tag string) error {
+	url := r.endpoints.TagRelease(project, name)
+	data := map[string]interface{}{
+		"release_id": project + "/" + name + "-v" + version,
+		"tag":        tag,
+	}
+	resp, err := r.client.POST_json_with_authentication(url, data)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("Couldn't tag")
+	}
+	return nil
+}
