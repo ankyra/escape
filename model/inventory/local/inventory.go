@@ -53,7 +53,19 @@ func (r *LocalInventory) QueryReleaseMetadata(project, name, version string) (*c
 }
 
 func (r *LocalInventory) TagRelease(project, name, version, tag string) error {
-	return nil
+	version, err := r.resolveReleaseVersion(project, name, version)
+	if err != nil {
+		return err
+	}
+	indexPath := filepath.Join(r.BaseDir, project, name, "index.json")
+	index, err := LoadVersionIndexFromFileOrCreateNew(name, indexPath)
+	if err != nil {
+		return fmt.Errorf("The application '%s/%s' could not be found: %s", project, name, err.Error())
+	}
+	if err := index.TagRelease(tag, version); err != nil {
+		return err
+	}
+	return index.Save()
 }
 
 func (r *LocalInventory) resolveReleaseVersion(project, name, version string) (string, error) {
@@ -81,7 +93,7 @@ func (r *LocalInventory) getLastVersionForPrefix(project, name, prefix string) (
 	}
 	index, err := LoadVersionIndexFromFile(indexPath)
 	if err != nil {
-		return "", fmt.Errorf("Failed to load application index for local inventory: %s", err.Error())
+		return "", fmt.Errorf("The application '%s/%s' could not be found: %s", project, name, err.Error())
 	}
 	return prefix + getMaxFromVersions(index.GetVersions(), prefix).ToString(), nil
 }

@@ -32,6 +32,7 @@ type VersionIndex struct {
 	EscapeCoreVersion string                           `json:"escape_core_version"`
 	CoreAPIVersion    int                              `json:"core_api_version"`
 	Versions          map[string]*core.ReleaseMetadata `json:"versions"`
+	Tags              map[string]string                `json:"tags"`
 }
 
 func NewVersionIndex() *VersionIndex {
@@ -40,6 +41,7 @@ func NewVersionIndex() *VersionIndex {
 		EscapeCoreVersion: core.CoreVersion,
 		CoreAPIVersion:    core.CurrentApiVersion,
 		Versions:          map[string]*core.ReleaseMetadata{},
+		Tags:              map[string]string{},
 	}
 }
 
@@ -86,6 +88,14 @@ func (v *VersionIndex) AddRelease(m *core.ReleaseMetadata) error {
 		return fmt.Errorf("Could not add release to local inventory at %s. Version %s already exists.", v.Path, m.Version)
 	}
 	v.Versions[m.Version] = m
+	return nil
+}
+
+func (v *VersionIndex) TagRelease(tag, version string) error {
+	if _, ok := v.Versions[version]; !ok {
+		return fmt.Errorf("The referenced version '%s' couldn't be tagged, because it couldn't be found.", version)
+	}
+	v.Tags[tag] = version
 	return nil
 }
 
