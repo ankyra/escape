@@ -11,7 +11,7 @@
                   "deploy": {
                      "status": {
                         "status": "test_failure",
-                        "updated_at": "2018-11-22T17:11:04.928428821Z",
+                        "updated_at": "2018-11-28T11:30:00.80084551Z",
                         "data": "Deployment state '_/name' for release 'name-v0.0.1' could not be found\n\nYou may need to run `escape run deploy name-v0.0.1` to resolve this issue"
                      }
                   }

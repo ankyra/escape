@@ -56,12 +56,21 @@ func ParseReleaseId(releaseId string) (*ReleaseId, error) {
 	} else if len(colonSplit) != 2 {
 		return nil, InvalidReleaseFormatError(releaseId)
 	}
-	if !IsValidTag(colonSplit[1]) {
+	pv, err := ParseVersionQuery(colonSplit[1])
+	if err != nil {
 		return nil, fmt.Errorf("Invalid tag '%s' in release string '%s'", colonSplit[1], releaseId)
 	}
 	result := &ReleaseId{}
 	result.Name = colonSplit[0]
-	result.Tag = colonSplit[1]
+	if pv.SpecificTag != "" {
+		result.Tag = colonSplit[1]
+	} else if pv.LatestVersion {
+		result.Version = "latest"
+	} else if pv.SpecificVersion != "" {
+		result.Version = pv.SpecificVersion
+	} else if pv.VersionPrefix != "" {
+		result.Version = pv.VersionPrefix + "@"
+	}
 	return result, nil
 }
 func parseTagLessReleaseId(releaseId string) (*ReleaseId, error) {

@@ -130,6 +130,34 @@ func (s *releaseIdSuite) Test_QualifiedReleaseID_with_tag(c *C) {
 	c.Assert(q.ToString(), Equals, "project/type-name:tag")
 }
 
+func (s *releaseIdSuite) Test_QualifiedReleaseID_with_version_as_tag(c *C) {
+	q, err := ParseQualifiedReleaseId("project/type-name:v1.0")
+	c.Assert(err, IsNil)
+	c.Assert(q.Project, Equals, "project")
+	c.Assert(q.ToString(), Equals, "project/type-name-v1.0")
+}
+
+func (s *releaseIdSuite) Test_QualifiedReleaseID_with_version_as_tag_2(c *C) {
+	q, err := ParseQualifiedReleaseId("project/type-name:1.0")
+	c.Assert(err, IsNil)
+	c.Assert(q.Project, Equals, "project")
+	c.Assert(q.ToString(), Equals, "project/type-name-v1.0")
+}
+
+func (s *releaseIdSuite) Test_QualifiedReleaseID_with_version_prefix_as_tag(c *C) {
+	q, err := ParseQualifiedReleaseId("project/type-name:v1.@")
+	c.Assert(err, IsNil)
+	c.Assert(q.Project, Equals, "project")
+	c.Assert(q.ToString(), Equals, "project/type-name-v1.@")
+}
+
+func (s *releaseIdSuite) Test_QualifiedReleaseID_with_version_prefix_as_tag_2(c *C) {
+	q, err := ParseQualifiedReleaseId("project/type-name:1.@")
+	c.Assert(err, IsNil)
+	c.Assert(q.Project, Equals, "project")
+	c.Assert(q.ToString(), Equals, "project/type-name-v1.@")
+}
+
 func (s *releaseIdSuite) Test_QualifiedReleaseID_default_project(c *C) {
 	q, err := ParseQualifiedReleaseId("type-name-v1")
 	c.Assert(err, IsNil)
